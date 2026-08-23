@@ -486,3 +486,100 @@ The implementation checkpoint also advanced `docs/CURRENT_STATE.md` so item 5 is
 Wire `components/collector/grafana/scripts/restore-dashboards.py` and `verify-dashboards.py` into the clean-machine runtime installer after normal Grafana HTTPS health and datasource provisioning are established.
 
 Do not proceed to package no-autostart hardening until the dashboard-wiring sub-section is validated, journaled, and pushed.
+
+## 2026-08-22 18:35 PDT - Grafana dashboard runtime wiring completed
+
+### Goal
+
+Integrate the already-proven Grafana 13 dashboard restore and verification tooling into the clean-machine collector runtime installer without introducing direct SQLite dashboard writes or automatic destructive replacement.
+
+### Work completed
+
+`components/collector/install/install-runtime.sh` now:
+
+- requires `grafana/scripts/dashboard_api.py`
+- requires `grafana/scripts/restore-dashboards.py`
+- requires `grafana/scripts/verify-dashboards.py`
+- requires all four captured Grafana dashboard resource files
+- waits for normal Grafana HTTPS health before dashboard reconstruction
+- verifies both captured ClickHouse datasources before dashboard reconstruction
+- invokes dashboard restoration through `https://127.0.0.1:443`
+- authenticates using the existing operator-supplied private `GRAFANA_ADMIN_PASSWORD_FILE`
+- runs the independent dashboard verifier immediately after restore
+- uses Python `-B` for both dashboard commands so runtime execution does not create `__pycache__` artifacts inside the repository
+- no longer reports dashboard resources as requiring a separate restore step
+
+The installer deliberately does not pass `--replace`.
+
+Runtime restore policy is therefore fail-closed:
+
+- missing captured dashboard -> create it
+- exact existing captured dashboard -> leave unchanged
+- divergent existing dashboard -> fail rather than replace automatically
+
+The clean-machine runtime installer was not executed against the working reference collector.
+
+### Runtime ordering
+
+The validated installer order is:
+
+1. start normal HTTPS Grafana
+2. verify Grafana HTTPS health
+3. verify both ClickHouse datasources
+4. restore the four captured dashboard resources
+5. independently verify the four dashboard resources
+6. continue to the SSH reload policy and final runtime-install completion
+
+### Validation evidence
+
+Completed validation includes:
+
+- `grafana_dashboard_wiring_patch=PASS`
+- `install_runtime_bash_syntax=PASS`
+- `grafana_dashboard_script_cli=PASS`
+- `grafana_dashboard_wiring_contract=PASS`
+- `dashboard_restore_policy=create_or_exact_match_only`
+- `dashboard_replace_automatic=no`
+- `dashboard_python_no_bytecode_patch=PASS`
+- `grafana_dashboard_runtime_invocation_contract=PASS`
+- `python_bytecode_artifacts=absent`
+- `GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
+- `grafana_dashboard_checkpoint_contract=PASS`
+- `current_state_single_next=PASS`
+- `PUBLIC REPO GATE: PASS`
+- `cached_diff_check=PASS`
+
+The previously completed Grafana API proofs remain the behavioral basis for this integration:
+
+- `GRAFANA_UNIFIED_RESOURCE_ROUND_TRIP=PASS`
+- `GRAFANA_DRYRUN_RESTORE_PROOF=PASS`
+- `GRAFANA_DASHBOARD_VERIFY=PASS`
+- `GRAFANA_DASHBOARD_RESTORE_DRYRUN=PASS`
+- `GRAFANA_DASHBOARD_LIVE_NONDESTRUCTIVE_TEST=PASS`
+
+### Correction discovered during implementation
+
+The first wiring validation invoked the Python dashboard scripts with `--help`, which generated an untracked `__pycache__` directory.
+
+The modified installer was automatically rolled back, the generated cache was removed, and the repository was verified clean before retrying.
+
+The integration was then reapplied with bytecode generation disabled during validation. The final runtime implementation was also changed from plain `python3` to `python3 -B` for both dashboard commands so a real clean-machine installer run will not write Python bytecode caches into the repository checkout.
+
+### Git checkpoint
+
+Implementation commit:
+
+`ca8e3ec8c07a9162d1213f680b3ac72eeef57de3` — `Wire Grafana dashboard restore into runtime installer`
+
+`origin/main` was explicitly verified to match that commit before this journal entry was created.
+
+The implementation checkpoint also advanced `docs/CURRENT_STATE.md`:
+
+- item 6 is now `DONE`
+- item 7 is the single `NEXT` item
+
+### Next action
+
+Add package-install no-autostart protection so package installation cannot transiently start unconfigured collector services before the clean-machine runtime configuration is applied.
+
+Do not proceed to installer structural/public-safety validation until the package no-autostart sub-section itself is completed, validated, journaled, and pushed.

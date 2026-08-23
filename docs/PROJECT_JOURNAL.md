@@ -6246,3 +6246,120 @@ All three live application hashes remained unchanged after capture and validatio
 Publish this checkpoint and independently verify GitHub.
 
 Then implement deterministic SQLite initialization from the complete effective schema captured in item 12M, including the two public-safe suppression rules captured in item 12H.
+
+## 2026-08-23 16:17 PDT - GX10 deterministic SQLite initialization
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The clean-machine SQLite initialization subsection is implemented and validated from the effective schema recovered in item 12M.
+
+### Implemented artifacts
+
+Added:
+
+- `components/gx10/sql/initialize.sql`
+- `components/gx10/install/initialize-database.py`
+- `components/gx10/tests/test_database_initialization.py`
+
+Updated:
+
+- `components/gx10/README.md`
+- `components/gx10/REBUILD_STATUS.md`
+- `docs/CURRENT_STATE.md`
+
+### Effective-schema reconstruction
+
+The SQL initializer creates exactly:
+
+- 5 application tables
+- 13 explicit application indexes
+- 3 foreign-key relationships
+- 18 noninternal table/index objects
+
+The five `sqlite_master` table definitions reproduce the normalized SHA-256 values captured from the live database:
+
+- `agent_state`: `8488a9c5f878e1979979c6bdb7868e6f6dffc9ba29592c02f3046fb55e83f3f2`
+- `event_enrichment`: `1a3d2819432ce6a4fbbbff6a9c1bbfb657f58ebe48f325358fd75f04fce83bf6`
+- `recent_events`: `5e1c4e91a37f75421d445f75bae0830244a132f0193908e7f996bf90bf552e9e`
+- `source_files`: `0b6219e204290200b2856b0afc34661ebadb31836ebb3f531de7fac23024d781`
+- `suppression_rules`: `1262051a43077190c96ae1b6549dd3683bed38375d102319c96431b3f60366ec`
+
+SQLite `user_version` and `application_id` remain zero, matching the captured live contract.
+
+### Suppression seed
+
+The initializer seeds exactly two enabled rules in ascending ID order:
+
+1. exact event code `ICMPV6-3-ND_LOG`
+2. exact event code `ICMPV6-3-ND_RA_LOG`
+
+Rediscovery intentionally did not expose the live rule-name and reason literals because they are nonfunctional metadata. The public initializer uses neutral reconstructed names/reasons and a deterministic neutral seed timestamp.
+
+The functional rule IDs, order, type, pattern, and enabled state match the captured live corpus.
+
+### Clean-machine initializer behavior
+
+`initialize-database.py`:
+
+- requires root and `CLEAN_INSTALL_CONFIRM=YES-CLEAN-GX10`
+- uses the fixed public database path and runtime identity
+- refuses an existing file or symbolic link at the database path
+- refuses a missing/symlinked schema source or invalid database parent
+- creates a temporary SQLite database in the target directory
+- executes the recovered schema and seed transaction
+- requires `PRAGMA quick_check=ok`
+- requires exactly 18 noninternal schema objects
+- requires the exact functional suppression corpus
+- installs runtime ownership and mode `0640`
+- publishes with a no-overwrite hard-link operation rather than replacement
+- removes the temporary file on success or failure
+
+The no-overwrite publication closes a race in which an unexpected target created after the initial existence check could otherwise have been replaced.
+
+### Compatibility proof
+
+Both captured application schema migrators were executed only against a synthetic initialized temporary database:
+
+- ingest `ensure_schema()`
+- deterministic-enrichment `ensure_schema()`
+
+Before/after `sqlite_master` definitions were identical.
+
+This proves that the recovered effective schema already contains every column/index expected by both captured migrators.
+
+### Validation
+
+The full GX10 reconstruction suite now reports:
+
+- 18 tests passing
+- all 5 recovered table DDL hashes exact
+- 13 explicit indexes
+- 3 foreign keys
+- 2 exact functional suppression rules
+- `PRAGMA quick_check=ok`
+- database mode `0640`
+- empty application event/state tables
+- existing-database refusal passing
+- captured schema-migrator no-op proof passing
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `gx10_python_compile=PASS`
+
+### Safety boundary
+
+This subsection:
+
+- used only temporary synthetic databases
+- did not open or copy the production database
+- did not read production event, enrichment, or suppression rows
+- did not execute a captured application against live state
+- did not run the clean-machine initializer on GX10
+- did not write to either reference system
+- did not change service state
+
+### Next action
+
+Publish this validated SQLite checkpoint and independently verify GitHub.
+
+Then implement public service/timer templates preserving the captured `timer -> fetch -> ingest` chain, cadence, hardening, runtime identity, writable paths, and absence of automatic enrichment invocation.

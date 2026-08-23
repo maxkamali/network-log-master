@@ -231,6 +231,8 @@ The first public reconstruction subsection now provides a synthetic operator-inp
 
 The three live custom application implementations are now captured in public-safe form. Deployment literals are loaded from a protected runtime configuration, all 27 function ASTs match the live sources after normalizing Python-version-only metadata, 12 synthetic application/configuration tests pass, and live hashes remained unchanged after capture.
 
+Deterministic SQLite initialization now reproduces all five recovered table DDL hashes, thirteen indexes, three foreign keys, empty application state, and the two functional suppression patterns. The captured ingest/enrichment schema migrators are no-ops against the initialized schema. The full GX10 reconstruction suite now has 18 passing tests.
+
 The known application hashes remain:
 
 - fetch: `662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
@@ -272,7 +274,7 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 9. `DONE` — collector README and operator-facing clean-machine rebuild documentation completed and validated.
 10. `DONE` — final collector public sanitation passed and the public collector rebuild-package/documentation milestone was closed.
 11. `DEFERRED` — clean-machine collector rebuild validation remains outstanding because no disposable Debian 13 amd64 validation system is currently available.
-12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package; publish the captured applications, then implement deterministic SQLite initialization from the recovered effective schema.
+12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package; publish SQLite initialization, then implement the service/timer templates preserving `timer -> fetch -> ingest` and the captured hardening contract.
 13. `NOT STARTED` — validate the GX10 rebuild package and operator documentation.
 14. `NOT STARTED` — reconcile and update full two-server architecture, operations, and rebuild documentation.
 15. `NOT STARTED` — run final repository sanitation and two-server acceptance validation.

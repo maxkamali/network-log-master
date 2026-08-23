@@ -22,7 +22,10 @@ Completed:
 - public-safe fetch, ingest, and deterministic-enrichment application sources
 - protected runtime configuration loader and fail-closed renderer
 - 27/27 live-to-public function AST parity
-- 12 synthetic configuration/application tests passing
+- deterministic SQLite initializer matching all 5 recovered table DDL hashes, 13 indexes, and 3 foreign keys
+- exact two-pattern functional suppression seed with neutral nonfunctional metadata
+- captured ingest/enrichment schema migrators proven no-op against the initialized schema
+- 18 synthetic configuration/application/database tests passing
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.
 

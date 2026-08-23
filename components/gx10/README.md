@@ -71,3 +71,18 @@ Validate operator configuration inputs without writing files with:
     GX10_SFTP_HOST=collector.example.invalid GX10_SFTP_PORT=2222 GX10_SFTP_USER=spool-reader components/gx10/install/render-runtime-config.py --check
 
 The deterministic-enrichment source is captured for faithful reconstruction and parity. It remains intentionally absent from the proven automatic `timer -> fetch -> ingest` chain.
+
+## SQLite initialization
+
+`sql/initialize.sql` reconstructs the complete effective SQLite contract recovered in item 12M:
+
+- 5 application tables
+- 13 explicit indexes
+- 3 foreign keys
+- the two enabled exact-match suppression patterns from item 12H
+
+`install/initialize-database.py` creates the database atomically, refuses any existing database, validates integrity/schema/corpus before publication, and installs mode `0640` for the dedicated runtime identity.
+
+The historical suppression-rule names and reasons were not exposed during rediscovery and no initializer survived. The public rebuild therefore uses neutral names/reasons while preserving functional IDs, evaluation order, types, patterns, and enabled state.
+
+Do not run the initializer against the working GX10 reference system.

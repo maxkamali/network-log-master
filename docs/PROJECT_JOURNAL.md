@@ -2833,3 +2833,211 @@ The next pass should classify the launcher before exposing source text and ident
 - child processes
 
 Only after those references are classified should the implementation itself be copied into a public-safe GX10 rebuild component.
+
+## 2026-08-23 11:45 PDT - GX10 item 12C launcher structural inspection
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The GX10 pipeline launcher was structurally inspected without publishing its source text, deployment-specific transport identity, credentials, SSH configuration contents, or database contents.
+
+### Provenance
+
+The launcher remained unchanged from item 12B.
+
+Observed properties:
+
+- Python 3 executable script
+- 472 source lines
+- 9523 bytes
+
+SHA-256:
+
+`662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
+
+Python syntax validation passed using in-memory AST parsing and compilation.
+
+### Validator correction
+
+The first item-12C syntax check used `python3 -m py_compile` against the root-owned system launcher.
+
+That attempted to create Python bytecode beside the launcher and failed with a permission error.
+
+This was a validation-method defect rather than a launcher defect.
+
+The retry used `ast.parse()` and in-memory `compile()` with bytecode generation disabled.
+
+The retry confirmed:
+
+- launcher syntax passes
+- no bytecode write was attempted
+- launcher SHA-256 remained unchanged
+- no GX10 filesystem write was requested by the corrected inspection
+
+### Python implementation structure
+
+Imported standard-library modules are:
+
+- `datetime`
+- `hashlib`
+- `os`
+- `pathlib`
+- `re`
+- `sqlite3`
+- `subprocess`
+- `sys`
+
+Twelve top-level functions were identified:
+
+- `download`
+- `floor_hour`
+- `get_state`
+- `list_remote_hour`
+- `log`
+- `main`
+- `run_sftp`
+- `set_state`
+- `sftp_base_command`
+- `sha256_file`
+- `timestamp_from_filename`
+- `verify_zstd`
+
+Relevant configuration/state identifiers include:
+
+- `BOOTSTRAP_HOURS`
+- `DB`
+- `FILE_RE`
+- `INCOMING_DIR`
+- `KNOWN_HOSTS`
+- `MAX_CATCHUP_HOURS`
+- `OVERLAP_HOURS`
+- `SETTLE_SECONDS`
+- `SFTP_HOST`
+- `SFTP_PORT`
+- `SFTP_USER`
+- `SSH_KEY`
+- `TMP_DIR`
+
+The values of transport identity and credential-related variables were not printed.
+
+### Transport and decompression behavior
+
+Static classification found literal use of:
+
+- SFTP
+- Zstandard
+
+The launcher imports `subprocess` and includes calls through `subprocess.run`.
+
+It therefore appears to orchestrate external transport/decompression commands rather than implementing those protocols directly in Python.
+
+Detailed subprocess arguments have not yet been published or reconstructed.
+
+### SQLite state
+
+The launcher imports Python's `sqlite3` module and contains a call to `sqlite3.connect`.
+
+One database-path reference was identified.
+
+The exact live database path is intentionally withheld because it contains deployment-local identity.
+
+No database contents or schema were read during item 12C.
+
+### Filesystem-reference classes
+
+Static classification identified:
+
+- one database-path reference
+- four spool/transfer-path references
+- one SSH/credential-path reference
+- zero separate script/config-path references
+
+The exact live private paths are intentionally not reproduced in the public journal.
+
+The inspection reported these private paths as not existing from the login account's perspective.
+
+That result must not be interpreted as proof of absence: lack of traversal permission on a private parent directory can cause a non-root `Path.exists()` check to return false.
+
+Existence, ownership, mode, and schema of the pipeline's private state must therefore be checked later through a bounded privileged metadata inspection without reading credentials or production records.
+
+### Deployment-specific transport identity
+
+Static classification found:
+
+- one IPv4 literal in the launcher
+- zero combined `user@host` literals
+- no HTTP URL literals
+
+The actual IPv4 value was not printed by the structural classifier and is not recorded publicly.
+
+Because the implementation also contains `SFTP_HOST`, `SFTP_PORT`, and `SFTP_USER` configuration identifiers, the transport endpoint must be treated as deployment-specific operator input in the public rebuild implementation rather than copied as a live address.
+
+### Credential and SSH classification
+
+The implementation contains references associated with:
+
+- an SSH private-key path
+- a known-hosts path
+- SFTP transport identity
+
+No recognized literal secret pattern was found.
+
+No private key, authorized key, known-host entry, credential value, password, or token was read or printed.
+
+### LLM and classification boundary
+
+The launcher contains:
+
+- zero model literals
+- zero suppression identifiers
+- no Ollama literal detected by static string classification
+- no `requests` import
+- no `urllib` import
+
+This establishes that the inspected launcher is primarily the spool acquisition/state layer and does not itself expose the model-selection or suppression logic expected elsewhere in the GX10 pipeline.
+
+The later GX10 capture must locate that downstream enrichment/inference implementation separately.
+
+### Safety boundary
+
+The successful item-12C inspection did not print:
+
+- launcher source text
+- deployment-specific IPv4 value
+- remote username or host value
+- SSH key contents
+- known-hosts contents
+- credential values
+- database contents
+
+The launcher SHA-256 was unchanged at the end of inspection.
+
+### Item 12C conclusion
+
+The current launcher is a Python timer-invoked SFTP spool acquisition component with local SQLite state and Zstandard verification/decompression support.
+
+Its transport identity and private paths are embedded/configured inside the launcher rather than supplied through systemd environment configuration.
+
+The public reconstruction must preserve behavior while converting environment-specific endpoint, username, SSH key, known-hosts, and state-path assumptions into documented operator-supplied or rendered configuration.
+
+### Next action
+
+Continue item 12 with a read-only semantic inspection of the launcher.
+
+The next pass should extract structure without printing private literals, including:
+
+- numeric timing/catch-up constants
+- filename-matching contract
+- SQLite table/schema definition
+- state keys and update semantics
+- SFTP command-option contract
+- remote directory construction semantics
+- download eligibility and settle-time behavior
+- temporary-file and atomic-move behavior
+- Zstandard verification behavior
+- deduplication/hash behavior
+- failure and retry semantics
+- precise subprocess return-code handling
+
+It should also determine whether the one deployment-specific IPv4 literal is the value assigned to the SFTP host variable without printing the address itself.

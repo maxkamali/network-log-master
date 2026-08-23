@@ -5750,3 +5750,116 @@ Capture:
 Then perform the final bounded GX10 rediscovery closure audit.
 
 No GX10 rebuild implementation begins until that closure checkpoint is published.
+
+## 2026-08-23 15:54 PDT - GX10 item 12N runtime and external-dependency contract complete
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The direct-access VM resume preconditions and the corrected item-12N external-executable dependency/provenance slice completed successfully.
+
+Item 12N is now complete. The final bounded GX10 rediscovery closure audit remains outstanding before any GX10 rebuild implementation begins.
+
+### Direct-access resume verification
+
+The local repository was clean and matched public GitHub `main` at:
+
+`3e4a7044c9bb13d5404301bd1069974288f2166e` — `auth test`
+
+That commit is an empty authentication-test commit whose tree is unchanged from the documented handoff commit:
+
+`d9d85f0e79c9187ec2e1c99fd6e83f09bf8b7fc8` — `Record direct-access VM execution decision`
+
+Authenticated read-only SSH command execution succeeded against both reference-system roles from the VM.
+
+The collector alias initially attempted the default SSH port and received a connection refusal. A one-shot connection using the already-captured nonstandard transport port from the GX10 fetch contract succeeded. The private port value, host identity, username, key path, and address were not printed or committed, and the VM SSH configuration was not modified.
+
+### Artifact-integrity precondition
+
+The three known GX10 application executables each had exactly one live match for the previously captured SHA-256 value:
+
+- fetch: `662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
+- ingest: `6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
+- deterministic enrichment: `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+
+The pipeline service unit also had exactly one live match for its captured SHA-256 value:
+
+`0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
+
+### Corrected external-executable detector
+
+The defective item-12N dependency slice was rerun with a corrected AST-based analyzer.
+
+The correction resolves command values through:
+
+- literal lists, tuples, sets, and dictionaries
+- assigned variables
+- concatenated and conditional expressions
+- starred values
+- helper-function arguments and return values
+- nested calls passed to Python `subprocess` operations
+
+This corrects the earlier false-zero result, which failed to follow the helper-function return that constructs the SFTP command.
+
+Corrected source and invocation results:
+
+- SFTP source references: `1`
+- SFTP subprocess invocations: `1`
+- SFTP referencing components: `1`
+- Zstandard source references: `4`
+- Zstandard subprocess invocations: `2`
+- Zstandard referencing components: `2`
+- total external-tool source references: `5`
+- external-tool dependency count: `2`
+- `external_tool_detector=PASS`
+
+This result reconciles item 12N with the already-proven item-12C, item-12D, and item-12F transport/decompression behavior.
+
+### Installed executable provenance
+
+Both required external executables are present and owned by installed Ubuntu packages:
+
+- `sftp`: package `openssh-client`, version `1:9.6p1-3ubuntu13.18`
+- `zstd`: package `zstd`, version `1.5.5+dfsg2-2build1.1`
+
+Combined with the already-captured Python contract, the known custom GX10 application dependency set is:
+
+- Python `3.12.3`
+- Python SQLite runtime `3.45.1`
+- Python package provenance `python3.12-minimal` version `3.12.3-1ubuntu0.15`
+- zero third-party Python imports
+- OpenSSH client package for SFTP
+- Zstandard CLI package
+
+### Postcheck and safety boundary
+
+All three application hashes remained unchanged after the corrected analysis.
+
+The item-12N completion work:
+
+- read application source only for static analysis
+- did not print application source
+- did not print private runtime account or group names
+- did not print private paths or connection values
+- did not read SSH private-key contents
+- did not read known-hosts contents
+- did not open the production application database
+- did not read production event rows
+- did not execute a pipeline component
+- did not request a GX10 filesystem write
+- did not modify either reference system
+
+### Item 12N conclusion
+
+The runtime identity, filesystem ownership/mode, SSH-material metadata, systemd sandbox, Python runtime/import, and external-executable dependency/provenance contracts are now complete.
+
+The earlier zero-external-tool result is superseded by the corrected validated result above.
+
+### Next action
+
+Run the final bounded GX10 rediscovery closure audit.
+
+The closure audit must reconcile the journaled item-12A through item-12N evidence, verify the known live artifact hashes again, bound any remaining application bootstrap/configuration gaps, update durable GX10 rebuild status/current-state documentation, and publish the rediscovery-complete checkpoint.
+
+No GX10 rebuild implementation begins until that closure checkpoint is published.

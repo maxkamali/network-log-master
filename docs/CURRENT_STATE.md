@@ -99,6 +99,12 @@ Important completed collector validation includes:
 - `GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
 - `PACKAGE_NO_AUTOSTART_FAILURE_PATH_VALIDATION=PASS`
 - `PACKAGE_NO_AUTOSTART_SYNTHETIC_PROOF=PASS`
+- `ITEM8C_CREDENTIAL_EXPOSURE_CLOSED=PASS`
+- `ITEM8D_RUNTIME_DEPENDENCY_CHECKPOINT=PASS`
+- `ITEM8E_STRUCTURAL_PREFLIGHT_CONTRACT=PASS`
+- `SYNTHETIC_PRIVATE_KEY_DETECTOR=PASS`
+- `ITEM8F_SHELL_EVALUATION_SAFETY=PASS`
+- `ITEM8F_FINDING_CLASSIFICATION_RETRY=PASS`
 
 Detailed component state is in `components/collector/REBUILD_STATUS.md`.
 
@@ -222,8 +228,8 @@ Long-lived incident correlation and production LLM orchestration remain separate
 5. `DONE` — secure Grafana administrator bootstrap is wired into `components/collector/install/install-runtime.sh` with private-file input, loopback-only first startup, explicit Grafana CLI path/data targeting, failure cleanup, and non-destructive temporary-database targeting proof.
 6. `DONE` — `restore-dashboards.py` and `verify-dashboards.py` are wired into the clean-machine collector runtime installer after HTTPS health and datasource verification, using loopback HTTPS and the private administrator password file.
 7. `DONE` — package-install no-autostart protection uses a temporary Debian service-policy guard plus persistent systemd condition guards, with failure-safe runtime authorization and synthetic behavior proof.
-8. `NEXT` — re-run collector installer structural, credential-exposure, and public-safety validation.
-9. `NOT STARTED` — finish collector README and operator-facing clean-machine rebuild documentation.
+8. `DONE` — collector installer structural, credential-exposure, dependency, failure-cleanup, and public-safety validation completed.
+9. `NEXT` — finish collector README and operator-facing clean-machine rebuild documentation.
 10. `NOT STARTED` — run final collector public sanitation and close the collector rebuild milestone.
 11. `NOT STARTED` — perform a clean-machine collector rebuild validation when practical.
 12. `NOT STARTED` — capture and reconstruct the complete GX10 implementation.

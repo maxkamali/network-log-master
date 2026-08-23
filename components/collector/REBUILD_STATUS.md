@@ -346,11 +346,36 @@ Package no-autostart protection is integrated across package and runtime install
 
 Earlier patch attempts failed safely because of ambiguous anchors and heredoc collisions. Later validation also exposed two useful corrections before publication: Grafana CLI configuration overrides must use `--configOverrides`, and the CLI must run from a working directory traversable by the `grafana` account.
 
+## Item 8 structural/public-safety validation
+
+Collector installer structural, credential-exposure, dependency, operator-input preflight, failure-cleanup, destination-mode, and public-safety validation is complete.
+
+Final validation established:
+
+- credential/process-argument exposure is closed
+- required `iproute2` and `sqlite3` dependencies are explicit
+- package verification requires its actual root execution context
+- authorized-keys inputs are validated before ClickHouse mutation
+- private-key PEM detection uses an explicit grep option terminator
+- runtime repository artifact references are complete
+- renderer environment and output contracts are complete
+- Grafana bootstrap override cleanup is failure-safe
+- service authorization-token cleanup is failure-safe
+- private temporary-file creation occurs under `umask 077`
+- sensitive Vector and Grafana destination modes are explicit and validated
+- TLS private-key mode remains `0400 grafana:grafana`
+- shell evaluation scanning found no `eval` or xtrace
+- public identity/material scanning closed with no deployment identity finding
+- live Grafana datasource database state matches the captured functional contract
+- absence of the clean-rebuild datasource provisioning file on the reference collector is an expected representation difference
+- the public repository gate passes
+
+No clean-machine installer was executed against the working reference collector.
+
 ## Detailed remaining collector work
 
 Use `docs/CURRENT_STATE.md` for the authoritative ordering/status. The remaining collector work currently consists of:
 
-- installer structural and public-safety validation
 - complete collector README/operator rebuild documentation
 - final staged public-repository sanitation gate
 - clean-machine end-to-end collector rebuild validation when practical

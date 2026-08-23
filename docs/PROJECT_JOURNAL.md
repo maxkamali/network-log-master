@@ -1891,3 +1891,157 @@ The next bounded slice should inspect:
 Any additional material finding must be corrected, validated, pushed, and journaled before item 8 is marked complete.
 
 Item 8 remains `NEXT`.
+
+## 2026-08-22 20:29 PDT - Item 8 collector structural and public-safety validation complete
+
+### Status
+
+`DONE` — execution-order item 8 is complete.
+
+`docs/CURRENT_STATE.md` advances item 9, collector README and operator-facing clean-machine rebuild documentation, to the single `NEXT` position.
+
+### Completed validation scope
+
+Item 8 completed collector installer validation for:
+
+- credential file handling
+- credential process-argument exposure
+- explicit runtime dependencies
+- package-verifier execution context
+- operator-input preflight
+- authorized-keys safety
+- runtime artifact-reference completeness
+- renderer input/output completeness
+- failure cleanup
+- temporary service authorization
+- Grafana bootstrap cleanup
+- sensitive destination ownership/modes
+- TLS private-key handling
+- shell evaluation/xtrace exposure
+- public identity/material scanning
+- live-reference versus clean-rebuild representation differences
+- public repository sanitation
+
+### Credential and dependency closure
+
+Credential/process-argument exposure closed with:
+
+- `COLLECTOR_CREDENTIAL_PROCESS_ARGUMENT_AUDIT=PASS`
+- `ITEM8C_CREDENTIAL_EXPOSURE_CLOSED=PASS`
+
+Explicit rebuild dependencies now include:
+
+- `sqlite3`
+- `iproute2`, supplying `ss`
+
+Root-context package verification passed:
+
+- `COLLECTOR_PACKAGE_VERIFY=PASS`
+- `ITEM8D_RUNTIME_DEPENDENCY_CHECKPOINT=PASS`
+
+### Operator-input and transport-key closure
+
+Both operator-supplied authorized-keys files are now validated before the first persistent ClickHouse mutation.
+
+The later transport checks remain as defense in depth.
+
+Synthetic validation discovered and corrected the existing leading-hyphen grep pattern defect.
+
+Both detectors now use an explicit grep option terminator.
+
+Validation passed:
+
+- `ITEM8E_STRUCTURAL_PREFLIGHT_CONTRACT=PASS`
+- `SYNTHETIC_PRIVATE_KEY_DETECTOR=PASS`
+
+### Failure cleanup and sensitive modes
+
+Validation confirmed:
+
+- `umask 077` precedes private temporary artifacts
+- runtime `EXIT` cleanup precedes persistent mutation
+- Grafana bootstrap override is removed on success and failure
+- temporary service authorization uses mode `0600`
+- temporary service authorization is removed on success and failure
+- runtime temporary directory is removed through `EXIT` cleanup
+- Vector ClickHouse secret destination is `0400 vector:vector`
+- Grafana datasource clean-rebuild destination is `0640 root:grafana`
+- Grafana TLS private-key destination is `0400 grafana:grafana`
+- Certbot renewal preserves the TLS ownership/mode contract
+- renderer private mode is established before secret-bearing output is written
+- synthetic `umask 077` file creation produced mode `0600`
+
+### Shell-safety validator correction
+
+The first shell-source scan produced two validator false positives.
+
+`. "$SCRIPT_DIR/versions.env"` in `verify-packages.sh` is an intentional fixed repository-controlled input.
+
+`source = Path(sys.argv[1])` in `verify-runtime.sh` is Python code inside an embedded heredoc, not shell sourcing.
+
+The corrected scan excludes heredoc bodies and permits only known fixed source inputs.
+
+Final result:
+
+- `shell_eval_commands=absent`
+- `shell_xtrace=absent`
+- `shell_source_commands=tracked_fixed_inputs_only`
+- `ITEM8F_SHELL_EVALUATION_SAFETY=PASS`
+
+### Public identity validator correction
+
+The generic IPv4-syntax scanner found two values in `REBUILD_STATUS.md`:
+
+- `127.0.0.1`, intentional loopback-only addressing
+- `26.3.17.110`, the pinned ClickHouse software version
+
+Classification passed:
+
+- `public_ipv4_candidate_127.0.0.1=allowed_loopback`
+- `public_ipv4_candidate_26.3.17.110=software_version_not_address`
+- `ITEM8F_PUBLIC_IDENTITY_FINDINGS=none`
+
+No unapproved deployment address, non-example email address, hardcoded user home path, URL credential, or literal private-key material remained as a public identity finding.
+
+### Grafana datasource representation
+
+The working reference collector does not contain the clean-rebuild provisioning file at:
+
+`/etc/grafana/provisioning/datasources/clickhouse.yaml`
+
+That is an expected representation difference, not live drift.
+
+The reference collector stores the two functional datasource records in Grafana's database.
+
+Read-only validation confirmed both captured UIDs, protocols, ports, loopback host policy, `grafana_reader`, expected tables, and secure data.
+
+Results:
+
+- `LIVE_GRAFANA_DATASOURCE_DB_CONTRACT=PASS`
+- `ITEM8F_LIVE_DATASOURCE_FINDING=expected_representation_difference`
+- `ITEM8F_LIVE_REFERENCE_FINDINGS=none`
+- `ITEM8F_DATASOURCE_CLASSIFICATION=PASS`
+
+The clean-machine rebuild creates the same functional state from the captured provisioning template.
+
+### Execution and publication safety
+
+The public repository gate passed throughout item 8.
+
+The final read-only audits left the repository unchanged.
+
+No clean-machine package installer, runtime installer, or transport bootstrap was executed on the working reference collector.
+
+No production credential, authorized-key content, certificate private key, production log data, deployment device identity, or deployment firewall policy was published.
+
+Firewall reconstruction remains intentionally out of scope.
+
+### Conclusion
+
+Collector installer structural, credential-exposure, dependency, failure-cleanup, operator-input, artifact-reference, and public-safety validation is complete.
+
+Execution-order item 8 is `DONE`.
+
+Execution-order item 9 is the single `NEXT` item:
+
+Finish the collector README and operator-facing clean-machine rebuild documentation.

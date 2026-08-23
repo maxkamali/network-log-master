@@ -196,7 +196,7 @@ Completed validation includes:
 
 ## GX10 state
 
-Status: `IN PROGRESS` — live-system rediscovery is complete; public rebuild implementation is next.
+Status: `IN PROGRESS` — live-system rediscovery is complete; public rebuild implementation has begun.
 
 Durably journaled rediscovery through item 12N and the final closure audit has established:
 
@@ -226,6 +226,8 @@ The final live closure audit passed. It found exactly one match for each known a
 Detailed reconstruction authority is now in:
 
 `components/gx10/REBUILD_STATUS.md`
+
+The first public reconstruction subsection now provides a synthetic operator-input template, neutral runtime identity/path contract, guarded clean-machine filesystem and SSH-material bootstrap, and non-mutating structural/public-safety validator. It has passed `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`.
 
 The known application hashes remain:
 
@@ -268,7 +270,7 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 9. `DONE` — collector README and operator-facing clean-machine rebuild documentation completed and validated.
 10. `DONE` — final collector public sanitation passed and the public collector rebuild-package/documentation milestone was closed.
 11. `DEFERRED` — clean-machine collector rebuild validation remains outstanding because no disposable Debian 13 amd64 validation system is currently available.
-12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package, beginning with the operator-input and filesystem/runtime identity contract.
+12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package; publish the completed operator-input/filesystem contract, then capture the three public-safe application implementations.
 13. `NOT STARTED` — validate the GX10 rebuild package and operator documentation.
 14. `NOT STARTED` — reconcile and update full two-server architecture, operations, and rebuild documentation.
 15. `NOT STARTED` — run final repository sanitation and two-server acceptance validation.

@@ -34,3 +34,20 @@ Current state:
 Transitional enrichment should be retired only after collector-side normalization and replay parity are proven.
 
 Live-system rediscovery is complete. The authoritative reconstruction checkpoint, captured contracts, preserved absences, and next implementation order are in `REBUILD_STATUS.md`.
+
+## Clean-machine reconstruction artifacts
+
+The first reconstruction subsection defines the public-safe runtime identity and filesystem boundary:
+
+- `config/operator-inputs.env.example` — synthetic operator-input template; populate only in a private file outside the repository
+- `install/filesystem-contract.env` — neutral fixed runtime identity and path roles
+- `install/install-filesystem.sh` — guarded clean-machine account, directory, and SSH-material bootstrap
+- `tests/validate-filesystem-contract.sh` — non-mutating structural and public-safety validation
+
+The filesystem installer requires operator-owned SFTP private-key and known-hosts files with mode `0400` or `0600`. It installs them with mode `0600`, creates the SSH parent with mode `0700`, creates spool/state directories with mode `0750`, locks the dedicated non-login system account, and refuses an existing application database.
+
+Do not populate the example file in the repository. Do not run the clean-machine installer against the working GX10 reference system.
+
+Run the safe repository validation with:
+
+    components/gx10/tests/validate-filesystem-contract.sh

@@ -10,6 +10,18 @@ Clean-machine GX10 validation and operator documentation remain later gates.
 
 This document is the component recovery authority for the active GX10 milestone. `docs/CURRENT_STATE.md` remains the authority for project-wide execution order and the single `NEXT` item.
 
+## Reconstruction progress
+
+Completed:
+
+- public-safe operator-input template
+- neutral dedicated runtime identity and fixed path-role contract
+- guarded clean-machine filesystem/SSH-material bootstrap
+- structural and public-safety validator
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+
+The bootstrap refuses an existing application database and is not executed against the working reference system.
+
 ## Public-safety boundary
 
 The repository intentionally omits deployment-specific addresses, usernames, private hostnames, SSH keys, known-hosts contents, credentials, private paths, and production event data.

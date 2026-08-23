@@ -5984,3 +5984,113 @@ Begin the first bounded public GX10 reconstruction subsection:
 4. add structural/public-safety validation for that contract
 
 Do not execute clean-machine installation logic against the working GX10 reference system.
+
+## 2026-08-23 16:10 PDT - GX10 reconstruction filesystem and operator-input contract
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The first bounded public GX10 reconstruction subsection is complete and validated.
+
+### Implemented artifacts
+
+Added:
+
+- `components/gx10/config/operator-inputs.env.example`
+- `components/gx10/install/filesystem-contract.env`
+- `components/gx10/install/install-filesystem.sh`
+- `components/gx10/tests/validate-filesystem-contract.sh`
+
+Updated:
+
+- `components/gx10/README.md`
+- `components/gx10/REBUILD_STATUS.md`
+- `docs/CURRENT_STATE.md`
+
+### Operator-input boundary
+
+The repository template contains only synthetic values.
+
+Deployment-specific SFTP hostname, port, username, private-key source path, and known-hosts source path are operator inputs. The populated file must remain outside the repository.
+
+Private key and known-hosts inputs must be regular, nonempty files with mode `0400` or `0600`.
+
+No private input content is accepted directly as a command-line value or stored in the public repository.
+
+### Runtime identity and filesystem contract
+
+The public rebuild uses neutral identity and path names rather than publishing historical private live names.
+
+The clean-machine contract defines:
+
+- one dedicated locked non-login system user/group
+- a runtime home under `/var/lib`
+- an SSH-material parent under the runtime home
+- incoming, processed, and temporary spool roles under `/var/spool`
+- an application-state directory and database path under the runtime home
+- a root-owned application executable directory under `/usr/local/libexec`
+
+Modes preserve the captured live security contract:
+
+- SSH-material parent: `0700`
+- private key: `0600`
+- known-hosts file: `0600`
+- runtime home/state/spool directories: `0750`
+- application database: reserved for later creation at `0640`
+- executable directory: root-owned `0755`
+
+UID and GID are allocated as system identities rather than pinning the live numeric IDs.
+
+### Clean-machine safety behavior
+
+`install-filesystem.sh`:
+
+- requires root
+- requires `CLEAN_INSTALL_CONFIRM=YES-CLEAN-GX10`
+- requires explicit private input files
+- validates input type, nonempty state, and restrictive modes
+- creates or verifies the neutral runtime identity
+- locks the runtime account
+- verifies any existing account has the expected group, home, and `nologin` shell
+- refuses an existing application database
+- never overwrites divergent installed SSH material
+- creates directories with explicit ownership and modes
+
+The installer is clearly scoped to a clean machine and was not run against the working GX10 reference system.
+
+### Validation
+
+The non-mutating validator checks:
+
+- shell syntax
+- fixed neutral identity and path relationships
+- clean-machine confirmation and existing-database refusal guards
+- runtime directory, SSH directory, and private-file mode contracts
+- account lock and non-login shell requirements
+- synthetic example hostname use
+- secret-like content
+- accidental private key, token, or SQLite files
+
+Result:
+
+`GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+
+The initial validator run self-matched its own secret signatures. The detector was corrected to construct those signatures from split literals, after which the intended GX10 component scan passed.
+
+### Safety boundary
+
+This subsection:
+
+- did not read the operator's external GitHub token file
+- did not copy or read live GX10 private-key or known-hosts contents
+- did not publish live hostnames, addresses, ports, usernames, paths, or credentials
+- did not execute the filesystem installer
+- did not write to either reference system
+- did not change service state
+
+### Next action
+
+Publish this validated subsection, verify GitHub, then begin capture of the three public-safe application implementations.
+
+Before publication, derive private configuration literals out of the captured live sources and preserve the recorded fetch, ingest, and deterministic-enrichment semantics with public-safe fixtures and tests.

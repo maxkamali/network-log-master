@@ -2352,3 +2352,80 @@ Perform the final item-9 documentation closure check.
 If the README remains consistent with the installer/verifier contracts and the public repository gate passes, mark execution-order item 9 `DONE` and advance item 10, final collector public sanitation and milestone closure, to the single `NEXT` position.
 
 Item 9 remains `NEXT` until that state transition is committed.
+
+## 2026-08-22 20:38 PDT - Item 9 collector operator documentation complete
+
+### Status
+
+`DONE` — execution-order item 9 is complete.
+
+`docs/CURRENT_STATE.md` advances item 10, final collector public sanitation and collector milestone closure, to the single `NEXT` position.
+
+### Published operator runbook
+
+`components/collector/README.md` is now the validated clean-machine operator runbook for the collector.
+
+The implementation checkpoint was:
+
+`62fbb0b668efad92955ad4ab19fcdf6aecd658a0` — `Document collector clean rebuild`
+
+Its journal checkpoint was:
+
+`37e499d720a1d7e5e694d36c97ab7bbf053954db` — `Journal collector operator runbook`
+
+### Final consistency validation
+
+The final documentation-to-implementation check confirmed:
+
+- exactly ten runtime operator inputs are documented
+- both installers' `YES-CLEAN-COLLECTOR` safety confirmation is documented
+- Debian 13 amd64 package baseline is documented
+- package and runtime success markers in the README exist in the actual scripts
+- private password-file and authorized-key guidance is present
+- external UDP/514, TCP/514, TCP/443, TCP/80, and nonstandard SSH connectivity requirements are documented
+- ClickHouse external exposure is not required; application listeners remain loopback-only
+- deferred SSH reload behavior is documented
+- broad `sudo -E` forwarding is not used
+- failure/retry guidance preserves fail-closed clean-machine semantics
+
+Final marker:
+
+`ITEM9_FINAL_DOCUMENTATION_CONSISTENCY=PASS`
+
+### Operator workflow now documented
+
+The published runbook covers:
+
+1. clean Debian 13 amd64 baseline
+2. repository checkout
+3. external private operator-input directory
+4. password and SSH public-key source preparation
+5. package installation
+6. independent package verification
+7. non-secret deployment variables
+8. runtime installation
+9. safe deferred SSH activation
+10. independent runtime verification
+11. failure/reprovision semantics
+
+### Safety boundary
+
+No package installer, runtime installer, transport bootstrap, or runtime verifier was executed during item 9.
+
+No production credential, password, SSH key, certificate private key, production device identity, private username, deployment-specific address, raw production log content, or firewall policy was added to public documentation.
+
+Firewall/nftables reconstruction remains intentionally out of scope.
+
+### Item 9 conclusion
+
+The collector README/operator clean-machine documentation is complete for the current captured implementation.
+
+Execution-order item 9 is now `DONE`.
+
+### Next action
+
+Execution-order item 10 is now the single `NEXT` item:
+
+Run final collector public sanitation and close the collector rebuild milestone.
+
+The final collector sanitation step must re-check the complete tracked collector/public documentation state rather than only the files changed by item 9.

@@ -372,14 +372,41 @@ Final validation established:
 
 No clean-machine installer was executed against the working reference collector.
 
+## Item 9 operator documentation
+
+The collector README is now the validated operator-facing clean-machine rebuild runbook.
+
+It documents:
+
+- clean Debian 13 amd64 baseline
+- explicit clean-install confirmation
+- required external connectivity without deployment-specific firewall reconstruction
+- all ten runtime operator inputs
+- private password-file preparation
+- public authorized-key input preparation
+- package installation and independent package verification
+- runtime installation
+- deferred SSH reload safety
+- independent runtime verification
+- installer success markers
+- fail-closed retry/reprovision guidance
+
+The documentation is based on the actual published installer/verifier contracts and does not introduce a parallel manual reconstruction procedure.
+
+Validation completed with:
+
+- `ITEM9B_README_OPERATOR_RUNBOOK_CONTRACT=PASS`
+- `ITEM9_FINAL_DOCUMENTATION_CONSISTENCY=PASS`
+- public repository gate passing
+
+No package installer, runtime installer, or runtime verifier was executed as part of the documentation milestone.
+
 ## Detailed remaining collector work
 
 Use `docs/CURRENT_STATE.md` for the authoritative ordering/status. The remaining collector work currently consists of:
 
-- complete collector README/operator rebuild documentation
-- final staged public-repository sanitation gate
+- final staged public-repository sanitation and collector milestone closure
 - clean-machine end-to-end collector rebuild validation when practical
-- collector milestone closure
 
 ## GX10 remaining milestone
 

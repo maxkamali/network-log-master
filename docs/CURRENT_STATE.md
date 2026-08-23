@@ -105,6 +105,7 @@ Important completed collector validation includes:
 - `SYNTHETIC_PRIVATE_KEY_DETECTOR=PASS`
 - `ITEM8F_SHELL_EVALUATION_SAFETY=PASS`
 - `ITEM8F_FINDING_CLASSIFICATION_RETRY=PASS`
+- `ITEM9B_README_OPERATOR_RUNBOOK_CONTRACT=PASS`
 
 Detailed component state is in `components/collector/REBUILD_STATUS.md`.
 
@@ -229,8 +230,8 @@ Long-lived incident correlation and production LLM orchestration remain separate
 6. `DONE` — `restore-dashboards.py` and `verify-dashboards.py` are wired into the clean-machine collector runtime installer after HTTPS health and datasource verification, using loopback HTTPS and the private administrator password file.
 7. `DONE` — package-install no-autostart protection uses a temporary Debian service-policy guard plus persistent systemd condition guards, with failure-safe runtime authorization and synthetic behavior proof.
 8. `DONE` — collector installer structural, credential-exposure, dependency, failure-cleanup, and public-safety validation completed.
-9. `NEXT` — finish collector README and operator-facing clean-machine rebuild documentation.
-10. `NOT STARTED` — run final collector public sanitation and close the collector rebuild milestone.
+9. `DONE` — collector README and operator-facing clean-machine rebuild documentation completed and validated.
+10. `NEXT` — run final collector public sanitation and close the collector rebuild milestone.
 11. `NOT STARTED` — perform a clean-machine collector rebuild validation when practical.
 12. `NOT STARTED` — capture and reconstruct the complete GX10 implementation.
 13. `NOT STARTED` — validate the GX10 rebuild package and operator documentation.

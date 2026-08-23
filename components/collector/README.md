@@ -387,9 +387,9 @@ For the detailed list of completed validations, known incomplete work, and clean
 
 Collector installer structural, credential-exposure, dependency, failure-cleanup, and public-safety validation is complete.
 
-This README is the operator-facing clean-machine rebuild runbook produced by execution-order item 9 and remains under validation until its item-9 journal checkpoint is published.
+The operator-facing clean-machine rebuild runbook is complete and validated.
 
-After operator documentation is validated, the remaining collector milestone work is the final public-repository sanitation/milestone closure and clean-machine end-to-end rebuild validation when practical.
+Execution-order item 9 is complete. The next collector phase is final public-repository sanitation and collector milestone closure, followed by clean-machine end-to-end rebuild validation when practical.
 
 Do not skip ahead without updating `docs/CURRENT_STATE.md` first.
 

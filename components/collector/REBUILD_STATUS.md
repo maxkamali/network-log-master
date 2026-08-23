@@ -1,6 +1,6 @@
 # Collector rebuild checkpoint
 
-Status: public collector rebuild package, sanitation, and operator documentation complete. Clean-machine end-to-end validation remains pending.
+Status: public collector rebuild package, sanitation, and operator documentation complete. Clean-machine end-to-end validation is deferred pending a disposable Debian 13 amd64 validation system.
 
 ## Execution authority
 
@@ -457,7 +457,7 @@ Clean-machine end-to-end collector rebuild execution remains a separate validati
 
 Use `docs/CURRENT_STATE.md` for the authoritative ordering/status. The remaining collector work currently consists of:
 
-- clean-machine end-to-end collector rebuild validation when practical
+- deferred: clean-machine end-to-end collector rebuild validation when a disposable Debian 13 amd64 system becomes available
 
 ## GX10 remaining milestone
 

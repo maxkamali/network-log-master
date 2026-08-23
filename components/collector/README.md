@@ -391,7 +391,9 @@ The operator-facing clean-machine rebuild runbook is complete and validated.
 
 The public collector rebuild-package and documentation milestone is closed after final current-state and public-history sanitation.
 
-Clean-machine end-to-end collector rebuild validation remains a separate follow-up gate in execution-order item 11.
+Clean-machine end-to-end collector rebuild validation is explicitly deferred because a disposable clean Debian 13 amd64 system is not currently available. This validation remains outstanding and is not claimed as complete.
+
+GX10 reconstruction is now the active execution phase under item 12.
 
 Do not skip ahead without updating `docs/CURRENT_STATE.md` first.
 

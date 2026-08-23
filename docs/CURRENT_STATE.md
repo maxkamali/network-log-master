@@ -50,7 +50,7 @@ The production collector path has not yet been switched to the new normalizer. P
 
 ## Collector rebuild milestone
 
-Status: `DONE` for the public collector rebuild package, operator documentation, and public sanitation; clean-machine end-to-end validation remains execution-order item 11.
+Status: `DONE` for the public collector rebuild package, operator documentation, and public sanitation; clean-machine end-to-end validation is `DEFERRED` pending a disposable Debian 13 amd64 validation system.
 
 A durable public collector checkpoint was published at:
 
@@ -233,8 +233,8 @@ Long-lived incident correlation and production LLM orchestration remain separate
 8. `DONE` — collector installer structural, credential-exposure, dependency, failure-cleanup, and public-safety validation completed.
 9. `DONE` — collector README and operator-facing clean-machine rebuild documentation completed and validated.
 10. `DONE` — final collector public sanitation passed and the public collector rebuild-package/documentation milestone was closed.
-11. `NEXT` — perform a clean-machine collector rebuild validation when practical.
-12. `NOT STARTED` — capture and reconstruct the complete GX10 implementation.
+11. `DEFERRED` — clean-machine collector rebuild validation remains outstanding because no disposable Debian 13 amd64 validation system is currently available.
+12. `NEXT` — capture and reconstruct the complete GX10 implementation.
 13. `NOT STARTED` — validate the GX10 rebuild package and operator documentation.
 14. `NOT STARTED` — reconcile and update full two-server architecture, operations, and rebuild documentation.
 15. `NOT STARTED` — run final repository sanitation and two-server acceptance validation.

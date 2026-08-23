@@ -2504,3 +2504,74 @@ Clean-machine end-to-end rebuild execution remains a separate validation gate an
 Item 11 is the next execution-order gate.
 
 If a disposable clean Debian 13 amd64 system is unavailable, item 11 may be explicitly deferred by operator decision and execution can advance to GX10 reconstruction without claiming clean-machine validation.
+
+## 2026-08-22 20:57 PDT - Item 11 clean-machine collector validation deferred
+
+### Status
+
+`DEFERRED` — clean-machine collector rebuild validation remains outstanding.
+
+The operator confirmed that no disposable clean Debian 13 amd64 system is currently available for destructive end-to-end rebuild validation.
+
+This item is therefore deferred rather than marked complete.
+
+Execution-order item 12, complete GX10 capture and reconstruction, becomes the single `NEXT` item.
+
+### Collector milestone state
+
+The public collector rebuild package remains closed for:
+
+- implementation capture
+- package/runtime reconstruction artifacts
+- structural validation
+- credential-exposure validation
+- dependency validation
+- failure-path validation
+- operator documentation
+- current tracked-state sanitation
+- public-main history sanitation
+
+The following claim is intentionally not made:
+
+That the published clean-machine rebuild procedure has already been executed successfully from start to finish on a fresh Debian 13 amd64 collector.
+
+### Deferral reason
+
+The installer is intentionally designed for a genuinely clean collector and contains fail-closed protections against execution on an existing stateful collector.
+
+The working collector must not be repurposed as the clean-machine test environment.
+
+Without a disposable clean Debian 13 amd64 system, executing item 11 safely is not practical at this checkpoint.
+
+### Deferred acceptance gate
+
+When a disposable clean collector becomes available, item 11 should be resumed and should validate at minimum:
+
+- package installation
+- package verification
+- operator credential-file preparation
+- runtime installation
+- certificate/HTTPS behavior
+- SSH/SFTP transport
+- Vector listeners and spool output
+- ClickHouse schema/access/listeners
+- Grafana datasources and dashboards
+- AI-result validation
+- retention behavior
+- final `COLLECTOR_RUNTIME_VERIFY=PASS`
+
+Until then, clean-machine execution remains an explicit open validation debt.
+
+### Safety boundary
+
+No collector installer or verifier was executed during this state transition.
+
+No functionality on the working collector was changed.
+
+### Next action
+
+Execution-order item 12 is now the single `NEXT` item:
+
+Capture and reconstruct the complete GX10 implementation.
+
+Begin with read-only GX10 inventory and state capture before publishing or changing GX10 configuration.

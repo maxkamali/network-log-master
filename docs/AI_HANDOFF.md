@@ -129,6 +129,8 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
+The final repository rebuild milestone is published. The single active gate is disposable clean-two-server execution; read `docs/ACCEPTANCE.md` before attempting it. Do not advance future production integration merely because repository-only acceptance passed.
+
 The proven automatic application chain is:
 
 `timer -> fetch -> ingest`

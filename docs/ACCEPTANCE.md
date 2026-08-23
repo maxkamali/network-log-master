@@ -72,7 +72,11 @@ GitHub verification during the acceptance run established:
 - remote default branch: `main`
 - public `main` matched the locally validated published checkpoint before the final acceptance changes
 
-The final milestone publication must repeat the remote-HEAD equality check after push.
+The item-15 acceptance checkpoint was published and independently matched at:
+
+`27ca641c261552428dab88fc57b98851f7cedecf`
+
+The final milestone publication repeats the remote-HEAD equality check after push; that result is recorded in the final journal verification entry.
 
 ## Read-only reference revalidation
 

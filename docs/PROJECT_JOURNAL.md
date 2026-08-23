@@ -7207,3 +7207,87 @@ This item:
 Publish this acceptance checkpoint and independently verify GitHub.
 
 Then publish execution-order item 16 as the final rebuild milestone, preserving the two clean-host validation deferrals and advancing future implementation only through a new explicit `NEXT` item.
+
+## 2026-08-23 16:49 PDT - Final public rebuild milestone
+
+### Status
+
+Execution-order item 16 is `DONE`.
+
+Execution-order item 17 is now the single `NEXT` item.
+
+The final public repository rebuild milestone is complete and ready for publication.
+
+### Published milestone scope
+
+The milestone contains:
+
+- consolidated deterministic normalizer with replay/parity evidence
+- complete public collector rebuild package and operator runbook
+- complete public GX10 rebuild package and operator runbook
+- guarded collector package/runtime activation boundaries
+- guarded GX10 package, offline-model, preactivation, and activation boundaries
+- current-versus-target architecture and data/operations contracts
+- collector-first two-server rebuild runbook and independent key-role mapping
+- durable current-tree/reachable-history sanitation gate with synthetic tests
+- final repository-only and read-only-reference acceptance report
+
+The validated item-15 acceptance checkpoint is:
+
+`27ca641c261552428dab88fc57b98851f7cedecf` — `Validate final two-server acceptance boundary`
+
+### Honest completion boundary
+
+Complete:
+
+- implementation and reconstruction artifacts
+- component and cross-system operator documentation
+- repository-only tests/static/synthetic validation
+- current-tree and reachable-history sanitation
+- Git integrity, local/public topology, and remote checkpoint verification
+- read-only reference connectivity/platform/core-service revalidation
+
+Deferred:
+
+- clean collector execution on disposable Debian 13 amd64
+- clean GX10 execution on disposable Ubuntu 24.04 arm64 GX10-class hardware
+- full disposable two-server execution and cross-host replay/idempotency proof
+
+The final public milestone does not convert those unavailable environmental tests into a pass.
+
+### Project acceptance status
+
+The repository is ready for deterministic clean-host execution without undocumented conversational memory.
+
+The project's ultimate acceptance criterion remains open until the component and two-server runbooks pass on suitable disposable hosts.
+
+Accordingly, the only active execution item is now:
+
+`17. NEXT — disposable clean-two-server execution`
+
+Future production normalizer integration, incident-engine development, Ollama orchestration, and result production remain deferred until that gate is satisfied or the operator explicitly changes execution authority.
+
+### Safety boundary
+
+This milestone step changes public status/documentation only.
+
+It:
+
+- does not execute an installer
+- does not call either application pipeline
+- does not read private values or production data
+- does not call Ollama or run inference
+- does not write either reference system or change service state
+
+### Publication sequence
+
+Publish this milestone commit to GitHub and independently verify:
+
+- public `main` equals the milestone commit
+- public branch count remains one
+- public tag count remains zero
+- remote default branch remains `main`
+- working tree remains clean
+- final public-repository gate passes against the published history
+
+Then append one final remote-verification journal entry identifying the milestone commit and push that verification closure.

@@ -4,6 +4,8 @@ A capture-first network observability and local-AI incident reasoning platform.
 
 This repository is the master public engineering record and active source repository for the deterministic normalizer plus complete public-safe collector and GX10 rebuild packages. Disposable-host execution of both clean-machine runbooks remains explicitly deferred.
 
+Final repository-only rebuild milestone status: `PUBLISHED`. Ultimate clean-two-server execution status: `DEFERRED`, not passed.
+
 ## Start here
 
 For a fresh engineering or AI session, begin with:

@@ -10,6 +10,14 @@ The rebuild/documentation project is complete only when two clean servers, this 
 
 Environment-specific credentials, addresses, usernames, SSH keys, certificate private keys, and similar identity-bearing values are intentionally supplied by the operator during rebuild rather than stored publicly.
 
+## Final rebuild milestone status
+
+Public rebuild packages, documentation, sanitation, and repository/read-only-reference acceptance: `DONE`.
+
+Disposable clean-two-server execution: `DEFERRED`.
+
+The final public repository milestone is published without claiming that unavailable clean-host execution passed. The project acceptance criterion above remains open until item 17 executes successfully on suitable disposable systems.
+
 ## Platform state
 
 The working observability path currently provides:
@@ -267,7 +275,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, and repository/read-only-reference acceptance validation are complete. Disposable-host validation remains explicitly deferred. The next technical action is publication of the final rebuild milestone.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, and final public milestone publication are complete. Disposable-host validation remains explicitly deferred. The next technical action is execution of the clean collector, GX10, and two-server runbooks on suitable disposable systems.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -288,7 +296,8 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 13. `DEFERRED` — clean-machine GX10 end-to-end validation remains outstanding because no disposable Ubuntu 24.04 arm64 GX10-class validation system is currently available; repository-only package/documentation validation passes.
 14. `DONE` — reconciled full two-server architecture, current/target data contracts, operations, key-role boundaries, rebuild order, and acceptance documentation.
 15. `DONE` — final current-tree/reachable-history sanitation, component tests, collector synthetic validation, Git/ref/link checks, private-identifier audit, and read-only two-server revalidation passed; disposable-host execution remains deferred.
-16. `NEXT` — publish the final rebuild milestone.
+16. `DONE` — published the final public rebuild milestone with complete repository/reference-read-only evidence and explicit clean-host deferrals.
+17. `NEXT` — execute the collector, GX10, and two-server clean-machine runbooks on suitable disposable hosts; do not claim full project acceptance until all required evidence passes.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

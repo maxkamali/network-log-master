@@ -82,7 +82,8 @@ Status: `DONE` for repository-only and read-only-reference acceptance; disposabl
 4. `DONE` — distinguish reconstructed current behavior from target architecture
 5. `DONE` — validate public examples/fixtures and run final repository sanitation/publication gates
 6. `DEFERRED` — perform clean two-server rebuild validation when suitable disposable hosts are available
-7. `NEXT` — publish final acceptance status without concealing deferred external validation
+7. `DONE` — publish final repository acceptance status without concealing deferred external validation
+8. `NEXT` — execute the full clean two-server runbook when suitable disposable hosts are available
 
 Exit gate:
 
@@ -90,7 +91,7 @@ Exit gate:
 
 ## Milestone 5 - Production normalizer integration
 
-Status: `DEFERRED UNTIL FINAL REPOSITORY ACCEPTANCE IS CLOSED`
+Status: `DEFERRED UNTIL CLEAN TWO-SERVER ACCEPTANCE PASSES`
 
 After the current system is reconstructable:
 

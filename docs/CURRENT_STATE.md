@@ -1,6 +1,6 @@
 # Current State
 
-Last verified project checkpoint: 2026-08-21.
+Last verified project checkpoint: 2026-08-22.
 
 This file is the authority for current execution order. Exactly one item should be marked `NEXT`.
 
@@ -92,6 +92,10 @@ Important completed collector validation includes:
 - `GRAFANA_DATASOURCE_CONTRACT=PASS`
 - `CERTBOT_RUNTIME_CONTRACT=PASS`
 - `COLLECTOR_RUNTIME_VERIFY=PASS`
+- `GRAFANA_ADMIN_BOOTSTRAP_PATCH_VALIDATION=PASS`
+- `GRAFANA_BOOTSTRAP_FAILURE_FLOW_VALIDATION=PASS`
+- `GRAFANA_CLI_WORKDIR_FIX_VALIDATION=PASS`
+- `GRAFANA_CLI_TEMP_DATABASE_TARGETING=PASS`
 
 Detailed component state is in `components/collector/REBUILD_STATUS.md`.
 
@@ -124,9 +128,27 @@ Completed validation:
 - `GRAFANA_DASHBOARD_RESTORE_DRYRUN=PASS`
 - `GRAFANA_DASHBOARD_LIVE_NONDESTRUCTIVE_TEST=PASS`
 
-Grafana 13.1.1 also supports secure administrator reset through:
+## Grafana administrator bootstrap
 
-`grafana cli admin reset-admin-password --password-from-stdin`
+Status: `DONE` for clean-machine installer wiring; clean-machine end-to-end execution remains a later collector validation gate.
+
+`install-runtime.sh` now:
+
+- requires an operator-supplied private `GRAFANA_ADMIN_PASSWORD_FILE`
+- rejects an empty, multiline, or group/world-accessible administrator password file
+- starts first-run Grafana through a temporary systemd drop-in bound only to `127.0.0.1:3000`
+- waits for Grafana health and confirms the bootstrap listener is loopback-only
+- stops Grafana after database initialization
+- runs `/usr/share/grafana/bin/grafana` as the `grafana` account from `/usr/share/grafana`
+- explicitly selects `/etc/grafana/grafana.ini` and `/var/lib/grafana`
+- resets administrator user ID 1 with `--password-from-stdin`
+- checks Grafana SQLite integrity and ownership after reset
+- removes the temporary bootstrap override before the later HTTPS startup path
+- removes the temporary bootstrap override through the installer cleanup trap on failure
+
+A non-destructive targeting proof used a temporary copy of the Grafana database and a synthetic user ID. The temporary password hash changed, the copied database passed `PRAGMA quick_check`, the synthetic user remained absent from the live database, and the live administrator password hash remained unchanged.
+
+The clean-machine runtime installer itself has not been executed against the working reference collector.
 
 ## GX10 state
 
@@ -163,8 +185,8 @@ Long-lived incident correlation and production LLM orchestration remain separate
 2. `DONE` — prove Grafana 13 dashboard round-trip, create, replace, and non-destructive dry-run restore behavior.
 3. `DONE` — publish permanent Grafana dashboard restore/verification scripts.
 4. `DONE` — establish repository recovery/journal operating rules and canonical startup documentation.
-5. `NEXT` — finish secure Grafana administrator bootstrap wiring in `components/collector/install/install-runtime.sh`, using an operator-supplied password file, loopback-only first startup, and `--password-from-stdin`.
-6. `NOT STARTED` — wire `restore-dashboards.py` and `verify-dashboards.py` into the clean-machine collector runtime installer.
+5. `DONE` — secure Grafana administrator bootstrap is wired into `components/collector/install/install-runtime.sh` with private-file input, loopback-only first startup, explicit Grafana CLI path/data targeting, failure cleanup, and non-destructive temporary-database targeting proof.
+6. `NEXT` — wire `restore-dashboards.py` and `verify-dashboards.py` into the clean-machine collector runtime installer.
 7. `NOT STARTED` — add package-install no-autostart protection so services cannot transiently expose an unconfigured first-start state.
 8. `NOT STARTED` — re-run collector installer structural, credential-exposure, and public-safety validation.
 9. `NOT STARTED` — finish collector README and operator-facing clean-machine rebuild documentation.

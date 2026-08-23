@@ -69,11 +69,30 @@ Direct writes to Grafana's SQLite database are not part of the rebuild contract.
 
 ## Administrator bootstrap
 
-Grafana 13.1.1 was verified to support:
+Secure administrator bootstrap is now wired into the clean-machine collector installer.
+
+Grafana 13.1.1 uses:
 
 `/usr/share/grafana/bin/grafana cli admin reset-admin-password --password-from-stdin`
 
-The clean-machine collector installer is being completed so the administrator password is supplied through an operator-owned private file, the initial Grafana startup is loopback-only, and the password is reset without placing it in command-line arguments or persistent public configuration.
+The rebuild sequence:
+
+1. requires an operator-owned private `GRAFANA_ADMIN_PASSWORD_FILE`
+2. rejects empty, multiline, or group/world-accessible password files
+3. creates a temporary systemd override for HTTP on `127.0.0.1:3000`
+4. starts Grafana and verifies health/database readiness
+5. confirms the only TCP/3000 listener is `127.0.0.1:3000`
+6. stops Grafana
+7. invokes the CLI as the `grafana` account from `/usr/share/grafana`
+8. explicitly supplies `/etc/grafana/grafana.ini`
+9. explicitly overrides the Grafana data path to `/var/lib/grafana`
+10. resets administrator user ID 1 with the password supplied through stdin
+11. runs SQLite `PRAGMA quick_check` and verifies database ownership
+12. removes the temporary bootstrap override before the normal HTTPS start
+
+The installer cleanup trap also stops temporary Grafana, removes the bootstrap override, and reloads systemd if a failure occurs while that override exists.
+
+A non-destructive behavioral proof copied the live Grafana SQLite database to a temporary directory, changed the administrator ID only in that copy, and invoked the same CLI targeting mechanism. The temporary password hash changed and the copied database passed integrity checking. The synthetic user remained absent from the live database and the live administrator password hash remained unchanged.
 
 Do not assume `grafana` or `grafana-cli` is on `PATH`; the Debian package service uses `/usr/share/grafana/bin/grafana`.
 

@@ -92,7 +92,9 @@ Proven behavior includes exact captured-`spec` round trip, POST create, PUT repl
 
 Grafana 13.1.1 also supports secure administrator reset through `/usr/share/grafana/bin/grafana cli admin reset-admin-password --password-from-stdin`.
 
-The remaining clean-machine installer work is to wire the secure administrator bootstrap and dashboard restore/verify sequence into `install-runtime.sh`.
+Secure administrator bootstrap is now wired into `install-runtime.sh` with a private operator password file, loopback-only first startup, explicit packaged CLI/data targeting, integrity checks, and cleanup of the temporary bootstrap override.
+
+The remaining Grafana clean-machine installer work is dashboard restore/verification wiring.
 
 ### Certificates
 
@@ -149,13 +151,12 @@ For the detailed list of completed validations, known incomplete work, and clean
 
 `docs/CURRENT_STATE.md` is authoritative. At the current checkpoint the collector sequence is:
 
-1. secure Grafana administrator bootstrap wiring
-2. dashboard restore/verification wiring
-3. package-install no-autostart protection
-4. installer/public-safety validation
-5. final collector operator/rebuild documentation
-6. final collector sanitation/milestone closure
-7. clean-machine collector rebuild validation when practical
+1. dashboard restore/verification wiring
+2. package-install no-autostart protection
+3. installer/public-safety validation
+4. final collector operator/rebuild documentation
+5. final collector sanitation/milestone closure
+6. clean-machine collector rebuild validation when practical
 
 Do not skip ahead without updating `docs/CURRENT_STATE.md` first.
 

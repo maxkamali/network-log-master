@@ -57,6 +57,7 @@ require_var CLEAN_INSTALL_CONFIRM
 for name in \
     CLICKHOUSE_DEFAULT_PASSWORD_FILE \
     GRAFANA_READER_PASSWORD_FILE \
+    GRAFANA_ADMIN_PASSWORD_FILE \
     VECTOR_INGEST_PASSWORD_FILE \
     GRAFANA_PUBLIC_HOST \
     CERT_NAME \
@@ -75,6 +76,12 @@ require_private_file \
 require_private_file \
     "$GRAFANA_READER_PASSWORD_FILE" \
     "Grafana reader password file"
+
+require_private_file \
+    "$GRAFANA_ADMIN_PASSWORD_FILE" \
+    "Grafana administrator password file"
+
+python3 -c 'from pathlib import Path; import sys; raw = Path(sys.argv[1]).read_text(encoding="utf-8", errors="strict"); password = raw.rstrip("\r\n"); sys.exit("ERROR: Grafana administrator password must be one non-empty line") if (not password or "\n" in password or "\r" in password) else None' "$GRAFANA_ADMIN_PASSWORD_FILE"
 
 require_private_file \
     "$VECTOR_INGEST_PASSWORD_FILE" \
@@ -200,6 +207,21 @@ TMPDIR="$(
 
 cleanup()
 {
+    if [ -n "${GRAFANA_BOOTSTRAP_DROPIN:-}" ] \
+        && [ -e "$GRAFANA_BOOTSTRAP_DROPIN" ]
+    then
+        systemctl stop grafana-server.service \
+            >/dev/null 2>&1 \
+            || true
+
+        rm -f "$GRAFANA_BOOTSTRAP_DROPIN" \
+            || true
+
+        systemctl daemon-reload \
+            >/dev/null 2>&1 \
+            || true
+    fi
+
     rm -rf "$TMPDIR"
 }
 
@@ -429,6 +451,133 @@ install \
     -m 0640 \
     "$RENDERED/clickhouse-datasources.yaml" \
     /etc/grafana/provisioning/datasources/clickhouse.yaml
+
+echo
+echo "=== BOOTSTRAP GRAFANA ADMINISTRATOR ==="
+
+GRAFANA_BOOTSTRAP_DROPIN_DIR="/etc/systemd/system/grafana-server.service.d"
+GRAFANA_BOOTSTRAP_DROPIN="$GRAFANA_BOOTSTRAP_DROPIN_DIR/zz-bootstrap-loopback.conf"
+
+command -v runuser >/dev/null 2>&1 || die "runuser is required for Grafana administrator bootstrap"
+command -v ss >/dev/null 2>&1 || die "ss is required for Grafana bootstrap listener validation"
+
+install -d -o root -g root -m 0755 "$GRAFANA_BOOTSTRAP_DROPIN_DIR"
+
+systemctl stop grafana-server.service
+
+printf '%s\n' '[Service]' 'Environment="GF_SERVER_PROTOCOL=http"' 'Environment="GF_SERVER_HTTP_ADDR=127.0.0.1"' 'Environment="GF_SERVER_HTTP_PORT=3000"' 'Environment="GF_SERVER_ROOT_URL=http://127.0.0.1:3000/"' > "$GRAFANA_BOOTSTRAP_DROPIN"
+
+chmod 0644 "$GRAFANA_BOOTSTRAP_DROPIN"
+
+systemctl daemon-reload
+
+systemctl start grafana-server.service
+
+grafana_bootstrap_ready=no
+
+for attempt in $(seq 1 60); do
+    if curl --fail --silent --show-error http://127.0.0.1:3000/api/health > "$TMPDIR/grafana-bootstrap-health.json"
+    then
+        grafana_bootstrap_ready=yes
+        break
+    fi
+
+    sleep 1
+done
+
+[ "$grafana_bootstrap_ready" = "yes" ] || {
+    echo "ERROR: Grafana bootstrap health endpoint did not become ready" >&2
+    false
+}
+
+grafana_bootstrap_listeners="$(
+    ss -H -ltn 'sport = :3000' \
+        | awk '{print $4}' \
+        | sort -u
+)"
+
+[ "$grafana_bootstrap_listeners" = "127.0.0.1:3000" ] || {
+    echo "ERROR: Grafana bootstrap listener is not loopback-only" >&2
+    printf 'listeners=%s\n' "$grafana_bootstrap_listeners" >&2
+    false
+}
+
+echo "grafana_bootstrap_listener=127.0.0.1:3000"
+
+python3 -c 'import json, sys; from pathlib import Path; data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8", errors="strict")); database = str(data.get("database", "")).lower(); sys.exit("ERROR: Grafana bootstrap health reports database != ok") if database != "ok" else print("grafana_bootstrap_database=ok")' "$TMPDIR/grafana-bootstrap-health.json"
+
+systemctl stop grafana-server.service
+
+[ -s /var/lib/grafana/grafana.db ] || {
+    echo "ERROR: Grafana database was not initialized" >&2
+    false
+}
+
+grafana_db_owner="$(
+    stat -c '%U:%G' /var/lib/grafana/grafana.db
+)"
+
+[ "$grafana_db_owner" = "grafana:grafana" ] || {
+    echo "ERROR: unexpected Grafana database ownership: $grafana_db_owner" >&2
+    false
+}
+
+(
+    cd /usr/share/grafana
+
+    runuser \
+        -u grafana \
+        -- \
+        /usr/share/grafana/bin/grafana \
+        cli \
+        --homepath /usr/share/grafana \
+        --config /etc/grafana/grafana.ini \
+        --configOverrides "cfg:default.paths.data=/var/lib/grafana" \
+        admin \
+        reset-admin-password \
+        --user-id 1 \
+        --password-from-stdin \
+        < "$GRAFANA_ADMIN_PASSWORD_FILE"
+)
+
+grafana_admin_count="$(
+    sqlite3 /var/lib/grafana/grafana.db \
+        "SELECT count(*) FROM user WHERE id = 1;"
+)"
+
+[ "$grafana_admin_count" = "1" ] || {
+    echo "ERROR: expected Grafana administrator user ID 1" >&2
+    false
+}
+
+grafana_db_check="$(
+    sqlite3 /var/lib/grafana/grafana.db \
+        "PRAGMA quick_check;"
+)"
+
+[ "$grafana_db_check" = "ok" ] || {
+    echo "ERROR: Grafana database quick_check failed" >&2
+    false
+}
+
+grafana_db_owner="$(
+    stat -c '%U:%G' /var/lib/grafana/grafana.db
+)"
+
+[ "$grafana_db_owner" = "grafana:grafana" ] || {
+    echo "ERROR: Grafana CLI changed database ownership: $grafana_db_owner" >&2
+    false
+}
+
+echo "grafana_admin_user_id=1"
+echo "grafana_admin_password_reset=PASS"
+echo "grafana_database_quick_check=PASS"
+
+rm -f "$GRAFANA_BOOTSTRAP_DROPIN"
+systemctl daemon-reload
+
+echo "grafana_bootstrap_override_removed=yes"
+echo "GRAFANA_ADMIN_BOOTSTRAP=PASS"
 
 echo
 echo "=== OBTAIN/REUSE GRAFANA CERTIFICATE ==="

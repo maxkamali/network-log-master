@@ -183,11 +183,24 @@ Validation completed:
 
 `GRAFANA_DASHBOARD_LIVE_NONDESTRUCTIVE_TEST=PASS`
 
-Grafana 13.1.1 was also verified to support:
+Grafana 13.1.1 was verified to support:
 
 `grafana cli admin reset-admin-password --password-from-stdin`
 
-The secure administrator bootstrap still needs to be wired into the clean-machine runtime installer.
+Secure administrator bootstrap wiring is now complete in the clean-machine runtime installer.
+
+The installer requires a mode-private `GRAFANA_ADMIN_PASSWORD_FILE`, performs the initial Grafana start on `127.0.0.1:3000`, validates health and loopback-only listener state, stops Grafana, and resets administrator user ID 1 through stdin while explicitly targeting the packaged Grafana configuration and `/var/lib/grafana` data path.
+
+Failure cleanup removes the bootstrap-only systemd drop-in. Successful bootstrap also removes that temporary override before the normal HTTPS startup path.
+
+A temporary-database behavioral proof confirmed the CLI reset changed only the explicitly selected temporary database while the live administrator password hash remained unchanged.
+
+Validation includes:
+
+- `GRAFANA_ADMIN_BOOTSTRAP_PATCH_VALIDATION=PASS`
+- `GRAFANA_BOOTSTRAP_FAILURE_FLOW_VALIDATION=PASS`
+- `GRAFANA_CLI_WORKDIR_FIX_VALIDATION=PASS`
+- `GRAFANA_CLI_TEMP_DATABASE_TARGETING=PASS`
 
 ## Collector transport boundary
 
@@ -274,25 +287,31 @@ Final result:
 
 Do not execute it against the working reference collector.
 
-The following Grafana work is NOT yet integrated into that installer:
+Secure Grafana administrator bootstrap is integrated:
 
-1. Add `GRAFANA_ADMIN_PASSWORD_FILE` as an operator-supplied private input.
-2. Start Grafana initially on loopback only.
-3. Allow Grafana to initialize its database.
-4. Stop Grafana.
-5. Reset administrator user ID 1 with `--password-from-stdin`.
-6. Remove the bootstrap-only loopback override.
-7. Start the captured HTTPS configuration.
-8. Run `restore-dashboards.py`.
-9. Run `verify-dashboards.py`.
+1. `GRAFANA_ADMIN_PASSWORD_FILE` is required as a private operator-supplied input.
+2. The first Grafana start uses a temporary loopback-only HTTP systemd override.
+3. Grafana health and database initialization are verified.
+4. The bootstrap listener is required to be exactly `127.0.0.1:3000`.
+5. Grafana is stopped before administrator reset.
+6. The CLI runs as the `grafana` account from `/usr/share/grafana`.
+7. The CLI explicitly selects `/etc/grafana/grafana.ini` and `/var/lib/grafana`.
+8. Administrator user ID 1 is reset through `--password-from-stdin`.
+9. SQLite quick-check and database ownership are verified.
+10. Failure cleanup removes the temporary bootstrap drop-in.
+11. Successful completion removes the temporary drop-in before later HTTPS startup.
 
-Several attempts to patch this integration were aborted before file replacement because patch anchors or heredoc delimiters were incorrect. Those failed attempts did not modify `install-runtime.sh`.
+The remaining Grafana runtime-installer work is:
+
+1. Run `restore-dashboards.py` after normal HTTPS Grafana becomes healthy.
+2. Run `verify-dashboards.py` and fail the rebuild if captured dashboards do not verify.
+
+Earlier patch attempts failed safely because of ambiguous anchors and heredoc collisions. Later validation also exposed two useful corrections before publication: Grafana CLI configuration overrides must use `--configOverrides`, and the CLI must run from a working directory traversable by the `grafana` account.
 
 ## Detailed remaining collector work
 
 Use `docs/CURRENT_STATE.md` for the authoritative ordering/status. The remaining collector work currently consists of:
 
-- secure Grafana administrator bootstrap wiring
 - dashboard restore/verification wiring
 - package-install no-autostart protection
 - installer structural and public-safety validation

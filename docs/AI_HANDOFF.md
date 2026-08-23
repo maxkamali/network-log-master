@@ -72,6 +72,7 @@ Key validated gates include:
 - `GRAFANA_UNIFIED_RESOURCE_ROUND_TRIP=PASS`
 - `GRAFANA_DRYRUN_RESTORE_PROOF=PASS`
 - `GRAFANA_DASHBOARD_LIVE_NONDESTRUCTIVE_TEST=PASS`
+- `GRAFANA_CLI_TEMP_DATABASE_TARGETING=PASS`
 
 Detailed state is in `components/collector/REBUILD_STATUS.md`.
 
@@ -98,17 +99,30 @@ Grafana 13.1.1 was also verified to support `grafana cli admin reset-admin-passw
 
 Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
-At this checkpoint, the next implementation task is to finish secure Grafana administrator bootstrap wiring in `components/collector/install/install-runtime.sh` using:
+Secure Grafana administrator bootstrap wiring in `components/collector/install/install-runtime.sh` is complete.
 
-- operator-supplied `GRAFANA_ADMIN_PASSWORD_FILE`
-- loopback-only first Grafana startup
-- local database initialization
-- secure admin reset through `--password-from-stdin`
-- removal of the temporary bootstrap-only override before normal HTTPS startup
+The implementation now uses:
+
+- operator-supplied private `GRAFANA_ADMIN_PASSWORD_FILE`
+- loopback-only first Grafana startup on `127.0.0.1:3000`
+- explicit bootstrap health/listener verification
+- administrator reset through `--password-from-stdin`
+- explicit packaged Grafana config and `/var/lib/grafana` data targeting
+- execution as the `grafana` service account from `/usr/share/grafana`
+- database integrity/ownership verification
+- cleanup of the bootstrap-only systemd override on success or failure
+
+A temporary-database proof verified that explicit CLI data targeting changes only the selected temporary Grafana database; the working collector administrator password hash was unchanged.
+
+The next implementation task is dashboard reconstruction wiring:
+
+1. integrate `restore-dashboards.py` into the clean-machine runtime installer after normal HTTPS Grafana health is established
+2. integrate `verify-dashboards.py`
+3. fail the clean-machine rebuild if dashboard verification does not pass
 
 Do not execute the clean-machine runtime installer against the working collector.
 
-After that sub-section validates, update and push `docs/PROJECT_JOURNAL.md` before materially proceeding to dashboard wiring.
+After the dashboard-wiring sub-section validates, update and push `docs/PROJECT_JOURNAL.md` before materially proceeding to package no-autostart hardening.
 
 ## Working method
 

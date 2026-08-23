@@ -94,7 +94,7 @@ The published checkpoint includes:
 
 The independent live collector verifier reached `COLLECTOR_RUNTIME_VERIFY=PASS`.
 
-The collector clean-machine installer still needs final Grafana administrator/bootstrap/dashboard integration and package no-autostart hardening before the collector rebuild milestone is closed.
+The collector clean-machine installer now includes the secure Grafana administrator bootstrap. Dashboard restore/verification wiring and package no-autostart hardening remain before the collector rebuild milestone is closed.
 
 ### GX10
 

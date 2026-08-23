@@ -3458,3 +3458,410 @@ Then inspect the enrichment candidate for:
 - any actual model/Ollama invocation
 
 Do not execute either candidate or read production database rows during structural inspection.
+
+## 2026-08-23 12:05 PDT - GX10 item 12F local-ingest contract
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The first downstream GX10 custom executable was inspected read-only and its local spool-ingest contract is now captured.
+
+The live identity-bearing executable filename and private state paths are intentionally omitted from the public journal.
+
+### Provenance
+
+The component is:
+
+- Python
+- root-owned
+- mode `0755`
+- 9372 bytes
+- 410 source lines
+
+SHA-256:
+
+`6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
+
+Python AST parsing and in-memory compilation passed.
+
+The component was not executed during inspection.
+
+### Implementation structure
+
+Imported standard-library modules are:
+
+- `datetime`
+- `io`
+- `json`
+- `os`
+- `pathlib`
+- `sqlite3`
+- `subprocess`
+- `sys`
+
+Six top-level functions were identified:
+
+- `ensure_schema`
+- `log`
+- `main`
+- `parse_epoch_ms`
+- `process_file`
+- `reconcile_processed`
+
+Configuration identifiers include:
+
+- database path
+- incoming spool directory
+- processed spool directory
+- maximum decompressed JSONL line size
+
+The live private path values are not recorded publicly.
+
+### Decompressed-line size contract
+
+The maximum permitted decompressed JSONL line size is:
+
+`1048576` bytes
+
+This is exactly 1 MiB.
+
+The guard measures:
+
+`len(line.encode(...))`
+
+against the maximum, so the constraint applies to encoded line bytes rather than merely Python character count.
+
+### Input event fields
+
+The parser was observed reading the following event keys through dictionary `.get()` access:
+
+- `device_timestamp`
+- `facility`
+- `hostname`
+- `message`
+- `parse_status`
+- `parser`
+- `raw_message`
+- `severity`
+- `source_ip`
+- `source_port`
+- `timestamp`
+
+No direct required-key subscript accesses were identified by the structural inspection.
+
+That is a description of the current access pattern, not a claim that all possible malformed inputs are accepted.
+
+### Timestamp normalization
+
+Timestamp parsing uses Python `fromisoformat`.
+
+The timestamp normalization function converts a terminal UTC `Z` representation to the explicit `+00:00` offset form before parsing.
+
+The ingest layer also stores an integer millisecond epoch representation in `timestamp_epoch_ms`.
+
+### Zstandard streaming
+
+Compressed spool files are consumed through exactly one `subprocess.Popen` call.
+
+The decompression command includes:
+
+`-dc`
+
+and the resulting stream is wrapped with `io.TextIOWrapper`.
+
+This confirms streaming decompression rather than first materializing a fully decompressed copy on disk.
+
+No decompression subprocess was executed during inspection.
+
+### SQLite role
+
+The ingest component contains 18 resolved SQLite API calls.
+
+Its `ensure_schema()` function does not create the three base pipeline tables.
+
+Instead, it performs compatibility/migration work against an existing schema.
+
+Observed migration actions include:
+
+- add `timestamp_epoch_ms INTEGER` to `recent_events`
+- add `record_count INTEGER` to `source_files`
+- create two indexes on the newer epoch-millisecond data
+
+The current final live schema was therefore captured separately using SQLite read-only immutable schema metadata.
+
+### Live-schema inspection safety
+
+The existing state database was opened with:
+
+- `mode=ro`
+- `immutable=1`
+- `PRAGMA query_only=ON`
+
+Only SQLite schema metadata was read.
+
+No application-data row was selected.
+
+The inspection confirmed all three expected tables exist:
+
+- `agent_state`
+- `source_files`
+- `recent_events`
+
+### `agent_state` schema
+
+The current table contains:
+
+- `key TEXT` — primary key
+- `value TEXT NOT NULL`
+- `updated_at TEXT NOT NULL`
+
+The primary-key index is unique on:
+
+`key`
+
+This table is shared with the previously captured remote-fetch cursor logic.
+
+### `source_files` schema
+
+The current table contains:
+
+- `remote_path TEXT` — primary key
+- `local_path TEXT`
+- `size_bytes INTEGER`
+- `sha256 TEXT`
+- `status TEXT NOT NULL`
+- `discovered_at TEXT NOT NULL`
+- `downloaded_at TEXT`
+- `processed_at TEXT`
+- `error TEXT`
+- `record_count INTEGER`
+
+A default value exists for `status`.
+
+The literal default value was not printed by the schema-metadata inspection and is therefore not asserted in this checkpoint.
+
+The primary-key index is unique on:
+
+`remote_path`
+
+This establishes remote-path identity for durable source-file tracking.
+
+### `recent_events` schema
+
+The current table contains:
+
+- `id INTEGER` — primary key
+- `source_file TEXT NOT NULL`
+- `record_number INTEGER NOT NULL`
+- `timestamp TEXT NOT NULL`
+- `device_timestamp TEXT`
+- `hostname TEXT`
+- `source_ip TEXT`
+- `source_port INTEGER`
+- `facility TEXT`
+- `severity TEXT`
+- `message TEXT NOT NULL`
+- `raw_message TEXT`
+- `parse_status TEXT`
+- `parser TEXT`
+- `event_json TEXT NOT NULL`
+- `timestamp_epoch_ms INTEGER`
+
+The table has a unique constraint on:
+
+`source_file, record_number`
+
+This is the ingest idempotency key.
+
+The event insert uses:
+
+`INSERT OR IGNORE`
+
+so replaying a source record with the same source-file identity and record number does not create a second event row.
+
+### `recent_events` indexes
+
+Current indexes include non-unique indexes on:
+
+- `timestamp`
+- `hostname, timestamp`
+- `source_ip, timestamp`
+- `severity, timestamp`
+- `timestamp_epoch_ms`
+- `hostname, timestamp_epoch_ms`
+
+The table also has the unique auto-index for:
+
+`source_file, record_number`
+
+These indexes are part of the currently functional local event-query/state behavior and should be represented in the GX10 rebuild schema.
+
+### Event insert mapping
+
+The ingest component inserts 15 explicit fields into `recent_events`:
+
+- `source_file`
+- `record_number`
+- `timestamp`
+- `timestamp_epoch_ms`
+- `device_timestamp`
+- `hostname`
+- `source_ip`
+- `source_port`
+- `facility`
+- `severity`
+- `message`
+- `raw_message`
+- `parse_status`
+- `parser`
+- `event_json`
+
+Observed mappings include:
+
+- source identity from the remote source path
+- record identity from the decompressed line number
+- normalized timestamp fields
+- parsed syslog metadata from the JSON object
+
+### Exact-event preservation
+
+`event_json` is not reconstructed with `json.dumps(event)`.
+
+The inserted value comes directly from:
+
+`line.rstrip(...)`
+
+on the decompressed input line.
+
+This means the implementation preserves the input JSON representation after its configured trailing-character removal rather than serializing the parsed dictionary into a new JSON representation.
+
+The exact argument supplied to `rstrip()` was not printed by this inspection and is intentionally not inferred here.
+
+That nuance must be preserved from the actual source when the public-safe implementation is captured.
+
+### File lifecycle
+
+Two `os.replace()` calls were identified.
+
+They occur in:
+
+- processed-file reconciliation
+- normal file processing
+
+Both code paths construct destinations under the processed-spool directory.
+
+This confirms an incoming-to-processed lifecycle using atomic replacement semantics.
+
+The earlier inspection's report of a `replace()` call inside timestamp parsing was correctly identified as string replacement, not filesystem movement.
+
+### Recovery/reconciliation behavior
+
+A `reconcile_processed()` function exists specifically to reconcile source-file database state with files that have already reached the processed filesystem location.
+
+The code also queries and updates `source_files` around processing.
+
+This indicates explicit recovery support for filesystem/database state that can diverge across interrupted runs.
+
+Detailed source-file status literals have not yet been published and should be retained directly from the implementation during the public-safe source capture rather than guessed.
+
+### Event-data preservation boundary
+
+The ingest database stores both:
+
+- structured parsed columns used for query/filtering
+- the source JSON line in `event_json`
+
+It also preserves both:
+
+- parsed `message`
+- `raw_message` when provided by the upstream event
+
+This gives downstream enrichment access to structured fields while retaining the upstream event representation.
+
+### LLM and suppression boundary
+
+The local-ingest component contains:
+
+- no Ollama literal
+- no known local model literal
+- no known suppression-rule literal
+
+It is therefore a deterministic spool-to-SQLite ingestion component, not the LLM/inference layer.
+
+The enrichment candidate remains the next implementation target.
+
+### Validator corrections during item 12F
+
+Several inspection-tool limitations were corrected before this checkpoint.
+
+The initial SQL literal scanner failed to reconstruct schema creation because this component is a schema migrator rather than the base schema creator.
+
+A later in-memory DDL test attempted to create indexes without the pre-existing `recent_events` table and failed.
+
+That failure was a validation-design issue, not a production GX10 failure.
+
+The final pass used read-only live SQLite schema metadata instead of inferring missing base DDL.
+
+The initial filesystem-call scanner also conflated:
+
+- string `.replace()`
+- `os.replace()`
+
+The corrected AST inspection established exactly two relevant filesystem `os.replace()` calls.
+
+The first subprocess scanner looked only for `subprocess.run()` and therefore missed streaming decompression.
+
+The corrected inspection found one `subprocess.Popen()` call using Zstandard decode streaming.
+
+### Safety boundary
+
+Item 12F did not:
+
+- execute the ingest component
+- execute the decompression subprocess
+- open any production compressed spool object
+- select application-data rows from SQLite
+- print production event records
+- print private state paths
+- print network addresses from production records
+- modify GX10 files
+
+The live database access was limited to immutable, read-only schema metadata.
+
+### Item 12F conclusion
+
+The local ingest stage is now captured sufficiently to reconstruct:
+
+- streaming Zstandard consumption
+- the 1 MiB line-size guard
+- event timestamp normalization
+- source-file and record-number idempotency
+- structured event extraction
+- upstream JSON-line retention
+- the current three-table SQLite schema
+- current event-query indexes
+- incoming-to-processed atomic file movement
+- schema migration behavior
+- interrupted-run reconciliation
+
+The base-schema creator has not yet been identified, but the current final schema is independently captured from the live database, so clean-rebuild reconstruction does not depend on locating historical schema-creation code.
+
+### Next action
+
+Continue execution-order item 12 with targeted read-only inspection of the second custom downstream candidate.
+
+That inspection should establish:
+
+- enrichment/classification version
+- additional SQLite schema or migrations
+- deterministic suppression rules
+- vendor and protocol classifiers
+- entity-key construction
+- state and signal mappings
+- repeat/repetition handling
+- attention-eligibility semantics
+- result/output behavior
+- whether any Ollama or model invocation actually exists
+
+Do not execute the candidate or read application-data rows while performing the structural inspection.

@@ -1706,3 +1706,188 @@ The next bounded slice should validate:
 Any material finding must be corrected, validated, pushed, and journaled before advancing.
 
 Item 8 remains `NEXT`.
+
+## 2026-08-22 20:16 PDT - Item 8 transport key validation hardened
+
+### Status
+
+`IN PROGRESS` — intermediate item-8 structural and public-safety checkpoint.
+
+The credential-exposure and explicit runtime-dependency portions of item 8 remain closed.
+
+Item 8 as a whole remains the single `NEXT` item because final structural/public-safety validation still remains.
+
+### Structural preflight finding
+
+The runtime installer requires these two operator-supplied public authorized-keys files:
+
+- `AI_SPOOL_READER_AUTHORIZED_KEYS_FILE`
+- `AI_RESULTS_WRITER_AUTHORIZED_KEYS_FILE`
+
+Before this correction, `install-runtime.sh` required both environment variables but did not validate the files themselves before beginning persistent runtime mutation.
+
+Detailed file validation existed only in `bootstrap-transport.sh`.
+
+The runtime sequence starts and initializes ClickHouse and applies the observability schema before executing the transport bootstrap.
+
+Therefore invalid, empty, missing, or accidentally supplied private-key input could fail only after earlier clean-machine runtime state had already been created.
+
+Classification:
+
+`authorized_keys_operator_files_validated_after_clickhouse_mutation`
+
+### Validator corrections during discovery
+
+Several read-only structural-audit attempts failed because of validator construction errors rather than implementation errors.
+
+The first validator over-escaped the shell line-continuation marker while parsing the required environment-variable block and incorrectly reported that `CLICKHOUSE_DEFAULT_PASSWORD_FILE` was missing.
+
+The next validator matched the repository-artifact reference to `bootstrap-transport.sh` rather than its later executable invocation and incorrectly classified transport bootstrap as the first runtime mutation.
+
+A subsequent ordering validator used a Python string containing a trailing backslash in a brittle exact marker and failed to locate the ClickHouse authorized-start call.
+
+Each of these failures left the repository unchanged.
+
+The audits were corrected or superseded rather than weakening the implementation checks.
+
+### Private-key detector defect
+
+While validating the proposed early preflight with synthetic files, a separate implementation defect was discovered in the existing transport validation.
+
+The transport script used:
+
+`grep -aEq`
+
+with a pattern whose first characters were:
+
+`-----BEGIN`
+
+Because the pattern begins with `-` and the command did not use `--` or `-e`, GNU grep interpreted the pattern as an option.
+
+The synthetic test produced:
+
+`grep: unrecognized option '-----BEGIN ...'`
+
+The check appeared inside an `if` condition, so grep status `2` did not cause the script to abort under `set -e`.
+
+The result was that the intended private-key rejection check could fail to detect supplied private-key material.
+
+Classification:
+
+`transport_private_key_grep_option_bug=confirmed`
+
+### Correction
+
+`components/collector/install/install-runtime.sh` now defines:
+
+`require_public_authorized_keys_file()`
+
+The helper:
+
+- requires a regular file
+- requires the file to be non-empty
+- rejects private-key PEM markers
+- invokes grep with the explicit option terminator `--`
+
+Both operator-supplied authorized-keys files are validated by this helper before the first ClickHouse persistent runtime mutation.
+
+The later validation in `bootstrap-transport.sh` remains in place as defense in depth.
+
+`components/collector/filesystem/bootstrap-transport.sh` was also corrected from:
+
+`grep -aEq`
+
+to:
+
+`grep -aEq --`
+
+for the private-key PEM detector.
+
+### Validation
+
+Shell syntax passed for both modified scripts.
+
+Static validation confirmed:
+
+- `runtime_private_key_detector_uses_option_terminator=PASS`
+- `transport_private_key_detector_uses_option_terminator=PASS`
+- `unsafe_leading_hyphen_grep_form=absent`
+- `runtime_authorized_keys_preflight=PASS`
+- `authorized_keys_preflight_before_clickhouse_enable=PASS`
+- `transport_authorized_keys_validation_preserved=PASS`
+- `ITEM8E_AUTHORIZED_KEYS_STATIC_CONTRACT=PASS`
+
+Synthetic behavior confirmed:
+
+- synthetic public authorized-keys content did not match the private-key detector
+- synthetic private-key material was detected
+- an empty synthetic authorized-keys file was identified as empty
+- `SYNTHETIC_PRIVATE_KEY_DETECTOR=PASS`
+
+The remaining structural contract also passed:
+
+- `runtime_required_artifacts_tracked=PASS`
+- `transport_required_artifacts_referenced=PASS`
+- `renderer_environment_export_contract=PASS`
+- `renderer_outputs_consumed_by_runtime=PASS`
+- `ITEM8E_PREFLIGHT_FINDING=closed`
+- `ITEM8E_PRIVATE_KEY_DETECTOR_FINDING=closed`
+- `ITEM8E_ARTIFACT_REFERENCE_CONTRACT=PASS`
+- `ITEM8E_STRUCTURAL_PREFLIGHT_CONTRACT=PASS`
+
+Repository/publication validation passed:
+
+- `current_state_item8_still_next=PASS`
+- `git_diff_check=PASS`
+- `modified_file_scope=PASS`
+- `checkpoint_file_scope=PASS`
+- `PUBLIC REPO GATE: PASS`
+- `cached_diff_check=PASS`
+
+Execution safety boundary:
+
+- `clean_machine_runtime_installer_executed=no`
+- `transport_bootstrap_executed=no`
+
+### Git checkpoint
+
+Implementation commit:
+
+`0e4d617be2abc09053c244d515a590127be05c15` — `Harden collector transport key validation`
+
+The public `main` branch was independently verified to point to this exact commit before this journal checkpoint.
+
+The independently observed commit diff contains only:
+
+1. the `grep -aEq --` correction in `bootstrap-transport.sh`
+2. the new early authorized-keys validation helper and two preflight calls in `install-runtime.sh`
+
+### Safety boundary
+
+No clean-machine installer or transport bootstrap was executed against the working collector.
+
+No production authorized-keys contents were read into project output or committed.
+
+Synthetic validation used only generated non-production test files.
+
+No package state, service state, firewall state, production database, credential, TLS material, or runtime configuration was changed.
+
+### Next action
+
+Continue item 8 with the remaining public-safety and failure-cleanup validation.
+
+The next bounded slice should inspect:
+
+- temporary/bootstrap artifact lifetime and cleanup on failure
+- configuration destination ownership and modes
+- TLS private-key destination mode
+- service authorization-token cleanup
+- temporary Grafana bootstrap drop-in cleanup
+- unsafe shell evaluation or environment interpolation
+- environment-specific values and tracked production identity material
+- public placeholders and synthetic/example addressing
+- final collector public-repository sanitation
+
+Any additional material finding must be corrected, validated, pushed, and journaled before item 8 is marked complete.
+
+Item 8 remains `NEXT`.

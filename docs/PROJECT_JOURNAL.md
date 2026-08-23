@@ -2575,3 +2575,120 @@ Execution-order item 12 is now the single `NEXT` item:
 Capture and reconstruct the complete GX10 implementation.
 
 Begin with read-only GX10 inventory and state capture before publishing or changing GX10 configuration.
+
+## 2026-08-23 11:26 PDT - GX10 item 12A read-only platform inventory
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The first GX10 capture pass was intentionally read-only and limited to platform/runtime inventory plus discovery of likely pipeline components.
+
+### Platform baseline
+
+The current GX10 reports:
+
+- Ubuntu 24.04.4 LTS
+- Linux kernel `6.17.0-1029-nvidia`
+- AArch64 / Debian architecture `arm64`
+- 20 CPU cores across Cortex-X925 and Cortex-A725 clusters
+- 130596118528 bytes of system memory
+- 982819848192-byte root filesystem
+- NVIDIA GB10
+- NVIDIA driver `580.173.02`
+- CUDA compiler release 13.0, build `V13.0.88`
+
+### Core runtime baseline
+
+Observed tool versions include:
+
+- Python 3.12.3
+- OpenSSH 9.6p1 from Ubuntu 24.04
+- rsync 3.2.7
+- Zstandard CLI 1.5.5
+- Git 2.43.0
+
+The standalone `sqlite3` CLI is not currently installed.
+
+This does not establish that SQLite is absent from the application runtime; Python's SQLite support and application-owned state remain to be inspected separately.
+
+### Ollama
+
+Ollama is installed at version `0.32.14`.
+
+Its system service is active and enabled.
+
+Installed local model names observed during the read-only inventory were:
+
+- `qwen3-coder-next:latest`
+- `north-mini-code-1.0:latest`
+- `qwen3.8:27b`
+- `qwen3:8b`
+- `nemotron-3.5-lightning:30b`
+- `gemma4:latest`
+
+The inventory does not yet claim which model is selected by the production log-processing pipeline.
+
+### Pipeline discovery
+
+A timer-driven AI spool pipeline exists on GX10.
+
+The live identity-bearing unit name is intentionally not copied into the public journal. Public rebuild artifacts should use a functional GX10 pipeline name while preserving the live behavior.
+
+Observed state:
+
+- pipeline service is a static unit and was inactive at the inventory instant
+- pipeline timer is active and enabled
+
+That state is consistent with a timer-triggered one-shot workload, but the service type and timer schedule have not yet been inspected and must be verified from the unit definition.
+
+No Git worktree was discovered in the scanned user, `/opt`, `/srv`, or `/usr/local/src` roots.
+
+The active pipeline source therefore still needs to be located from the systemd unit and its referenced executable paths.
+
+### SQLite discovery
+
+The broad filename scan found application SQLite databases associated with Open WebUI and ordinary operating-system/user software.
+
+The scan did not identify the GX10 pipeline state database by a clearly attributable filename.
+
+No database content was read.
+
+The pipeline code/unit definition must be inspected to locate the actual state database before its schema can be captured safely.
+
+### Safety boundary
+
+The item-12A inventory did not request or print:
+
+- network addresses
+- production hostnames
+- GPU UUIDs or serial numbers
+- process command lines
+- process environment variables
+- SSH configuration contents
+- database contents
+- credentials or secret values
+
+No GX10 filesystem changes were requested.
+
+### Item 12A conclusion
+
+The hardware, operating-system, CUDA, Ollama, model inventory, and presence of the timer-driven pipeline are now established.
+
+The implementation is not yet reconstructed.
+
+### Next action
+
+Continue execution-order item 12 with a read-only pipeline-definition discovery pass.
+
+Inspect the pipeline service and timer metadata sufficiently to identify:
+
+- service type
+- timer schedule
+- executable path
+- working directory
+- environment-file presence without reading secret values
+- runtime user classification
+- local source/config paths
+
+Do not dump command arguments containing remote identities, network addresses, credentials, SSH configuration, environment values, or database contents.

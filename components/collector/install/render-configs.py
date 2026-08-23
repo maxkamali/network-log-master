@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import re
+import stat
 import sys
 
 
@@ -28,14 +29,48 @@ def require_nonempty(name: str) -> str:
 
 def read_secret(path_text: str, label: str) -> str:
     path = Path(path_text)
+    fd = -1
 
     try:
-        value = path.read_text(
+        fd = os.open(
+            path,
+            os.O_RDONLY | os.O_CLOEXEC,
+        )
+
+        metadata = os.fstat(fd)
+
+        if not stat.S_ISREG(metadata.st_mode):
+            fail(
+                f"{label} is not a regular file"
+            )
+
+        mode = stat.S_IMODE(
+            metadata.st_mode
+        )
+
+        if mode & 0o077:
+            fail(
+                f"{label} must not be "
+                "group/world accessible"
+            )
+
+        handle = os.fdopen(
+            fd,
+            "r",
             encoding="utf-8",
             errors="strict",
         )
-    except OSError as exc:
+        fd = -1
+
+        with handle:
+            value = handle.read()
+
+    except (OSError, UnicodeError) as exc:
         fail(f"cannot read {label}: {exc}")
+
+    finally:
+        if fd >= 0:
+            os.close(fd)
 
     value = value.rstrip("\r\n")
 
@@ -46,6 +81,49 @@ def read_secret(path_text: str, label: str) -> str:
         fail(f"{label} contains a NUL byte")
 
     return value
+
+
+def write_private_text(
+    destination: Path,
+    text: str,
+) -> None:
+    fd = -1
+
+    try:
+        fd = os.open(
+            destination,
+            os.O_WRONLY
+            | os.O_CREAT
+            | os.O_TRUNC
+            | os.O_CLOEXEC,
+            0o600,
+        )
+
+        os.fchmod(
+            fd,
+            0o600,
+        )
+
+        handle = os.fdopen(
+            fd,
+            "w",
+            encoding="utf-8",
+            errors="strict",
+        )
+        fd = -1
+
+        with handle:
+            handle.write(text)
+
+    except OSError as exc:
+        fail(
+            "cannot write private rendered file "
+            f"{destination}: {exc}"
+        )
+
+    finally:
+        if fd >= 0:
+            os.close(fd)
 
 
 def replace_required(
@@ -188,9 +266,9 @@ def render_clickhouse_access(destination: Path) -> None:
         "ClickHouse access SQL",
     )
 
-    destination.write_text(
+    write_private_text(
+        destination,
         text,
-        encoding="utf-8",
     )
 
 
@@ -241,9 +319,9 @@ def render_grafana_datasources(
         "Grafana datasource configuration",
     )
 
-    destination.write_text(
+    write_private_text(
+        destination,
         text,
-        encoding="utf-8",
     )
 
 
@@ -353,16 +431,6 @@ def main() -> None:
 
     render_certbot_hook(
         output / "10-grafana-cert"
-    )
-
-    os.chmod(
-        output / "40-access-control.sql",
-        0o600,
-    )
-
-    os.chmod(
-        output / "clickhouse-datasources.yaml",
-        0o600,
     )
 
     os.chmod(

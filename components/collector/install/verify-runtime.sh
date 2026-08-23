@@ -13,6 +13,26 @@ require_file()
         || die "required file missing: $1"
 }
 
+require_private_file()
+{
+    local path="$1"
+    local label="$2"
+    local mode
+
+    require_file "$path"
+
+    [ -s "$path" ] \
+        || die "$label is empty"
+
+    mode="$(
+        stat -c '%a' "$path"
+    )"
+
+    if (( (8#$mode & 077) != 0 )); then
+        die "$label must not be group/world accessible"
+    fi
+}
+
 require_active()
 {
     systemctl is-active --quiet "$1" \
@@ -50,11 +70,11 @@ require_metadata()
 
 : "${CLICKHOUSE_DEFAULT_PASSWORD_FILE:?set CLICKHOUSE_DEFAULT_PASSWORD_FILE}"
 
-require_file \
-    "$CLICKHOUSE_DEFAULT_PASSWORD_FILE"
+require_private_file \
+    "$CLICKHOUSE_DEFAULT_PASSWORD_FILE" \
+    "ClickHouse default password file"
 
-[ -s "$CLICKHOUSE_DEFAULT_PASSWORD_FILE" ] \
-    || die "ClickHouse default password file is empty"
+umask 077
 
 SCRIPT_DIR="$(
     cd "$(
@@ -295,6 +315,13 @@ trap cleanup EXIT
 
 CH_CONFIG="$TMPDIR/clickhouse-client.xml"
 
+install \
+    -o root \
+    -g root \
+    -m 0600 \
+    /dev/null \
+    "$CH_CONFIG"
+
 python3 - \
     "$CLICKHOUSE_DEFAULT_PASSWORD_FILE" \
     "$CH_CONFIG" \
@@ -328,11 +355,6 @@ destination.write_text(
     f"  <password>{escape(password)}</password>\n"
     "</config>\n",
     encoding="utf-8",
-)
-
-os.chmod(
-    destination,
-    0o600,
 )
 PY
 

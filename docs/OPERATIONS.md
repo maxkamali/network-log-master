@@ -102,6 +102,8 @@ Grafana is served over HTTPS by the collector and reads ClickHouse through captu
 
 Current dashboard reconstruction uses the supported Grafana 13 `dashboard.grafana.app/v2` API. Rebuild tooling must not write directly into Grafana's SQLite database.
 
+The clean-machine runtime installer now restores the four captured dashboard resources only after HTTPS health and both ClickHouse datasources are verified, then runs the independent dashboard verifier. Runtime restore is fail-closed for unexpected divergent existing dashboards: automatic replacement is not enabled.
+
 The clean-machine Grafana bootstrap sequence is wired so that first startup is loopback-only on `127.0.0.1:3000`, administrator credentials come from an operator-owned private file, the reset runs through `--password-from-stdin`, and the temporary bootstrap override is removed before normal HTTPS exposure. Failure cleanup also removes the temporary override.
 
 The Grafana CLI path/data targeting was proven non-destructively against a temporary copy of the Grafana database; the live administrator password hash remained unchanged.

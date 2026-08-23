@@ -94,7 +94,7 @@ Grafana 13.1.1 also supports secure administrator reset through `/usr/share/graf
 
 Secure administrator bootstrap is now wired into `install-runtime.sh` with a private operator password file, loopback-only first startup, explicit packaged CLI/data targeting, integrity checks, and cleanup of the temporary bootstrap override.
 
-The remaining Grafana clean-machine installer work is dashboard restore/verification wiring.
+Dashboard restore and independent verification are now wired into `install-runtime.sh` after HTTPS health and datasource checks. The installer creates missing dashboards, accepts exact matches, refuses unexpected divergent resources rather than replacing them automatically, and uses Python no-bytecode mode for the runtime scripts.
 
 ### Certificates
 
@@ -151,12 +151,11 @@ For the detailed list of completed validations, known incomplete work, and clean
 
 `docs/CURRENT_STATE.md` is authoritative. At the current checkpoint the collector sequence is:
 
-1. dashboard restore/verification wiring
-2. package-install no-autostart protection
-3. installer/public-safety validation
-4. final collector operator/rebuild documentation
-5. final collector sanitation/milestone closure
-6. clean-machine collector rebuild validation when practical
+1. package-install no-autostart protection
+2. installer/public-safety validation
+3. final collector operator/rebuild documentation
+4. final collector sanitation/milestone closure
+5. clean-machine collector rebuild validation when practical
 
 Do not skip ahead without updating `docs/CURRENT_STATE.md` first.
 

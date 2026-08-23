@@ -67,6 +67,22 @@ Restore behavior:
 
 Direct writes to Grafana's SQLite database are not part of the rebuild contract.
 
+## Runtime installer integration
+
+Dashboard reconstruction is wired into the clean-machine collector runtime installer after normal Grafana HTTPS health and ClickHouse datasource provisioning are verified.
+
+The installer:
+
+- connects only to `https://127.0.0.1:443`
+- authenticates with the operator-owned private Grafana administrator password file
+- creates missing captured dashboards
+- leaves exact matching dashboards unchanged
+- deliberately does not pass `--replace`, so a divergent existing resource fails closed
+- runs the independent verifier after restore
+- uses Python `-B` for restore and verification so runtime execution does not create `__pycache__` artifacts in the repository
+
+Clean-machine end-to-end execution remains part of the later collector rebuild validation gate.
+
 ## Administrator bootstrap
 
 Secure administrator bootstrap is now wired into the clean-machine collector installer.

@@ -96,12 +96,13 @@ Important completed collector validation includes:
 - `GRAFANA_BOOTSTRAP_FAILURE_FLOW_VALIDATION=PASS`
 - `GRAFANA_CLI_WORKDIR_FIX_VALIDATION=PASS`
 - `GRAFANA_CLI_TEMP_DATABASE_TARGETING=PASS`
+- `GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
 
 Detailed component state is in `components/collector/REBUILD_STATUS.md`.
 
 ## Grafana dashboard reconstruction
 
-Status: `DONE` for capture/restore mechanism; runtime-installer integration remains open.
+Status: `DONE` for capture, restore mechanism, and clean-machine runtime-installer integration; clean-machine end-to-end execution remains a later collector validation gate.
 
 Four current dashboards are captured as Grafana 13 `dashboard.grafana.app/v2` resources.
 
@@ -127,6 +128,9 @@ Completed validation:
 - `GRAFANA_DASHBOARD_VERIFY=PASS`
 - `GRAFANA_DASHBOARD_RESTORE_DRYRUN=PASS`
 - `GRAFANA_DASHBOARD_LIVE_NONDESTRUCTIVE_TEST=PASS`
+- `GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
+
+The clean-machine runtime installer now restores the four captured dashboards after HTTPS health and datasource verification, then runs the independent dashboard verifier. Automatic replacement is intentionally not enabled; an unexpected existing divergent dashboard causes the installer to fail rather than overwrite it.
 
 ## Grafana administrator bootstrap
 
@@ -186,8 +190,8 @@ Long-lived incident correlation and production LLM orchestration remain separate
 3. `DONE` — publish permanent Grafana dashboard restore/verification scripts.
 4. `DONE` — establish repository recovery/journal operating rules and canonical startup documentation.
 5. `DONE` — secure Grafana administrator bootstrap is wired into `components/collector/install/install-runtime.sh` with private-file input, loopback-only first startup, explicit Grafana CLI path/data targeting, failure cleanup, and non-destructive temporary-database targeting proof.
-6. `NEXT` — wire `restore-dashboards.py` and `verify-dashboards.py` into the clean-machine collector runtime installer.
-7. `NOT STARTED` — add package-install no-autostart protection so services cannot transiently expose an unconfigured first-start state.
+6. `DONE` — `restore-dashboards.py` and `verify-dashboards.py` are wired into the clean-machine collector runtime installer after HTTPS health and datasource verification, using loopback HTTPS and the private administrator password file.
+7. `NEXT` — add package-install no-autostart protection so services cannot transiently expose an unconfigured first-start state.
 8. `NOT STARTED` — re-run collector installer structural, credential-exposure, and public-safety validation.
 9. `NOT STARTED` — finish collector README and operator-facing clean-machine rebuild documentation.
 10. `NOT STARTED` — run final collector public sanitation and close the collector rebuild milestone.

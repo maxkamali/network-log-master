@@ -183,6 +183,12 @@ Validation completed:
 
 `GRAFANA_DASHBOARD_LIVE_NONDESTRUCTIVE_TEST=PASS`
 
+`GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
+
+The clean-machine runtime installer now requires the dashboard API scripts and all four captured dashboard resources, restores dashboards only after normal HTTPS Grafana health and datasource provisioning are verified, then runs the independent dashboard verifier. The runtime calls use Python `-B` so installer execution does not create bytecode cache artifacts inside the repository.
+
+Automatic dashboard replacement is not enabled in the installer. A missing dashboard is created, an exact match is left unchanged, and an unexpected divergent existing resource causes the rebuild to fail rather than overwrite it.
+
 Grafana 13.1.1 was verified to support:
 
 `grafana cli admin reset-admin-password --password-from-stdin`
@@ -301,10 +307,16 @@ Secure Grafana administrator bootstrap is integrated:
 10. Failure cleanup removes the temporary bootstrap drop-in.
 11. Successful completion removes the temporary drop-in before later HTTPS startup.
 
-The remaining Grafana runtime-installer work is:
+Grafana dashboard restore/verification is also integrated:
 
-1. Run `restore-dashboards.py` after normal HTTPS Grafana becomes healthy.
-2. Run `verify-dashboards.py` and fail the rebuild if captured dashboards do not verify.
+1. Required dashboard API scripts and all four capture files are checked before installation proceeds.
+2. Restore runs after normal HTTPS Grafana health and datasource provisioning are verified.
+3. The API connection is loopback HTTPS at `https://127.0.0.1:443`.
+4. The operator-supplied private Grafana administrator password file is reused for API authentication.
+5. Missing dashboards are created and exact matches are unchanged.
+6. Automatic replacement of divergent dashboards is deliberately disabled.
+7. `verify-dashboards.py` independently verifies all four captured resources after restore.
+8. Python `-B` prevents runtime bytecode cache files from being written into the repository.
 
 Earlier patch attempts failed safely because of ambiguous anchors and heredoc collisions. Later validation also exposed two useful corrections before publication: Grafana CLI configuration overrides must use `--configOverrides`, and the CLI must run from a working directory traversable by the `grafana` account.
 
@@ -312,7 +324,6 @@ Earlier patch attempts failed safely because of ambiguous anchors and heredoc co
 
 Use `docs/CURRENT_STATE.md` for the authoritative ordering/status. The remaining collector work currently consists of:
 
-- dashboard restore/verification wiring
 - package-install no-autostart protection
 - installer structural and public-safety validation
 - complete collector README/operator rebuild documentation

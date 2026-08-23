@@ -163,6 +163,13 @@ for path in \
     "$VECTOR_DIR/vector.yaml" \
     "$GRAFANA_DIR/provisioning/datasources/clickhouse.yaml.in" \
     "$GRAFANA_DIR/systemd/grafana-server.service.d/https.conf.in" \
+    "$GRAFANA_DIR/scripts/dashboard_api.py" \
+    "$GRAFANA_DIR/scripts/restore-dashboards.py" \
+    "$GRAFANA_DIR/scripts/verify-dashboards.py" \
+    "$GRAFANA_DIR/dashboards/device-logs.json" \
+    "$GRAFANA_DIR/dashboards/logs-dash.json" \
+    "$GRAFANA_DIR/dashboards/noc-view.json" \
+    "$GRAFANA_DIR/dashboards/noc-view-copy-backup.json" \
     "$CERTBOT_DIR/systemd/certbot-renew.service" \
     "$CERTBOT_DIR/systemd/certbot-renew.timer" \
     "$CERTBOT_DIR/renewal-hooks/deploy/10-grafana-cert.in" \
@@ -791,6 +798,26 @@ datasource_count="$(
 echo "grafana_clickhouse_datasources=2"
 
 echo
+echo "=== RESTORE GRAFANA DASHBOARDS ==="
+
+python3 -B \
+    "$GRAFANA_DIR/scripts/restore-dashboards.py" \
+    --dashboard-dir "$GRAFANA_DIR/dashboards" \
+    --base-url "https://127.0.0.1:443" \
+    --username admin \
+    --password-file "$GRAFANA_ADMIN_PASSWORD_FILE"
+
+echo
+echo "=== VERIFY GRAFANA DASHBOARDS ==="
+
+python3 -B \
+    "$GRAFANA_DIR/scripts/verify-dashboards.py" \
+    --dashboard-dir "$GRAFANA_DIR/dashboards" \
+    --base-url "https://127.0.0.1:443" \
+    --username admin \
+    --password-file "$GRAFANA_ADMIN_PASSWORD_FILE"
+
+echo
 echo "=== SSH RELOAD POLICY ==="
 
 if [ "${RELOAD_SSH:-no}" = "yes" ]; then
@@ -806,4 +833,3 @@ fi
 
 echo
 echo "COLLECTOR_RUNTIME_INSTALL=PASS"
-echo "Grafana dashboard resources are intentionally restored separately."

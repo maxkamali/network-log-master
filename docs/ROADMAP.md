@@ -42,15 +42,15 @@ Completed capture includes:
 - Grafana 13 dashboard resource capture
 - proven API-based dashboard restoration and verification tooling
 - secure Grafana administrator bootstrap wiring with loopback-only first start and stdin password reset
+- dashboard restore/verification wiring in the clean-machine runtime installer
 
 Remaining collector gates:
 
-1. dashboard restore/verify integration into the runtime installer
-2. package-install no-autostart protection before first configuration
-3. installer structural, credential-exposure, and public-safety validation
-4. complete collector operator/rebuild documentation
-5. final collector sanitation/publication gate
-6. clean-machine collector rebuild validation when practical
+1. package-install no-autostart protection before first configuration
+2. installer structural, credential-exposure, and public-safety validation
+3. complete collector operator/rebuild documentation
+4. final collector sanitation/publication gate
+5. clean-machine collector rebuild validation when practical
 
 Exit gate: another engineer/AI can reconstruct the current collector on a clean server from the repository plus operator-supplied environment values without undocumented implementation memory.
 

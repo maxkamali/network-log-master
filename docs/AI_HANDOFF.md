@@ -73,6 +73,7 @@ Key validated gates include:
 - `GRAFANA_DRYRUN_RESTORE_PROOF=PASS`
 - `GRAFANA_DASHBOARD_LIVE_NONDESTRUCTIVE_TEST=PASS`
 - `GRAFANA_CLI_TEMP_DATABASE_TARGETING=PASS`
+- `GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
 
 Detailed state is in `components/collector/REBUILD_STATUS.md`.
 
@@ -114,15 +115,24 @@ The implementation now uses:
 
 A temporary-database proof verified that explicit CLI data targeting changes only the selected temporary Grafana database; the working collector administrator password hash was unchanged.
 
-The next implementation task is dashboard reconstruction wiring:
+Dashboard reconstruction wiring in the clean-machine runtime installer is complete.
 
-1. integrate `restore-dashboards.py` into the clean-machine runtime installer after normal HTTPS Grafana health is established
-2. integrate `verify-dashboards.py`
-3. fail the clean-machine rebuild if dashboard verification does not pass
+The installer now:
+
+- requires the dashboard API scripts and all four captured dashboard resources
+- waits for normal Grafana HTTPS health
+- verifies both ClickHouse datasources before dashboard work
+- restores through loopback HTTPS using the private administrator password file
+- creates missing dashboards and leaves exact matches unchanged
+- does not automatically replace divergent existing dashboards
+- runs `verify-dashboards.py` after restore
+- uses Python `-B` for both runtime dashboard commands
+
+The next implementation task is package-install no-autostart protection so package installation cannot transiently expose an unconfigured service before the runtime installer has applied the captured configuration.
 
 Do not execute the clean-machine runtime installer against the working collector.
 
-After the dashboard-wiring sub-section validates, update and push `docs/PROJECT_JOURNAL.md` before materially proceeding to package no-autostart hardening.
+After the package no-autostart sub-section validates, update and push `docs/PROJECT_JOURNAL.md` before materially proceeding to installer structural/public-safety validation.
 
 ## Working method
 

@@ -4778,3 +4778,165 @@ Continue rediscovery with a narrow reference search for:
 Avoid another broad vendor-tree scan.
 
 Do not rebuild or modify the live GX10 system during this rediscovery phase.
+
+## 2026-08-23 13:23 PDT - GX10 item 12J enrichment invocation closeout
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+A bounded rediscovery pass investigated the unresolved invocation path for the already-captured deterministic enrichment component.
+
+The investigation found no current automatic invocation mechanism.
+
+### Previously proven scheduling boundary
+
+Item 12I established the current scheduled data-acquisition chain as:
+
+`timer -> oneshot service -> fetch -> ingest`
+
+The deterministic enrichment component is not referenced by that service.
+
+No cron reference to the component had been found.
+
+### Initial 12J reference scan
+
+The first 12J pass performed:
+
+- bounded local configuration/reference scanning
+- saved shell-history reference counts
+- an attempted system-journal metadata scan
+
+The local filesystem portion found two apparent strong unknown candidates associated with enrichment references.
+
+The system-journal step used an insufficiently bounded historical query and took unacceptably long.
+
+The operator interrupted that query.
+
+This was a discovery-validator design problem, not evidence of a GX10 implementation failure.
+
+The interrupted pass:
+
+- did not execute a pipeline component
+- did not open the application database
+- did not read event rows
+- did not make a network request
+- did not modify GX10 files
+
+The system-journal approach was abandoned rather than retried.
+
+### False-positive candidate resolution
+
+A corrected bounded closeout compared the two apparent unknown candidates against the saved shell-history files.
+
+Both candidates resolved exactly to shell-history files:
+
+- one for the normal login account
+- one for the root account
+
+They were not:
+
+- wrappers
+- services
+- timers
+- cron files
+- result-return components
+- inference components
+
+The initial strong-candidate result was therefore a scanner false positive caused by searching home-directory history files as ordinary text artifacts.
+
+### Saved-history classification
+
+The login-account Bash history contained:
+
+`4`
+
+references to the enrichment executable.
+
+The root Bash history contained:
+
+`16`
+
+references.
+
+All twenty references were classified as:
+
+`reference_not_execution_position`
+
+The bounded command-position classifier found zero saved-history instances of:
+
+- direct enrichment executable invocation
+- Python-interpreter invocation of the enrichment executable
+- systemd-run invocation of the enrichment executable
+
+No shell-history command text was printed.
+
+The stored history therefore provides no evidence that the enrichment component was directly executed from those saved shell sessions.
+
+This is not proof that the component has never been run historically because shell history is not a complete execution audit log.
+
+### Non-history reference closeout
+
+A second bounded scan excluded shell-history files and searched the relevant configuration and custom-code locations for an exact enrichment executable reference.
+
+The final result was:
+
+`non_history_enrich_reference_count=0`
+
+No additional wrapper, scheduler, profile hook, custom executable, or configuration artifact referencing the enrichment component was found in that bounded search.
+
+### Current orchestration conclusion
+
+The only currently proven automatic runtime path remains:
+
+`timer -> fetch -> ingest`
+
+The enrichment implementation is present and has been completely characterized at the source/schema level, but no current automatic invocation mechanism has been discovered.
+
+There is currently no evidence that enrichment is:
+
+- part of the fetch/ingest oneshot service
+- invoked by cron
+- invoked by a discovered wrapper
+- invoked by a discovered user-level systemd unit
+- invoked by a discovered root-level systemd unit
+- directly executed in the saved shell-history records examined
+
+This is a rediscovery finding and must be preserved rather than silently "fixing" the live design during capture.
+
+Any future rebuild decision to automate enrichment would be an implementation change unless additional live evidence establishes an existing invocation mechanism.
+
+### Component integrity
+
+All three previously captured custom components retained their expected SHA-256 values throughout the 12J investigation.
+
+No production application rows were read.
+
+No network request was issued.
+
+No filesystem modification was requested on GX10.
+
+### Rediscovery implications
+
+The absence of a discovered enrichment invocation is itself part of the current-state reconstruction.
+
+The public rebuild must distinguish between:
+
+1. behavior proven to be automatically active today
+2. deterministic implementation present on GX10 but not proven to be automatically scheduled
+3. future architecture that may deliberately wire additional stages together
+
+The rediscovery phase must not convert category 2 into category 1 without evidence.
+
+### Remaining rediscovery targets
+
+The remaining live-system rediscovery is now narrowly focused on:
+
+1. the GX10 write-only result-return producer/path
+2. any actual caller of Ollama or a local model
+3. Ollama/model runtime configuration required to represent the current GX10 state
+4. SQLite/base-state bootstrap or schema-creation provenance
+5. remaining users, directories, permissions, and runtime dependencies needed to account for the live GX10 implementation
+6. a final rediscovery closure audit confirming every current functional GX10 component has been accounted for
+
+No rebuild implementation work should begin until those discovery gaps are closed and the rediscovery milestone is journaled in GitHub.

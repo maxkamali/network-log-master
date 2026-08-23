@@ -1,6 +1,6 @@
 # Current State
 
-Last verified project checkpoint: 2026-08-22.
+Last verified project checkpoint: 2026-08-23.
 
 This file is the authority for current execution order. Exactly one item should be marked `NEXT`.
 
@@ -20,9 +20,11 @@ The working observability path currently provides:
 - compressed file backlog creation for GX10
 - restricted read-only backlog retrieval by GX10
 - GX10 local durable ingest with replay/idempotency protection
-- transitional deterministic enrichment on GX10
-- write-only AI-result return to the collector
-- collector-side AI-result validation and ClickHouse ingestion
+- transitional deterministic enrichment implementation on GX10
+- collector-side write-only AI-result return boundary and validation/ingestion path
+- local Ollama runtime on GX10
+
+Current rediscovery has not identified a GX10 application producer that writes to the collector result-return boundary, nor an application-specific observability-pipeline caller of Ollama.
 
 The long-lived deterministic incident correlator and production local-LLM orchestration are not yet complete.
 
@@ -170,7 +172,7 @@ Status: `DONE` for clean-machine package/runtime installer wiring and synthetic 
 
 `install-packages.sh` establishes the package-install safety boundary before apt transactions begin:
 
-- a temporary `policy-rc.d` denies policy-aware package service starts/restarts
+- a temporary `policy-rc.d` denies policy-aware package maintainer scripts from starting/restarting services
 - persistent systemd `ConditionPathExists` guards hold Vector, ClickHouse, and Grafana until runtime configuration deliberately authorizes them
 - an already-active SSH management plane is preserved
 - an initially inactive SSH service/socket pair is held until transport configuration validates
@@ -194,32 +196,69 @@ Completed validation includes:
 
 ## GX10 state
 
-Status: `NOT STARTED` for complete public rebuild capture.
+Status: `IN PROGRESS` — live-system rediscovery is nearly complete; public rebuild implementation has not yet begun.
 
-Verified working capabilities already known from the live system include:
+Durably journaled rediscovery through item 12M has established:
 
-- read-only secure fetch of compressed backlog files
-- local durable SQLite ingest
-- replay/idempotency protection
-- transitional deterministic enrichment
-- write-only secure AI-result return
-- local Ollama runtime
+- Ubuntu 24.04.4 LTS / arm64 / NVIDIA GB10 platform baseline
+- NVIDIA driver and CUDA runtime/compiler baseline
+- timer-driven oneshot pipeline service and hardening contract
+- exact fetch, ingest, and deterministic-enrichment executable provenance
+- remote-spool fetch/catch-up/SFTP/Zstandard semantics
+- local SQLite ingest and replay/idempotency behavior
+- deterministic classification version 3 and enrichment schema
+- complete two-rule active suppression corpus
+- proven automatic runtime chain `timer -> fetch -> ingest`
+- no discovered automatic invocation mechanism for deterministic enrichment
+- no discovered GX10 application producer for the collector result-return boundary
+- no discovered application-specific observability-pipeline caller of Ollama
+- Ollama active/enabled service state, executable provenance, loopback listener, model storage, and six complete local model manifests
+- complete effective SQLite schema: 5 application tables, 13 explicit indexes, 3 foreign keys, and zero unexpected schema objects
+- no surviving bounded SQLite/bootstrap initializer artifact
 
-Still requiring complete capture/rebuild treatment:
+Item 12N runtime/filesystem/dependency inspection was executed immediately before the environment-transition pause. Its runtime identity, filesystem ownership/mode, SSH metadata, systemd sandbox, and Python-runtime portions passed, but the external-executable dependency detector incorrectly reported zero external tools despite earlier proven SFTP and Zstandard use.
 
-- package/runtime reconstruction
-- NVIDIA/GB10 environment dependencies
-- Ollama/model configuration
-- spool fetcher implementation
-- local SQLite schema and ingest implementation
-- deterministic enrichment/classification implementation
-- systemd service/timer configuration
-- inference integration
-- result-return implementation
-- verification scripts
-- operator rebuild documentation
+Therefore item 12N is `PARTIAL` and must not be treated as complete until that narrow detector is corrected and rerun.
 
-Long-lived incident correlation and production LLM orchestration remain separate future implementation work beyond reconstruction of the currently functional system.
+Detailed partial evidence and the exact resume procedure are recorded in:
+
+`docs/VM_HANDOFF.md`
+
+The known application hashes remain:
+
+- fetch: `662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
+- ingest: `6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
+- deterministic enrichment: `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+- pipeline service unit: `0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
+
+Current rediscovery conclusions that must not be silently changed during reconstruction:
+
+- automatic pipeline behavior currently proven is `timer -> fetch -> ingest`
+- deterministic enrichment exists but is not proven automatically scheduled
+- Ollama/model infrastructure exists but no observability-pipeline caller has been identified
+- the collector result-return boundary exists but no GX10 result producer has been identified
+- missing historical bootstrap/install provenance should be reconstructed from captured effective contracts rather than invented and presented as discovered history
+
+## Execution pause and direct-access VM handoff
+
+Status: `PAUSED FOR EXECUTION-ENVIRONMENT MIGRATION`
+
+The project is intentionally paused while execution moves to an operator-controlled VM with direct authenticated access to the collector reference system, GX10, and GitHub.
+
+This changes the execution mechanism, not project scope or safety rules.
+
+The new VM session must begin by reading `docs/VM_HANDOFF.md`, verifying public `main`, verifying authenticated connectivity to both reference systems, and revalidating the known GX10 artifact hashes before materially continuing.
+
+The first technical action after those preconditions is to correct and rerun only the item-12N external-executable dependency/provenance check. Earlier rediscovery already proves SFTP and Zstandard usage, so a zero external-tool result must not be accepted.
+
+After corrected 12N validation:
+
+1. complete and journal item 12N
+2. run the final GX10 rediscovery closure audit
+3. publish a rediscovery-complete checkpoint
+4. only then begin GX10 public rebuild implementation
+
+Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
 ## Explicit execution order
 
@@ -234,7 +273,7 @@ Long-lived incident correlation and production LLM orchestration remain separate
 9. `DONE` — collector README and operator-facing clean-machine rebuild documentation completed and validated.
 10. `DONE` — final collector public sanitation passed and the public collector rebuild-package/documentation milestone was closed.
 11. `DEFERRED` — clean-machine collector rebuild validation remains outstanding because no disposable Debian 13 amd64 validation system is currently available.
-12. `NEXT` — capture and reconstruct the complete GX10 implementation.
+12. `NEXT` — finish GX10 rediscovery, publish the rediscovery-complete checkpoint, then capture and reconstruct the complete GX10 implementation.
 13. `NOT STARTED` — validate the GX10 rebuild package and operator documentation.
 14. `NOT STARTED` — reconcile and update full two-server architecture, operations, and rebuild documentation.
 15. `NOT STARTED` — run final repository sanitation and two-server acceptance validation.
@@ -249,6 +288,7 @@ Do not skip ahead unless this execution order is explicitly updated first. Only 
 - Production device identities, addresses, credentials, authorized keys, certificate private keys, and similar private environment values stay outside the public repository.
 - Public rebuild artifacts may generalize identity-bearing historical service names while preserving their behavior.
 - Clean-machine rebuild installers must not be executed against working reference systems unless an explicit safe mode is designed and validated.
+- Direct authenticated VM access does not authorize destructive changes to reference systems by default.
 
 ## Continuity rule
 

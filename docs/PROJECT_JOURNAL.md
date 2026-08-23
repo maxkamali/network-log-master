@@ -1134,3 +1134,129 @@ Continue item 8 from this durable checkpoint with the broader installer validati
 8. consistency between installer behavior and durable documentation
 
 Item 8 must remain `NEXT` until the complete validation sub-section passes, is documented, committed, pushed, journaled, and remotely verified.
+
+## 2026-08-22 19:23 PDT - Item 8 renderer credential handling hardened
+
+### Status
+
+`IN PROGRESS` — this is an intermediate item-8 credential-exposure validation/correction checkpoint.
+
+`docs/CURRENT_STATE.md` item 8 remains the single `NEXT` item.
+
+### Audit finding
+
+A synthetic credential-handling audit was run against the published configuration renderer using only temporary synthetic passwords and output directories.
+
+Before correction, direct invocation of `render-configs.py` under `umask 022` showed two credential-safety defects.
+
+First:
+
+`renderer_accepts_group_world_readable_password_files=yes`
+
+The renderer accepted password source files with mode `0644`. The enclosing runtime installer already rejected group/world-readable password files, but the renderer is a separately published and directly invokable tool and did not independently enforce that contract.
+
+Second, an intentional failure after the ClickHouse credential SQL had been rendered showed:
+
+- `partial_clickhouse_secret_output_mode=644`
+- `partial_output_contains_synthetic_credentials=yes`
+- `partial_secret_output_private=no`
+
+Successful rendering eventually changed the secret-bearing output files to `0600`, but the chmod occurred only after all render stages completed. Therefore a mid-render failure could leave an already-created credential-bearing file permissively readable.
+
+### Correction
+
+`components/collector/install/render-configs.py` was hardened so credential safety no longer depends on the caller's umask or on successful completion of all rendering stages.
+
+Secret input handling now:
+
+- opens the password source directly
+- uses `fstat` on the opened descriptor
+- requires a regular file
+- rejects any group/world permission bits
+- reads through the same opened descriptor after validation
+
+Secret-bearing rendered output now uses a dedicated private-write helper that:
+
+- opens/creates the destination with mode `0600`
+- explicitly applies `fchmod(0600)` before content is written
+- writes through that already-private descriptor
+
+This is used for:
+
+- `40-access-control.sql`
+- `clickhouse-datasources.yaml`
+
+The former end-of-run chmod dependency for those credential-bearing files was removed.
+
+### Regression proof
+
+With synthetic password files intentionally set to mode `0644`:
+
+- `permissive_password_files_rejected=yes`
+- `secret_output_written_after_input_rejection=no`
+- `RENDERER_PRIVATE_INPUT_REGRESSION=PASS`
+
+With private input files and an intentional mid-render failure under `umask 022`:
+
+- `partial_output_contains_synthetic_credentials=yes`
+- `partial_clickhouse_secret_output_mode=600`
+- `partial_secret_output_private=yes`
+- `RENDERER_FAILURE_PATH_PRIVATE_OUTPUT=PASS`
+
+A complete successful render under `umask 022` also verified:
+
+- `successful_clickhouse_secret_output_mode=600`
+- `successful_grafana_secret_output_mode=600`
+- `successful_certbot_hook_mode=700`
+- `RENDERER_SUCCESS_OUTPUT_MODES=PASS`
+
+Synthetic credential artifacts were deleted after validation.
+
+### Additional validation
+
+Passed:
+
+- `renderer_credential_hardening_patch=PASS`
+- `renderer_python_syntax=PASS`
+- `renderer_private_input_contract=PASS`
+- `renderer_private_output_contract=PASS`
+- `late_secret_chmod_dependency=absent`
+- `synthetic_credential_artifacts_removed=PASS`
+- `current_state_item8_still_next=PASS`
+- `git_diff_check=PASS`
+- `modified_file_scope=PASS`
+- `checkpoint_file_scope=PASS`
+- `PUBLIC REPO GATE: PASS`
+- `cached_diff_check=PASS`
+- `RENDERER_CREDENTIAL_HARDENING_CHECKPOINT=PASS`
+
+### Git checkpoint
+
+Renderer credential-hardening implementation:
+
+`1babbedf1efe42e5816b4cc1882a1d953c05303d` — `Harden collector renderer credential handling`
+
+`origin/main` was independently verified to point to this commit before this journal checkpoint.
+
+### Safety boundary
+
+The audit used only synthetic credentials and temporary files.
+
+Neither clean-machine installer was executed.
+
+No production password file was read, copied, modified, or published.
+
+No package, service, systemd unit, production configuration, or collector runtime state was changed.
+
+### Next action
+
+Continue item 8 with the next bounded credential-exposure validation slice:
+
+- inspect every clean-machine installer/tool invocation for credential material placed directly in process arguments, environment values, temporary files, rendered files, logs, or command output
+- distinguish secret file paths from secret contents
+- verify generated private files are private from creation through failure cleanup
+- identify any remaining independently invokable helper that relies only on a parent installer's safety checks
+
+Checkpoint and journal any material correction before proceeding further.
+
+Item 8 remains `NEXT` until the complete installer structural, credential-exposure, and public-safety validation sub-section is finished and journaled.

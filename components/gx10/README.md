@@ -51,3 +51,23 @@ Do not populate the example file in the repository. Do not run the clean-machine
 Run the safe repository validation with:
 
     components/gx10/tests/validate-filesystem-contract.sh
+
+## Captured application implementations
+
+The three live custom applications are captured under `sbin/` with deployment values removed:
+
+- `fetch-spool.py`
+- `ingest-spool.py`
+- `enrich-events.py`
+
+`sbin/runtime_config.py` loads the protected runtime configuration rendered by `install/render-runtime-config.py`. See `sbin/PROVENANCE.md` for live hashes and the function-level parity proof.
+
+Validate the synthetic application/configuration contract with:
+
+    python3 -m unittest discover -s components/gx10/tests -p 'test_*.py' -v
+
+Validate operator configuration inputs without writing files with:
+
+    GX10_SFTP_HOST=collector.example.invalid GX10_SFTP_PORT=2222 GX10_SFTP_USER=spool-reader components/gx10/install/render-runtime-config.py --check
+
+The deterministic-enrichment source is captured for faithful reconstruction and parity. It remains intentionally absent from the proven automatic `timer -> fetch -> ingest` chain.

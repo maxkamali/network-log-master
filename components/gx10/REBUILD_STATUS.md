@@ -19,6 +19,10 @@ Completed:
 - guarded clean-machine filesystem/SSH-material bootstrap
 - structural and public-safety validator
 - `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- public-safe fetch, ingest, and deterministic-enrichment application sources
+- protected runtime configuration loader and fail-closed renderer
+- 27/27 live-to-public function AST parity
+- 12 synthetic configuration/application tests passing
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.
 

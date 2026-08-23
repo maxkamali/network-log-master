@@ -28,6 +28,9 @@ require_private_input()
     [ -f "$path" ] \
         || die "$label source is not a regular file"
 
+    [ ! -L "$path" ] \
+        || die "$label source must not be a symbolic link"
+
     [ -s "$path" ] \
         || die "$label source is empty"
 
@@ -48,8 +51,14 @@ install_or_verify_private_file()
     local destination="$2"
 
     if [ -e "$destination" ] || [ -L "$destination" ]; then
+        [ ! -L "$destination" ] \
+            || die "existing private destination must not be a symbolic link"
+
         [ -f "$destination" ] \
             || die "existing private destination is not a regular file"
+
+        [ "$(stat -c '%h' "$destination")" -eq 1 ] \
+            || die "existing private destination must not be hard-linked"
 
         cmp -s "$source" "$destination" \
             || die "existing private destination differs from operator input"
@@ -75,16 +84,19 @@ require_root
 : "${GX10_SFTP_KNOWN_HOSTS_FILE:?set GX10_SFTP_KNOWN_HOSTS_FILE}"
 
 for command_name in \
+    basename \
     chmod \
     chown \
     cmp \
+    cut \
     getent \
     groupadd \
     id \
     install \
     stat \
     useradd \
-    usermod
+    usermod \
+    wc
 do
     require_command "$command_name"
 done
@@ -107,6 +119,8 @@ for required_name in \
     GX10_RUNTIME_USER \
     GX10_RUNTIME_GROUP \
     GX10_RUNTIME_HOME \
+    GX10_CONFIG_DIR \
+    GX10_RUNTIME_CONFIG_PATH \
     GX10_SSH_DIR \
     GX10_PRIVATE_KEY_PATH \
     GX10_KNOWN_HOSTS_PATH \
@@ -142,6 +156,9 @@ if getent passwd "$GX10_RUNTIME_USER" >/dev/null; then
 
     [ "$(basename "$(getent passwd "$GX10_RUNTIME_USER" | cut -d: -f7)")" = nologin ] \
         || die "existing runtime user has unexpected login shell"
+
+    [ "$(id -Gn "$GX10_RUNTIME_USER" | wc -w)" -eq 1 ] \
+        || die "existing runtime user has unexpected supplementary groups"
 else
     useradd \
         --system \
@@ -155,6 +172,7 @@ fi
 usermod --lock "$GX10_RUNTIME_USER"
 
 install -d -o root -g root -m 0755 "$GX10_LIBEXEC_DIR"
+install -d -o root -g "$GX10_RUNTIME_GROUP" -m 0750 "$GX10_CONFIG_DIR"
 install -d -o "$GX10_RUNTIME_USER" -g "$GX10_RUNTIME_GROUP" -m 0750 "$GX10_RUNTIME_HOME"
 install -d -o "$GX10_RUNTIME_USER" -g "$GX10_RUNTIME_GROUP" -m 0700 "$GX10_SSH_DIR"
 install -d -o "$GX10_RUNTIME_USER" -g "$GX10_RUNTIME_GROUP" -m 0750 "$GX10_SPOOL_DIR"

@@ -6094,3 +6094,155 @@ This subsection:
 Publish this validated subsection, verify GitHub, then begin capture of the three public-safe application implementations.
 
 Before publication, derive private configuration literals out of the captured live sources and preserve the recorded fetch, ingest, and deterministic-enrichment semantics with public-safe fixtures and tests.
+
+## 2026-08-23 16:13 PDT - GX10 public application source capture
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The three custom GX10 application implementations are captured in public-safe form and validated without executing them against the working reference system.
+
+### Captured applications
+
+Added:
+
+- `components/gx10/sbin/fetch-spool.py`
+- `components/gx10/sbin/ingest-spool.py`
+- `components/gx10/sbin/enrich-events.py`
+- `components/gx10/sbin/runtime_config.py`
+- `components/gx10/sbin/PROVENANCE.md`
+
+Live provenance remains:
+
+- fetch: `662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
+- ingest: `6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
+- deterministic enrichment: `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+
+Public captured SHA-256 values are intentionally different because private configuration literals were removed and the AST was rendered into neutral formatting:
+
+- fetch: `a5b034b238ee137f65e71fc0bb5fc3e8702aa4bbfcb8a02fbbbe1167011b9db3`
+- ingest: `f011976372191ebb8536376e4ec170e317aa4b9c89849ed2fa68db4b40e4499f`
+- deterministic enrichment: `0c34343452c8d7c761e5b3b073c8e0f14291db32162b6eea3764148edff7dc46`
+- runtime configuration loader: `8474e670581afe3ffb0d7d32c21fd605f2c1b6fe0e4f7dad55de4e2a1cc17f5e`
+
+### Public-safety transformation
+
+The source import used a bounded AST rewrite.
+
+It changed only configuration binding:
+
+- live database, spool, key, and known-hosts paths now resolve from `runtime_config.py`
+- live SFTP host, port, and username now resolve from a protected JSON runtime configuration
+- the already-public `/spool/%Y/%m/%d/%H` remote chroot pattern remains fixed
+- public `/usr/bin/sftp` and `/usr/bin/zstd` executable paths remain fixed
+
+The import gate rejected the first attempt when private absolute literals remained inside function bodies. Those duplicate literals were resolved by exact captured hashes and replaced before any source reached the public working tree.
+
+The sole extra absolute fetch literal was classified by hash as the already-journaled public remote-hour format, not an application executable path.
+
+No deployment IPv4 literal or non-public absolute path survived the final import gate.
+
+### Function-level parity
+
+All live and public function ASTs were compared by function name and canonical AST hash.
+
+The first comparison differed on every function because Python 3.12 includes a `type_params` AST metadata field that the VM's local Python 3.9 does not expose.
+
+After excluding only that version-specific metadata field:
+
+- compared function count: `27`
+- differing function count: `0`
+- `gx10_live_function_ast_parity=PASS`
+
+This covers every fetch, ingest, and deterministic-enrichment function.
+
+### Protected runtime configuration
+
+Added:
+
+- `components/gx10/install/render-runtime-config.py`
+
+The renderer:
+
+- accepts only SFTP host, port, and username inputs
+- validates input syntax without echoing rejected values
+- supports a non-writing `--check` mode
+- writes a fixed protected JSON path only when run as root
+- uses atomic creation
+- installs mode `0640` with root/runtime-group ownership
+- refuses divergent existing content
+- refuses symbolic or hard-linked existing configuration
+
+The runtime loader:
+
+- requires exactly the three expected keys
+- rejects oversized or malformed configuration
+- validates and normalizes the port
+- supplies only neutral public filesystem paths to the applications
+
+### Filesystem hardening follow-up
+
+The clean-machine filesystem bootstrap was also hardened to:
+
+- refuse symbolic-link private inputs and destinations
+- refuse hard-linked installed private files
+- reject an existing runtime account with supplementary groups
+- explicitly require all commands it invokes
+
+### Validation
+
+Results:
+
+- 12 synthetic application/configuration tests passing
+- `GX10_RUNTIME_CONFIG_INPUT=PASS`
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `gx10_python_compile=PASS`
+- `gx10_live_function_ast_parity=PASS`
+- `gx10_live_application_postcheck=PASS`
+- `gx10_private_file_scan=PASS`
+- `gx10_secret_scan=PASS`
+
+Synthetic tests cover:
+
+- strict SFTP command construction and host-key options
+- fixed remote-hour path contract
+- timestamp/timezone behavior
+- repeat-notice classification
+- synthetic BGP recovery classification
+- synthetic OSPF retransmission degradation classification
+- runtime configuration validation and exact-key policy
+- rejected-value non-echo behavior
+- symlink refusal
+- deployment IPv4 and private-path scanning
+
+### Preserved scheduling boundary
+
+This checkpoint captures deterministic enrichment source for faithful reconstruction and migration parity.
+
+It does not add enrichment to the automatic service chain.
+
+The proven automatic behavior remains:
+
+`timer -> fetch -> ingest`
+
+### Safety boundary
+
+This subsection:
+
+- did not execute any captured application
+- did not open the production database
+- did not read production event or suppression rows
+- did not contact the collector through the application SFTP identity
+- did not read live SSH private-key or known-hosts contents
+- did not print or commit private live source values
+- did not write to either reference system
+- did not change service state
+
+All three live application hashes remained unchanged after capture and validation.
+
+### Next action
+
+Publish this checkpoint and independently verify GitHub.
+
+Then implement deterministic SQLite initialization from the complete effective schema captured in item 12M, including the two public-safe suppression rules captured in item 12H.

@@ -34,6 +34,8 @@ set +a
 [ "$GX10_RUNTIME_USER" = network-log-agent ] || die "unexpected public runtime user"
 [ "$GX10_RUNTIME_GROUP" = network-log-agent ] || die "unexpected public runtime group"
 [ "$GX10_RUNTIME_HOME" = /var/lib/network-log-gx10 ] || die "unexpected runtime home"
+[ "$GX10_CONFIG_DIR" = /etc/network-log-gx10 ] || die "unexpected configuration directory"
+[ "$GX10_RUNTIME_CONFIG_PATH" = "$GX10_CONFIG_DIR/runtime.json" ] || die "runtime configuration is outside configuration directory"
 [ "$GX10_SSH_DIR" = "$GX10_RUNTIME_HOME/.ssh" ] || die "SSH directory is outside runtime home"
 [ "$GX10_STATE_DIR" = "$GX10_RUNTIME_HOME/state" ] || die "state directory is outside runtime home"
 [ "$GX10_DATABASE_PATH" = "$GX10_STATE_DIR/events.sqlite3" ] || die "database path is outside state directory"
@@ -49,6 +51,9 @@ grep -Fq ' -m 0700 ' "$INSTALLER" || die "SSH directory mode contract missing"
 grep -Fq ' -m 0600 ' "$INSTALLER" || die "private-file mode contract missing"
 grep -Fq '/usr/sbin/nologin' "$INSTALLER" || die "non-login shell contract missing"
 grep -Fq 'usermod --lock' "$INSTALLER" || die "runtime account lock missing"
+grep -Fq 'must not be a symbolic link' "$INSTALLER" || die "private-file symlink refusal missing"
+grep -Fq 'must not be hard-linked' "$INSTALLER" || die "private-file hard-link refusal missing"
+grep -Fq 'unexpected supplementary groups' "$INSTALLER" || die "supplementary-group refusal missing"
 
 grep -Fq 'collector.example.invalid' "$EXAMPLE" || die "synthetic collector hostname missing"
 

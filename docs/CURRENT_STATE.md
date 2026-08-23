@@ -229,6 +229,8 @@ Detailed reconstruction authority is now in:
 
 The first public reconstruction subsection now provides a synthetic operator-input template, neutral runtime identity/path contract, guarded clean-machine filesystem and SSH-material bootstrap, and non-mutating structural/public-safety validator. It has passed `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`.
 
+The three live custom application implementations are now captured in public-safe form. Deployment literals are loaded from a protected runtime configuration, all 27 function ASTs match the live sources after normalizing Python-version-only metadata, 12 synthetic application/configuration tests pass, and live hashes remained unchanged after capture.
+
 The known application hashes remain:
 
 - fetch: `662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
@@ -270,7 +272,7 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 9. `DONE` — collector README and operator-facing clean-machine rebuild documentation completed and validated.
 10. `DONE` — final collector public sanitation passed and the public collector rebuild-package/documentation milestone was closed.
 11. `DEFERRED` — clean-machine collector rebuild validation remains outstanding because no disposable Debian 13 amd64 validation system is currently available.
-12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package; publish the completed operator-input/filesystem contract, then capture the three public-safe application implementations.
+12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package; publish the captured applications, then implement deterministic SQLite initialization from the recovered effective schema.
 13. `NOT STARTED` — validate the GX10 rebuild package and operator documentation.
 14. `NOT STARTED` — reconcile and update full two-server architecture, operations, and rebuild documentation.
 15. `NOT STARTED` — run final repository sanitation and two-server acceptance validation.

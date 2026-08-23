@@ -2,7 +2,7 @@
 
 A capture-first network observability and local-AI incident reasoning platform.
 
-This repository is the master public engineering record and active source repository for components already consolidated here. It now contains the active deterministic normalizer and a substantial public-safe collector rebuild capture. GX10 remains the next major component to receive the same reconstruction treatment.
+This repository is the master public engineering record and active source repository for the deterministic normalizer plus complete public-safe collector and GX10 rebuild packages. Disposable-host execution of both clean-machine runbooks remains explicitly deferred.
 
 ## Start here
 
@@ -11,7 +11,7 @@ For a fresh engineering or AI session, begin with:
 1. [`docs/START_HERE.md`](docs/START_HERE.md)
 2. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 3. [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md)
-4. the active component rebuild status, currently [`components/collector/REBUILD_STATUS.md`](components/collector/REBUILD_STATUS.md)
+4. [`components/collector/REBUILD_STATUS.md`](components/collector/REBUILD_STATUS.md) and [`components/gx10/REBUILD_STATUS.md`](components/gx10/REBUILD_STATUS.md)
 5. the latest entries in [`docs/PROJECT_JOURNAL.md`](docs/PROJECT_JOURNAL.md)
 
 `docs/CURRENT_STATE.md` is the authority for execution order and should contain exactly one item marked `NEXT`.
@@ -34,22 +34,20 @@ Network devices
 Collector / log server
     |-- Vector ingest and fan-out
     |-- ClickHouse durable storage
-    |-- Python deterministic normalizer
+    |-- captured Vector normalization and fan-out
     |-- Grafana presentation
     |-- validated AI-result ingestion
     |
     | durable/prepared observations
     v
 GX10
-    |-- compact incident/state engine target
-    |-- deterministic correlation target
-    |-- rolling context target
-    |-- local LLM reasoning via Ollama
-    |
-    | validated AI updates
-    v
-Collector / ClickHouse / Grafana
+    |-- scheduled read-only backlog fetch
+    |-- replay-safe SQLite ingest
+    |-- unscheduled deterministic-enrichment reference
+    |-- local Ollama infrastructure without a pipeline caller
 ```
+
+The collector has a validated write-only AI-result return boundary, but no GX10 producer for it was discovered. Long-lived incident correlation, automatic LLM reasoning, and result production remain future implementation work.
 
 ## Architectural invariants
 
@@ -94,11 +92,17 @@ The published checkpoint includes:
 
 The independent live collector verifier reached `COLLECTOR_RUNTIME_VERIFY=PASS`.
 
-The collector clean-machine rebuild flow now includes secure Grafana administrator bootstrap, API-based dashboard restore/verification, and package-install no-autostart protection with synthetic systemd behavior proof. Installer-wide validation, final operator documentation, sanitation, and clean-machine validation gates remain before the collector rebuild milestone is closed.
+The collector public rebuild package, operator documentation, sanitation, and repository-only validation gates are complete. Clean-machine execution is deferred because no disposable Debian 13 amd64 target is available.
 
 ### GX10
 
-GX10 currently provides working backlog fetch, local durable ingest, transitional deterministic enrichment, write-only result return, and local Ollama availability, but its complete public rebuild capture has not yet been performed.
+GX10's complete public rebuild package is published under [`components/gx10/`](components/gx10/). It captures the proven `timer -> fetch -> ingest` chain, exact SQLite state, unscheduled deterministic enrichment, platform/dependency contract, Ollama service and six-model store, guarded activation, and the clean-machine runbook.
+
+Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 42 tests. Clean-machine execution is deferred because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
+
+### Two-server rebuild
+
+[`docs/TWO_SERVER_REBUILD.md`](docs/TWO_SERVER_REBUILD.md) coordinates the collector-first rebuild order, independent transport keys, cross-server inputs, activation boundary, and acceptance evidence without duplicating the component runbooks.
 
 ## Repository map
 
@@ -107,6 +111,7 @@ GX10 currently provides working backlog fetch, local durable ingest, transitiona
 - [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md) - verified project checkpoint and strict execution order.
 - [`docs/DATA_CONTRACTS.md`](docs/DATA_CONTRACTS.md) - raw, normalized, incident, and AI-result contracts.
 - [`docs/OPERATIONS.md`](docs/OPERATIONS.md) - ingest, backlog, validation, replay, failure, and rebuild behavior.
+- [`docs/TWO_SERVER_REBUILD.md`](docs/TWO_SERVER_REBUILD.md) - collector-first two-host reconstruction and acceptance order.
 - [`docs/CLICKHOUSE.md`](docs/CLICKHOUSE.md) - durable table and sink contracts.
 - [`docs/GRAFANA.md`](docs/GRAFANA.md) - datasource, dashboard restore, drilldown, and NOC-view behavior.
 - [`docs/NORMALIZER_MIGRATION.md`](docs/NORMALIZER_MIGRATION.md) - controlled collector-side normalization migration.
@@ -118,7 +123,7 @@ GX10 currently provides working backlog fetch, local durable ingest, transitiona
 - [`SECURITY.md`](SECURITY.md) - public-repository publication rules.
 - [`components/normalizer/`](components/normalizer/) - active deterministic normalizer source and tests.
 - [`components/collector/`](components/collector/) - collector rebuild artifacts, verifiers, and component state.
-- [`components/gx10/`](components/gx10/) - GX10 ownership/migration area; full rebuild capture remains pending.
+- [`components/gx10/`](components/gx10/) - complete GX10 rebuild artifacts, verifiers, tests, and clean-machine runbook.
 
 ## Source-of-truth policy
 

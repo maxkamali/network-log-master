@@ -51,7 +51,7 @@ The framework also includes generic capture-first normalization, event-envelope 
 
 ## Parity reference
 
-The transitional GX10 enrichment path remains operational and is useful for comparing:
+The transitional GX10 enrichment executable remains captured and is useful for comparing:
 
 - event family
 - vendor/platform interpretation
@@ -143,4 +143,4 @@ This milestone does not authorize production cutover.
 
 Production normalizer integration is intentionally deferred while the project first captures enough of the currently functional collector and GX10 implementation to satisfy the clean two-server rebuild acceptance criterion.
 
-After collector and GX10 rebuild milestones are closed, `docs/CURRENT_STATE.md` may advance production integration/rollback design to the active `NEXT` item. Until then, do not treat this migration document's cutover gate as the current execution queue.
+Collector and GX10 rebuild milestones are now closed. Production integration/rollback design may advance only after the final repository acceptance gate and only when `docs/CURRENT_STATE.md` marks it `NEXT`; this migration document is not the execution queue.

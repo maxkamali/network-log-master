@@ -35,7 +35,7 @@ Owns:
 
 ### GX10
 
-Owns:
+Target ownership:
 
 - receiving/fetching prepared or durable observation backlog
 - compact local working state
@@ -47,6 +47,8 @@ Owns:
 - returning thin AI result records
 
 GX10 is intentionally not the authoritative raw-log archive, dashboard server, or direct ClickHouse writer.
+
+Current reconstructed implementation is narrower than the target. Its automatic behavior is scheduled read-only backlog fetch followed by replay-safe local SQLite ingest. A deterministic-enrichment executable and Ollama infrastructure exist, but no automatic enrichment invocation, application-specific Ollama caller, or result-return producer was discovered.
 
 ## Current data path
 
@@ -60,17 +62,36 @@ Devices
 GX10
   -> restricted read-only backlog fetch
   -> local durable replay-safe ingest
-  -> deterministic enrichment/current working logic
-  -> local inference when invoked
-  -> write-only AI result return
+```
 
-Collector
-  -> AI result validation gate
+Separately present but not connected by a discovered GX10 producer:
+
+```text
+collector write-only result transport
+  -> validation/quarantine gate
   -> ClickHouse validated AI updates
   -> Grafana
 ```
 
-The target architecture additionally moves deterministic vendor/event normalization onto the collector before GX10 correlation. That normalizer has passed replay/parity but has not yet been cut into the production collector path.
+The deterministic GX10 enrichment executable is also separately present and unscheduled. Ollama is installed, active, enabled, loopback-only, and has six complete model manifests, but no application-specific network-observability caller was found.
+
+## Target data path
+
+Future architecture, after separate implementation and promotion gates, is:
+
+```text
+collector capture
+  -> collector-side deterministic normalization
+  -> durable prepared observations
+  -> GX10 deterministic incident correlation/lifecycle
+  -> deterministic wake policy
+  -> local Ollama reasoning
+  -> thin result producer
+  -> collector write-only validation boundary
+  -> ClickHouse/Grafana
+```
+
+The collector-side normalizer has passed selected replay/parity but has not been cut into the production collector path. The GX10 incident engine, wake policy, Ollama caller, and result producer are future implementation, not reconstructed current behavior.
 
 ## Capture-first contract
 
@@ -96,7 +117,7 @@ CANDIDATE -> OPEN -> RECOVERING -> RESOLVED
 
 The LLM may summarize or explain an incident but does not decide canonical identity, deduplication, or lifecycle state.
 
-The long-lived incident engine is a future implementation milestone. Rebuild capture of the currently functional GX10 precedes new incident-engine work.
+The long-lived incident engine is a future implementation milestone. Collector and GX10 rebuild capture are now complete, so later roadmap work may design that engine without misrepresenting it as existing behavior.
 
 ## Context model
 
@@ -124,7 +145,7 @@ The exact policy remains deterministic and testable outside the LLM.
 Input and output transport credentials are independent and least-privilege.
 
 - backlog reader: read-only
-- AI result writer: write-only
+- AI result writer boundary: write-only; no current GX10 producer/private-key installation is claimed
 - AI results: validated before durable ingestion
 - GX10: no direct ClickHouse write path
 - ClickHouse application listeners: collector-local boundary
@@ -145,3 +166,5 @@ Transitional logic is retired deliberately rather than rewritten in place withou
 ## Reconstruction rule
 
 Before adding new architecture to a component, first capture enough of the currently functional implementation that a clean machine can reproduce it from this repository plus operator-supplied environment values. This prevents modernization work from destroying the only known working implementation history.
+
+Both component reconstruction packages and operator runbooks now satisfy the repository-only portion of that rule. Full clean-host execution remains deferred until disposable collector and GX10 targets are available. `docs/TWO_SERVER_REBUILD.md` defines the cross-system order and acceptance evidence.

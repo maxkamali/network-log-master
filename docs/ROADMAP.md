@@ -51,11 +51,11 @@ Exit gate: another engineer/AI can reconstruct the current collector on a clean 
 
 ## Milestone 3 - GX10 rebuild capture
 
-Status: `IN PROGRESS` — live-system rediscovery is complete and public reconstruction is next.
+Status: `DONE` for the public rebuild package and documentation; clean-machine end-to-end validation is deferred pending a disposable Ubuntu 24.04 arm64 GX10-class system.
 
 Goal: capture and reconstruct the currently functional GX10 implementation before adding new incident-engine architecture.
 
-Required capture includes:
+Completed capture includes:
 
 - Ubuntu/runtime package requirements
 - NVIDIA/GB10 environment dependencies
@@ -74,15 +74,15 @@ Exit gate: another engineer/AI can reconstruct the current functional GX10 on a 
 
 ## Milestone 4 - Two-server rebuild acceptance
 
-Status: `NOT STARTED`
+Status: `IN PROGRESS` — cross-system documentation is reconciled; final repository sanitation/acceptance validation remains.
 
-1. reconcile collector and GX10 rebuild assumptions
-2. document the complete operator-supplied environment-value contract
-3. document service installation/start order and cross-server dependencies
-4. validate public examples and fixtures
-5. run final repository sanitation/publication gates
-6. perform clean two-server rebuild validation when practical
-7. verify no undocumented memory is required
+1. `DONE` — reconcile collector and GX10 rebuild assumptions
+2. `DONE` — document the complete operator-supplied environment-value contract
+3. `DONE` — document service installation/start order and cross-server dependencies
+4. `DONE` — distinguish reconstructed current behavior from target architecture
+5. `NEXT` — validate public examples/fixtures and run final repository sanitation/publication gates
+6. `DEFERRED` — perform clean two-server rebuild validation when suitable disposable hosts are available
+7. `PENDING` — publish final acceptance status without concealing deferred external validation
 
 Exit gate:
 
@@ -90,7 +90,7 @@ Exit gate:
 
 ## Milestone 5 - Production normalizer integration
 
-Status: `DEFERRED UNTIL REBUILD CAPTURE IS CLOSED`
+Status: `DEFERRED UNTIL FINAL REPOSITORY ACCEPTANCE IS CLOSED`
 
 After the current system is reconstructable:
 

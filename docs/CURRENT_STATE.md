@@ -196,7 +196,7 @@ Completed validation includes:
 
 ## GX10 state
 
-Status: `IN PROGRESS` — live-system rediscovery is complete; public rebuild implementation has begun.
+Status: `DONE` for live-system rediscovery, public rebuild implementation, guarded activation, operator documentation, and repository-only validation. Clean-machine end-to-end execution is `DEFERRED` pending a disposable Ubuntu 24.04 arm64 GX10-class validation system.
 
 Durably journaled rediscovery through item 12N and the final closure audit has established:
 
@@ -227,13 +227,21 @@ Detailed reconstruction authority is now in:
 
 `components/gx10/REBUILD_STATUS.md`
 
-The first public reconstruction subsection now provides a synthetic operator-input template, neutral runtime identity/path contract, guarded clean-machine filesystem and SSH-material bootstrap, and non-mutating structural/public-safety validator. It has passed `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`.
+The completed public package provides:
 
-The three live custom application implementations are now captured in public-safe form. Deployment literals are loaded from a protected runtime configuration, all 27 function ASTs match the live sources after normalizing Python-version-only metadata, 12 synthetic application/configuration tests pass, and live hashes remained unchanged after capture.
-
-Deterministic SQLite initialization now reproduces all five recovered table DDL hashes, thirteen indexes, three foreign keys, empty application state, and the two functional suppression patterns. The captured ingest/enrichment schema migrators are no-ops against the initialized schema. The full GX10 reconstruction suite now has 18 passing tests.
-
-The full live service/timer files are now captured with only identity-bearing values replaced. The public service preserves both `ExecStart` operations in fetch-then-ingest order and every captured hardening directive; the timer preserves the monotonic cadence. A guarded installer verifies exact database/config prerequisites and installs applications/units without enabling or starting them. The suite now has 26 passing tests.
+- synthetic operator-input template and neutral runtime identity/path contract
+- guarded filesystem/SSH-material bootstrap and protected runtime configuration
+- all three public-safe applications with 27/27 function AST parity
+- deterministic SQLite initialization matching all recovered DDL/index/foreign-key and suppression contracts
+- captured service/timer preserving fetch-then-ingest order, cadence, and hardening
+- exact pinned application packages and fail-closed platform verification
+- exact Ollama binary/unit and offline six-model-store installation/verification
+- reference-like/nonempty-state preactivation refusal
+- dual-confirmation activation with full blob hashing and failure rollback
+- complete clean-machine runbook and two-server integration runbook
+- 42 passing GX10 tests
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The known application hashes remain:
 
@@ -259,7 +267,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, corrected item 12N validation, rediscovery closure audit, complete GX10 reconstruction package, guarded activation, operator runbook, and final component audit are complete. Disposable-host validation remains explicitly deferred. The next technical action is full two-server architecture, operations, and rebuild-documentation reconciliation.
+The environment transition, both component rebuild packages, guarded activation, component runbooks/audits, and full two-server architecture/operations/rebuild-documentation reconciliation are complete. Disposable-host validation remains explicitly deferred. The next technical action is final repository sanitation and two-server acceptance validation.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -278,8 +286,8 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 11. `DEFERRED` — clean-machine collector rebuild validation remains outstanding because no disposable Debian 13 amd64 validation system is currently available.
 12. `DONE` — reconstructed the captured GX10 implementation as a public clean-machine rebuild package with guarded activation, offline model import, operator runbook, and final package audit.
 13. `DEFERRED` — clean-machine GX10 end-to-end validation remains outstanding because no disposable Ubuntu 24.04 arm64 GX10-class validation system is currently available; repository-only package/documentation validation passes.
-14. `NEXT` — reconcile and update full two-server architecture, operations, and rebuild documentation.
-15. `NOT STARTED` — run final repository sanitation and two-server acceptance validation.
+14. `DONE` — reconciled full two-server architecture, current/target data contracts, operations, key-role boundaries, rebuild order, and acceptance documentation.
+15. `NEXT` — run final repository sanitation and two-server acceptance validation.
 16. `NOT STARTED` — publish the final rebuild milestone.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.

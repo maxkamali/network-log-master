@@ -66,7 +66,7 @@ The fetch path is designed so interruption can be retried without corrupting or 
 
 ## GX10 local ingest
 
-Fetched JSONL records are ingested into a local SQLite working database using WAL mode.
+Fetched JSONL records are ingested into a local SQLite working database. The captured applications enable foreign-key enforcement where needed and use a 5-second busy timeout; they do not explicitly set WAL mode.
 
 Important ingest contracts:
 
@@ -80,9 +80,23 @@ Important ingest contracts:
 
 This local database is working state, not the authoritative raw-log archive.
 
-## AI result return path
+## GX10 orchestration boundary
 
-GX10 emits thin JSONL result files through a separate write-only transport. The collector applies a validation gate before durable ingestion.
+The proven automatic chain is exactly:
+
+```text
+network-log-gx10.timer
+  -> fetch-spool.py
+  -> ingest-spool.py
+```
+
+The timer uses a two-minute boot delay, a one-minute inactive interval, and five-second accuracy. The oneshot service is non-root and retains the captured filesystem and kernel hardening.
+
+`enrich-events.py` is installed for current-state parity but has no discovered systemd, cron, or other automatic invocation. Ollama is installed separately, active/enabled, and loopback-only, but no application-specific network-observability caller was discovered.
+
+## AI result return boundary
+
+The collector exposes a separate write-only transport and applies a validation gate before durable ingestion of thin JSONL result files.
 
 Current validation policy includes:
 
@@ -95,6 +109,8 @@ Current validation policy includes:
 - rejected files are quarantined with a reason
 
 Validated records are then ingested into ClickHouse and become available to Grafana.
+
+No GX10 application producer for this boundary was discovered. Current operations must verify the collector boundary without claiming a working GX10 AI-result round trip.
 
 ## Grafana operational boundary
 
@@ -124,6 +140,12 @@ The runtime installer uses short-lived authorization tokens for required bootstr
 
 The runtime installer is intended for a clean collector. Do not execute it against the working reference collector.
 
+The complete collector runbook is `components/collector/README.md`. Clean-machine execution is deferred pending a disposable Debian 13 amd64 target.
+
+The GX10 rebuild package separates guarded installation, offline model import, preactivation verification, dual-confirmation activation, and active runtime verification. Its complete runbook is `components/gx10/CLEAN_MACHINE_RUNBOOK.md`. Clean-machine execution is deferred pending a disposable Ubuntu 24.04 arm64 GX10-class target.
+
+`docs/TWO_SERVER_REBUILD.md` coordinates the required collector-first order, independent transport-key roles, cross-server inputs, activation point, and acceptance evidence.
+
 Rebuild inputs that are private or environment-specific are supplied by the operator through environment values and/or private files. They are not stored in the public repository.
 
 The public rebuild should render concrete runtime configuration before starting services rather than permanently enabling unsafe environment interpolation solely to make templates work.
@@ -136,6 +158,7 @@ Operator documentation should state the required functional connectivity, for ex
 
 - network devices must be able to deliver syslog to the collector's configured UDP/TCP syslog listeners
 - operators/GX10 must reach the configured restricted SSH/SFTP service
+- GX10 needs only the read-only backlog role for the currently reconstructed automatic path
 - users must reach Grafana HTTPS
 - certificate issuance/renewal must satisfy the chosen ACME validation requirements, including temporary HTTP validation reachability when applicable
 
@@ -147,11 +170,13 @@ The system should fail in the direction of preserving evidence:
 
 - parser failure -> keep generic observation
 - model unavailable -> retain deterministic incident/evidence state
+- Ollama/model infrastructure unavailable -> fetch/ingest remains a separate deterministic path; no current pipeline caller is claimed
 - malformed AI output -> reject/quarantine, do not write directly to ClickHouse
 - transport interruption -> retry from durable file/checkpoint state
 - replay -> no duplicate canonical records
 - dashboard restore uncertainty -> validate through API/dry-run rather than mutate Grafana database state directly
 - rebuild mismatch -> stop and reconcile against verified live behavior rather than guessing
+- missing GX10 result producer or Ollama caller -> preserve the absence; do not fabricate connectivity to make validation appear end-to-end
 
 ## Operational change rule
 

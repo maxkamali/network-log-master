@@ -11,7 +11,7 @@ Read and verify in this order before changing implementation:
 3. The relevant component rebuild statuses — `components/collector/REBUILD_STATUS.md` and `components/gx10/REBUILD_STATUS.md`; both component reconstruction milestones are closed and cross-system reconciliation is active.
 4. The latest entries in `docs/PROJECT_JOURNAL.md` — understand recent decisions, failed approaches, validation evidence, and checkpoint history.
 5. `docs/DECISIONS.md` — review durable architecture decisions that constrain implementation choices.
-6. `docs/DATA_CONTRACTS.md` and `docs/OPERATIONS.md` — confirm data and operational contracts for the area being changed.
+6. `docs/DATA_CONTRACTS.md`, `docs/OPERATIONS.md`, and `docs/TWO_SERVER_REBUILD.md` — confirm data, operational, and cross-host rebuild contracts.
 7. Component-specific documentation for the active task.
 8. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
 

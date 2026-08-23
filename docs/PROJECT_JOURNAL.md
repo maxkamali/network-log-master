@@ -6904,3 +6904,130 @@ This closure subsection:
 Publish this milestone closure and independently verify GitHub.
 
 Then reconcile project-wide architecture, operations, data/rebuild documentation, and the two component runbooks under execution-order item 14 before final repository sanitation and acceptance validation.
+
+## 2026-08-23 16:40 PDT - Two-server architecture and operations reconciliation
+
+### Status
+
+Execution-order item 14 is `DONE`.
+
+Execution-order item 15 is now the single `NEXT` item.
+
+Project-wide architecture, data, operations, handoff, roadmap, and rebuild documentation now agree with the completed collector/GX10 captures and the preserved rediscovery absences.
+
+### Two-server rebuild authority
+
+Added:
+
+- `docs/TWO_SERVER_REBUILD.md`
+
+The new cross-system runbook coordinates rather than duplicates the component runbooks. It defines:
+
+- one reviewed repository revision on both hosts
+- collector-first installation and runtime verification
+- collector transport readiness before GX10 activation
+- independent backlog-reader and AI-result-writer keypairs
+- backlog-reader public key on the collector and matching private key/known-hosts on GX10
+- result-writer public key on the collector without claiming or installing a GX10 producer/private key
+- GX10 preactivation before transport authorization
+- dual-confirmation GX10 activation
+- the first automatic read-only fetch/ingest cycle and replay/idempotency evidence
+- separate validation of the collector result boundary without claiming an end-to-end GX10 AI-result round trip
+- exact public-safe completion evidence for later disposable-host execution
+
+### Current versus target architecture correction
+
+Updated:
+
+- `README.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DATA_CONTRACTS.md`
+- `docs/OPERATIONS.md`
+
+The previous high-level architecture could be read as if the current GX10 automatically performed enrichment, local inference, and result return.
+
+Rediscovery did not prove that path.
+
+The corrected current automatic path is:
+
+`devices -> collector Vector/ClickHouse/backlog -> read-only SFTP -> GX10 fetch -> GX10 ingest`
+
+Separately present boundaries are now shown separately:
+
+- deterministic GX10 enrichment executable, unscheduled
+- Ollama/model infrastructure, without an application-specific pipeline caller
+- collector write-only result transport/gate/storage, without a GX10 producer
+
+The target incident engine, wake policy, Ollama caller, and result producer remain future architecture.
+
+### Data and operational corrections
+
+`docs/DATA_CONTRACTS.md` now records:
+
+- the current collector backlog file/path/JSONL/Zstandard contract
+- GX10 required fields and original-line retention
+- the exact five-table/13-index/3-foreign-key working-state boundary
+- automatic versus explicitly invoked SQLite writes
+- collector result validation limits and the absence of a GX10 producer
+- the normalized/incident contracts as validated targets rather than current production claims
+
+`docs/OPERATIONS.md` now records:
+
+- the exact automatic systemd chain and cadence
+- unscheduled enrichment and uncalled Ollama infrastructure
+- the result-return boundary rather than an asserted GX10 result path
+- both component runbooks and the cross-server order
+- current read-only transport requirements
+- failure behavior that preserves missing orchestration instead of fabricating it
+
+It also corrects an inaccurate statement that the captured GX10 applications use SQLite WAL mode. The captured sources enable foreign keys where needed and a 5-second busy timeout; they do not explicitly set WAL mode.
+
+### Durable decision
+
+Added ADR-015:
+
+`Reconstruction preserves absent orchestration`
+
+This makes the central rediscovery distinction durable: presence of a component or boundary is not evidence of a caller. Any future enrichment scheduling, incident engine, Ollama integration, or result producer requires separate design/migration gates.
+
+### Continuity and roadmap updates
+
+Updated:
+
+- `docs/CURRENT_STATE.md`
+- `docs/START_HERE.md`
+- `docs/AI_HANDOFF.md`
+- `docs/ROADMAP.md`
+- `docs/NORMALIZER_MIGRATION.md`
+- `components/collector/README.md`
+
+These documents no longer direct a fresh session to restart GX10 reconstruction. Both component packages are closed, both disposable-host validations remain explicitly deferred, and the final sanitation/acceptance phase is now active.
+
+### Validation
+
+Documentation reconciliation validation passed with:
+
+- exactly one numbered `NEXT` item in `docs/CURRENT_STATE.md`
+- zero current-document matches for the stale GX10-pending/WAL/result-producer claims audited in this subsection
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
+- 42 GX10 tests passing
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `git diff --check` passing
+
+### Safety boundary
+
+This subsection changed public documentation only.
+
+It:
+
+- did not read or publish private connection values
+- did not read production logs, database rows, credentials, keys, or model contents
+- did not execute either pipeline
+- did not call Ollama or run inference
+- did not modify either reference system or any service state
+
+### Next action
+
+Publish this documentation checkpoint and independently verify GitHub.
+
+Then run execution-order item 15: final full-repository sanitation, public-history/ref-topology review, all practical repository-only component gates, and two-server acceptance validation with unavailable disposable-host execution reported as deferred rather than passed.

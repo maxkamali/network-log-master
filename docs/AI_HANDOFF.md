@@ -7,13 +7,14 @@ Use this file to resume the project safely in a fresh AI session.
 1. `docs/START_HERE.md`
 2. `docs/ARCHITECTURE.md`
 3. `docs/CURRENT_STATE.md`
-4. the active component rebuild status — currently `components/gx10/REBUILD_STATUS.md`
+4. both component rebuild statuses — `components/collector/REBUILD_STATUS.md` and `components/gx10/REBUILD_STATUS.md`
 5. the latest entries in `docs/PROJECT_JOURNAL.md`
 6. `docs/DECISIONS.md`
 7. `docs/DATA_CONTRACTS.md`
 8. `docs/OPERATIONS.md`
-9. component-specific documentation for the task at hand
-10. verify repository reality with `git log -10 --oneline` and `git status --short`
+9. `docs/TWO_SERVER_REBUILD.md`
+10. component-specific documentation for the task at hand
+11. verify repository reality with `git log -10 --oneline` and `git status --short`
 
 `docs/CURRENT_STATE.md` is the execution authority. Do not infer a different work order from older journal entries or historical documents.
 
@@ -22,7 +23,7 @@ Use this file to resume the project safely in a fresh AI session.
 When sources disagree, use this order:
 
 1. live verified system/configuration and current checked-out code/tests
-2. `docs/CURRENT_STATE.md` and the active component `REBUILD_STATUS.md`
+2. `docs/CURRENT_STATE.md` and the relevant component `REBUILD_STATUS.md` files
 3. current repository implementation and component documentation
 4. architecture/decision documents
 5. older runbooks or historical planning documents
@@ -79,6 +80,29 @@ Key validated gates include:
 
 Detailed state is in `components/collector/REBUILD_STATUS.md`.
 
+Collector public rebuild/package documentation is complete. Disposable Debian 13 amd64 clean-host execution is deferred.
+
+### GX10
+
+GX10 live rediscovery and public reconstruction are complete.
+
+Published artifacts include:
+
+- exact runtime/filesystem and platform dependency contracts
+- captured fetch, ingest, and unscheduled deterministic enrichment
+- exact reconstructed SQLite state
+- captured service/timer and Ollama unit
+- exact Ollama binary and offline six-model-store installation/verification
+- guarded preactivation and dual-confirmation activation
+- complete clean-machine runbook
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 42 tests
+
+Detailed state is in `components/gx10/REBUILD_STATUS.md`. Disposable Ubuntu 24.04 arm64 GX10-class clean-host execution is deferred.
+
+Reference public GX10 package-closure commit:
+
+`346e4b9fb21c52f4ba0873327fae9f02606891ca`
+
 ### Grafana dashboard restore
 
 Four Grafana 13 dashboards are captured as `dashboard.grafana.app/v2` resources.
@@ -102,7 +126,7 @@ Grafana 13.1.1 was also verified to support `grafana cli admin reset-admin-passw
 
 Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
-GX10 live-system rediscovery is complete through item 12N and the final closure audit.
+Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
 The proven automatic application chain is:
 
@@ -115,11 +139,7 @@ Preserve these rediscovery boundaries:
 - the collector result-return boundary exists but has no discovered GX10 producer
 - the original SQLite/bootstrap initializer did not survive the bounded search; reconstruct from the captured effective schema
 
-The active component authority is `components/gx10/REBUILD_STATUS.md`.
-
-Begin public reconstruction with its first bounded subsection: define the public-safe operator input plus filesystem/runtime identity contract. Do not execute clean-machine installers against either working reference system.
-
-After the subsection validates, append and push `docs/PROJECT_JOURNAL.md` before proceeding.
+The active execution item is defined only by `docs/CURRENT_STATE.md`. Do not restart component rediscovery/reconstruction unless new evidence invalidates a captured contract.
 
 ## Working method
 
@@ -157,5 +177,5 @@ Use RFC documentation address space and synthetic hostnames in examples.
 ## Scope notes
 
 - Firewall/nftables reconstruction is intentionally out of scope for the current rebuild milestone.
-- GX10 complete rebuild capture is the next major component milestone after the collector is closed.
-- Long-lived deterministic incident correlation and production LLM orchestration are not yet complete; reconstruct the currently functional GX10 implementation before adding new architecture.
+- Collector and GX10 component rebuild packages are complete; disposable-host validation remains deferred.
+- Long-lived deterministic incident correlation and production LLM orchestration are not yet complete. They remain later implementation milestones after final repository acceptance.

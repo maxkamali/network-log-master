@@ -238,3 +238,25 @@ Consequence:
 - existing publication, sanitation, validation, journal, and single-`NEXT` continuity rules remain unchanged
 - item 12N remains partial across the environment transition because its external-tool detector reported zero dependencies despite previously proven SFTP and Zstandard use; that narrow check must be corrected and rerun before 12N is accepted as complete
 - the durable transition/resume evidence is recorded in `docs/VM_HANDOFF.md`
+
+## ADR-015 - Reconstruction preserves absent orchestration
+
+**Status:** Accepted
+
+Public rebuild artifacts and current-state documentation must reproduce only the runtime connections proven during rediscovery. The presence of an executable, service, model store, or transport boundary is not sufficient evidence that another component calls it.
+
+Why:
+
+- GX10 rediscovery proved the automatic chain `timer -> fetch -> ingest`
+- deterministic enrichment exists but has no discovered automatic invocation
+- Ollama is active with six complete models but has no discovered application-specific observability-pipeline caller
+- the collector result-return boundary exists but has no discovered GX10 producer
+- silently connecting these separately present capabilities would create new architecture and mislabel it as recovered current behavior
+
+Consequence:
+
+- the GX10 rebuild installs deterministic enrichment but does not schedule it
+- the Ollama rebuild reproduces infrastructure/model state but creates no pipeline caller
+- the collector rebuild reproduces the write-only result boundary but the GX10 rebuild installs no result-writer key or producer
+- architecture, data-contract, operations, and rebuild documents distinguish current reconstructed behavior from future target behavior
+- future incident-engine, wake-policy, Ollama-caller, and result-producer work requires its own design, tests, migration, and rollback gates

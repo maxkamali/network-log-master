@@ -2045,3 +2045,133 @@ Execution-order item 8 is `DONE`.
 Execution-order item 9 is the single `NEXT` item:
 
 Finish the collector README and operator-facing clean-machine rebuild documentation.
+
+## 2026-08-22 20:32 PDT - Item 9A collector documentation gap audit
+
+### Status
+
+`IN PROGRESS` — execution-order item 9 remains the single `NEXT` item.
+
+This checkpoint records the validated gap inventory before modifying the collector README/operator runbook.
+
+### Execution authority
+
+`docs/CURRENT_STATE.md` was verified to contain exactly one `NEXT` item:
+
+Item 9 — finish collector README and operator-facing clean-machine rebuild documentation.
+
+### Installer-derived operator contract
+
+The clean-machine runtime installer currently requires ten operator-supplied values:
+
+- `CLICKHOUSE_DEFAULT_PASSWORD_FILE`
+- `GRAFANA_READER_PASSWORD_FILE`
+- `GRAFANA_ADMIN_PASSWORD_FILE`
+- `VECTOR_INGEST_PASSWORD_FILE`
+- `GRAFANA_PUBLIC_HOST`
+- `CERT_NAME`
+- `CERTBOT_EMAIL`
+- `SSH_PORT`
+- `AI_SPOOL_READER_AUTHORIZED_KEYS_FILE`
+- `AI_RESULTS_WRITER_AUTHORIZED_KEYS_FILE`
+
+Both package and runtime installation require:
+
+`CLEAN_INSTALL_CONFIRM=YES-CLEAN-COLLECTOR`
+
+Additional validated installer contract:
+
+- clean package bootstrap expects Debian 13
+- package bootstrap expects amd64
+- `SSH_PORT` must be numeric, valid, and nonstandard
+- `RELOAD_SSH=yes` is optional; the default is no
+- default syslog listeners are UDP/514 and TCP/514
+- default ClickHouse HTTP endpoint is loopback `127.0.0.1:8123`
+- default ClickHouse host is loopback `127.0.0.1`
+- default ClickHouse ingest user is `vector_ingest`
+- package verification requires root
+- runtime verification requires root
+
+Password-bearing runtime inputs are file-backed rather than supplied as raw secret command arguments.
+
+The runtime requires private password files to be regular, non-empty, and inaccessible to group/world permission bits.
+
+The Grafana administrator password must be one non-empty line.
+
+The authorized-keys source files must be regular and non-empty, and private-key PEM material is rejected.
+
+`GRAFANA_PUBLIC_HOST` and `CERT_NAME` must describe the same IPv4 address under the currently captured certificate contract.
+
+### README gap inventory
+
+The read-only README coverage audit identified these missing operator-facing topics:
+
+- Debian 13 clean-machine baseline
+- explicit `CLEAN_INSTALL_CONFIRM=YES-CLEAN-COLLECTOR`
+- `CLICKHOUSE_DEFAULT_PASSWORD_FILE`
+- `GRAFANA_READER_PASSWORD_FILE`
+- `GRAFANA_ADMIN_PASSWORD_FILE`
+- `VECTOR_INGEST_PASSWORD_FILE`
+- `GRAFANA_PUBLIC_HOST`
+- `CERT_NAME`
+- `CERTBOT_EMAIL`
+- `SSH_PORT`
+- `AI_SPOOL_READER_AUTHORIZED_KEYS_FILE`
+- `AI_RESULTS_WRITER_AUTHORIZED_KEYS_FILE`
+- optional `RELOAD_SSH`
+- private password-file mode guidance
+- UDP/514 syslog prerequisite
+- TCP/514 syslog prerequisite
+- TCP/443 Grafana prerequisite
+- TCP/80 ACME standalone-validation prerequisite
+
+The README already references:
+
+- `install-packages.sh`
+- `verify-packages.sh`
+- `install-runtime.sh`
+- `verify-runtime.sh`
+- the clean-machine safety boundary
+- `COLLECTOR_RUNTIME_VERIFY=PASS`
+- firewall/nftables reconstruction being intentionally out of scope
+
+### Stale README state
+
+The README still describes installer/public-safety validation as remaining work even though execution-order item 8 is now complete.
+
+Its checkpoint-oriented remaining-work sequence therefore needs to be refreshed so item 9 documentation is the active phase.
+
+### Item 9 documentation objective
+
+The README should become a clean-machine operator runbook that another engineer or AI can follow using:
+
+- a clean Debian 13 amd64 collector
+- this public repository
+- operator-supplied environment values
+- operator-supplied password files
+- operator-supplied SSH public-key files
+
+The documentation must not contain real deployment credentials, addresses, usernames, SSH keys, certificate private keys, or private deployment identity.
+
+It should preserve the actual installer contract rather than introducing a parallel manual installation procedure.
+
+### Planned next bounded slice
+
+Update `components/collector/README.md` without rewriting unrelated captured architecture material.
+
+The update should add:
+
+- supported clean-machine baseline
+- required external connectivity prerequisites
+- all operator-supplied variables and their constraints
+- secure preparation guidance for password/key files
+- exact package-install and verification sequence
+- exact runtime-install invocation pattern
+- post-install runtime verification
+- deferred SSH reload guidance
+- explicit description of what the installer creates
+- failure/retry guidance
+- explicit reminder that firewall reconstruction is outside scope
+- refreshed remaining-work state
+
+Item 9 remains `NEXT` until the completed operator documentation is validated and journaled.

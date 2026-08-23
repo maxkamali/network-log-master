@@ -21,6 +21,9 @@ require_file()
 
 require_root
 
+[ "${CLEAN_INSTALL_CONFIRM:-}" = "YES-CLEAN-COLLECTOR" ] \
+    || die "CLEAN_INSTALL_CONFIRM must equal YES-CLEAN-COLLECTOR"
+
 SCRIPT_DIR="$(
     cd "$(
         dirname "${BASH_SOURCE[0]}"

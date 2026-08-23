@@ -7,6 +7,54 @@ die()
     exit 1
 }
 
+require_root()
+{
+    [ "${EUID}" -eq 0 ] \
+        || die "run this verifier as root"
+}
+
+ROOT_COMMAND_PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+require_installed_package()
+{
+    local package="$1"
+    local status
+
+    status="$(
+        dpkg-query \
+            -W \
+            -f='${Status}' \
+            "$package" \
+            2>/dev/null
+    )" \
+        || die "$package is not installed"
+
+    [ "$status" = "install ok installed" ] \
+        || die "$package status differs: $status"
+
+    echo "dependency_package=$package installed=yes"
+}
+
+require_command()
+{
+    local name="$1"
+    local path
+    local PATH="$ROOT_COMMAND_PATH"
+
+    path="$(
+        command -v "$name" \
+            2>/dev/null \
+            || true
+    )"
+
+    [ -n "$path" ] \
+        || die "required command not found: $name"
+
+    echo "dependency_command=$name path=$path"
+}
+
+require_root
+
 SCRIPT_DIR="$(
     cd "$(
         dirname "${BASH_SOURCE[0]}"
@@ -40,6 +88,20 @@ require_version()
         "package=$package" \
         "version=$actual"
 }
+
+for package in \
+    iproute2 \
+    sqlite3
+do
+    require_installed_package "$package"
+done
+
+for command_name in \
+    ss \
+    sqlite3
+do
+    require_command "$command_name"
+done
 
 require_version \
     vector \

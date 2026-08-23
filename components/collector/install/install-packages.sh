@@ -237,6 +237,8 @@ apt-get install -y \
     zstd \
     jq \
     acl \
+    iproute2 \
+    sqlite3 \
     openssh-server \
     python3 \
     python3-dev \

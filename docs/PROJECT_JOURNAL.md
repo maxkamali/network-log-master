@@ -1260,3 +1260,163 @@ Continue item 8 with the next bounded credential-exposure validation slice:
 Checkpoint and journal any material correction before proceeding further.
 
 Item 8 remains `NEXT` until the complete installer structural, credential-exposure, and public-safety validation sub-section is finished and journaled.
+
+## 2026-08-22 19:51 PDT - Item 8 runtime verifier credential handling hardened
+
+### Status
+
+`IN PROGRESS` — intermediate item-8 credential-exposure validation/correction checkpoint.
+
+`docs/CURRENT_STATE.md` item 8 remains the single `NEXT` item.
+
+### Credential-flow audit validator correction
+
+The first item-8C credential-flow audit stopped with:
+
+`FAIL: runtime references raw secret-like shell variable(s): CLICKHOUSE_DEFAULT_PASSWORD, GRAFANA_ADMIN_PASSWORD, GRAFANA_READER_PASSWORD, VECTOR_INGEST_PASSWORD`
+
+That result was a validator defect, not a credential leak.
+
+The scanner's regular expression matched prefixes inside complete variables ending in `_PASSWORD_FILE`, incorrectly classifying file-path variables such as `CLICKHOUSE_DEFAULT_PASSWORD_FILE` as raw password variables.
+
+The repository remained unchanged.
+
+The corrected scanner parsed complete shell variable references before classification.
+
+### Corrected credential-flow audit
+
+The corrected audit identified the runtime installer secret-like variable set as:
+
+`CLICKHOUSE_DEFAULT_PASSWORD_FILE,GRAFANA_ADMIN_PASSWORD_FILE,GRAFANA_READER_PASSWORD_FILE,VECTOR_INGEST_PASSWORD_FILE`
+
+Validation showed:
+
+- `runtime_raw_secret_shell_variables=absent`
+- `runtime_password_file_variable_set=PASS`
+- `runtime_password_inputs=file_backed_private=PASS`
+- `runtime_secret_content_in_argv=absent`
+- `grafana_admin_password_transport=stdin`
+- `dashboard_admin_password_transport=file_path`
+- `clickhouse_admin_password_transport=private_config_file`
+- `RUNTIME_PROCESS_ARGUMENT_CREDENTIAL_CONTRACT=PASS`
+- `renderer_secret_inputs=file_backed_private=PASS`
+- `renderer_secret_outputs=private_from_creation=PASS`
+- `dashboard_password_source=private_file`
+- `dashboard_credentials_in_url=forbidden`
+- `dashboard_authorization=in_process_header`
+- `DASHBOARD_CREDENTIAL_CONTRACT=PASS`
+- `vector_clickhouse_password=secret_provider`
+- `clickhouse_service_passwords=renderer_placeholders`
+- `STORED_CONFIGURATION_CREDENTIAL_CONTRACT=PASS`
+- `verify_runtime_secret_content_in_argv=absent`
+- `verify_runtime_clickhouse_transport=config_file`
+- `credential_relevant_shell_xtrace=absent`
+- `direct_secret_argument_candidates=0`
+- `EXECUTABLE_CREDENTIAL_EXPOSURE_SCAN=PASS`
+- `COLLECTOR_CREDENTIAL_PROCESS_ARGUMENT_AUDIT=PASS`
+- `ITEM8C_CREDENTIAL_EXPOSURE_AUDIT_RETRY=PASS`
+
+### Remaining finding
+
+The corrected audit found:
+
+- `finding_verify_runtime_private_file_enforcement=missing`
+- `verify_runtime_explicit_private_umask=missing`
+- `ITEM8C_FINDING=verify_runtime_password_source_not_mode_private_enforced`
+
+`verify-runtime.sh` accepted a ClickHouse administrator password source based only on existence and non-empty content.
+
+Although it kept the actual password out of process arguments by using a generated ClickHouse client configuration, the independently invokable verifier did not enforce the same private source-file contract as the runtime installer.
+
+Its generated client configuration also relied on a post-write chmod instead of being private before secret content was written.
+
+### Correction
+
+`components/collector/install/verify-runtime.sh` now:
+
+- includes `require_private_file`
+- rejects an empty ClickHouse password source
+- rejects group/world-accessible ClickHouse password sources
+- applies `umask 077`
+- creates the temporary ClickHouse client configuration as root-owned mode `0600` before Python writes secret content
+- continues to pass only the private configuration path to `clickhouse-client`
+- no longer relies on post-write `os.chmod()` for the credential-bearing client configuration
+
+### Static validation
+
+Passed:
+
+- `verify_runtime_credential_hardening_patch=PASS`
+- `verify_runtime_bash_syntax=PASS`
+- `verify_runtime_private_file_enforcement=PASS`
+- `verify_runtime_private_umask=PASS`
+- `verify_runtime_client_config_private_before_write=PASS`
+- `verify_runtime_late_secret_chmod_dependency=absent`
+- `verify_runtime_secret_content_in_argv=absent`
+- `VERIFY_RUNTIME_CREDENTIAL_CONTRACT=PASS`
+
+### Synthetic behavioral proof
+
+A temporary synthetic password source was first created with mode `0644`.
+
+The message:
+
+`FAIL: synthetic password file must not be group/world accessible`
+
+was the expected result of the deliberate negative test, not a failure of the overall checkpoint.
+
+The test then confirmed:
+
+- `permissive_password_source_rejected=yes`
+- a mode `0600` synthetic password source was accepted
+- `private_password_source_accepted=yes`
+- a synthetic client configuration created under an intentionally permissive `umask 022` still had mode `0600`
+- `synthetic_client_config_mode=600`
+- `SYNTHETIC_VERIFY_RUNTIME_CREDENTIAL_BEHAVIOR=PASS`
+- `synthetic_credential_artifacts_removed=PASS`
+
+No production credential content was used by this synthetic proof.
+
+### Additional checkpoint validation
+
+Passed:
+
+- `current_state_item8_still_next=PASS`
+- `git_diff_check=PASS`
+- `modified_file_scope=PASS`
+- `checkpoint_file_scope=PASS`
+- `PUBLIC REPO GATE: PASS`
+- `cached_diff_check=PASS`
+- `VERIFY_RUNTIME_CREDENTIAL_HARDENING_CHECKPOINT=PASS`
+
+### Git checkpoint
+
+Runtime verifier credential hardening:
+
+`50390f60643f610f7ae4098f6636cac0698adcf4` — `Harden runtime verifier credential handling`
+
+`origin/main` was independently verified to point to this exact commit before this journal checkpoint.
+
+### Safety boundary
+
+Neither clean-machine installer was executed.
+
+The full runtime verifier was not executed as part of this correction.
+
+Synthetic tests used temporary files and synthetic credential strings only.
+
+No production password content was displayed, copied into the repository, passed on a command line, or modified.
+
+No package, service, systemd unit, production configuration, or collector runtime state was changed.
+
+### Next action
+
+Continue item 8 by rerunning the corrected credential/process-argument audit against the hardened verifier.
+
+The expected result is that the prior verifier finding disappears while all existing credential-transport and public-repository checks continue to pass.
+
+After that, continue the remaining installer structural and public-safety validation slices.
+
+Checkpoint and journal any additional material finding/correction before proceeding.
+
+Item 8 remains `NEXT` until the complete structural, credential-exposure, and public-safety validation sub-section is completed, documented, pushed, journaled, and remotely verified.

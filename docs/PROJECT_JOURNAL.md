@@ -1049,3 +1049,88 @@ Begin item 8 only after this completion journal entry is committed, pushed, and 
 re-run the collector installer structural, credential-exposure, and public-safety validation.
 
 Do not begin final collector README/operator rebuild documentation until item 8 itself is completed, validated, journaled, and pushed.
+
+## 2026-08-22 19:18 PDT - Item 8 clean-package-installer guard correction
+
+### Status
+
+`IN PROGRESS` — this is an intermediate item-8 validation/correction checkpoint.
+
+`docs/CURRENT_STATE.md` item 8 remains the single `NEXT` item.
+
+### Item 8 goal
+
+Re-run collector installer structural, credential-exposure, and public-safety validation before final operator/rebuild documentation.
+
+### Finding
+
+The first item-8 structural review found that:
+
+- `install-runtime.sh` already required explicit operator acknowledgement with `CLEAN_INSTALL_CONFIRM=YES-CLEAN-COLLECTOR`
+- `install-packages.sh` did not have the equivalent clean-machine acknowledgement guard
+
+This created an avoidable accidental-execution risk because the package installer can perform apt transactions, install temporary package policy, and install systemd no-autostart guards.
+
+### Correction
+
+`components/collector/install/install-packages.sh` now requires:
+
+`CLEAN_INSTALL_CONFIRM=YES-CLEAN-COLLECTOR`
+
+The check occurs immediately after root validation and before:
+
+- temporary package-install state is created
+- `/usr/sbin/policy-rc.d` can be installed
+- persistent systemd package guards can be installed
+- apt metadata or package transactions can begin
+
+The runtime and package installers therefore use the same explicit clean-machine acknowledgement contract.
+
+### Validation evidence
+
+Passed:
+
+- `package_clean_install_guard_preconditions=PASS`
+- `package_clean_install_guard_patch=PASS`
+- `package_installer_bash_syntax=PASS`
+- `package_clean_install_guard_contract=PASS`
+- `guard_before_temp_state=PASS`
+- `guard_before_policy_rc_d=PASS`
+- `guard_before_apt=PASS`
+- `clean_install_confirmation_parity=PASS`
+- `current_state_item8_still_next=PASS`
+- `git_diff_check=PASS`
+- `modified_file_scope=PASS`
+- `checkpoint_file_scope=PASS`
+- `PUBLIC REPO GATE: PASS`
+- `cached_diff_check=PASS`
+- `PACKAGE_CLEAN_INSTALL_GUARD_CHECKPOINT=PASS`
+
+### Git checkpoint
+
+Implementation correction:
+
+`545922abe50099a9ee2e322304cd3b9dacc61836` — `Guard collector package installer against accidental use`
+
+`origin/main` was independently verified to match this commit before this journal checkpoint.
+
+### Safety boundary
+
+The package installer was not executed.
+
+No apt transaction, systemd mutation, service change, package-policy change, or live collector configuration change occurred during this correction.
+
+### Next action
+
+Continue item 8 from this durable checkpoint with the broader installer validation, including:
+
+1. shell/Python syntax and static structural contracts
+2. secret and credential-flow review
+3. command-line exposure review
+4. environment/private-file input validation
+5. clean-machine versus reference-system safety boundaries
+6. tracked-file/public repository sanitation
+7. staged/tracked restricted-term and secret scanning
+8. consistency between installer behavior and durable documentation
+
+Item 8 must remain `NEXT` until the complete validation sub-section passes, is documented, committed, pushed, journaled, and remotely verified.

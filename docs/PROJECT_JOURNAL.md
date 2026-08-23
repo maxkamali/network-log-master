@@ -3041,3 +3041,251 @@ The next pass should extract structure without printing private literals, includ
 - precise subprocess return-code handling
 
 It should also determine whether the one deployment-specific IPv4 literal is the value assigned to the SFTP host variable without printing the address itself.
+
+## 2026-08-23 11:53 PDT - GX10 item 12D fetcher semantic contract
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+Read-only AST inspection established the current GX10 spool fetcher's behavioral contract without executing the launcher, opening its application database, contacting SFTP, or publishing deployment-specific transport values.
+
+### Provenance
+
+The inspected fetcher remained unchanged.
+
+SHA-256:
+
+`662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
+
+Python parsing and in-memory compilation both passed.
+
+### Timing and catch-up policy
+
+The current implementation defines:
+
+- `BOOTSTRAP_HOURS=2`
+- `MAX_CATCHUP_HOURS=24`
+- `OVERLAP_HOURS=1`
+- `SETTLE_SECONDS=120`
+
+When no previous remote-scan state exists, scanning starts from the current time minus the two-hour bootstrap interval, rounded down to an hour.
+
+When previous scan state exists, scanning starts one hour before the recorded previous scan point, rounded down to an hour.
+
+A single invocation advances no farther than 24 hours from that calculated scan start.
+
+The scan end is also bounded by the current hour.
+
+File eligibility uses a cutoff equal to the current time minus the 120-second settle interval.
+
+### Remote spool and filename contract
+
+Remote spool directories follow:
+
+`/spool/%Y/%m/%d/%H`
+
+The fetcher uses that value through `strftime`.
+
+Accepted spool filenames match:
+
+`^syslog-(\d{8})-(\d{4})\.jsonl\.zst$`
+
+The filename timestamp is parsed with:
+
+`%Y%m%d%H%M`
+
+This establishes a minute-resolution timestamp encoded in each accepted compressed JSONL spool filename.
+
+### Deployment-specific transport input
+
+The fetcher contains one valid IPv4 literal.
+
+The corrected inspection confirmed that the sole IPv4 literal is the value assigned to `SFTP_HOST`.
+
+The actual address is intentionally not recorded publicly.
+
+The SFTP port and username are also literal configuration values in the live implementation, but their values remain withheld.
+
+The public rebuild implementation must render or otherwise obtain these deployment-specific transport values from the operator rather than embed the live values.
+
+### SFTP command contract
+
+The current fetcher uses SFTP with command flags including:
+
+- `-P`
+- `-b`
+- `-i`
+- `-o`
+- `-q`
+
+SSH/SFTP option names include:
+
+- `IdentitiesOnly`
+- `StrictHostKeyChecking`
+- `UserKnownHostsFile`
+
+Observed boolean settings include:
+
+- `IdentitiesOnly=yes`
+- `StrictHostKeyChecking=yes`
+
+SFTP batch operations identified are:
+
+- `ls`
+- `get`
+
+This preserves strict host-key validation rather than accepting unknown remote keys automatically.
+
+The private-key path, known-hosts path, username, port, and host value were not published.
+
+### SQLite contract
+
+The fetcher uses two real SQLite tables:
+
+- `agent_state`
+- `source_files`
+
+The earlier semantic scanner incorrectly reported `SET` as a table because it matched the SQL `UPDATE ... SET` clause.
+
+The corrected SQL parser confirmed:
+
+`sqlite_false_table_SET_present=no`
+
+The `agent_state` table CREATE contract contains:
+
+- `key`
+- `value`
+- `updated_at`
+
+Observed operations include:
+
+- CREATE on `agent_state`
+- SELECT on `agent_state`
+- INSERT on `agent_state`
+- SELECT on `source_files`
+- INSERT on `source_files`
+- UPDATE on `source_files`
+
+The CREATE statement/column contract for `source_files` was not recovered by this inspection and must not yet be inferred.
+
+One explicit agent-state key is used:
+
+`last_remote_scan_utc`
+
+No live database content was read.
+
+### Download transaction
+
+The observed download call sequence is:
+
+1. remove a pre-existing temporary target when required
+2. invoke SFTP download
+3. verify the temporary compressed file with Zstandard
+4. inspect temporary-file metadata
+5. compute SHA-256
+6. atomically move the validated file into its final location with `os.replace`
+
+The implementation contains explicit temporary-file unlink cleanup and atomic replacement.
+
+It does not rely on a non-atomic rename sequence exposed by the inspected AST.
+
+### Zstandard integrity verification
+
+The fetcher invokes Zstandard verification through a subprocess.
+
+Observed flags are:
+
+- `-q`
+- `-t`
+
+This means downloaded compressed spool objects are integrity-tested before final placement.
+
+### Hashing and deduplication state
+
+`sha256_file()` is called by the download path.
+
+SHA-256 is therefore part of the source-file handling/state contract.
+
+The exact `source_files` status-transition schema and duplicate-decision predicates still need to be captured before the complete deduplication behavior can be reconstructed.
+
+### Subprocess behavior
+
+Two `subprocess.run()` call sites were identified:
+
+- SFTP execution
+- Zstandard verification
+
+The SFTP subprocess uses explicit stdin/stdout/stderr handling with text mode.
+
+The Zstandard subprocess captures stdout/stderr in text mode.
+
+Return codes are explicitly examined in the surrounding fetcher functions rather than relying solely on `subprocess.run(check=True)`.
+
+### Failure behavior
+
+The outer `main()` function contains an `Exception` handler and has a literal failure return value of `1`.
+
+The helper functions inspected do not contain their own broad exception handlers.
+
+This indicates that unexpected helper exceptions can propagate to the outer fetcher failure boundary.
+
+Detailed log-message wording and every status transition remain to be captured before reproducing implementation source.
+
+### Semantic-validator corrections
+
+Two issues in the first item-12D semantic extractor were corrected before this checkpoint.
+
+First, the initial SQL scanner misclassified the SQL keyword `SET` as a table name.
+
+Second, the initial remote-directory extractor only searched formatted-string AST nodes and therefore missed the literal strftime format.
+
+The corrected pass established:
+
+- exactly two real SQLite tables: `agent_state` and `source_files`
+- no false `SET` table
+- exactly one remote spool strftime format
+- `/spool/%Y/%m/%d/%H` is actually passed to `strftime`
+
+These were validator defects, not production implementation defects.
+
+### Safety boundary
+
+The semantic inspection did not:
+
+- execute the fetcher
+- execute subprocesses
+- contact SFTP
+- open the application SQLite database
+- print the deployment-specific IPv4 value
+- print the SFTP username
+- print the SSH private-key path
+- print the known-hosts path
+- read SSH key contents
+- read known-hosts contents
+- modify the GX10 filesystem
+
+### Item 12D conclusion
+
+The GX10 fetcher's acquisition contract is now captured sufficiently to reconstruct its scheduling, remote-hour discovery, filename eligibility, strict SFTP transport, temporary download validation, SHA-256 handling, atomic file publication, and durable scan cursor.
+
+The `source_files` table's full schema and detailed status-transition semantics remain unresolved.
+
+The downstream enrichment/inference portion of the GX10 implementation has also not yet been located.
+
+### Next action
+
+Continue execution-order item 12 by locating the downstream enrichment/inference implementation.
+
+Use read-only discovery focused on:
+
+- additional systemd units and timers related to the spool directories
+- executables or Python files referencing the incoming spool location
+- files referencing Ollama
+- files referencing known suppression identifiers
+- SQLite files or code containing enrichment/incident-state schema
+- any result-return transport back to the collector
+
+Do not recursively dump source contents or production records.
+
+First identify candidate files by path class, size, mode, owner class, and hash; then inspect candidates individually.

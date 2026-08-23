@@ -63,7 +63,7 @@ do
     [ -s "$key_file" ] \
         || die "authorized_keys source is empty"
 
-    if grep -aEq \
+    if grep -aEq -- \
         '-----BEGIN ([A-Z0-9 ]+)?PRIVATE[[:space:]]KEY-----' \
         "$key_file"
     then

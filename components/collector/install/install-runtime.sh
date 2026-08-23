@@ -47,6 +47,24 @@ require_private_file()
     fi
 }
 
+require_public_authorized_keys_file()
+{
+    local path="$1"
+    local label="$2"
+
+    require_file "$path"
+
+    [ -s "$path" ] \
+        || die "$label is empty"
+
+    if grep -aEq -- \
+        '-----BEGIN ([A-Z0-9 ]+)?PRIVATE[[:space:]]KEY-----' \
+        "$path"
+    then
+        die "private key material supplied where a public authorized_keys file is required"
+    fi
+}
+
 PACKAGE_NO_AUTOSTART_DROPIN="90-collector-rebuild-no-autostart.conf"
 PACKAGE_NO_AUTOSTART_CONDITION="/run/collector-rebuild/runtime-service-start-authorized"
 
@@ -186,6 +204,14 @@ python3 -c 'from pathlib import Path; import sys; raw = Path(sys.argv[1]).read_t
 require_private_file \
     "$VECTOR_INGEST_PASSWORD_FILE" \
     "Vector ingest password file"
+
+require_public_authorized_keys_file \
+    "$AI_SPOOL_READER_AUTHORIZED_KEYS_FILE" \
+    "AI spool reader authorized_keys source"
+
+require_public_authorized_keys_file \
+    "$AI_RESULTS_WRITER_AUTHORIZED_KEYS_FILE" \
+    "AI results writer authorized_keys source"
 
 python3 - \
     "$GRAFANA_PUBLIC_HOST" \

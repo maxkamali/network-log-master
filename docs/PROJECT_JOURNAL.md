@@ -4940,3 +4940,188 @@ The remaining live-system rediscovery is now narrowly focused on:
 6. a final rediscovery closure audit confirming every current functional GX10 component has been accounted for
 
 No rebuild implementation work should begin until those discovery gaps are closed and the rediscovery milestone is journaled in GitHub.
+
+## 2026-08-23 13:26 PDT - GX10 item 12K result-return and Ollama caller boundary
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+A targeted read-only rediscovery pass searched for:
+
+- a GX10 application component that produces or uploads result-return data
+- an application-specific caller of Ollama or a local model
+
+Neither was identified in the bounded live-system scan.
+
+### Result-return application search
+
+The targeted application scan returned:
+
+`result_return_candidate_count=0`
+
+No custom application artifact was identified that combined transport behavior with:
+
+- AI-update semantics
+- result-return semantics
+- result-upload semantics
+- ready/incoming result-directory semantics
+- JSON result-generation semantics
+
+The scan did not identify a GX10 producer currently writing to the collector's already-established write-only result-return boundary.
+
+This does not invalidate the collector-side result-return infrastructure.
+
+It establishes that a live GX10 producer for that boundary has not been discovered.
+
+### Ollama/model caller search
+
+The targeted scan returned:
+
+`pipeline_ollama_candidate_count=0`
+
+No scanned application-specific artifact combined an Ollama API/CLI/runtime reference with pipeline state, result semantics, model references, or enrichment state.
+
+No application-specific pipeline caller of Ollama was identified.
+
+### Systemd boundary
+
+The bounded systemd semantic pass examined:
+
+`146`
+
+service/timer/path unit files.
+
+Results:
+
+`systemd_result_return_candidate_count=0`
+
+and:
+
+`systemd_pipeline_ollama_candidate_count=0`
+
+No scanned systemd orchestration unit currently ties the application pipeline to:
+
+- a GX10 result-return producer
+- an Ollama API caller
+- a model-execution wrapper
+
+### Saved shell-history evidence
+
+The saved login-account and root Bash histories were examined using semantic counts only.
+
+For both histories, counts were zero for:
+
+- SFTP put behavior
+- SCP invocation
+- rsync invocation
+- `ollama run`
+- Ollama API endpoint references
+- known current model-name references
+
+No shell-history command text was printed.
+
+Saved shell history therefore provides no evidence for an operator-driven result upload or model invocation in the retained history.
+
+As with earlier history inspection, absence from saved shell history is not treated as proof that an operation has never occurred.
+
+### Ollama runtime state
+
+Ollama itself is present as active infrastructure.
+
+At inspection time its service was:
+
+- loaded
+- active
+- enabled
+
+Therefore the correct current-state distinction is:
+
+1. Ollama runtime infrastructure exists and is running.
+2. Locally installed model inventory has already been captured separately.
+3. No application-specific pipeline caller of that runtime has been identified.
+
+The project must preserve that distinction rather than infer production LLM orchestration solely from the presence of the running Ollama service.
+
+### Existing collector return boundary
+
+The collector rebuild capture already establishes a write-only GX10 result-return transport boundary and collector-side validation/ingestion path.
+
+Item 12K does not change that collector finding.
+
+The unresolved side is specifically the GX10 producer:
+
+- no producer executable was identified
+- no producer wrapper was identified
+- no producer systemd unit was identified
+- no retained shell-history transfer command was identified
+
+A clean rebuild of the current proven GX10 state must not invent a result producer and label it as discovered production behavior.
+
+### Search scope
+
+The discovery scan deliberately focused on application-controlled locations and configuration.
+
+Large vendor/runtime trees were pruned.
+
+The Open WebUI implementation tree was also pruned.
+
+Accordingly, this checkpoint does not claim that:
+
+- no installed third-party application can communicate with Ollama
+- Open WebUI cannot communicate with Ollama
+- the Ollama runtime has never processed a request
+
+The conclusion is specifically about the reconstructed network-observability application pipeline.
+
+### Component integrity
+
+The previously captured custom components retained their expected SHA-256 values throughout the scan.
+
+No pipeline component was executed.
+
+No production database was opened.
+
+No production event rows were read.
+
+No network request was made.
+
+No GX10 filesystem write was requested.
+
+### Rediscovery interpretation
+
+Items 12I through 12K now establish a significant current-state boundary.
+
+Proven automatic pipeline behavior:
+
+`timer -> fetch -> ingest`
+
+Present but not automatically invoked by any discovered mechanism:
+
+`deterministic enrichment`
+
+Present infrastructure without an identified application pipeline caller:
+
+`Ollama runtime`
+
+Collector-side capability present without an identified GX10 producer:
+
+`write-only result-return boundary`
+
+These distinctions are part of rediscovery and must remain separate from later design decisions.
+
+### Remaining rediscovery targets
+
+The major discovery gaps are now reduced to:
+
+1. Ollama service/runtime configuration and current model metadata required to reproduce the existing installed state
+2. SQLite/base-state bootstrap and schema-creation provenance
+3. GX10 runtime user, group, directory, ownership, permission, and package/dependency contracts
+4. final bounded discovery for any remaining application bootstrap/config artifacts
+5. rediscovery closure audit and GitHub checkpoint
+
+The result-return producer and production LLM orchestration should no longer be treated as undiscovered components that must exist.
+
+Unless later evidence contradicts this checkpoint, they should be recorded as not currently identified in the live application implementation.
+
+No GX10 rebuild implementation work begins until rediscovery closure is journaled.

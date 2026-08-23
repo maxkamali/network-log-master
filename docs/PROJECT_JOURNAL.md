@@ -5492,3 +5492,261 @@ Do not read production event payload rows.
 After database/bootstrap provenance is bounded, capture GX10 runtime identity, directory, ownership, permission, and dependency contracts.
 
 No GX10 rebuild implementation work begins until the rediscovery closure checkpoint is published.
+
+## 2026-08-23 13:37 PDT - GX10 item 12M SQLite schema and bootstrap provenance
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+A read-only immutable SQLite metadata inspection recovered the complete current application schema and bounded the search for its original bootstrap/initializer provenance.
+
+No production event payload rows or suppression-rule rows were selected.
+
+### Database-path consistency
+
+All three captured GX10 application components contain exactly one absolute SQLite database-path literal.
+
+All three resolve to the same live database path.
+
+The private live path remains withheld.
+
+Path-value SHA-256:
+
+`bb6b9179d182ada7a636a1fe40bdeb79b6874382c013d3604a67db2d53a1a430`
+
+Current database size:
+
+`1798782976` bytes
+
+Current mode:
+
+`0640`
+
+### SQLite metadata
+
+The database was opened read-only and immutable with SQLite query-only mode enabled.
+
+Observed metadata:
+
+- `query_only=1`
+- `user_version=0`
+- `application_id=0`
+- `schema_version=26`
+
+There is no surviving nonzero SQLite application or migration-version identifier.
+
+### Schema inventory
+
+Noninternal SQLite schema objects:
+
+`18`
+
+Expected schema objects:
+
+`18`
+
+Unexpected schema objects:
+
+`0`
+
+The effective application schema contains:
+
+- 5 application tables
+- 13 explicit application indexes
+- 3 foreign-key relationships
+
+### Table `agent_state`
+
+Normalized live DDL:
+
+    CREATE TABLE agent_state ( key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL )
+
+Normalized SQL SHA-256:
+
+`8488a9c5f878e1979979c6bdb7868e6f6dffc9ba29592c02f3046fb55e83f3f2`
+
+### Table `event_enrichment`
+
+Normalized live DDL:
+
+    CREATE TABLE event_enrichment ( event_id INTEGER PRIMARY KEY, event_code TEXT NOT NULL DEFAULT '', family TEXT NOT NULL DEFAULT 'unknown', device TEXT NOT NULL DEFAULT '', entity_type TEXT, entity_key TEXT, state TEXT, attention_eligible INTEGER NOT NULL DEFAULT 1 CHECK ( attention_eligible IN (0,1) ), suppression_rule_id INTEGER, classified_at TEXT NOT NULL, repeat_count INTEGER NOT NULL DEFAULT 1, classification_version INTEGER NOT NULL DEFAULT 0, vendor_hint TEXT NOT NULL DEFAULT 'unknown', protocol TEXT NOT NULL DEFAULT '', signal_type TEXT NOT NULL DEFAULT 'observation', attributes_json TEXT NOT NULL DEFAULT '{}', FOREIGN KEY(event_id) REFERENCES recent_events(id), FOREIGN KEY(suppression_rule_id) REFERENCES suppression_rules(id) )
+
+Normalized SQL SHA-256:
+
+`1a3d2819432ce6a4fbbbff6a9c1bbfb657f58ebe48f325358fd75f04fce83bf6`
+
+### Table `recent_events`
+
+Normalized live DDL:
+
+    CREATE TABLE recent_events ( id INTEGER PRIMARY KEY AUTOINCREMENT, source_file TEXT NOT NULL, record_number INTEGER NOT NULL, timestamp TEXT NOT NULL, device_timestamp TEXT, hostname TEXT, source_ip TEXT, source_port INTEGER, facility TEXT, severity TEXT, message TEXT NOT NULL, raw_message TEXT, parse_status TEXT, parser TEXT, event_json TEXT NOT NULL, timestamp_epoch_ms INTEGER, FOREIGN KEY(source_file) REFERENCES source_files(remote_path), UNIQUE(source_file, record_number) )
+
+Normalized SQL SHA-256:
+
+`5e1c4e91a37f75421d445f75bae0830244a132f0193908e7f996bf90bf552e9e`
+
+### Table `source_files`
+
+Normalized live DDL:
+
+    CREATE TABLE source_files ( remote_path TEXT PRIMARY KEY, local_path TEXT, size_bytes INTEGER, sha256 TEXT, status TEXT NOT NULL DEFAULT 'discovered' CHECK ( status IN ( 'discovered', 'downloaded', 'processing', 'processed', 'failed' ) ), discovered_at TEXT NOT NULL, downloaded_at TEXT, processed_at TEXT, error TEXT , record_count INTEGER)
+
+Normalized SQL SHA-256:
+
+`0b6219e204290200b2856b0afc34661ebadb31836ebb3f531de7fac23024d781`
+
+### Table `suppression_rules`
+
+Normalized live DDL:
+
+    CREATE TABLE suppression_rules ( id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, rule_type TEXT NOT NULL CHECK ( rule_type IN ( 'event_code_exact', 'event_code_prefix', 'message_regex' ) ), pattern TEXT NOT NULL, enabled INTEGER NOT NULL DEFAULT 1 CHECK (enabled IN (0,1)), reason TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL )
+
+Normalized SQL SHA-256:
+
+`1262051a43077190c96ae1b6549dd3683bed38375d102319c96431b3f60366ec`
+
+### Explicit indexes
+
+Enrichment indexes:
+
+    CREATE INDEX idx_enrichment_attention ON event_enrichment(attention_eligible)
+    CREATE INDEX idx_enrichment_entity ON event_enrichment(entity_type, entity_key)
+    CREATE INDEX idx_enrichment_event_code ON event_enrichment(event_code)
+    CREATE INDEX idx_enrichment_family ON event_enrichment(family)
+    CREATE INDEX idx_enrichment_protocol ON event_enrichment(protocol)
+    CREATE INDEX idx_enrichment_signal_type ON event_enrichment(signal_type)
+    CREATE INDEX idx_enrichment_vendor_hint ON event_enrichment(vendor_hint)
+
+Recent-event indexes:
+
+    CREATE INDEX idx_recent_events_device_epoch ON recent_events(hostname, timestamp_epoch_ms)
+    CREATE INDEX idx_recent_events_device_time ON recent_events(hostname, timestamp)
+    CREATE INDEX idx_recent_events_epoch ON recent_events(timestamp_epoch_ms)
+    CREATE INDEX idx_recent_events_severity_time ON recent_events(severity, timestamp)
+    CREATE INDEX idx_recent_events_source_ip_time ON recent_events(source_ip, timestamp)
+    CREATE INDEX idx_recent_events_timestamp ON recent_events(timestamp)
+
+### Foreign-key contract
+
+Exactly three foreign-key relationships are present:
+
+`event_enrichment.suppression_rule_id -> suppression_rules.id`
+
+`event_enrichment.event_id -> recent_events.id`
+
+`recent_events.source_file -> source_files.remote_path`
+
+### Suppression-state relationship
+
+Item 12H separately captured the complete current functional suppression corpus:
+
+- exactly two rows
+- both enabled
+- both `event_code_exact`
+- both public-safe patterns already recorded
+- zero non-allowlisted patterns
+
+Item 12M did not select those application rows again.
+
+The recovered table DDL plus the item-12H corpus capture provide the current suppression schema/state contract for later reconstruction.
+
+### Bootstrap-artifact search
+
+A bounded search of relevant systemd, cron, `/usr/local`, bounded `/opt`, login-user-home, and root-home artifacts returned:
+
+`bootstrap_candidate_count=0`
+
+No surviving external artifact was identified containing strong evidence of:
+
+- application table creation
+- application index creation
+- multi-table SQLite bootstrap
+- suppression-rule seeding
+
+### Saved-history bootstrap evidence
+
+Login-account Bash history:
+
+- create-table references: `0`
+- SQLite/table references: `0`
+- suppression-seed references: `0`
+
+Root Bash history:
+
+- create-table references: `0`
+- SQLite/table references: `0`
+- suppression-seed references: `0`
+
+No shell-history command text was printed.
+
+### Bootstrap provenance conclusion
+
+No surviving bootstrap/initializer artifact was found in the bounded live-system search.
+
+No retained shell-history bootstrap command was found.
+
+This does not prove an initializer never existed.
+
+It establishes that its original provenance is not recoverable from the surviving artifacts inspected during rediscovery.
+
+The historical loss does not prevent deterministic reconstruction because the complete current effective SQLite schema has now been recovered directly from SQLite metadata.
+
+The later rebuild can create a clean database from this recovered schema contract rather than inventing undocumented historical migration behavior.
+
+### Safety boundary
+
+Item 12M:
+
+- opened the application database read-only and immutable
+- enabled SQLite query-only mode
+- inspected schema metadata
+- did not select application rows
+- did not read production event payload rows
+- did not select suppression-rule rows
+- did not read authorized keys
+- did not read SSH private material
+- did not print bootstrap candidate contents
+- did not print shell-history commands
+- did not execute pipeline components
+- did not make a network request
+- did not request a GX10 filesystem write
+
+All three known GX10 pipeline executable hashes remained unchanged.
+
+### Item 12M conclusion
+
+GX10 SQLite data-model rediscovery is complete.
+
+Captured:
+
+- one shared database-path contract
+- current database mode and size
+- SQLite metadata/version state
+- all five application table definitions
+- all thirteen explicit application indexes
+- all three foreign-key relationships
+- zero unexpected schema objects
+- zero surviving bounded bootstrap candidates
+- zero retained shell-history bootstrap evidence
+
+The original initializer should no longer be treated as an undiscovered component that must exist.
+
+### Next action
+
+Continue rediscovery with the GX10 runtime identity and filesystem/dependency contract.
+
+Capture:
+
+- application service account and group properties
+- pipeline directories
+- ownership and modes
+- SFTP key and known-hosts metadata without reading private key material
+- Python/runtime dependencies
+- required external executables
+- systemd filesystem-access restrictions
+- any final application bootstrap/configuration artifacts
+
+Then perform the final bounded GX10 rediscovery closure audit.
+
+No GX10 rebuild implementation begins until that closure checkpoint is published.

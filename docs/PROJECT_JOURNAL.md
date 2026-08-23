@@ -1420,3 +1420,123 @@ After that, continue the remaining installer structural and public-safety valida
 Checkpoint and journal any additional material finding/correction before proceeding.
 
 Item 8 remains `NEXT` until the complete structural, credential-exposure, and public-safety validation sub-section is completed, documented, pushed, journaled, and remotely verified.
+
+## 2026-08-22 19:54 PDT - Item 8 credential-exposure audit closed
+
+### Status
+
+`DONE` for the credential-exposure portion of item 8.
+
+Item 8 as a whole remains `IN PROGRESS` and remains the single `NEXT` item because installer structural and public-safety validation still remain.
+
+### Final closure audit
+
+The credential/process-argument audit was rerun after hardening `verify-runtime.sh`.
+
+The final audit confirmed:
+
+- `runtime_raw_secret_shell_variables=absent`
+- `runtime_password_file_variable_set=PASS`
+- `runtime_password_inputs=file_backed_private=PASS`
+- `runtime_secret_content_in_argv=absent`
+- `grafana_admin_password_transport=stdin`
+- `dashboard_admin_password_transport=file_path`
+- `clickhouse_admin_password_transport=private_config_file`
+- `RUNTIME_PROCESS_ARGUMENT_CREDENTIAL_CONTRACT=PASS`
+
+Renderer handling remained correct:
+
+- `renderer_secret_inputs=file_backed_private=PASS`
+- `renderer_secret_outputs=private_from_creation=PASS`
+
+Grafana dashboard tooling remained correct:
+
+- `dashboard_password_source=private_file`
+- `dashboard_credentials_in_url=forbidden`
+- `dashboard_authorization=in_process_header`
+- `DASHBOARD_CREDENTIAL_CONTRACT=PASS`
+
+Stored configuration handling remained correct:
+
+- `vector_clickhouse_password=secret_provider`
+- `clickhouse_service_passwords=renderer_placeholders`
+- `STORED_CONFIGURATION_CREDENTIAL_CONTRACT=PASS`
+
+The hardened independent runtime verifier confirmed:
+
+- `finding_verify_runtime_private_file_enforcement=present`
+- `verify_runtime_explicit_private_umask=present`
+- `verify_runtime_client_config_private_before_write=PASS`
+- `verify_runtime_secret_content_in_argv=absent`
+- `VERIFY_RUNTIME_CREDENTIAL_CONTRACT=PASS`
+
+Repository-wide executable scanning confirmed:
+
+- `credential_relevant_shell_xtrace=absent`
+- `direct_secret_argument_candidates=0`
+- `EXECUTABLE_CREDENTIAL_EXPOSURE_SCAN=PASS`
+
+Final classification:
+
+- `ITEM8C_FINDING=none`
+- `COLLECTOR_CREDENTIAL_PROCESS_ARGUMENT_AUDIT=PASS`
+- `ITEM8C_CREDENTIAL_EXPOSURE_CLOSED=PASS`
+- `PUBLIC REPO GATE: PASS`
+- `current_state_item8_still_next=PASS`
+- `repository_unchanged=PASS`
+- `ITEM8C_FINAL_AUDIT=PASS`
+
+### Findings corrected during this validation slice
+
+Three credential/safety issues were found and corrected during item 8 so far.
+
+1. `install-packages.sh` lacked the explicit clean-machine acknowledgement guard used by the runtime installer.
+
+   Corrected at:
+
+   `545922abe50099a9ee2e322304cd3b9dacc61836`
+
+2. `render-configs.py` accepted permissively readable password source files and could leave a secret-bearing partial output at mode `0644` after mid-render failure.
+
+   Corrected at:
+
+   `1babbedf1efe42e5816b4cc1882a1d953c05303d`
+
+3. `verify-runtime.sh` did not independently enforce a private ClickHouse password source and created its secret-bearing client configuration before applying its final private mode.
+
+   Corrected at:
+
+   `50390f60643f610f7ae4098f6636cac0698adcf4`
+
+### Audit-tool correction
+
+The first credential scanner incorrectly matched prefixes of variables ending in `_PASSWORD_FILE` and reported those file-path variables as raw password variables.
+
+The validator was corrected to classify complete shell variable names.
+
+The corrected audit demonstrated that the runtime installer uses only password-file variables rather than shell variables containing password contents.
+
+### Safety boundary
+
+No clean-machine installer was executed during the credential-exposure audit.
+
+The final closure audit was static/read-only.
+
+Synthetic credential behavioral tests used only temporary synthetic data.
+
+No production credential contents were printed, committed, or passed directly through process arguments.
+
+### Next action
+
+Continue item 8 with the remaining installer structural and public-safety validation.
+
+The next validation slice should concentrate on:
+
+- installer/helper dependency completeness
+- clean-machine execution ordering and fail-closed assumptions
+- placeholder and operator-input completeness
+- executable/configuration artifact consistency
+- tracked-file sanitation and forbidden environment identifiers
+- validation that public rebuild artifacts contain no production-derived identity material
+
+Item 8 must remain `NEXT` until those remaining checks pass and the complete item-8 result is documented and published.

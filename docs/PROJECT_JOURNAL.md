@@ -4613,3 +4613,168 @@ Inspect systemd units, timers, and cron references by exact local executable ref
 Also identify whether a separate downstream inference/result-return launcher exists outside those three captured components.
 
 Do not execute pipeline components or make network requests during orchestration discovery.
+
+## 2026-08-23 12:31 PDT - GX10 item 12I runtime orchestration discovery
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+A bounded read-only GX10 orchestration inventory established how the already-captured remote-spool fetcher and local ingester are scheduled.
+
+It also established that the deterministic enrichment component is not invoked by that same systemd service and is not referenced by cron.
+
+Live identity-bearing executable and unit names remain omitted from this public journal.
+
+### Scheduled pipeline service
+
+Exactly one systemd unit directly references the captured fetch and ingest executables.
+
+The unit SHA-256 is:
+
+`0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
+
+This is the same service-unit provenance captured earlier during GX10 pipeline discovery.
+
+The service contract is:
+
+- `Type=oneshot`
+- wants `network-online.target`
+- ordered after `network-online.target`
+- first `ExecStart` invokes the remote-spool fetch component
+- second `ExecStart` invokes the local-spool ingest component
+
+Systemd therefore provides explicit sequential execution:
+
+`fetch -> ingest`
+
+within a single oneshot service invocation.
+
+### Runtime state
+
+At inspection time:
+
+- the pipeline service was `static`
+- the pipeline service was `inactive/dead`
+- its timer was `enabled`
+- its timer was `active/waiting`
+
+The inactive service state is consistent with a timer-driven oneshot that exits after each run.
+
+The timer cadence and timer-unit provenance were captured previously during the GX10 service/timer inspection and were not re-derived by this bounded reference scan.
+
+### Enrichment boundary
+
+The deterministic enrichment executable was present with unchanged provenance:
+
+`6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+
+However, the systemd unit that directly invokes fetch and ingest does not reference enrichment.
+
+No other scanned systemd unit directly referenced that enrichment executable.
+
+No cron file referenced:
+
+- fetch
+- ingest
+- enrichment
+
+Therefore the currently proven scheduled chain is only:
+
+`timer -> fetch -> ingest`
+
+How deterministic enrichment is invoked remains unresolved.
+
+That unresolved invocation path is now a specific rediscovery target rather than an inferred part of the fetch/ingest timer.
+
+### Component provenance recheck
+
+All three already-known custom components remained unchanged during this inspection.
+
+Remote-spool fetch SHA-256:
+
+`662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
+
+Local-spool ingest SHA-256:
+
+`6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
+
+Deterministic enrichment SHA-256:
+
+`6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+
+### Ollama boundary
+
+The Ollama service is:
+
+- enabled
+- active/running
+
+The orchestration inspection found no direct systemd or cron reference connecting Ollama to the captured fetch, ingest, or enrichment executable paths.
+
+This does not prove that no other component calls Ollama.
+
+It does establish that Ollama is not part of the directly observed fetch/ingest systemd invocation.
+
+### Broad-marker false positives
+
+The local executable marker scan also returned the NVIDIA system-analysis executable and the Ollama executable because generic strings such as:
+
+- `result`
+- `return`
+- SQLite-related text
+- transport-related text
+
+occur in large vendor/runtime binaries.
+
+Those marker hits are not treated as evidence that either executable belongs to the application result-return pipeline.
+
+The three already-proven custom Python components remain the only application components established by this scan.
+
+### Cron boundary
+
+No matching reference was found in the scanned cron locations.
+
+Current orchestration discovery therefore has no evidence for cron-based execution of:
+
+- fetch
+- ingest
+- enrichment
+
+### Safety boundary
+
+Item 12I did not:
+
+- execute any pipeline component
+- open the production database
+- read production event rows
+- make a network request
+- print unit environment values
+- print unit secret values
+- dump custom executable source
+- modify GX10 files
+
+### Item 12I conclusion
+
+Current runtime orchestration is now proven at the first scheduling boundary:
+
+`timer -> oneshot service -> fetch -> ingest`
+
+The deterministic enrichment component is not invoked at that boundary.
+
+Its invocation path, any result-return path, and any actual Ollama/inference orchestration remain to be discovered.
+
+### Next action
+
+Continue rediscovery with a narrow reference search for:
+
+- deterministic enrichment invocation
+- result-return/upload logic
+- wrappers that invoke already-known GX10 components
+- additional application-specific systemd units or timers
+- shell/profile/operator scheduling references
+- any component that invokes Ollama or a local model
+
+Avoid another broad vendor-tree scan.
+
+Do not rebuild or modify the live GX10 system during this rediscovery phase.

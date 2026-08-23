@@ -583,3 +583,135 @@ The implementation checkpoint also advanced `docs/CURRENT_STATE.md`:
 Add package-install no-autostart protection so package installation cannot transiently start unconfigured collector services before the clean-machine runtime configuration is applied.
 
 Do not proceed to installer structural/public-safety validation until the package no-autostart sub-section itself is completed, validated, journaled, and pushed.
+
+## 2026-08-22 19:05 PDT - Package no-autostart intermediate recovery checkpoint
+
+### Status
+
+`IN PROGRESS` — this is an intermediate recovery checkpoint, not completion of the package no-autostart sub-section.
+
+`docs/CURRENT_STATE.md` item 7 remains the single `NEXT` item.
+
+### Goal
+
+Prevent package installation or an intervening reboot from exposing unconfigured collector services before the clean-machine runtime installer intentionally starts them.
+
+### Package maintainer-script audit
+
+The installed Debian package scripts were inspected before implementation.
+
+Observed behavior:
+
+- OpenSSH service start/restart actions use Debian policy-aware helpers including `invoke-rc.d` and `deb-systemd-invoke`
+- Vector restart uses `deb-systemd-invoke`
+- ClickHouse directly runs `systemctl enable clickhouse-server` but does not directly start the service in the reviewed post-install path
+- Grafana does not start on a fresh installation; its direct `systemctl restart grafana-server` path applies to upgrades
+- the current package installer previously stopped Vector and Grafana only after package installation, leaving a possible transient-start/reboot exposure window
+
+No package installation or production service mutation was performed during this audit.
+
+### Current implementation
+
+`components/collector/install/install-packages.sh` now establishes two layers of protection:
+
+1. a temporary `/usr/sbin/policy-rc.d` returning status 101 during package transactions
+2. persistent systemd condition drop-ins using:
+
+`ConditionPathExists=/run/collector-rebuild/runtime-service-start-authorized`
+
+Persistent guards are installed for:
+
+- `vector.service`
+- `clickhouse-server.service`
+- `grafana-server.service`
+
+SSH handling preserves the management plane:
+
+- if SSH was already active before package installation, the existing management plane is preserved
+- if SSH was inactive, guards are installed for `ssh.service` and `ssh.socket`
+
+The package installer verifies guarded collector services remain inactive and removes its temporary `policy-rc.d` before successful completion.
+
+### Runtime release design
+
+`components/collector/install/install-runtime.sh` now understands and validates the package-installed guard contract.
+
+For services that must start before final activation, the runtime installer uses a short-lived authorization token while leaving the persistent guard installed:
+
+- ClickHouse receives a temporary authorized start for schema/bootstrap work
+- an initially inactive SSH management plane is started only after transport configuration and `sshd -t` validation
+- Grafana receives a temporary authorized start only after the loopback bootstrap override has been installed
+
+The authorization token is removed immediately after each authorized start and is also covered by the runtime installer's `EXIT` cleanup.
+
+Collector service guards for Vector, ClickHouse, and Grafana are permanently removed only at the final service-activation boundary.
+
+### Failure-path corrections
+
+The first structural implementation exposed two important failure-path issues before publication:
+
+1. an initially inactive SSH installation would have had its guards removed without actually starting the configured SSH service
+2. the Grafana guard would have been permanently removed for bootstrap, so a later bootstrap failure followed by reboot could have allowed an unintended unguarded start
+
+The runtime design was changed to use temporary authorization while retaining persistent guards.
+
+A subsequent validation attempt reported:
+
+`FAIL: ClickHouse authorized start ordering changed`
+
+That was a validator bug, not an implementation-ordering failure. The validator matched the earlier required-artifact reference to `bootstrap-transport.sh` rather than the later executable invocation. The failed hardening patch was rolled back automatically.
+
+The patch was reapplied with the validator anchored to the executable transport section and then passed.
+
+### Validation evidence at this checkpoint
+
+Passed:
+
+- `package_no_autostart_preconditions=PASS`
+- `package_no_autostart_patch=PASS`
+- `package_installer_bash_syntax=PASS`
+- `runtime_installer_bash_syntax=PASS`
+- `package_no_autostart_structural_contract=PASS`
+- `package_policy_rc_d=temporary`
+- `collector_service_guards=persistent_until_runtime_release`
+- `ssh_policy=preserve_existing_management_plane`
+- `package_no_autostart_failure_path_patch=PASS`
+- `package_no_autostart_failure_safe_contract=PASS`
+- `validator_transport_anchor=executable_invocation`
+- `clickhouse_bootstrap=temporary_authorization_guard_retained`
+- `grafana_bootstrap=temporary_authorization_guard_retained`
+- `inactive_ssh=start_after_transport_then_release`
+- `active_ssh=preserved_without_forced_reload`
+- `collector_guard_release=final_activation`
+- `authorization_token_exit_cleanup=PASS`
+- `git_diff_check=PASS`
+- `modified_file_scope=PASS`
+- `PACKAGE_NO_AUTOSTART_FAILURE_PATH_VALIDATION=PASS`
+
+### Safety boundary
+
+Neither clean-machine installer has been executed against the working reference collector.
+
+No collector service, systemd unit, package, package policy file, or live configuration was changed by this implementation work.
+
+### Remaining work in this sub-section
+
+Before item 7 can be marked `DONE`:
+
+1. behaviorally prove the systemd `ConditionPathExists` hold-and-temporary-authorization mechanism with a synthetic temporary unit
+2. review any findings from that proof
+3. run the final package no-autostart implementation/documentation/public-safety checkpoint
+4. update `docs/CURRENT_STATE.md` only after the sub-section is fully validated
+5. append and push the completion journal entry
+
+### Continuity policy update
+
+For long, risk-heavy, or multi-step work, meaningful validated intermediate states will now be committed and pushed more frequently.
+
+Intermediate journal entries will also be used when they preserve non-obvious decisions, corrections, or exact recovery state.
+
+This supplements rather than replaces the existing journal-after-each-completed-subsection rule.
+
+### Next action
+
+Run a non-destructive behavioral proof of the systemd condition-guard and temporary authorization mechanism using a synthetic temporary unit. Do not touch collector services during that proof.

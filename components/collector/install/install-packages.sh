@@ -66,6 +66,161 @@ ARCH="$(
 [ "$ARCH" = "amd64" ] \
     || die "collector package bootstrap expects amd64"
 
+TMPDIR="$(
+    mktemp -d
+)"
+
+POLICY_RC_D="/usr/sbin/policy-rc.d"
+POLICY_RC_D_EXPECTED="$TMPDIR/policy-rc.d.expected"
+POLICY_RC_D_MANAGED=no
+
+PACKAGE_NO_AUTOSTART_DROPIN="90-collector-rebuild-no-autostart.conf"
+PACKAGE_NO_AUTOSTART_CONDITION="/run/collector-rebuild/runtime-service-start-authorized"
+PACKAGE_NO_AUTOSTART_EXPECTED="$TMPDIR/package-no-autostart.expected"
+
+cat > "$POLICY_RC_D_EXPECTED" <<'PACKAGE_POLICY_RC_D_EXPECTED'
+#!/bin/sh
+# Collector rebuild package-install no-autostart guard.
+exit 101
+PACKAGE_POLICY_RC_D_EXPECTED
+
+cat > "$PACKAGE_NO_AUTOSTART_EXPECTED" <<PACKAGE_NO_AUTOSTART_EXPECTED
+[Unit]
+ConditionPathExists=$PACKAGE_NO_AUTOSTART_CONDITION
+PACKAGE_NO_AUTOSTART_EXPECTED
+
+cleanup()
+{
+    if [ "${POLICY_RC_D_MANAGED:-no}" = "yes" ] \
+        && [ -e "$POLICY_RC_D" ] \
+        && cmp -s \
+            "$POLICY_RC_D_EXPECTED" \
+            "$POLICY_RC_D"
+    then
+        rm -f "$POLICY_RC_D"
+    fi
+
+    rm -rf "$TMPDIR"
+}
+
+trap cleanup EXIT
+
+install_policy_rc_d_guard()
+{
+    if [ -e "$POLICY_RC_D" ] \
+        || [ -L "$POLICY_RC_D" ]
+    then
+        cmp -s \
+            "$POLICY_RC_D_EXPECTED" \
+            "$POLICY_RC_D" \
+            || die \
+                "existing /usr/sbin/policy-rc.d is not the managed collector rebuild guard"
+
+        echo "policy_rc_d_guard=reusing-managed"
+    else
+        install \
+            -o root \
+            -g root \
+            -m 0755 \
+            "$POLICY_RC_D_EXPECTED" \
+            "$POLICY_RC_D"
+
+        echo "policy_rc_d_guard=installed"
+    fi
+
+    POLICY_RC_D_MANAGED=yes
+}
+
+remove_policy_rc_d_guard()
+{
+    [ "$POLICY_RC_D_MANAGED" = "yes" ] \
+        || return
+
+    [ -e "$POLICY_RC_D" ] \
+        || die \
+            "managed /usr/sbin/policy-rc.d disappeared during package installation"
+
+    cmp -s \
+        "$POLICY_RC_D_EXPECTED" \
+        "$POLICY_RC_D" \
+        || die \
+            "managed /usr/sbin/policy-rc.d changed during package installation"
+
+    rm -f "$POLICY_RC_D"
+    POLICY_RC_D_MANAGED=no
+}
+
+install_service_no_autostart_guard()
+{
+    local unit="$1"
+    local directory
+    local path
+
+    directory="/etc/systemd/system/${unit}.d"
+    path="$directory/$PACKAGE_NO_AUTOSTART_DROPIN"
+
+    install \
+        -d \
+        -o root \
+        -g root \
+        -m 0755 \
+        "$directory"
+
+    if [ -e "$path" ] \
+        || [ -L "$path" ]
+    then
+        cmp -s \
+            "$PACKAGE_NO_AUTOSTART_EXPECTED" \
+            "$path" \
+            || die \
+                "unexpected existing no-autostart guard for $unit"
+    else
+        install \
+            -o root \
+            -g root \
+            -m 0644 \
+            "$PACKAGE_NO_AUTOSTART_EXPECTED" \
+            "$path"
+    fi
+
+    echo "package_no_autostart_guard=$unit"
+}
+
+command -v systemctl >/dev/null 2>&1 \
+    || die "systemctl is required for package no-autostart protection"
+
+[ ! -e "$PACKAGE_NO_AUTOSTART_CONDITION" ] \
+    || die \
+        "package no-autostart release condition unexpectedly exists"
+
+SSH_MANAGEMENT_WAS_ACTIVE=no
+
+if systemctl is-active --quiet ssh.service \
+    || systemctl is-active --quiet ssh.socket
+then
+    SSH_MANAGEMENT_WAS_ACTIVE=yes
+fi
+
+install_policy_rc_d_guard
+
+for unit in \
+    vector.service \
+    clickhouse-server.service \
+    grafana-server.service
+do
+    install_service_no_autostart_guard "$unit"
+done
+
+if [ "$SSH_MANAGEMENT_WAS_ACTIVE" = "no" ]; then
+    install_service_no_autostart_guard ssh.service
+    install_service_no_autostart_guard ssh.socket
+    echo "ssh_management_plane=held-inactive"
+else
+    echo "ssh_management_plane=preserve-existing-active"
+fi
+
+systemctl daemon-reload
+
 export DEBIAN_FRONTEND=interactive
 
 apt-get update
@@ -85,17 +240,6 @@ apt-get install -y \
     python3-venv \
     libaugeas-dev \
     gcc
-
-TMPDIR="$(
-    mktemp -d
-)"
-
-cleanup()
-{
-    rm -rf "$TMPDIR"
-}
-
-trap cleanup EXIT
 
 curl \
     -fsSL \
@@ -312,14 +456,83 @@ if actual != expected:
     )
 PY
 
-systemctl stop vector.service \
-    2>/dev/null \
-    || true
+echo
+echo "=== VERIFY PACKAGE NO-AUTOSTART HOLD ==="
 
-systemctl stop grafana-server.service \
-    2>/dev/null \
-    || true
+systemctl daemon-reload
+
+for unit in \
+    vector.service \
+    clickhouse-server.service \
+    grafana-server.service
+do
+    guard="/etc/systemd/system/${unit}.d/$PACKAGE_NO_AUTOSTART_DROPIN"
+
+    [ -f "$guard" ] \
+        || die \
+            "package no-autostart guard missing for $unit"
+
+    cmp -s \
+        "$PACKAGE_NO_AUTOSTART_EXPECTED" \
+        "$guard" \
+        || die \
+            "package no-autostart guard changed for $unit"
+
+    if systemctl is-active --quiet "$unit"; then
+        die \
+            "$unit became active before runtime configuration"
+    fi
+
+    enabled_state="$(
+        systemctl is-enabled "$unit" \
+            2>/dev/null \
+            || true
+    )"
+
+    echo \
+        "unit=$unit" \
+        "active=inactive" \
+        "guard=present" \
+        "enabled=$enabled_state"
+done
+
+if [ "$SSH_MANAGEMENT_WAS_ACTIVE" = "no" ]; then
+    for unit in \
+        ssh.service \
+        ssh.socket
+    do
+        guard="/etc/systemd/system/${unit}.d/$PACKAGE_NO_AUTOSTART_DROPIN"
+
+        [ -f "$guard" ] \
+            || die \
+                "package no-autostart guard missing for $unit"
+
+        cmp -s \
+            "$PACKAGE_NO_AUTOSTART_EXPECTED" \
+            "$guard" \
+            || die \
+                "package no-autostart guard changed for $unit"
+
+        if systemctl is-active --quiet "$unit"; then
+            die \
+                "$unit became active despite package no-autostart protection"
+        fi
+    done
+
+    echo "ssh_package_no_autostart_hold=PASS"
+else
+    echo "ssh_existing_management_plane_preserved=yes"
+fi
+
+remove_policy_rc_d_guard
+
+[ ! -e "$POLICY_RC_D" ] \
+    || die \
+        "temporary package policy guard was not removed"
+
+echo "policy_rc_d_guard_removed=yes"
+echo "PACKAGE_NO_AUTOSTART_HOLD=PASS"
 
 echo
 echo "COLLECTOR_PACKAGE_INSTALL=PASS"
-echo "Packages are installed but application configuration is not yet deployed."
+echo "Packages are installed but collector application services remain held until runtime configuration releases them."

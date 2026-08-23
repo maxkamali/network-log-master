@@ -47,6 +47,106 @@ require_private_file()
     fi
 }
 
+PACKAGE_NO_AUTOSTART_DROPIN="90-collector-rebuild-no-autostart.conf"
+PACKAGE_NO_AUTOSTART_CONDITION="/run/collector-rebuild/runtime-service-start-authorized"
+
+package_no_autostart_guard_path()
+{
+    local unit="$1"
+
+    printf \
+        '/etc/systemd/system/%s.d/%s\n' \
+        "$unit" \
+        "$PACKAGE_NO_AUTOSTART_DROPIN"
+}
+
+validate_package_no_autostart_guard()
+{
+    local unit="$1"
+    local path
+    local expected
+    local actual
+
+    path="$(
+        package_no_autostart_guard_path "$unit"
+    )"
+
+    [ -f "$path" ] \
+        || die \
+            "package no-autostart guard missing for $unit; run install-packages.sh first"
+
+    expected="$(
+        printf \
+            '[Unit]\nConditionPathExists=%s\n' \
+            "$PACKAGE_NO_AUTOSTART_CONDITION"
+    )"
+
+    actual="$(
+        cat "$path"
+    )"
+
+    [ "$actual" = "$expected" ] \
+        || die \
+            "unexpected package no-autostart guard content for $unit"
+}
+
+release_package_no_autostart_guard()
+{
+    local unit="$1"
+    local path
+
+    validate_package_no_autostart_guard "$unit"
+
+    path="$(
+        package_no_autostart_guard_path "$unit"
+    )"
+
+    rm -f "$path"
+
+    echo "package_no_autostart_guard_released=$unit"
+}
+
+start_service_with_package_no_autostart_guard()
+{
+    local unit="$1"
+
+    validate_package_no_autostart_guard "$unit"
+
+    [ ! -e "$PACKAGE_NO_AUTOSTART_CONDITION" ] \
+        || die \
+            "package no-autostart authorization token already exists"
+
+    install \
+        -d \
+        -o root \
+        -g root \
+        -m 0755 \
+        "$(dirname "$PACKAGE_NO_AUTOSTART_CONDITION")"
+
+    install \
+        -o root \
+        -g root \
+        -m 0600 \
+        /dev/null \
+        "$PACKAGE_NO_AUTOSTART_CONDITION"
+
+    systemctl daemon-reload
+
+    if ! systemctl start "$unit"; then
+        rm -f "$PACKAGE_NO_AUTOSTART_CONDITION"
+        die \
+            "failed authorized start for $unit"
+    fi
+
+    rm -f "$PACKAGE_NO_AUTOSTART_CONDITION"
+
+    systemctl is-active --quiet "$unit" \
+        || die \
+            "$unit is not active after authorized start"
+
+    echo "package_no_autostart_authorized_start=$unit"
+}
+
 require_root
 
 require_var CLEAN_INSTALL_CONFIRM
@@ -229,6 +329,10 @@ cleanup()
             || true
     fi
 
+    rm -f "$PACKAGE_NO_AUTOSTART_CONDITION" \
+        >/dev/null 2>&1 \
+        || true
+
     rm -rf "$TMPDIR"
 }
 
@@ -284,7 +388,9 @@ CH=(
 )
 
 systemctl enable clickhouse-server.service
-systemctl start clickhouse-server.service
+
+start_service_with_package_no_autostart_guard \
+    clickhouse-server.service
 
 "${CH[@]}" \
     --query "SELECT 1" \
@@ -366,6 +472,68 @@ echo
 echo "=== INSTALL TRANSPORT FILESYSTEM/SSH BOUNDARY ==="
 
 "$FILESYSTEM_DIR/bootstrap-transport.sh"
+
+ssh_service_guard="$(
+    package_no_autostart_guard_path ssh.service
+)"
+
+ssh_socket_guard="$(
+    package_no_autostart_guard_path ssh.socket
+)"
+
+ssh_service_guard_present=no
+ssh_socket_guard_present=no
+
+if [ -e "$ssh_service_guard" ] \
+    || [ -L "$ssh_service_guard" ]
+then
+    ssh_service_guard_present=yes
+fi
+
+if [ -e "$ssh_socket_guard" ] \
+    || [ -L "$ssh_socket_guard" ]
+then
+    ssh_socket_guard_present=yes
+fi
+
+if [ "$ssh_service_guard_present" = "yes" ] \
+    && [ "$ssh_socket_guard_present" = "yes" ]
+then
+    validate_package_no_autostart_guard \
+        ssh.service
+
+    validate_package_no_autostart_guard \
+        ssh.socket
+
+    sshd -t
+
+    start_service_with_package_no_autostart_guard \
+        ssh.service
+
+    release_package_no_autostart_guard \
+        ssh.service
+
+    release_package_no_autostart_guard \
+        ssh.socket
+
+    systemctl daemon-reload
+
+    echo "ssh_management_plane_started_after_transport=yes"
+elif [ "$ssh_service_guard_present" = "no" ] \
+    && [ "$ssh_socket_guard_present" = "no" ]
+then
+    if systemctl is-active --quiet ssh.service \
+        || systemctl is-active --quiet ssh.socket
+    then
+        echo "ssh_existing_management_plane_preserved=yes"
+    else
+        die \
+            "SSH package guards are absent but no existing SSH management plane is active"
+    fi
+else
+    die \
+        "incomplete SSH package no-autostart guard state"
+fi
 
 echo
 echo "=== INSTALL AI RESULT GATE ==="
@@ -476,9 +644,8 @@ printf '%s\n' '[Service]' 'Environment="GF_SERVER_PROTOCOL=http"' 'Environment="
 
 chmod 0644 "$GRAFANA_BOOTSTRAP_DROPIN"
 
-systemctl daemon-reload
-
-systemctl start grafana-server.service
+start_service_with_package_no_autostart_guard \
+    grafana-server.service
 
 grafana_bootstrap_ready=no
 
@@ -686,6 +853,30 @@ install \
 
 echo
 echo "=== ACTIVATE SERVICES ==="
+
+for unit in \
+    vector.service \
+    clickhouse-server.service \
+    grafana-server.service
+do
+    release_package_no_autostart_guard "$unit"
+done
+
+for unit in \
+    vector.service \
+    clickhouse-server.service \
+    grafana-server.service
+do
+    guard="$(
+        package_no_autostart_guard_path "$unit"
+    )"
+
+    [ ! -e "$guard" ] \
+        || die \
+            "package no-autostart guard unexpectedly remains for $unit"
+done
+
+echo "collector_package_no_autostart_guards_released=PASS"
 
 systemctl daemon-reload
 

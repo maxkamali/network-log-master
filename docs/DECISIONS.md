@@ -194,3 +194,24 @@ Consequence:
 - every completed validated sub-section is journaled and pushed to GitHub before materially proceeding into the next sub-section
 - `docs/START_HERE.md` defines the canonical recovery/read order
 - architecture/current-state/component rebuild documents have distinct source-of-truth roles rather than duplicating one another
+## ADR-013 - Long-running subsections use intermediate durable checkpoints
+
+**Status:** Accepted
+
+Long-running, risk-heavy, or multi-step project sub-sections should use intermediate validated GitHub checkpoints instead of relying only on the final sub-section commit.
+
+Why:
+
+- conversational context is finite and may be lost before a large sub-section is finished
+- validated implementation state can be expensive to reconstruct from live systems or terminal history
+- intermediate commits create explicit rollback and recovery points
+- non-obvious failed approaches and corrections should survive independently of chat memory
+- waiting for a large sub-section to finish can leave too much correct but unpublished work vulnerable to loss
+
+Consequence:
+
+- after a meaningful implementation state passes bounded structural, syntax, safety, or behavioral validation, commit and push it when doing so creates a useful recovery point
+- intermediate checkpoints must be clearly identified as incomplete when additional validation remains
+- append a project-journal checkpoint when the intermediate state contains decisions, corrections, failure analysis, or resume information that would otherwise need to be rediscovered
+- `docs/CURRENT_STATE.md` remains the execution authority and does not advance an item from `NEXT` to `DONE` merely because an intermediate checkpoint was published
+- the existing rule still applies: every fully completed validated sub-section must receive its completion journal entry and push before the next sub-section begins

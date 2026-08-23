@@ -403,3 +403,86 @@ All writes were made directly to the repository `main` branch through the GitHub
 ### Next action
 
 Return to collector implementation work at the single `NEXT` item in `docs/CURRENT_STATE.md`: finish secure Grafana administrator bootstrap wiring in `components/collector/install/install-runtime.sh`. After that sub-section passes its intended validation, append and push its journal entry before moving to dashboard restore/verification wiring.
+## 2026-08-22 18:23 PDT - Secure Grafana administrator bootstrap completed
+
+### Goal
+
+Complete the clean-machine Grafana administrator bootstrap in `components/collector/install/install-runtime.sh` without exposing an unconfigured Grafana instance or placing the administrator password in process arguments or public configuration.
+
+### Work completed
+
+The runtime installer now:
+
+- requires operator-supplied `GRAFANA_ADMIN_PASSWORD_FILE`
+- requires the administrator password file to be non-empty and mode-private
+- rejects multiline administrator passwords
+- creates a temporary Grafana systemd override for HTTP on `127.0.0.1:3000`
+- starts Grafana only on that loopback bootstrap listener
+- waits for `/api/health` and requires the Grafana database to report healthy
+- verifies the TCP/3000 listener is exactly loopback-only
+- stops Grafana after first database initialization
+- invokes `/usr/share/grafana/bin/grafana` as the `grafana` service account
+- runs the CLI from `/usr/share/grafana`
+- explicitly supplies `/etc/grafana/grafana.ini`
+- explicitly selects `/var/lib/grafana` through `--configOverrides`
+- resets administrator user ID 1 using `--password-from-stdin`
+- verifies the Grafana SQLite database with `PRAGMA quick_check`
+- verifies Grafana database ownership remains `grafana:grafana`
+- removes the temporary bootstrap-only systemd override before the normal HTTPS startup path
+- removes the bootstrap override and stops temporary Grafana through cleanup if bootstrap fails
+
+The clean-machine runtime installer was not executed against the working reference collector.
+
+### Validation evidence
+
+Repository/structural validation:
+
+- `GRAFANA_ADMIN_BOOTSTRAP_PATCH_VALIDATION=PASS`
+- `GRAFANA_BOOTSTRAP_FAILURE_FLOW_VALIDATION=PASS`
+- `GRAFANA_CLI_WORKDIR_FIX_VALIDATION=PASS`
+- `install_runtime_bash_syntax=PASS`
+- `grafana_admin_checkpoint_contract=PASS`
+- `current_state_single_next=PASS`
+- `PUBLIC REPO GATE: PASS`
+
+Grafana CLI capability validation:
+
+- Grafana version: 13.1.1
+- `reset-admin-password` supports `--password-from-stdin`
+- `--configOverrides "cfg:default.paths.data=..."` was proven to select the intended Grafana data directory
+
+Non-destructive behavioral proof:
+
+- a consistent temporary copy of the live Grafana SQLite database was created
+- administrator user ID 1 was changed to a synthetic ID only inside the temporary copy
+- the Grafana CLI reset targeted that synthetic user in the explicitly selected temporary data directory
+- the temporary password hash changed
+- the temporary database passed `PRAGMA quick_check`
+- the synthetic user remained absent from the live database
+- the live administrator password hash remained unchanged
+- final result: `GRAFANA_CLI_TEMP_DATABASE_TARGETING=PASS`
+
+### Corrections discovered during implementation
+
+Several checks prevented unsafe or incorrect behavior from being committed:
+
+1. Grafana 13 CLI does not accept service-style bare `cfg:...` arguments in CLI mode. The supported CLI form is `--configOverrides`.
+2. Wrapping the bootstrap body in `if ! ( ... )` could interfere with expected `set -e` behavior. The implementation was changed to use the installer's top-level strict mode plus cleanup through the existing `EXIT` trap.
+3. `runuser` inherited an inaccessible operator working directory during the first temporary-database proof. The final implementation explicitly changes to `/usr/share/grafana` before invoking the CLI as the `grafana` account.
+4. The temporary-database proof was rerun after that correction and passed without modifying the live administrator password.
+
+### Git checkpoint
+
+Implementation commit:
+
+`fe5a611d5379b946660d6255032d02fa40a8c310` — `Complete Grafana admin bootstrap wiring`
+
+`origin/main` was explicitly verified to match that implementation commit before this journal entry was created.
+
+The implementation checkpoint also advanced `docs/CURRENT_STATE.md` so item 5 is `DONE` and item 6 is the single `NEXT` item.
+
+### Next action
+
+Wire `components/collector/grafana/scripts/restore-dashboards.py` and `verify-dashboards.py` into the clean-machine runtime installer after normal Grafana HTTPS health and datasource provisioning are established.
+
+Do not proceed to package no-autostart hardening until the dashboard-wiring sub-section is validated, journaled, and pushed.

@@ -2175,3 +2175,180 @@ The update should add:
 - refreshed remaining-work state
 
 Item 9 remains `NEXT` until the completed operator documentation is validated and journaled.
+
+## 2026-08-22 20:37 PDT - Item 9B collector clean-machine operator runbook published
+
+### Status
+
+`IN PROGRESS` — execution-order item 9 remains the single `NEXT` item pending its final documentation closure/state transition.
+
+The operator-facing collector README implementation is published and validated.
+
+### Published checkpoint
+
+Implementation commit:
+
+`62fbb0b668efad92955ad4ab19fcdf6aecd658a0` — `Document collector clean rebuild`
+
+Independent GitHub verification confirmed that this commit changes only:
+
+`components/collector/README.md`
+
+The public `main` branch was independently verified to point to the same commit before this journal checkpoint.
+
+### Documentation added
+
+`components/collector/README.md` now contains a clean-machine operator runbook based on the actual published installers rather than a parallel manual reconstruction procedure.
+
+The runbook documents the supported baseline:
+
+- clean Debian 13
+- amd64
+- root or sudo access
+- public repository checkout
+- operator-supplied environment values
+- operator-supplied credential files
+- no pre-existing `observability` ClickHouse database
+
+Both package and runtime installers are documented as requiring:
+
+`CLEAN_INSTALL_CONFIRM=YES-CLEAN-COLLECTOR`
+
+The documentation explicitly warns that this confirmation is only an accidental-execution guard and does not make the runtime installer safe for an existing collector.
+
+### External prerequisites
+
+The runbook now documents required external connectivity without reconstructing deployment-specific firewall policy.
+
+Documented inbound requirements include:
+
+- UDP/514 for syslog
+- TCP/514 for syslog
+- TCP/443 for Grafana HTTPS
+- TCP/80 when ACME standalone validation is required
+- the operator-selected nonstandard SSH port for authorized management/GX10 transport
+
+ClickHouse application listeners remain documented as loopback-only.
+
+Firewall/nftables reconstruction remains explicitly out of scope.
+
+### Operator input contract
+
+All ten required runtime inputs are documented:
+
+- `CLICKHOUSE_DEFAULT_PASSWORD_FILE`
+- `GRAFANA_READER_PASSWORD_FILE`
+- `GRAFANA_ADMIN_PASSWORD_FILE`
+- `VECTOR_INGEST_PASSWORD_FILE`
+- `GRAFANA_PUBLIC_HOST`
+- `CERT_NAME`
+- `CERTBOT_EMAIL`
+- `SSH_PORT`
+- `AI_SPOOL_READER_AUTHORIZED_KEYS_FILE`
+- `AI_RESULTS_WRITER_AUTHORIZED_KEYS_FILE`
+
+The runbook documents:
+
+- private password files
+- recommended root-owned mode `0600`
+- one-line Grafana administrator password requirement
+- public authorized-key files rather than private SSH keys
+- same-IPv4 `GRAFANA_PUBLIC_HOST` / `CERT_NAME` contract
+- numeric nonstandard SSH-port requirement
+
+Optional `RELOAD_SSH=yes` behavior is documented along with the safer default of deferring the first SSH reload.
+
+Captured defaults are documented for:
+
+- `SYSLOG_UDP_ADDRESS`
+- `SYSLOG_TCP_ADDRESS`
+- `CLICKHOUSE_ENDPOINT`
+- `CLICKHOUSE_HOST`
+- `CLICKHOUSE_USER`
+
+### Rebuild sequence
+
+The runbook now provides the operator sequence for:
+
+1. cloning the repository
+2. preparing an external root-owned input directory
+3. preparing private password and authorized-key source files
+4. running `install-packages.sh`
+5. running `verify-packages.sh`
+6. setting non-secret deployment values
+7. running `install-runtime.sh`
+8. validating and safely reloading SSH when deferred
+9. running `verify-runtime.sh`
+
+Documented success markers include:
+
+- `PACKAGE_NO_AUTOSTART_HOLD=PASS`
+- `COLLECTOR_PACKAGE_INSTALL=PASS`
+- `COLLECTOR_PACKAGE_VERIFY=PASS`
+- `COLLECTOR_RUNTIME_INSTALL=PASS`
+- `COLLECTOR_RUNTIME_VERIFY=PASS`
+
+### SSH management safety
+
+The runbook tells the operator to keep the original management connection open when SSH reload is deferred.
+
+It documents:
+
+- `sudo sshd -t`
+- verification that network policy permits the selected nonstandard port
+- `sudo systemctl reload ssh.service`
+- opening and validating a second management connection before closing the original one
+- validating the GX10 SFTP role access
+
+The documentation avoids broad `sudo -E` environment forwarding.
+
+### Failure and retry semantics
+
+The runbook now states that the installers are fail-closed rebuild tools, not general idempotent convergence tools.
+
+It warns against:
+
+- manually removing package no-autostart guards to force progress
+- blindly rerunning a partially completed runtime installation
+- bypassing clean-install confirmation
+- bypassing the existing-database refusal
+- bypassing private-file validation
+- bypassing authorized-key validation
+
+For deterministic recovery after persistent runtime state has been created, it directs the operator to restore a clean-server snapshot or reprovision the clean collector, fix the identified input/environment issue, and restart the documented sequence.
+
+### Publication validation
+
+README validation passed:
+
+- `readme_required_operator_inputs=10`
+- `readme_operator_input_contract=PASS`
+- `readme_clean_machine_baseline=PASS`
+- `readme_external_connectivity_contract=PASS`
+- `readme_private_input_guidance=PASS`
+- `readme_package_install_sequence=PASS`
+- `readme_runtime_install_sequence=PASS`
+- `readme_ssh_reload_safety=PASS`
+- `readme_runtime_verification_sequence=PASS`
+- `readme_failure_retry_policy=PASS`
+- `readme_stale_item8_execution_state=absent`
+- `readme_explicit_sudo_environment_forwarding=PASS`
+- `ITEM9B_README_OPERATOR_RUNBOOK_CONTRACT=PASS`
+
+The public repository gate passed.
+
+No package installer, runtime installer, or runtime verifier was executed during the documentation change.
+
+### Safety boundary
+
+No production credential, password, authorized-key content, certificate private key, private username, production device identity, or deployment-specific address was added to the README.
+
+The runbook uses operator-supplied placeholders and public-safe instructions.
+
+### Next action
+
+Perform the final item-9 documentation closure check.
+
+If the README remains consistent with the installer/verifier contracts and the public repository gate passes, mark execution-order item 9 `DONE` and advance item 10, final collector public sanitation and milestone closure, to the single `NEXT` position.
+
+Item 9 remains `NEXT` until that state transition is committed.

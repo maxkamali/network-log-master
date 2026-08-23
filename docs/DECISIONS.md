@@ -215,3 +215,26 @@ Consequence:
 - append a project-journal checkpoint when the intermediate state contains decisions, corrections, failure analysis, or resume information that would otherwise need to be rediscovered
 - `docs/CURRENT_STATE.md` remains the execution authority and does not advance an item from `NEXT` to `DONE` merely because an intermediate checkpoint was published
 - the existing rule still applies: every fully completed validated sub-section must receive its completion journal entry and push before the next sub-section begins
+
+## ADR-014 - Remaining execution moves to a direct-access operator VM
+
+**Status:** Accepted
+
+The remaining project work will be executed from an operator-controlled VM that provides the executing AI with direct authenticated access to the collector reference system, GX10, and GitHub, rather than using the human operator as the routine shell-command copy/paste relay.
+
+Why:
+
+- the copy/paste relay adds substantial latency to bounded discovery, validation, repository updates, and iterative corrections
+- direct access allows the same read-only checks and reversible implementation work to be executed and validated without transcription errors between chat and terminal sessions
+- the project now has sufficient durable GitHub state to resume safely from a new execution environment
+- the human operator should be able to supervise the agentic workflow and intervene primarily when judgment, credentials, or risk approval are genuinely required
+
+Consequence:
+
+- credentials, SSH keys, private addresses, usernames, and other environment-specific identity remain outside the public repository
+- the new VM must verify GitHub state and authenticated connectivity to both reference systems before materially continuing
+- direct credential availability is not blanket authorization for destructive or difficult-to-reverse actions
+- destructive/high-risk production changes, material architecture/scope decisions, and unresolved ambiguity requiring operator intent still require human involvement
+- existing publication, sanitation, validation, journal, and single-`NEXT` continuity rules remain unchanged
+- item 12N remains partial across the environment transition because its external-tool detector reported zero dependencies despite previously proven SFTP and Zstandard use; that narrow check must be corrected and rerun before 12N is accepted as complete
+- the durable transition/resume evidence is recorded in `docs/VM_HANDOFF.md`

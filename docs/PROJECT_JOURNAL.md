@@ -7291,3 +7291,34 @@ Publish this milestone commit to GitHub and independently verify:
 - final public-repository gate passes against the published history
 
 Then append one final remote-verification journal entry identifying the milestone commit and push that verification closure.
+
+## 2026-08-23 16:51 PDT - Final milestone remote verification
+
+### Status
+
+The final public rebuild milestone was published and independently verified.
+
+Verified milestone commit:
+
+`13c27ec7b7a6d3b9bc938a84414627a3937f1d9d` — `Publish final public rebuild milestone`
+
+### Public verification result
+
+After publication:
+
+- local `HEAD` exactly matched public `main`
+- the public branch count was one
+- the public tag count was zero
+- the remote default branch was `main`
+- the working tree was clean
+- `git diff --check` passed
+- `git fsck --full --strict` passed
+- the final public-repository gate passed for the current tree, all reachable history, local links, and ref topology
+
+The verification did not use or publish the local fine-grained token file, private SSH key material, or private connection values.
+
+### Remaining gate
+
+This verification closes publication of execution-order item 16. It does not close execution-order item 17 or the ultimate project acceptance criterion.
+
+The single `NEXT` item remains disposable clean collector, GX10, and two-server execution on suitable systems. No reference-system write or service-state change occurred during final publication or verification.

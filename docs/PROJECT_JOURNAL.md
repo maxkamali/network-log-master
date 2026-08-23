@@ -4405,3 +4405,211 @@ Before printing any literal pattern or reason, test it for:
 Publish literal values only when they are confirmed generic and public-safe.
 
 The known generic IPv6 neighbor-discovery suppressions should be recoverable through this process without exposing unrelated deployment-specific rules.
+
+## 2026-08-23 12:18 PDT - GX10 item 12H suppression corpus
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The active SQLite-backed GX10 suppression-rule corpus was inspected read-only.
+
+The corpus contains exactly two rows.
+
+Both are enabled, generic, public-safe network-event suppressions.
+
+No production event or enrichment rows were read.
+
+### Loader semantics
+
+The deterministic enrichment component contains exactly one suppression-rule loader query.
+
+That query selects:
+
+- `id`
+- `name`
+- `rule_type`
+- `pattern`
+
+from the suppression-rule table.
+
+The loader:
+
+- has an explicit filter
+- loads enabled rules only
+- orders rules by `id`
+- orders ascending
+
+This establishes deterministic evaluation order for the active suppression corpus.
+
+### Corpus size
+
+Current suppression-rule row count:
+
+`2`
+
+Enabled rules:
+
+`2`
+
+Disabled rules:
+
+`0`
+
+Both active rules use:
+
+`event_code_exact`
+
+There are currently no active or inactive rows using the other supported rule-engine types:
+
+- `event_code_prefix`
+- `message_regex`
+
+The engine continues to support those types even though the current corpus does not use them.
+
+### Active suppression rule 1
+
+Database rule ID:
+
+`1`
+
+Enabled:
+
+`1`
+
+Rule type:
+
+`event_code_exact`
+
+Pattern:
+
+`ICMPV6-3-ND_LOG`
+
+The pattern is generic protocol/event-code material and passed the bounded public-safety classifier with no detected sensitive marker.
+
+The database rule-name literal was intentionally not printed.
+
+For provenance, its current value has:
+
+- length `18`
+- SHA-256 `b353a75e0d1f901069f6cbc092e26fb23bcdf5cff6a1119ec2c13bf7e036437a`
+
+The current reason value has:
+
+- length `61`
+- SHA-256 `73838c81792b6535040ab1bd62dd3137a5eb4186558c387d7535c46ccf4d411d`
+
+No sensitivity marker was detected in either value, but their literals were not needed to establish suppression behavior and therefore were not exposed during this inspection.
+
+### Active suppression rule 2
+
+Database rule ID:
+
+`2`
+
+Enabled:
+
+`1`
+
+Rule type:
+
+`event_code_exact`
+
+Pattern:
+
+`ICMPV6-3-ND_RA_LOG`
+
+The pattern is generic protocol/event-code material and passed the bounded public-safety classifier with no detected sensitive marker.
+
+The database rule-name literal was intentionally not printed.
+
+For provenance, its current value has:
+
+- length `21`
+- SHA-256 `658e9e66fc6794532f18226ef9bc03fe9006fdeb5db0e85743dd5bdf6069107a`
+
+The current reason value has:
+
+- length `61`
+- SHA-256 `efade090255af6dfd326c979d3701bf798a2262d2232d2f30cacc02e4bf69484`
+
+No sensitivity marker was detected in either value, but their literals were not needed to establish suppression behavior and therefore were not exposed during this inspection.
+
+### Public-safety result
+
+The corpus inspection found:
+
+- zero non-allowlisted patterns
+- zero patterns with a detected sensitive marker
+- zero production IP-address literals
+- zero private-path literals
+- zero credential/secret markers
+- zero deployment-specific patterns requiring further review
+
+Only the two explicitly allowlisted generic event-code patterns were printed.
+
+Suppression-rule names and reasons were not printed.
+
+### Functional suppression corpus
+
+The complete currently active functional suppression pattern set is therefore:
+
+1. `ICMPV6-3-ND_LOG`
+2. `ICMPV6-3-ND_RA_LOG`
+
+Both are exact event-code matches and both are enabled.
+
+This confirms the previously expected IPv6 neighbor-discovery suppressions against the live GX10 state rather than relying on prior memory.
+
+### Rebuild implications
+
+A clean rebuild must seed two active exact-event-code suppression rules covering the patterns above.
+
+Evaluation order is ascending rule ID.
+
+The enrichment implementation supports additional prefix and regex rule types, but no current live row uses them.
+
+The unique rule-name and descriptive reason fields remain database metadata rather than part of the matching predicate established here.
+
+Their current hashes have been recorded so later source/config capture can prove exact preservation if those literals are recovered from a public-safe initialization artifact.
+
+### Safety boundary
+
+Item 12H:
+
+- opened the SQLite database read-only
+- used `immutable=1`
+- used `PRAGMA query_only=ON`
+- selected only suppression-rule rows
+- did not select `recent_events`
+- did not select `event_enrichment`
+- did not execute the enrichment component
+- did not modify SQLite
+- did not modify GX10 files
+
+### Item 12H conclusion
+
+The current live suppression corpus is fully bounded at the functional matching level.
+
+It contains exactly two enabled, public-safe, exact event-code suppressions:
+
+- `ICMPV6-3-ND_LOG`
+- `ICMPV6-3-ND_RA_LOG`
+
+There is no hidden additional live suppression pattern requiring public-safety review.
+
+### Next action
+
+Continue execution-order item 12 by reconstructing GX10 runtime orchestration.
+
+Perform a read-only reference inventory to determine exactly how the already-captured custom components are invoked:
+
+- remote spool fetch
+- local spool ingest
+- deterministic enrichment
+
+Inspect systemd units, timers, and cron references by exact local executable reference without dumping unit secrets or environment values.
+
+Also identify whether a separate downstream inference/result-return launcher exists outside those three captured components.
+
+Do not execute pipeline components or make network requests during orchestration discovery.

@@ -5125,3 +5125,370 @@ The result-return producer and production LLM orchestration should no longer be 
 Unless later evidence contradicts this checkpoint, they should be recorded as not currently identified in the live application implementation.
 
 No GX10 rebuild implementation work begins until rediscovery closure is journaled.
+
+## 2026-08-23 13:32 PDT - GX10 item 12L Ollama runtime and model state
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+A read-only local-filesystem and systemd inspection captured the current Ollama runtime and model state without invoking the Ollama API, running inference, pulling models, or making an external network request.
+
+### Ollama service state
+
+The Ollama service is:
+
+- loaded
+- active
+- enabled
+
+Runtime identity:
+
+- user `ollama`
+- group `ollama`
+
+Service behavior:
+
+- `Restart=always`
+- restart delay `3s`
+- no explicit working directory
+- `LimitNOFILE=524288`
+
+The current unit does not enable the following systemd hardening directives:
+
+- `PrivateTmp`
+- `ProtectHome`
+- `ProtectSystem`
+- `NoNewPrivileges`
+
+These are current-state findings, not recommendations.
+
+### Service dependency state
+
+Observed `After` dependencies include:
+
+- `basic.target`
+- `network-online.target`
+- `sysinit.target`
+- `system.slice`
+- `systemd-journald.socket`
+
+The service has no explicit `Wants` dependencies.
+
+Observed `Requires` dependencies are:
+
+- `sysinit.target`
+- `system.slice`
+
+### Unit provenance
+
+The service fragment is a regular `ollama.service` unit.
+
+Current fragment SHA-256:
+
+`11758d469d3f103e53a9612a8ffcb3a3e61834c994c08d412bb051f3c827dbd3`
+
+Mode:
+
+`0644`
+
+Drop-in count:
+
+`0`
+
+### Executable contract
+
+The Ollama executable is:
+
+- basename `ollama`
+- root-owned
+- root-group
+- mode `0755`
+- size `35792104` bytes
+
+Current executable SHA-256:
+
+`26f44ca89143f2326a3aad98b2cb5e8b5af9397aef7001cd8d022e90d6e0b55e`
+
+The service `ExecStart` references that executable and invokes its `serve` operation.
+
+The raw `ExecStart` value was not printed.
+
+The executable is not owned by a dpkg package.
+
+This establishes that current Ollama installation provenance is not represented by the Debian package database.
+
+It does not by itself establish how the binary was originally installed.
+
+The Ollama version previously captured during GX10 platform inventory remains the version checkpoint for this rediscovery phase; item 12L did not execute the Ollama CLI to revalidate it.
+
+### Service environment
+
+Exactly one explicit service environment variable was present:
+
+`PATH`
+
+Its value was not printed.
+
+For provenance, the current value SHA-256 is:
+
+`f5a00065660f4ba15c80ff30175de9613f3def42dfbb702d707014bc162fe79c`
+
+There are:
+
+`0`
+
+environment-file references.
+
+No environment-file values were read or printed.
+
+No explicit `OLLAMA_HOST` or `OLLAMA_MODELS` override was present in the systemd environment captured here.
+
+### Model storage
+
+The model root was resolved from the Ollama service account home.
+
+Current model root:
+
+`/usr/share/ollama/.ollama/models`
+
+Ownership:
+
+`ollama:ollama`
+
+Mode:
+
+`0755`
+
+Both expected subtrees are present:
+
+- manifests
+- blobs
+
+### Manifest inventory
+
+Exactly six Ollama manifests are present.
+
+Every manifest resolves to an already-reviewed public-safe model reference.
+
+Unexpected or unreviewed model count:
+
+`0`
+
+Missing referenced blob count:
+
+`0`
+
+Every manifest-referenced blob is present.
+
+### Model 1
+
+Reference:
+
+`gemma4:latest`
+
+Manifest SHA-256:
+
+`c6eb396dbd5992bbe3f5cdb947e8bbc0ee413d7c17e2beaae69f5d569cf982eb`
+
+Config digest:
+
+`sha256:f0988ff50a2458c598ff6b1b87b94d0f5c44d73061c2795391878b00b2285e11`
+
+Declared referenced bytes:
+
+`9608350718`
+
+Referenced blobs:
+
+`4`
+
+All referenced blobs are present.
+
+### Model 2
+
+Reference:
+
+`nemotron-3.5-lightning:30b`
+
+Manifest SHA-256:
+
+`e7a64ff15fb174c42b4f463e5c888c4f2c7b9cabf9e8d65a1c0874405426c1b2`
+
+Config digest:
+
+`sha256:7101a4a1d9e30ce87a71265e93215173f5e4cc84883e5cf1ef88862547f31fcd`
+
+Declared referenced bytes:
+
+`25430749387`
+
+Referenced blobs:
+
+`5`
+
+All referenced blobs are present.
+
+### Model 3
+
+Reference:
+
+`north-mini-code-1.0:latest`
+
+Manifest SHA-256:
+
+`d8b269ad5c7c7144ce104b83ce93bc3efb85e0f74e01be6be5f5d6f7ca90b60f`
+
+Config digest:
+
+`sha256:d7d22779fb87ed760b8b256143d423ccbbf760020d5277b9949759f67afbab12`
+
+Declared referenced bytes:
+
+`18593967008`
+
+Referenced blobs:
+
+`4`
+
+All referenced blobs are present.
+
+### Model 4
+
+Reference:
+
+`qwen3:8b`
+
+Manifest SHA-256:
+
+`500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41`
+
+Config digest:
+
+`sha256:05a61d37b08453e59290add468e3bb2f688e23a01e967fecb0e2fa41218cea76`
+
+Declared referenced bytes:
+
+`5225388164`
+
+Referenced blobs:
+
+`5`
+
+All referenced blobs are present.
+
+### Model 5
+
+Reference:
+
+`qwen3-coder-next:latest`
+
+Manifest SHA-256:
+
+`ca06e9e4087c714d44355bf954099187890e63084b4a632b8e9956c4b9492074`
+
+Config digest:
+
+`sha256:5d55cac51f303b790c7fafb707fbec596ad64c7af9282619aa7dc88a37646d4c`
+
+Declared referenced bytes:
+
+`51741611823`
+
+Referenced blobs:
+
+`4`
+
+All referenced blobs are present.
+
+### Model 6
+
+Reference:
+
+`qwen3.8:27b`
+
+Manifest SHA-256:
+
+`22130167c4c20e20c7b71454612966ca8e8171e9b3cc8ab6ce8aa6cbfec79643`
+
+Config digest:
+
+`sha256:492b2922d38e553cabc2d319345644ed482874fbf5e5c9e4495cbf8e17b0cf5f`
+
+Declared referenced bytes:
+
+`17741872154`
+
+Referenced blobs:
+
+`5`
+
+All referenced blobs are present.
+
+### Listener boundary
+
+Exactly one Ollama TCP listener was identified.
+
+It is:
+
+- loopback-only
+- TCP port `11434`
+
+The raw listener address was not printed.
+
+This confirms that the current Ollama API is not exposed on all interfaces by the observed service state.
+
+### Pipeline interpretation
+
+Item 12L captures the Ollama runtime as installed infrastructure.
+
+Combined with item 12K, the current evidence is:
+
+- Ollama is installed
+- Ollama is running
+- Ollama is enabled
+- six local model manifests are complete
+- model blobs required by those manifests are present
+- the API listener is loopback-only
+- no application-specific network-observability pipeline caller has been identified
+
+The existence of the models and running runtime must therefore remain distinct from production LLM orchestration.
+
+### Safety boundary
+
+Item 12L:
+
+- did not call the Ollama API
+- did not run an Ollama model operation
+- did not execute inference
+- did not pull a model
+- did not read model blob contents
+- read model manifest metadata
+- did not print unknown environment values
+- did not print raw listener addresses
+- did not open the production application database
+- did not read production event rows
+- did not make an external network request
+- did not request a filesystem write
+
+All three previously captured GX10 pipeline executables retained their expected SHA-256 values after the inspection.
+
+### Item 12L conclusion
+
+The active Ollama service, its systemd contract, executable provenance, model-storage contract, six-manifest inventory, complete referenced-blob state, and loopback listener boundary are now captured.
+
+The executable is not dpkg-owned, so later rebuild implementation must explicitly provide an Ollama installation mechanism rather than assuming the Debian package database can reproduce the current binary.
+
+That later installation design must remain separate from this rediscovery record.
+
+### Next action
+
+Continue rediscovery with the SQLite/base-state bootstrap and schema-creation provenance.
+
+Determine how the live application database and initial tables/rules were originally created, or establish that no surviving bootstrap artifact exists.
+
+Do not read production event payload rows.
+
+After database/bootstrap provenance is bounded, capture GX10 runtime identity, directory, ownership, permission, and dependency contracts.
+
+No GX10 rebuild implementation work begins until the rediscovery closure checkpoint is published.

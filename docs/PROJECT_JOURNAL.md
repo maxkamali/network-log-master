@@ -2692,3 +2692,144 @@ Inspect the pipeline service and timer metadata sufficiently to identify:
 - local source/config paths
 
 Do not dump command arguments containing remote identities, network addresses, credentials, SSH configuration, environment values, or database contents.
+
+## 2026-08-23 11:39 PDT - GX10 item 12B pipeline definition discovery
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The GX10 pipeline service and timer definitions were inspected read-only with live identity-bearing names and configuration values withheld from the public journal.
+
+### Service contract
+
+The active GX10 spool-processing service is:
+
+- systemd `Type=oneshot`
+- static rather than independently enabled
+- normally inactive/dead between timer invocations
+- `RemainAfterExit=no`
+- `Restart=no`
+- explicit non-root runtime user
+- explicit non-root runtime group
+- no `DynamicUser`
+
+The service has no configured:
+
+- working directory
+- systemd state directory
+- systemd cache directory
+- systemd runtime directory
+- systemd logs directory
+- drop-in files
+
+The service unit SHA-256 at this checkpoint is:
+
+`0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
+
+The identity-bearing live service-unit filename is intentionally not recorded publicly.
+
+### Service hardening
+
+Observed systemd hardening includes:
+
+- `PrivateTmp=yes`
+- `ProtectHome=yes`
+- `ProtectSystem=strict`
+- `NoNewPrivileges=yes`
+
+These settings are part of the currently functional GX10 behavior and must be preserved during reconstruction unless later testing proves that a deliberate change is required.
+
+### Timer contract
+
+The pipeline timer is enabled, active, and waiting.
+
+Configured monotonic scheduling includes:
+
+- `OnBootSec=2min`
+- `OnUnitInactiveSec=1min`
+- no calendar schedule
+- `AccuracySec=5s`
+- no randomized delay
+- `Persistent=no`
+- `FixedRandomDelay=no`
+- `RemainAfterElapse=yes`
+
+This confirms that the current implementation is a timer-triggered one-shot pipeline rather than a continuously running daemon.
+
+The timer unit SHA-256 at this checkpoint is:
+
+`5371995539846d4cca6014a70548e95c942e9f601d0736b06f4bda61c1ccc0f5`
+
+The identity-bearing live timer-unit filename is intentionally not recorded publicly.
+
+### Launcher contract
+
+The service executes exactly one program with no additional ExecStart arguments.
+
+The launcher is currently:
+
+- a regular file
+- root-owned
+- mode `0755`
+- 9523 bytes
+
+Launcher SHA-256:
+
+`662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
+
+The live identity-bearing executable filename is intentionally withheld from the public journal until the implementation is captured into a public-safe GX10 component layout.
+
+### Configuration-input discovery
+
+The systemd service contains:
+
+- zero inline environment variables
+- zero `Environment=` directives
+- zero `EnvironmentFile=` references
+
+No systemd environment values were printed.
+
+Because the service also has only the executable itself in ExecStart, the remaining pipeline configuration and implementation assumptions must be discovered from the launcher and the local resources that it invokes.
+
+This is a discovery conclusion, not yet a claim about where credentials, model selection, state paths, transport configuration, or remote identities are stored.
+
+### Safety boundary
+
+The item-12B inspection did not print:
+
+- the full ExecStart definition
+- environment values
+- remote target values
+- SSH configuration contents
+- database contents
+- production addresses
+- credentials
+
+No GX10 filesystem changes were requested.
+
+### Item 12B conclusion
+
+The scheduling model, systemd service type, runtime privilege classification, hardening contract, absence of systemd-level configuration inputs, and exact unit/launcher provenance hashes are now captured.
+
+The launcher source has not yet been printed or published.
+
+### Next action
+
+Continue execution-order item 12 with a read-only launcher implementation inspection.
+
+The next pass should classify the launcher before exposing source text and identify, without printing sensitive values:
+
+- interpreter/language
+- imported or invoked external tools
+- local script/config paths
+- local database/state paths
+- spool input/output paths
+- model-selection mechanism
+- SFTP/SSH usage
+- credential/key references
+- remote-target references
+- suppression/rule files
+- child processes
+
+Only after those references are classified should the implementation itself be copied into a public-safe GX10 rebuild component.

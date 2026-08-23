@@ -1540,3 +1540,169 @@ The next validation slice should concentrate on:
 - validation that public rebuild artifacts contain no production-derived identity material
 
 Item 8 must remain `NEXT` until those remaining checks pass and the complete item-8 result is documented and published.
+
+## 2026-08-22 20:06 PDT - Item 8 runtime dependency contract hardened
+
+### Status
+
+`IN PROGRESS` — intermediate item-8 structural/rebuild-dependency correction checkpoint.
+
+The credential-exposure portion of item 8 remains closed.
+
+Item 8 as a whole remains the single `NEXT` item because additional structural and public-safety validation remains.
+
+### External dependency audit
+
+A read-only audit enumerated externally supplied commands required by the collector runtime and transport implementation and mapped them to their Debian package providers.
+
+The audit confirmed these relevant providers on the Debian 13 reference collector:
+
+- `sqlite3` -> package `sqlite3`
+- `ss` -> package `iproute2`
+- `runuser` -> package `util-linux`
+- `setfacl` / `getfacl` -> package `acl`
+- `sshd` -> package `openssh-server`
+- `mount` -> package `mount`
+- `findmnt` -> package `util-linux`
+- account-management commands -> package `passwd`
+- standard file/text utilities -> required or essential Debian packages
+
+The package installer already explicitly installed `acl` and `openssh-server`.
+
+The audit found:
+
+- `sqlite3_not_explicitly_installed`
+- `iproute2_not_explicitly_installed`
+- `sqlite3_not_package_verified`
+- `ss_not_package_verified`
+
+Both missing packages are required by published runtime behavior:
+
+- `install-runtime.sh` invokes the `sqlite3` CLI for Grafana database integrity and administrator checks
+- Grafana bootstrap listener validation uses `ss`, supplied by `iproute2`
+
+### Package-verifier execution-context finding
+
+The first attempted dependency patch correctly added the dependency checks, but its read-only validation invoked `verify-packages.sh` as the non-root operator account.
+
+That verifier reported:
+
+`FAIL: Grafana ClickHouse plugin is missing`
+
+The patch rollback completed before any commit.
+
+A subsequent read-only visibility audit showed that this was not plugin drift.
+
+Observed:
+
+- non-root plugin visibility: `no`
+- root plugin existence: `yes`
+- plugin ID: `grafana-clickhouse-datasource`
+- plugin version: `4.20.0`
+- Grafana CLI reports the same plugin at `4.20.0`
+
+The plugin directory is intentionally not traversable by an unrelated non-root account.
+
+Classification:
+
+`ITEM8D_PLUGIN_VISIBILITY_FINDING=verify_packages_requires_root_context`
+
+The repository remained unchanged after the failed attempt and audit.
+
+### Correction
+
+`components/collector/install/install-packages.sh` now explicitly installs:
+
+- `iproute2`
+- `sqlite3`
+
+`components/collector/install/verify-packages.sh` now:
+
+- explicitly requires root execution
+- uses a root-style command search path
+- verifies that `iproute2` is installed
+- verifies that `sqlite3` is installed
+- verifies that `ss` resolves
+- verifies that `sqlite3` resolves
+- retains the existing exact application/package version checks
+- retains the existing Grafana ClickHouse plugin identity/version verification
+
+This makes the dependency assumptions required by the runtime installer explicit rather than depending on incidental presence in a base image or another package dependency.
+
+### Validation
+
+Static validation passed:
+
+- `explicit_iproute2_dependency=PASS`
+- `explicit_sqlite3_dependency=PASS`
+- `package_verifier_requires_root=PASS`
+- `package_verifier_iproute2_contract=PASS`
+- `package_verifier_sqlite3_contract=PASS`
+- `package_verifier_ss_command_contract=PASS`
+- `runtime_dependency_usage_contract=PASS`
+- `clean_install_confirmation_guard_preserved=PASS`
+- `ITEM8D_DEPENDENCY_VERIFIER_STATIC_CONTRACT=PASS`
+
+The verifier also proved fail-closed outside its required execution context:
+
+- `package_verifier_nonroot_rejected=yes`
+
+A root-context read-only verification then confirmed:
+
+- `dependency_package=iproute2 installed=yes`
+- `dependency_package=sqlite3 installed=yes`
+- `dependency_command=ss path=/usr/bin/ss`
+- `dependency_command=sqlite3 path=/usr/bin/sqlite3`
+- Vector `0.57.0-1`
+- ClickHouse server/client `26.3.17.110`
+- Grafana `13.1.1`
+- Certbot `5.7.0`
+- Grafana ClickHouse plugin `4.20.0`
+- `COLLECTOR_PACKAGE_VERIFY=PASS`
+- `package_verifier_root_context=PASS`
+
+Additional validation passed:
+
+- `clean_machine_package_installer_executed=no`
+- `current_state_item8_still_next=PASS`
+- `git_diff_check=PASS`
+- `modified_file_scope=PASS`
+- `checkpoint_file_scope=PASS`
+- `PUBLIC REPO GATE: PASS`
+- `cached_diff_check=PASS`
+- `ITEM8D_RUNTIME_DEPENDENCY_CHECKPOINT=PASS`
+
+### Git checkpoint
+
+Runtime dependency implementation:
+
+`524b962002fed7c42bfcbad7048ad9aa69293a70` — `Declare collector runtime dependencies`
+
+The public `main` branch was independently verified to point to this exact commit before this journal checkpoint.
+
+### Safety boundary
+
+The clean-machine package installer was not executed against the working collector.
+
+Package/version verification was read-only.
+
+No package was installed, removed, upgraded, or downgraded during this validation.
+
+No service state, production configuration, credential, firewall state, or runtime database was modified.
+
+### Next action
+
+Continue item 8 with the remaining structural/public-safety validation.
+
+The next bounded slice should validate:
+
+- every runtime-installed repository artifact is present and correctly referenced
+- installer execution ordering remains fail-closed
+- required operator inputs are complete and validated before destructive/runtime mutation
+- generated/rendered configuration dependencies are complete
+- clean-machine versus live/reference verification boundaries remain explicit
+- tracked collector content contains only public-safe placeholders and synthetic/example values where environment-specific data would otherwise appear
+
+Any material finding must be corrected, validated, pushed, and journaled before advancing.
+
+Item 8 remains `NEXT`.

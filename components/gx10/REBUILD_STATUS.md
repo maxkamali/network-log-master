@@ -4,9 +4,9 @@
 
 Live-system rediscovery is `DONE`.
 
-Public clean-machine reconstruction is `NEXT` under execution-order item 12.
+Public clean-machine reconstruction and operator documentation are `DONE` under execution-order item 12.
 
-Clean-machine GX10 validation and operator documentation remain later gates.
+Clean-machine GX10 validation is `DEFERRED` because no disposable Ubuntu 24.04 arm64 GX10-class target is currently available.
 
 This document is the component recovery authority for the active GX10 milestone. `docs/CURRENT_STATE.md` remains the authority for project-wide execution order and the single `NEXT` item.
 
@@ -31,6 +31,7 @@ Completed:
 - deterministic enrichment remains intentionally unscheduled
 - exact pinned application-package installer and fail-closed platform verifier
 - exact operator-supplied Ollama binary installer with no automatic activation
+- guarded offline model-store importer with source/target content hashing, no overwrite, and resumable exact reuse
 - sanitized Ollama unit preserving the captured service contract
 - offline six-manifest/model-blob verifier and active loopback runtime verifier
 - live read-only `GX10_PLATFORM_VERIFY=PASS` and `GX10_OLLAMA_VERIFY=PASS`
@@ -38,7 +39,10 @@ Completed:
 - exact installed-source, configuration, SQLite, filesystem, systemd, and effective-limit verification
 - dual-confirmation activator with full offline blob hashing, ordered enablement, and failure rollback
 - only Ollama and the fetch/ingest timer are activated; deterministic enrichment remains unscheduled
-- 39 synthetic tests passing
+- complete clean-machine operator runbook
+- final structural, syntax, generated/private-artifact, IPv4/public-safety, unit-test, and filesystem-contract audit
+- 42 synthetic tests passing
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.
 
@@ -218,17 +222,17 @@ Do not silently change these findings during reconstruction:
 
 ## Reconstruction order
 
-Proceed in bounded, journaled subsections:
+Completed in bounded, journaled subsections:
 
-1. define the public-safe operator input and filesystem/runtime identity contract
-2. capture public-safe fetch, ingest, and deterministic-enrichment implementations
-3. provide deterministic SQLite schema initialization from the recovered effective schema
-4. provide service/timer templates preserving the proven automatic chain and hardening
-5. provide Ollama installation/model verification without claiming application orchestration
-6. add package, structural, public-safety, and runtime verifiers
-7. write the clean-machine operator runbook
-8. run clean-machine GX10 validation when a disposable target is available
+1. `DONE` — define the public-safe operator input and filesystem/runtime identity contract
+2. `DONE` — capture public-safe fetch, ingest, and deterministic-enrichment implementations
+3. `DONE` — provide deterministic SQLite schema initialization from the recovered effective schema
+4. `DONE` — provide service/timer templates preserving the proven automatic chain and hardening
+5. `DONE` — provide Ollama installation/model verification without claiming application orchestration
+6. `DONE` — add package, structural, public-safety, and runtime verifiers
+7. `DONE` — write the clean-machine operator runbook
+8. `DEFERRED` — run clean-machine GX10 validation when a disposable target is available
 
-After every validated subsection, append and push `docs/PROJECT_JOURNAL.md` before materially entering the next subsection.
+Every completed subsection is durably journaled. The component milestone is closed without laundering unavailable disposable-host validation into a pass.
 
 Do not run clean-machine installers against the working GX10 reference system.

@@ -259,7 +259,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, corrected item 12N validation, rediscovery closure audit, filesystem/application/SQLite/service reconstruction, package/Ollama reconstruction, and guarded activation/runtime verification implementation are complete. The next technical action is the clean-machine operator runbook and final GX10 package structural/public-safety audit defined in `components/gx10/REBUILD_STATUS.md`.
+The environment transition, corrected item 12N validation, rediscovery closure audit, complete GX10 reconstruction package, guarded activation, operator runbook, and final component audit are complete. Disposable-host validation remains explicitly deferred. The next technical action is full two-server architecture, operations, and rebuild-documentation reconciliation.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -276,9 +276,9 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 9. `DONE` — collector README and operator-facing clean-machine rebuild documentation completed and validated.
 10. `DONE` — final collector public sanitation passed and the public collector rebuild-package/documentation milestone was closed.
 11. `DEFERRED` — clean-machine collector rebuild validation remains outstanding because no disposable Debian 13 amd64 validation system is currently available.
-12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package; implementation/activation safeguards are complete, and the operator runbook plus final package audit are next.
-13. `NOT STARTED` — validate the GX10 rebuild package and operator documentation.
-14. `NOT STARTED` — reconcile and update full two-server architecture, operations, and rebuild documentation.
+12. `DONE` — reconstructed the captured GX10 implementation as a public clean-machine rebuild package with guarded activation, offline model import, operator runbook, and final package audit.
+13. `DEFERRED` — clean-machine GX10 end-to-end validation remains outstanding because no disposable Ubuntu 24.04 arm64 GX10-class validation system is currently available; repository-only package/documentation validation passes.
+14. `NEXT` — reconcile and update full two-server architecture, operations, and rebuild documentation.
 15. `NOT STARTED` — run final repository sanitation and two-server acceptance validation.
 16. `NOT STARTED` — publish the final rebuild milestone.
 

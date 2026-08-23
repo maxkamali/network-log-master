@@ -35,6 +35,8 @@ Transitional enrichment should be retired only after collector-side normalizatio
 
 Live-system rediscovery is complete. The authoritative reconstruction checkpoint, captured contracts, preserved absences, and next implementation order are in `REBUILD_STATUS.md`.
 
+The complete installation and activation sequence is in `CLEAN_MACHINE_RUNBOOK.md`. Use that runbook only on a clean intended rebuild target, never on the working reference system.
+
 ## Clean-machine reconstruction artifacts
 
 The first reconstruction subsection defines the public-safe runtime identity and filesystem boundary:
@@ -107,7 +109,7 @@ See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boun
 
 `install/install-ollama.py` requires an operator-supplied binary with the exact captured size and SHA-256. It creates the locked service identity and model-root boundary, installs the binary and sanitized unit without replacing divergent artifacts, verifies the unit, and reloads systemd. It never enables or starts Ollama.
 
-The large model blobs are intentionally not stored in Git. Before activation, the operator must populate the protected model root from an independently obtained offline model store matching the captured contract. `install/verify-ollama.py --offline` verifies the exact six-manifest inventory, manifest references and hashes, config digests, declared bytes, and every referenced blob size without calling the Ollama API. The normal mode additionally requires the service active/enabled and exactly one loopback TCP listener.
+The large model blobs are intentionally not stored in Git. `install/install-model-store.py` imports an independently obtained exact offline model store with full source/target blob hashing, no overwrite, resumable exact-file reuse, and blobs-before-manifests publication. `install/verify-ollama.py --offline` verifies the exact six-manifest inventory, manifest references and hashes, config digests, declared bytes, and every referenced blob size without calling the Ollama API. The normal mode additionally requires the service active/enabled and exactly one loopback TCP listener.
 
 No reconstruction artifact creates an application-specific Ollama caller. The proven automatic application chain remains `timer -> fetch -> ingest`.
 
@@ -127,3 +129,11 @@ Successful activation enables exactly:
 The pipeline service remains static and deterministic enrichment remains unscheduled. Starting the timer authorizes the proven automatic `fetch -> ingest` behavior, so run activation only after the operator has reviewed the final clean-machine runbook and confirmed the transport endpoint.
 
 Do not run the activation script against the working reference system.
+
+Run the final non-mutating repository package audit with:
+
+    components/gx10/tests/validate-rebuild-package.py
+
+Expected marker:
+
+`GX10_REBUILD_PACKAGE_VALIDATION=PASS`

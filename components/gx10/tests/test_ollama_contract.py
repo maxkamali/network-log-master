@@ -17,6 +17,7 @@ def load_script(name, filename):
 
 
 INSTALLER = load_script('install_ollama', 'install-ollama.py')
+MODEL_INSTALLER = load_script('install_model_store', 'install-model-store.py')
 VERIFIER = load_script('verify_ollama', 'verify-ollama.py')
 PLATFORM_VERIFIER = load_script('verify_platform', 'verify-platform.py')
 
@@ -78,6 +79,44 @@ class OllamaContractTests(unittest.TestCase):
             PLATFORM_VERIFIER.CUDA_COMPILER,
             Path('/usr/local/cuda/bin/nvcc'),
         )
+
+    def test_model_store_file_install_is_no_overwrite_and_reusable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / 'source'
+            target = root / 'target'
+            source.write_bytes(b'manifest')
+            MODEL_INSTALLER.install_file(
+                source,
+                target,
+                os.getuid(),
+                os.getgid(),
+            )
+            self.assertEqual(target.read_bytes(), b'manifest')
+            self.assertEqual(target.stat().st_nlink, 1)
+            MODEL_INSTALLER.preflight_file(source, target)
+            MODEL_INSTALLER.install_file(
+                source,
+                target,
+                os.getuid(),
+                os.getgid(),
+            )
+
+    def test_divergent_existing_model_store_file_is_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / 'source'
+            target = root / 'target'
+            source.write_bytes(b'expected')
+            target.write_bytes(b'diverged')
+            with self.assertRaisesRegex(ValueError, 'differs'):
+                MODEL_INSTALLER.preflight_file(source, target)
+
+    def test_model_store_source_and_target_must_be_distinct(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with self.assertRaisesRegex(ValueError, 'equals installed target'):
+                MODEL_INSTALLER.validate_distinct_roots(root, root)
 
     def test_ollama_unit_does_not_claim_pipeline_integration(self):
         text = (GX10_DIR / 'systemd' / 'ollama.service').read_text(encoding='utf-8')

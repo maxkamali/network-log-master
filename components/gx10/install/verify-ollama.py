@@ -101,6 +101,7 @@ def verify_model_store(model_root=MODEL_ROOT, hash_blobs=False):
 
     observed = set()
     hashed_blobs = set()
+    referenced_blobs = set()
     for path in manifests:
         if path.is_symlink():
             raise ValueError('unexpected symbolic-link Ollama manifest')
@@ -136,6 +137,7 @@ def verify_model_store(model_root=MODEL_ROOT, hash_blobs=False):
             if not isinstance(size, int) or size < 0:
                 raise ValueError('invalid Ollama blob size')
             blob = blob_root / digest.replace(':', '-')
+            referenced_blobs.add(blob)
             verify_hash = hash_blobs and blob not in hashed_blobs
             validate_model_blob(
                 blob,
@@ -151,6 +153,7 @@ def verify_model_store(model_root=MODEL_ROOT, hash_blobs=False):
 
     if observed != set(EXPECTED_MANIFESTS):
         raise ValueError('incomplete Ollama manifest set')
+    return tuple(sorted(manifests)), tuple(sorted(referenced_blobs))
 
 
 def verify_listener():

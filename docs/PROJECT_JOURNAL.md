@@ -6765,3 +6765,142 @@ That remains a later validation gate rather than being falsely marked complete.
 Publish this activation checkpoint and independently verify GitHub.
 
 Then write the complete clean-machine GX10 operator runbook, perform the final item-12 structural/public-safety audit, and close the public rebuild-package milestone without claiming disposable-host validation.
+
+## 2026-08-23 16:35 PDT - GX10 public rebuild-package milestone closure
+
+### Status
+
+Execution-order item 12 is `DONE`.
+
+Execution-order item 13 is `DEFERRED` because no disposable Ubuntu 24.04 arm64 GX10-class clean-machine validation target is currently available.
+
+Execution-order item 14 is now the single `NEXT` item.
+
+The GX10 public reconstruction package, clean-machine runbook, and final repository-only audit are complete.
+
+### Offline model-store installation
+
+The runbook review identified one remaining undocumented hand step: verification existed for a populated model store, but the repository did not yet provide a guarded installation mechanism for the externally supplied large model artifacts.
+
+Added:
+
+- `components/gx10/install/install-model-store.py`
+
+The installer:
+
+- requires root and `CLEAN_INSTALL_CONFIRM=YES-CLEAN-GX10`
+- requires `OLLAMA_MODEL_STORE_DIR` outside the installed target
+- requires the previously installed exact Ollama identity/model-root boundary
+- fully verifies and hashes the source six-manifest store before writing
+- ignores unreferenced source blobs and copies only the exact referenced inventory
+- rejects symbolic-link source/target roots and target symbolic links
+- rejects unexpected target files
+- preflights every existing target artifact and refuses same-size or different-size divergent content
+- creates only protected `ollama:ollama` mode-`0755` directories
+- publishes mode-`0644` files atomically without replacement
+- copies unique blobs before publishing manifests
+- can resume by reusing exact already-copied files
+- fully hashes and verifies the installed target store before returning success
+- calls no Ollama API, pulls no model, and runs no inference
+
+The verifier now returns its exact manifest/blob inventory to the installer while preserving existing verification behavior.
+
+### Complete operator runbook
+
+Added:
+
+- `components/gx10/CLEAN_MACHINE_RUNBOOK.md`
+
+Expanded:
+
+- `components/gx10/config/operator-inputs.env.example`
+
+The runbook now provides one ordered path covering:
+
+1. clean checkout and repository audit
+2. protected external operator inputs
+3. exact application package installation and platform verification
+4. runtime identity/filesystem/SSH-material bootstrap
+5. protected runtime configuration rendering
+6. exact empty SQLite initialization
+7. application and service/timer installation without activation
+8. exact Ollama binary installation without activation
+9. offline model-store import
+10. preactivation reference-like-state refusal
+11. dual-confirmation guarded activation
+12. post-activation runtime/Ollama verification
+13. first timer-cycle inspection and failure/rerun rules
+
+It explicitly states every preserved absence and warns that activation authorizes the captured automatic read-only fetch followed by local ingest.
+
+No private operator value appears in the runbook or expanded template.
+
+### Final package audit
+
+Added:
+
+- `components/gx10/tests/validate-rebuild-package.py`
+
+The non-mutating audit covers the complete tracked and nonignored-untracked GX10 package inventory and requires:
+
+- real nonsymlinked text artifacts only
+- no generated database, key, known-hosts, populated operator-input, token, or bytecode artifact
+- no workstation-private path prefix
+- no private-key material marker
+- no nonapproved IPv4 literal; only loopback/unspecified and documentation networks are accepted
+- Python source compilation without bytecode output
+- shell syntax validation
+- executable shebang and mode validation for install/application/test scripts
+- the full GX10 unit-test suite
+- the filesystem/public-safety contract validator
+
+Final result:
+
+`GX10_REBUILD_PACKAGE_VALIDATION=PASS`
+
+The complete suite reports:
+
+- 42 tests passing
+- exact/resumable model-file installation passing
+- same-size divergent target refusal passing
+- source/target identity refusal passing
+- all prior application, SQLite, systemd, platform, Ollama, and activation tests passing
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+
+### Milestone conclusion
+
+The public repository now contains everything known and required to reconstruct the proven GX10 implementation from a clean host plus operator-supplied transport values, exact Ollama binary, and exact offline model store.
+
+The following proven absences remain preserved:
+
+- no automatic deterministic enrichment
+- no application-specific network-observability Ollama caller
+- no GX10 producer for the collector result-return boundary
+
+The package does not claim those missing future capabilities exist.
+
+### Deferred clean-machine validation
+
+The complete runbook has not been executed on a disposable GX10-class host because none is available.
+
+That external validation remains explicitly deferred, matching the collector milestone's handling of its unavailable disposable Debian target.
+
+No installer or activator was executed against the working reference GX10.
+
+### Safety boundary
+
+This closure subsection:
+
+- used only synthetic temporary files and databases
+- did not read or publish private operator values
+- did not read production database or model-blob contents
+- did not call the Ollama API, pull a model, or run inference
+- did not execute fetch, ingest, or enrichment
+- did not modify service state
+- did not write to either reference system
+
+### Next action
+
+Publish this milestone closure and independently verify GitHub.
+
+Then reconcile project-wide architecture, operations, data/rebuild documentation, and the two component runbooks under execution-order item 14 before final repository sanitation and acceptance validation.

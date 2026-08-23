@@ -22,6 +22,8 @@ Use this checklist before every public commit that adds or changes operational m
 
 ## Engineering gates
 
+- [ ] run `scripts/validate-public-repository.py`
+- [ ] run the sanitation gate's synthetic unit tests under `scripts/`
 - [ ] stage only intended files
 - [ ] run secret/sanitation scanning against staged and tracked content
 - [ ] run restricted-term/environment-identifier scanning

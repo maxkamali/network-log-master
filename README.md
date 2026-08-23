@@ -112,6 +112,7 @@ Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 4
 - [`docs/DATA_CONTRACTS.md`](docs/DATA_CONTRACTS.md) - raw, normalized, incident, and AI-result contracts.
 - [`docs/OPERATIONS.md`](docs/OPERATIONS.md) - ingest, backlog, validation, replay, failure, and rebuild behavior.
 - [`docs/TWO_SERVER_REBUILD.md`](docs/TWO_SERVER_REBUILD.md) - collector-first two-host reconstruction and acceptance order.
+- [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) - final repository/reference acceptance evidence and deferred clean-host boundary.
 - [`docs/CLICKHOUSE.md`](docs/CLICKHOUSE.md) - durable table and sink contracts.
 - [`docs/GRAFANA.md`](docs/GRAFANA.md) - datasource, dashboard restore, drilldown, and NOC-view behavior.
 - [`docs/NORMALIZER_MIGRATION.md`](docs/NORMALIZER_MIGRATION.md) - controlled collector-side normalization migration.
@@ -124,6 +125,7 @@ Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 4
 - [`components/normalizer/`](components/normalizer/) - active deterministic normalizer source and tests.
 - [`components/collector/`](components/collector/) - collector rebuild artifacts, verifiers, and component state.
 - [`components/gx10/`](components/gx10/) - complete GX10 rebuild artifacts, verifiers, tests, and clean-machine runbook.
+- [`scripts/validate-public-repository.py`](scripts/validate-public-repository.py) - current-tree, reachable-history, link, and ref-topology public gate.
 
 ## Source-of-truth policy
 

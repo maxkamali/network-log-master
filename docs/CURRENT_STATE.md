@@ -267,7 +267,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component runbooks/audits, and full two-server architecture/operations/rebuild-documentation reconciliation are complete. Disposable-host validation remains explicitly deferred. The next technical action is final repository sanitation and two-server acceptance validation.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, and repository/read-only-reference acceptance validation are complete. Disposable-host validation remains explicitly deferred. The next technical action is publication of the final rebuild milestone.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -287,8 +287,8 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 12. `DONE` — reconstructed the captured GX10 implementation as a public clean-machine rebuild package with guarded activation, offline model import, operator runbook, and final package audit.
 13. `DEFERRED` — clean-machine GX10 end-to-end validation remains outstanding because no disposable Ubuntu 24.04 arm64 GX10-class validation system is currently available; repository-only package/documentation validation passes.
 14. `DONE` — reconciled full two-server architecture, current/target data contracts, operations, key-role boundaries, rebuild order, and acceptance documentation.
-15. `NEXT` — run final repository sanitation and two-server acceptance validation.
-16. `NOT STARTED` — publish the final rebuild milestone.
+15. `DONE` — final current-tree/reachable-history sanitation, component tests, collector synthetic validation, Git/ref/link checks, private-identifier audit, and read-only two-server revalidation passed; disposable-host execution remains deferred.
+16. `NEXT` — publish the final rebuild milestone.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

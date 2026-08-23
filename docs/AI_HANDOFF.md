@@ -13,8 +13,9 @@ Use this file to resume the project safely in a fresh AI session.
 7. `docs/DATA_CONTRACTS.md`
 8. `docs/OPERATIONS.md`
 9. `docs/TWO_SERVER_REBUILD.md`
-10. component-specific documentation for the task at hand
-11. verify repository reality with `git log -10 --oneline` and `git status --short`
+10. `docs/ACCEPTANCE.md`
+11. component-specific documentation for the task at hand
+12. verify repository reality with `git log -10 --oneline` and `git status --short`
 
 `docs/CURRENT_STATE.md` is the execution authority. Do not infer a different work order from older journal entries or historical documents.
 

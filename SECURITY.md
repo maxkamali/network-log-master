@@ -37,6 +37,14 @@ Before any public commit or push:
 6. inspect the staged diff
 7. commit only after all gates pass
 
+Run the repository-wide current-tree/history/link/ref gate from repository root:
+
+    scripts/validate-public-repository.py
+
+Its synthetic tests are:
+
+    PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p 'test_*.py'
+
 Do not weaken a deny list merely to make a gate pass. Fix the content instead.
 
 ## Operational separation

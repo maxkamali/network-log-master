@@ -74,15 +74,15 @@ Exit gate: another engineer/AI can reconstruct the current functional GX10 on a 
 
 ## Milestone 4 - Two-server rebuild acceptance
 
-Status: `IN PROGRESS` — cross-system documentation is reconciled; final repository sanitation/acceptance validation remains.
+Status: `DONE` for repository-only and read-only-reference acceptance; disposable clean two-server execution is deferred.
 
 1. `DONE` — reconcile collector and GX10 rebuild assumptions
 2. `DONE` — document the complete operator-supplied environment-value contract
 3. `DONE` — document service installation/start order and cross-server dependencies
 4. `DONE` — distinguish reconstructed current behavior from target architecture
-5. `NEXT` — validate public examples/fixtures and run final repository sanitation/publication gates
+5. `DONE` — validate public examples/fixtures and run final repository sanitation/publication gates
 6. `DEFERRED` — perform clean two-server rebuild validation when suitable disposable hosts are available
-7. `PENDING` — publish final acceptance status without concealing deferred external validation
+7. `NEXT` — publish final acceptance status without concealing deferred external validation
 
 Exit gate:
 

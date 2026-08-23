@@ -7031,3 +7031,179 @@ It:
 Publish this documentation checkpoint and independently verify GitHub.
 
 Then run execution-order item 15: final full-repository sanitation, public-history/ref-topology review, all practical repository-only component gates, and two-server acceptance validation with unavailable disposable-host execution reported as deferred rather than passed.
+
+## 2026-08-23 16:47 PDT - Final sanitation and two-server acceptance validation
+
+### Status
+
+Execution-order item 15 is `DONE`.
+
+Execution-order item 16 is now the single `NEXT` item.
+
+Repository-only acceptance and read-only reference revalidation pass. Disposable clean-host execution remains explicitly deferred.
+
+### Durable full-repository sanitation gate
+
+Added:
+
+- `scripts/validate-public-repository.py`
+- `scripts/test_public_repository_validator.py`
+- `docs/ACCEPTANCE.md`
+
+The public gate scans the tracked plus nonignored-untracked current tree and every commit reachable from all refs.
+
+It validates:
+
+- text-only, nonsymlinked repository artifacts
+- generated/private artifact path denial
+- private-key and common GitHub/AWS/OpenAI/Slack/Google credential patterns
+- workstation-private path denial
+- public IPv4 policy, with only loopback/unspecified, documentation networks, and the reviewed ClickHouse version literal accepted
+- local Markdown link targets
+- exactly one numbered `NEXT`
+- sensitive historical paths
+- secret/private-address patterns throughout reachable history
+- one local branch (`main`) and zero tags
+
+Final markers:
+
+- `PUBLIC_REPOSITORY_CURRENT_TREE=PASS`
+- `PUBLIC_REPOSITORY_HISTORY=PASS`
+- `PUBLIC_REPOSITORY_LINKS=PASS`
+- `PUBLIC_REPOSITORY_REF_TOPOLOGY=PASS`
+- `PUBLIC_REPOSITORY_VALIDATION=PASS`
+
+Five synthetic tests passed, including negative cases for a private address, token, private-key marker, and sensitive artifact paths.
+
+### Sanitation-tool corrections
+
+The first self-scan correctly detected that the validator source contained literal private-key/private-path marker strings. The source now constructs its detector markers from noncontiguous public fragments, so the gate tests the repository without self-whitelisting a dangerous literal.
+
+The first history IPv4 scan passed a Python lookaround expression to Git's POSIX ERE engine, which failed safely. The history prefilter now uses a compatible broad ERE and applies the precise Python address policy to each returned line.
+
+Neither correction weakened the intended policy.
+
+### Environment-specific identifier audit
+
+A separate local-policy scan derived three private identifiers from the operator VM's existing SSH configuration without printing or persisting their values.
+
+It scanned:
+
+- the complete current working tree
+- every commit reachable from all refs
+
+Result:
+
+`PRIVATE_IDENTIFIER_CURRENT_AND_HISTORY=PASS terms=3`
+
+No private identifier value was printed or committed.
+
+### Normalizer validation
+
+The operator VM initially lacked the normalizer's required Python 3.13 runtime. Versioned Python 3.13 was installed through Homebrew on the operator VM only, and pytest 8 was installed into a temporary isolated environment.
+
+The first consolidated invocation ran pytest from repository root without selecting the component's `pyproject.toml`; collection therefore could not resolve the `src` package. This was an invocation error, not a source/test failure.
+
+The corrected explicit component-config invocation returned:
+
+- 73 tests passing
+- `PUBLIC REPO GATE: PASS`
+
+Generated local bytecode caches from the failed invocation were removed, and the final run used bytecode-disabled/isolated-cache modes. No generated artifact remained in the repository.
+
+### GX10 validation
+
+Final results:
+
+- 42 tests passing
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
+
+This covers source/configuration, SQLite, systemd, platform/Ollama contracts, model-store installation, activation refusal/order/rollback, syntax, modes, and GX10 public safety.
+
+### Collector repository-only validation
+
+Using documentation-only synthetic values and mode-private temporary password files:
+
+- `COLLECTOR_CONFIG_RENDER=PASS`
+- source and rendered YAML parsed successfully
+- all four dashboard JSON resources parsed
+- collector Python source compiled under Python 3.13 with an isolated bytecode cache
+- Bash/POSIX shell syntax checks passed
+- synthetic AI-result gate valid/invalid record behavior passed
+- dashboard capture count, loopback HTTPS base-URL restriction, and clean-payload construction passed
+
+Live-only/package-manager/systemd/ClickHouse/Grafana/ACME checks were not executed on the macOS operator VM. Their previously journaled independent live results remain authoritative, and clean-machine collector execution remains deferred.
+
+### Git integrity and public topology
+
+Final results:
+
+- `git diff --check` passed
+- `git fsck --full --strict` passed
+- 118 reachable commits scanned during acceptance
+- exactly one public branch: `main`
+- zero public tags
+- remote default branch: `main`
+- public `main` matched the locally validated published checkpoint before these acceptance changes
+- `PUBLIC_REMOTE_TOPOLOGY_AND_HEAD=PASS`
+
+The final publication step must repeat the remote equality check after pushing the acceptance/final milestone commits.
+
+### Read-only reference revalidation
+
+Collector:
+
+- authenticated SSH alias succeeded
+- SSH, Vector, ClickHouse, and Grafana core units were active
+- `COLLECTOR_CORE_RUNTIME_READONLY=PASS`
+
+GX10:
+
+- authenticated SSH alias succeeded
+- `GX10_PLATFORM_VERIFY=PASS`
+- `GX10_OLLAMA_VERIFY=PASS`
+
+The GX10 recheck did not call the API, run inference, pull models, or read model blob contents.
+
+No reference-system file or service state was changed.
+
+### Acceptance boundary
+
+Aggregate repository marker:
+
+`FINAL_REPOSITORY_ONLY_ACCEPTANCE=PASS`
+
+Passed:
+
+- public implementation/package completeness
+- repository-only tests and structural gates
+- current-tree and reachable-history sanitation
+- documentation links/current-state authority
+- Git integrity and public topology
+- read-only reference connectivity/core-state revalidation
+
+Deferred, not passed:
+
+- clean collector execution on disposable Debian 13 amd64
+- clean GX10 execution on disposable Ubuntu 24.04 arm64 GX10-class hardware
+- full disposable two-host execution of `docs/TWO_SERVER_REBUILD.md`
+
+### Safety boundary
+
+This item:
+
+- installed Python 3.13 only on the operator VM for the required test runtime
+- used only synthetic temporary renderer/test inputs
+- did not print or persist private connection values
+- did not read production logs, databases, credentials, keys, or model blob contents
+- did not call Ollama or run inference
+- did not execute fetch, ingest, enrichment, or result production
+- did not write either reference system
+- did not change reference-system service state
+
+### Next action
+
+Publish this acceptance checkpoint and independently verify GitHub.
+
+Then publish execution-order item 16 as the final rebuild milestone, preserving the two clean-host validation deferrals and advancing future implementation only through a new explicit `NEXT` item.

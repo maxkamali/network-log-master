@@ -2429,3 +2429,78 @@ Execution-order item 10 is now the single `NEXT` item:
 Run final collector public sanitation and close the collector rebuild milestone.
 
 The final collector sanitation step must re-check the complete tracked collector/public documentation state rather than only the files changed by item 9.
+
+## 2026-08-22 20:56 PDT - Item 10 collector public sanitation and milestone closure
+
+### Status
+
+`DONE` — execution-order item 10 is complete.
+
+Item 11 becomes the single `NEXT` item pending the operator decision on availability of a disposable clean Debian 13 amd64 validation system.
+
+### Final sanitation
+
+The final sanitation audit covered the current tracked repository and complete Git history reachable from public `main`.
+
+Validated public topology:
+
+- one public branch: `main`
+- zero public tags
+
+Current tracked state:
+
+- `tracked_file_count=87`
+- `ITEM10A_TRACKED_PATH_SANITATION=PASS`
+- `ITEM10A_COLLECTOR_SYNTAX=PASS`
+- public repository gate passed with five local forbidden terms
+
+Public-main history:
+
+- `historical_unique_blob_count=205`
+- `collector_doc_history_blob_count=151`
+- all sensitive-history finding counts were zero
+- `ITEM10A_PUBLIC_MAIN_HISTORY_SANITATION=PASS`
+
+Current-head validation:
+
+- `ITEM10A_CURRENT_TRACKED_SANITATION=PASS`
+
+Final result:
+
+`ITEM10A_FINAL_SANITATION_AUDIT=PASS`
+
+### Audit-tool corrections
+
+Two read-only validator defects failed safely.
+
+First, a zero-tag repository caused a `grep -v` pipeline to return nonzero under `set -o pipefail`.
+
+Second, the audit initially looked for the local forbidden-term policy at repository root instead of the actual untracked path:
+
+`components/normalizer/.public-gate-local.txt`
+
+Both were diagnosed without repository changes before the final successful audit.
+
+The staged closure validator also initially classified the documentation placeholder describing a home-directory path as a hardcoded identity. That closure attempt rolled back completely.
+
+The corrected closure preserves the strict home-directory identity scanner and avoids adding such a placeholder.
+
+### Safety boundary
+
+No package installer, runtime installer, transport bootstrap, or runtime verifier was executed during item 10.
+
+No clean-machine rebuild was executed.
+
+No production credential, SSH key, certificate private key, private username, deployment-specific address, raw production log content, or deployment firewall policy was published.
+
+### Collector milestone
+
+The public collector rebuild-package, operator documentation, and public sanitation milestone is closed.
+
+Clean-machine end-to-end rebuild execution remains a separate validation gate and is not represented as completed.
+
+### Next action
+
+Item 11 is the next execution-order gate.
+
+If a disposable clean Debian 13 amd64 system is unavailable, item 11 may be explicitly deferred by operator decision and execution can advance to GX10 reconstruction without claiming clean-machine validation.

@@ -389,7 +389,9 @@ Collector installer structural, credential-exposure, dependency, failure-cleanup
 
 The operator-facing clean-machine rebuild runbook is complete and validated.
 
-Execution-order item 9 is complete. The next collector phase is final public-repository sanitation and collector milestone closure, followed by clean-machine end-to-end rebuild validation when practical.
+The public collector rebuild-package and documentation milestone is closed after final current-state and public-history sanitation.
+
+Clean-machine end-to-end collector rebuild validation remains a separate follow-up gate in execution-order item 11.
 
 Do not skip ahead without updating `docs/CURRENT_STATE.md` first.
 

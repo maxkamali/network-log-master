@@ -1,6 +1,6 @@
 # Collector rebuild checkpoint
 
-Status: validated public capture checkpoint. Final clean-machine integration is still in progress.
+Status: public collector rebuild package, sanitation, and operator documentation complete. Clean-machine end-to-end validation remains pending.
 
 ## Execution authority
 
@@ -401,11 +401,62 @@ Validation completed with:
 
 No package installer, runtime installer, or runtime verifier was executed as part of the documentation milestone.
 
+## Item 10 public sanitation and milestone closure
+
+Final public sanitation completed against the current tracked repository and the complete Git history reachable from public `main`.
+
+Validated public-ref topology:
+
+- one public branch: `main`
+- zero public tags
+
+Current tracked-state validation confirmed:
+
+- no tracked local forbidden-term policy file
+- no sensitive-key/database/temporary artifact paths
+- no tracked backup or Python-bytecode artifacts
+- collector shell syntax passes
+- collector Python syntax passes
+- captured Grafana JSON parses successfully
+- public repository gate passes with five local forbidden terms
+
+Public `main` history validation covered 205 unique historical blobs, including 151 collector/documentation history blobs.
+
+Historical finding counts were all zero for:
+
+- local forbidden terms in paths
+- sensitive artifact paths
+- local forbidden terms in blob content
+- local forbidden terms in commit messages
+- private-key material
+- certificate material
+- SSH authorized-key material
+- recognized credential tokens
+- URL-embedded credentials
+- unapproved IPv4 addresses in collector/documentation history
+- unapproved IPv6 addresses in collector/documentation history
+- unapproved email addresses in collector/documentation history
+- hardcoded user-specific home-directory identity paths
+
+Two sanitation-tool defects failed safely and did not modify repository content:
+
+1. the first public-tag counter used `grep -v` under `set -o pipefail`; a repository with zero tags therefore terminated the audit before the count was printed
+2. the first local-policy assertion looked for `.public-gate-local.txt` at repository root, while the actual untracked policy file used by the gate is `components/normalizer/.public-gate-local.txt`
+
+Both validator defects were diagnosed and corrected before the final sanitation pass.
+
+Final validation marker:
+
+- `ITEM10A_FINAL_SANITATION_AUDIT=PASS`
+
+The public collector rebuild-package/documentation milestone is therefore closed.
+
+Clean-machine end-to-end collector rebuild execution remains a separate validation gate.
+
 ## Detailed remaining collector work
 
 Use `docs/CURRENT_STATE.md` for the authoritative ordering/status. The remaining collector work currently consists of:
 
-- final staged public-repository sanitation and collector milestone closure
 - clean-machine end-to-end collector rebuild validation when practical
 
 ## GX10 remaining milestone

@@ -715,3 +715,149 @@ This supplements rather than replaces the existing journal-after-each-completed-
 ### Next action
 
 Run a non-destructive behavioral proof of the systemd condition-guard and temporary authorization mechanism using a synthetic temporary unit. Do not touch collector services during that proof.
+
+## 2026-08-22 19:09 PDT - Package no-autostart synthetic behavior proof passed
+
+### Status
+
+`IN PROGRESS` — package no-autostart implementation has now passed its synthetic systemd behavioral proof, but the overall sub-section is not yet marked complete.
+
+`docs/CURRENT_STATE.md` item 7 remains the single `NEXT` item until the final implementation/documentation/public-safety checkpoint is completed.
+
+### Behavioral proof goal
+
+Validate the systemd `ConditionPathExists` hold-and-temporary-authorization mechanism used by the package/runtime installer design without starting, stopping, restarting, enabling, or disabling any real collector service.
+
+### Proof method
+
+A synthetic temporary oneshot systemd unit was created entirely under `/run`.
+
+The synthetic unit used the same behavioral contract as the collector package guards:
+
+`ConditionPathExists=/run/collector-rebuild-no-autostart-proof/runtime-service-start-authorized`
+
+The proof did not execute either clean-machine installer.
+
+### Test results
+
+#### Guard without authorization
+
+Starting the synthetic service without the authorization token:
+
+- did not execute the service payload
+- left the unit inactive
+- produced `ConditionResult=no`
+
+Result:
+
+`SYSTEMD_GUARD_BLOCK=PASS`
+
+#### Temporary authorization
+
+Creating the temporary authorization token and starting the synthetic service:
+
+- allowed the service payload to execute
+- allowed the service to become active
+- produced `ConditionResult=yes`
+
+The token was then removed while the service remained active.
+
+Result:
+
+`SYSTEMD_TEMPORARY_AUTHORIZATION=PASS`
+
+#### Guard reassertion
+
+With the persistent guard still installed and the authorization token removed, a subsequent restart attempt:
+
+- did not execute the service payload
+- returned the unit to inactive state
+- re-evaluated the condition as false
+
+Result:
+
+`SYSTEMD_GUARD_REASSERTION=PASS`
+
+This proves that temporary authorization does not permanently bypass the persistent hold.
+
+#### Permanent release
+
+After removing the synthetic condition drop-in and reloading systemd:
+
+- the service started normally
+- the service payload executed
+- no authorization token was required
+
+Result:
+
+`SYSTEMD_FINAL_RELEASE=PASS`
+
+### Cleanup proof
+
+All synthetic artifacts were removed after the test:
+
+- temporary unit
+- temporary condition drop-in
+- proof authorization token
+- proof execution marker
+- proof runtime directory
+
+Result:
+
+`synthetic_artifact_cleanup=PASS`
+
+The real collector authorization-token path remained absent.
+
+### Working collector safety proof
+
+Before the synthetic test, active/enabled state was captured for:
+
+- `ssh.service`
+- `ssh.socket`
+- `vector.service`
+- `clickhouse-server.service`
+- `grafana-server.service`
+
+The same state was checked afterward.
+
+No active or enabled state changed for any real collector unit.
+
+Result:
+
+`collector_service_state_unchanged=PASS`
+
+### Final behavioral validation
+
+Passed:
+
+- `live_service_state_captured=PASS`
+- `synthetic_guard_installed=PASS`
+- `SYSTEMD_GUARD_BLOCK=PASS`
+- `SYSTEMD_TEMPORARY_AUTHORIZATION=PASS`
+- `SYSTEMD_GUARD_REASSERTION=PASS`
+- `SYSTEMD_FINAL_RELEASE=PASS`
+- `synthetic_artifact_cleanup=PASS`
+- `collector_service_state_unchanged=PASS`
+- `SYSTEMD_NO_AUTOSTART_BEHAVIOR_PROOF=PASS`
+- `repository_unchanged=PASS`
+- `PACKAGE_NO_AUTOSTART_SYNTHETIC_PROOF=PASS`
+
+### Implementation checkpoint
+
+The implementation under test is already published at:
+
+`2f40156af9b610cddf552ae83753db9973cdc369` — `Checkpoint package no-autostart hardening`
+
+That checkpoint contains the package/runtime implementation, ADR-013, and the earlier in-progress recovery journal entry.
+
+### Next action
+
+Run the final package no-autostart sub-section checkpoint:
+
+1. perform final installer structural and failure-path validation
+2. update durable collector documentation and `docs/CURRENT_STATE.md`
+3. move item 7 to `DONE`
+4. make item 8 the single `NEXT` item
+5. run the public repository gate
+6. commit and push the completed implementation/documentation state
+7. append and push the completion journal entry before beginning item 8

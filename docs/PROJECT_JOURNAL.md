@@ -3289,3 +3289,172 @@ Use read-only discovery focused on:
 Do not recursively dump source contents or production records.
 
 First identify candidate files by path class, size, mode, owner class, and hash; then inspect candidates individually.
+
+## 2026-08-23 11:56 PDT - GX10 item 12E downstream candidate discovery
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+A privileged but read-only filesystem discovery pass searched for the GX10 implementation downstream of the already-captured spool fetcher.
+
+No candidate source text, application database records, SSH material, environment values, or source-derived network addresses were printed.
+
+### Discovery scope and noise classification
+
+The broad classifier returned 154 candidates.
+
+Most are not GX10 observability-pipeline components.
+
+A large fraction came from NVIDIA profiling and SDK trees because generic search markers such as:
+
+- return/result terminology
+- incident/correlation terminology
+- SQLite terminology
+
+also occur naturally in vendor tooling.
+
+Those vendor SDK matches must not be interpreted as pipeline dependencies.
+
+The discovery pass was useful for locating a small number of custom executables, but future inspection should be targeted rather than recursively scanning vendor software.
+
+### Established fetcher
+
+The previously captured spool-fetch component remained unchanged.
+
+SHA-256:
+
+`662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
+
+Its existing provenance and semantic contract remain authoritative.
+
+### Custom downstream candidate A
+
+A separate root-owned custom Python executable was found with:
+
+- mode `0755`
+- 9372 bytes
+- Python syntax validation passing
+- spool-input marker present
+- SQLite-state marker present
+- result/return terminology present
+
+SHA-256:
+
+`6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
+
+Its live filename indicates a local ingest role, but that role has not yet been independently reconstructed from its source semantics.
+
+The identity-bearing live filename is intentionally not copied into the public journal.
+
+### Custom downstream candidate B
+
+A second root-owned custom Python executable was found with:
+
+- mode `0755`
+- 23011 bytes
+- Python syntax validation passing
+- SQLite-state marker present
+- result/return terminology present
+
+SHA-256:
+
+`6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+
+Its live filename indicates an enrichment role, but its current semantic behavior has not yet been independently reconstructed from source.
+
+The identity-bearing live filename is intentionally not copied into the public journal.
+
+### Ollama/model discovery result
+
+The scan reported six Ollama-marker candidates.
+
+The visible matches were associated with Ollama service configuration, Open WebUI service/configuration, and related UI/container configuration rather than the two custom downstream pipeline executables.
+
+The broad scan reported:
+
+- zero model-reference candidates
+- zero explicit enrichment-content-marker candidates
+- zero known-suppression-literal candidates
+
+These zero counts are search results, not proof that the custom enrichment implementation lacks deterministic enrichment or suppression logic.
+
+Static search can miss:
+
+- constructed strings
+- regex fragments
+- identifiers encoded differently from the search patterns
+- logic expressed without those literal terms
+
+The custom candidate must therefore be inspected directly.
+
+### Current architecture inference boundary
+
+The discovery pass does not establish that production Ollama orchestration is wired into the GX10 observability pipeline.
+
+It establishes only that:
+
+- Ollama itself is installed and active from earlier inventory
+- the broad custom-code search did not locate an obvious pipeline-side Ollama/model invocation
+- two custom downstream Python executables exist and are higher-signal than the vendor SDK matches
+
+No claim about active LLM orchestration should be made until the targeted custom-code inspection is complete.
+
+### Safety boundary
+
+The discovery pass:
+
+- used read-only source inspection
+- did not execute candidate programs
+- did not open production SQLite databases
+- did not scan the private SSH directory
+- did not read SSH keys
+- did not read known-host entries
+- did not contact SFTP
+- did not send an Ollama request
+- did not modify the GX10 filesystem
+
+Incidental Python `SyntaxWarning` messages from NVIDIA SDK scripts were produced while classifying vendor files.
+
+They are unrelated to the custom GX10 implementation and are not pipeline failures.
+
+### Item 12E conclusion
+
+The broad discovery phase is complete.
+
+The next useful targets are the two custom downstream Python executables identified by hashes:
+
+- `6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
+- `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+
+Further broad recursive discovery would add noise rather than materially improve implementation capture.
+
+### Next action
+
+Continue item 12 with targeted, read-only structural inspection of the two custom downstream candidates.
+
+Inspect the local-ingest candidate first to establish:
+
+- compressed-file consumption behavior
+- JSONL line-size limits
+- required input fields
+- timestamp handling
+- exact-event preservation
+- SQLite table creation and schema
+- idempotency key
+- incoming-to-processed file movement
+- failure/retry semantics
+
+Then inspect the enrichment candidate for:
+
+- classification version
+- enrichment table schema
+- attention-eligibility default
+- suppression rules
+- vendor/protocol classifiers
+- entity-key construction
+- state/signal mappings
+- repeat handling
+- any actual model/Ollama invocation
+
+Do not execute either candidate or read production database rows during structural inspection.

@@ -8,7 +8,7 @@ Read and verify in this order before changing implementation:
 
 1. `docs/ARCHITECTURE.md` — understand the intended two-server system and ownership boundaries.
 2. `docs/CURRENT_STATE.md` — establish what is actually complete, what is incomplete, and the strict execution order. This file is the authority for the single `NEXT` item.
-3. The relevant component rebuild status — currently `components/collector/REBUILD_STATUS.md` while the collector milestone is active.
+3. The relevant component rebuild status — currently `components/gx10/REBUILD_STATUS.md` while the GX10 milestone is active.
 4. The latest entries in `docs/PROJECT_JOURNAL.md` — understand recent decisions, failed approaches, validation evidence, and checkpoint history.
 5. `docs/DECISIONS.md` — review durable architecture decisions that constrain implementation choices.
 6. `docs/DATA_CONTRACTS.md` and `docs/OPERATIONS.md` — confirm data and operational contracts for the area being changed.

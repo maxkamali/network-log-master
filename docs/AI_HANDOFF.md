@@ -7,7 +7,7 @@ Use this file to resume the project safely in a fresh AI session.
 1. `docs/START_HERE.md`
 2. `docs/ARCHITECTURE.md`
 3. `docs/CURRENT_STATE.md`
-4. the active component rebuild status — currently `components/collector/REBUILD_STATUS.md`
+4. the active component rebuild status — currently `components/gx10/REBUILD_STATUS.md`
 5. the latest entries in `docs/PROJECT_JOURNAL.md`
 6. `docs/DECISIONS.md`
 7. `docs/DATA_CONTRACTS.md`
@@ -102,53 +102,24 @@ Grafana 13.1.1 was also verified to support `grafana cli admin reset-admin-passw
 
 Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
-Secure Grafana administrator bootstrap wiring in `components/collector/install/install-runtime.sh` is complete.
+GX10 live-system rediscovery is complete through item 12N and the final closure audit.
 
-The implementation now uses:
+The proven automatic application chain is:
 
-- operator-supplied private `GRAFANA_ADMIN_PASSWORD_FILE`
-- loopback-only first Grafana startup on `127.0.0.1:3000`
-- explicit bootstrap health/listener verification
-- administrator reset through `--password-from-stdin`
-- explicit packaged Grafana config and `/var/lib/grafana` data targeting
-- execution as the `grafana` service account from `/usr/share/grafana`
-- database integrity/ownership verification
-- cleanup of the bootstrap-only systemd override on success or failure
+`timer -> fetch -> ingest`
 
-A temporary-database proof verified that explicit CLI data targeting changes only the selected temporary Grafana database; the working collector administrator password hash was unchanged.
+Preserve these rediscovery boundaries:
 
-Dashboard reconstruction wiring in the clean-machine runtime installer is complete.
+- deterministic enrichment exists but has no discovered automatic invocation
+- Ollama is active with six complete models but has no discovered application-specific observability-pipeline caller
+- the collector result-return boundary exists but has no discovered GX10 producer
+- the original SQLite/bootstrap initializer did not survive the bounded search; reconstruct from the captured effective schema
 
-The installer now:
+The active component authority is `components/gx10/REBUILD_STATUS.md`.
 
-- requires the dashboard API scripts and all four captured dashboard resources
-- waits for normal Grafana HTTPS health
-- verifies both ClickHouse datasources before dashboard work
-- restores through loopback HTTPS using the private administrator password file
-- creates missing dashboards and leaves exact matches unchanged
-- does not automatically replace divergent existing dashboards
-- runs `verify-dashboards.py` after restore
-- uses Python `-B` for both runtime dashboard commands
+Begin public reconstruction with its first bounded subsection: define the public-safe operator input plus filesystem/runtime identity contract. Do not execute clean-machine installers against either working reference system.
 
-Package-install no-autostart protection is complete.
-
-The package/runtime contract now uses:
-
-- a temporary `policy-rc.d` during package transactions
-- persistent systemd condition guards for Vector, ClickHouse, and Grafana
-- preservation of an already-active SSH management plane
-- guarded delayed SSH start when SSH was initially inactive
-- short-lived authorization for ClickHouse bootstrap and loopback Grafana bootstrap
-- `EXIT` cleanup of the temporary authorization token
-- permanent collector-guard release only at final configured-service activation
-
-A synthetic systemd unit proved unauthorized blocking, temporary authorization, guard reassertion after token removal, and normal start after final guard removal. Real collector service state was unchanged.
-
-The next implementation task is the full collector installer structural, credential-exposure, and public-safety validation gate.
-
-Do not execute either clean-machine installer against the working collector.
-
-After that validation sub-section completes, update and push `docs/PROJECT_JOURNAL.md` before proceeding to final collector operator/rebuild documentation.
+After the subsection validates, append and push `docs/PROJECT_JOURNAL.md` before proceeding.
 
 ## Working method
 

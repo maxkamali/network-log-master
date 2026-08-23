@@ -25,7 +25,12 @@ Current state:
 - secure backlog fetch and durable ingest are operational
 - replay/idempotency protections exist in the ingest path
 - transitional deterministic enrichment exists and is useful as a migration parity reference
-- secure AI-result return transport is proven
+- the proven automatic chain is `timer -> fetch -> ingest`
+- deterministic enrichment has no discovered automatic invocation mechanism
+- Ollama is active with six complete model manifests, but no application-specific observability-pipeline caller was discovered
+- secure collector-side AI-result return transport is proven, but no GX10 result producer was discovered
 - the long-lived deterministic incident engine and production LLM orchestration remain future build phases
 
 Transitional enrichment should be retired only after collector-side normalization and replay parity are proven.
+
+Live-system rediscovery is complete. The authoritative reconstruction checkpoint, captured contracts, preserved absences, and next implementation order are in `REBUILD_STATUS.md`.

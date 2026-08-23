@@ -196,9 +196,9 @@ Completed validation includes:
 
 ## GX10 state
 
-Status: `IN PROGRESS` — live-system rediscovery is nearly complete; public rebuild implementation has not yet begun.
+Status: `IN PROGRESS` — live-system rediscovery is complete; public rebuild implementation is next.
 
-Durably journaled rediscovery through item 12M has established:
+Durably journaled rediscovery through item 12N and the final closure audit has established:
 
 - Ubuntu 24.04.4 LTS / arm64 / NVIDIA GB10 platform baseline
 - NVIDIA driver and CUDA runtime/compiler baseline
@@ -215,14 +215,17 @@ Durably journaled rediscovery through item 12M has established:
 - Ollama active/enabled service state, executable provenance, loopback listener, model storage, and six complete local model manifests
 - complete effective SQLite schema: 5 application tables, 13 explicit indexes, 3 foreign keys, and zero unexpected schema objects
 - no surviving bounded SQLite/bootstrap initializer artifact
+- complete runtime-account, filesystem ownership/mode, SSH-material metadata, and systemd writable-path contracts
+- Python `3.12.3`, SQLite runtime `3.45.1`, zero third-party Python imports, and exact Python package provenance
+- required external dependencies `sftp`/`openssh-client` and `zstd` with package provenance
 
-Item 12N runtime/filesystem/dependency inspection was executed immediately before the environment-transition pause. Its runtime identity, filesystem ownership/mode, SSH metadata, systemd sandbox, and Python-runtime portions passed, but the external-executable dependency detector incorrectly reported zero external tools despite earlier proven SFTP and Zstandard use.
+The corrected item-12N analyzer resolved command values through helper-function returns and found 5 external-tool source references across 2 dependencies, including 1 SFTP and 2 Zstandard subprocess invocations. Both executables are present and package-owned. Item 12N is complete.
 
-Therefore item 12N is `PARTIAL` and must not be treated as complete until that narrow detector is corrected and rerun.
+The final live closure audit passed. It found exactly one match for each known application/service/timer hash, preserved the timer/service contract, reconfirmed zero systemd/cron enrichment references, verified external dependencies, and passed unchanged postcheck hashes.
 
-Detailed partial evidence and the exact resume procedure are recorded in:
+Detailed reconstruction authority is now in:
 
-`docs/VM_HANDOFF.md`
+`components/gx10/REBUILD_STATUS.md`
 
 The known application hashes remain:
 
@@ -230,6 +233,7 @@ The known application hashes remain:
 - ingest: `6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
 - deterministic enrichment: `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
 - pipeline service unit: `0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
+- pipeline timer unit: `5371995539846d4cca6014a70548e95c942e9f601d0736b06f4bda61c1ccc0f5`
 
 Current rediscovery conclusions that must not be silently changed during reconstruction:
 
@@ -239,24 +243,15 @@ Current rediscovery conclusions that must not be silently changed during reconst
 - the collector result-return boundary exists but no GX10 result producer has been identified
 - missing historical bootstrap/install provenance should be reconstructed from captured effective contracts rather than invented and presented as discovered history
 
-## Execution pause and direct-access VM handoff
+## Direct-access execution environment
 
-Status: `PAUSED FOR EXECUTION-ENVIRONMENT MIGRATION`
+Status: `ACTIVE`
 
-The project is intentionally paused while execution moves to an operator-controlled VM with direct authenticated access to the collector reference system, GX10, and GitHub.
+The project is running from the operator-controlled VM. Public GitHub `main` and authenticated read-only command execution to both reference-system roles were verified before item 12N resumed.
 
-This changes the execution mechanism, not project scope or safety rules.
+The collector VM alias currently omits the captured nonstandard SSH port. Connectivity succeeds with a one-shot override using the already-captured private transport value; the private value is not published. Correcting local SSH convenience configuration is not a repository requirement.
 
-The new VM session must begin by reading `docs/VM_HANDOFF.md`, verifying public `main`, verifying authenticated connectivity to both reference systems, and revalidating the known GX10 artifact hashes before materially continuing.
-
-The first technical action after those preconditions is to correct and rerun only the item-12N external-executable dependency/provenance check. Earlier rediscovery already proves SFTP and Zstandard usage, so a zero external-tool result must not be accepted.
-
-After corrected 12N validation:
-
-1. complete and journal item 12N
-2. run the final GX10 rediscovery closure audit
-3. publish a rediscovery-complete checkpoint
-4. only then begin GX10 public rebuild implementation
+The environment transition, corrected item 12N validation, and rediscovery closure audit are complete. The next technical action is the first public GX10 reconstruction subsection defined in `components/gx10/REBUILD_STATUS.md`.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -273,7 +268,7 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 9. `DONE` — collector README and operator-facing clean-machine rebuild documentation completed and validated.
 10. `DONE` — final collector public sanitation passed and the public collector rebuild-package/documentation milestone was closed.
 11. `DEFERRED` — clean-machine collector rebuild validation remains outstanding because no disposable Debian 13 amd64 validation system is currently available.
-12. `NEXT` — finish GX10 rediscovery, publish the rediscovery-complete checkpoint, then capture and reconstruct the complete GX10 implementation.
+12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package, beginning with the operator-input and filesystem/runtime identity contract.
 13. `NOT STARTED` — validate the GX10 rebuild package and operator documentation.
 14. `NOT STARTED` — reconcile and update full two-server architecture, operations, and rebuild documentation.
 15. `NOT STARTED` — run final repository sanitation and two-server acceptance validation.

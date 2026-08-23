@@ -22,7 +22,7 @@ Production cutover remains a later controlled migration task and is not required
 
 ## Milestone 2 - Collector rebuild package
 
-Status: `IN PROGRESS`
+Status: `DONE` for the public rebuild package and documentation; clean-machine end-to-end validation is deferred pending a disposable Debian 13 amd64 system.
 
 Goal: reconstruct the working collector from public artifacts plus operator-supplied environment values.
 
@@ -45,18 +45,13 @@ Completed capture includes:
 - dashboard restore/verification wiring in the clean-machine runtime installer
 - package-install no-autostart protection with synthetic systemd behavior proof
 
-Remaining collector gates:
-
-1. installer structural, credential-exposure, and public-safety validation
-2. complete collector operator/rebuild documentation
-3. final collector sanitation/publication gate
-4. clean-machine collector rebuild validation when practical
+The installer structural, credential-exposure, public-safety, operator-documentation, and final sanitation gates are complete. Clean-machine collector rebuild validation remains deferred.
 
 Exit gate: another engineer/AI can reconstruct the current collector on a clean server from the repository plus operator-supplied environment values without undocumented implementation memory.
 
 ## Milestone 3 - GX10 rebuild capture
 
-Status: `NOT STARTED`
+Status: `IN PROGRESS` — live-system rediscovery is complete and public reconstruction is next.
 
 Goal: capture and reconstruct the currently functional GX10 implementation before adding new incident-engine architecture.
 
@@ -70,7 +65,7 @@ Required capture includes:
 - replay-safe/idempotent ingest implementation
 - current deterministic enrichment/classification
 - systemd services/timers
-- result-return implementation
+- collector result-return boundary and the verified absence of a discovered GX10 producer
 - restricted transport configuration
 - validation/verifier scripts
 - operator rebuild documentation

@@ -5863,3 +5863,124 @@ Run the final bounded GX10 rediscovery closure audit.
 The closure audit must reconcile the journaled item-12A through item-12N evidence, verify the known live artifact hashes again, bound any remaining application bootstrap/configuration gaps, update durable GX10 rebuild status/current-state documentation, and publish the rediscovery-complete checkpoint.
 
 No GX10 rebuild implementation begins until that closure checkpoint is published.
+
+## 2026-08-23 16:01 PDT - GX10 rediscovery closure complete
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item and now advances from rediscovery to public reconstruction.
+
+The final bounded GX10 live-system rediscovery closure audit passed. Items 12A through 12N now account for the current functional application artifacts, runtime contracts, preserved absences, and effective state required to begin clean-machine reconstruction.
+
+No GX10 rebuild implementation was started before this closure.
+
+### Durable item-12N prerequisite
+
+The completed item-12N runtime/dependency checkpoint was published and independently verified on GitHub at:
+
+`8c06822` — `Journal GX10 runtime dependencies`
+
+### Live closure audit
+
+Authenticated read-only connectivity to both reference-system roles was revalidated.
+
+The final GX10 audit found exactly one live match for each captured critical artifact:
+
+- fetch executable: `1`
+- ingest executable: `1`
+- deterministic-enrichment executable: `1`
+- pipeline service unit: `1`
+- pipeline timer unit: `1`
+
+The exact captured hashes remain:
+
+- fetch: `662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
+- ingest: `6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
+- deterministic enrichment: `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+- pipeline service unit: `0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
+- pipeline timer unit: `5371995539846d4cca6014a70548e95c942e9f601d0736b06f4bda61c1ccc0f5`
+
+The active service/timer contract also passed:
+
+- service `Type=oneshot`
+- service static
+- timer active and enabled
+- service directly references fetch and ingest
+- zero service, other systemd, or cron enrichment references
+- required SFTP and Zstandard executables present and package-owned
+- all five critical hashes unchanged in the postcheck
+- `gx10_rediscovery_live_closure_audit=PASS`
+
+### Evidence reconciliation
+
+The completed rediscovery record now covers:
+
+- Ubuntu/arm64/NVIDIA GB10, driver, CUDA, Python, and SQLite runtime baselines
+- timer/service scheduling, hardening, identity, filesystem-access, and provenance contracts
+- SFTP backlog discovery/fetch/catch-up and Zstandard verification behavior
+- replay-safe streaming ingest, local SQLite behavior, and effective schema
+- deterministic enrichment/classification version 3 and the complete two-rule suppression corpus
+- runtime account, group, directory, ownership, mode, SSH-material metadata, and dependency contracts
+- Ollama service, executable, loopback listener, model storage, and six complete model manifests
+- absence of a surviving bounded base-schema/bootstrap initializer
+- absence of a discovered automatic deterministic-enrichment invocation
+- absence of a discovered application-specific observability-pipeline Ollama caller
+- absence of a discovered GX10 producer for the collector result-return boundary
+
+No open rediscovery target remains that blocks faithful public reconstruction of the currently proven GX10 state.
+
+### Durable documentation update
+
+Created `components/gx10/REBUILD_STATUS.md` as the active component recovery authority.
+
+Updated:
+
+- `components/gx10/README.md`
+- `docs/START_HERE.md`
+- `docs/CURRENT_STATE.md`
+- `docs/AI_HANDOFF.md`
+- `docs/ROADMAP.md`
+
+The documents now record the captured contracts, private-input boundary, preserved rediscovery conclusions, and bounded reconstruction order.
+
+`docs/CURRENT_STATE.md` continues to contain exactly one `NEXT` item. Item 12 now directs reconstruction to begin with the public-safe operator-input and filesystem/runtime identity contract.
+
+### Credential-file boundary
+
+The operator identified an external GitHub token file under the VM's `Dev` area. The file was not read. A presence-only check confirmed it is outside the repository, and no `token.txt` is tracked or present in the repository working tree.
+
+GitHub operations continued through the already-working VM credential setup.
+
+### Safety boundary
+
+The closure audit:
+
+- did not execute a pipeline component
+- did not open the production application database or read production event rows
+- did not read SSH private-key or known-hosts contents
+- did not print private paths, identities, addresses, ports, or credentials
+- did not call Ollama or run inference
+- did not write to either reference system or change service state
+
+### Rediscovery closure conclusion
+
+GX10 live-system rediscovery is complete.
+
+The following distinctions are reconstruction requirements, not unresolved discovery tasks:
+
+- automatic application behavior is `timer -> fetch -> ingest`
+- deterministic enrichment exists without a discovered automatic schedule
+- Ollama/model infrastructure exists without a discovered observability-pipeline caller
+- the collector result-return boundary exists without a discovered GX10 producer
+- missing historical bootstrap/install provenance must be reconstructed from captured effective contracts rather than invented as recovered history
+
+### Next action
+
+Begin the first bounded public GX10 reconstruction subsection:
+
+1. define operator-supplied private inputs
+2. define the dedicated runtime identity contract
+3. define public-safe filesystem roles, ownership, and modes
+4. add structural/public-safety validation for that contract
+
+Do not execute clean-machine installation logic against the working GX10 reference system.

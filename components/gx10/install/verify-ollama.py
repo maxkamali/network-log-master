@@ -6,6 +6,7 @@ import ipaddress
 import json
 import os
 import pwd
+import re
 import stat
 import subprocess
 import sys
@@ -49,6 +50,7 @@ EXPECTED_MANIFESTS = {
 OLLAMA_BINARY = Path('/usr/local/bin/ollama')
 OLLAMA_UNIT = Path('/etc/systemd/system/ollama.service')
 MODEL_ROOT = Path('/usr/share/ollama/.ollama/models')
+SHA256_DIGEST_RE = re.compile(r'^sha256:([0-9a-f]{64})$')
 
 
 def file_sha256(path):
@@ -76,15 +78,18 @@ def validate_file(path, uid, gid, mode, size=None, digest=None):
         raise ValueError('required Ollama artifact has unexpected hash')
 
 
-def validate_model_blob(path, expected_size):
+def validate_model_blob(path, expected_size, expected_digest=None, hash_content=False):
     path = Path(path)
     if path.is_symlink() or not path.is_file():
         raise ValueError('missing or invalid Ollama blob')
     if path.stat().st_size != expected_size:
         raise ValueError('missing or invalid Ollama blob')
+    if hash_content:
+        if expected_digest is None or file_sha256(path) != expected_digest:
+            raise ValueError('Ollama blob hash differs')
 
 
-def verify_model_store(model_root=MODEL_ROOT):
+def verify_model_store(model_root=MODEL_ROOT, hash_blobs=False):
     manifest_root = model_root / 'manifests'
     blob_root = model_root / 'blobs'
     if not manifest_root.is_dir() or not blob_root.is_dir():
@@ -95,6 +100,7 @@ def verify_model_store(model_root=MODEL_ROOT):
         raise ValueError('unexpected Ollama manifest count')
 
     observed = set()
+    hashed_blobs = set()
     for path in manifests:
         if path.is_symlink():
             raise ValueError('unexpected symbolic-link Ollama manifest')
@@ -120,12 +126,25 @@ def verify_model_store(model_root=MODEL_ROOT):
         for descriptor in descriptors:
             digest = descriptor.get('digest')
             size = descriptor.get('size')
-            if not isinstance(digest, str) or not digest.startswith('sha256:'):
+            digest_match = (
+                SHA256_DIGEST_RE.fullmatch(digest)
+                if isinstance(digest, str)
+                else None
+            )
+            if digest_match is None:
                 raise ValueError('invalid Ollama blob digest')
             if not isinstance(size, int) or size < 0:
                 raise ValueError('invalid Ollama blob size')
             blob = blob_root / digest.replace(':', '-')
-            validate_model_blob(blob, size)
+            verify_hash = hash_blobs and blob not in hashed_blobs
+            validate_model_blob(
+                blob,
+                size,
+                expected_digest=digest_match.group(1),
+                hash_content=verify_hash,
+            )
+            if verify_hash:
+                hashed_blobs.add(blob)
             declared_bytes += size
         if declared_bytes != expected_bytes:
             raise ValueError('unexpected Ollama declared bytes')
@@ -155,6 +174,11 @@ def verify_listener():
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--offline', action='store_true')
+    parser.add_argument(
+        '--hash-blobs',
+        action='store_true',
+        help='read and hash each unique model blob against its digest name',
+    )
     return parser.parse_args()
 
 
@@ -185,7 +209,7 @@ def main():
             raise ValueError('Ollama model root has unexpected ownership')
         if stat.S_IMODE(model_details.st_mode) != 0o755:
             raise ValueError('Ollama model root has unexpected mode')
-        verify_model_store()
+        verify_model_store(hash_blobs=args.hash_blobs)
 
         if not args.offline:
             subprocess.run(

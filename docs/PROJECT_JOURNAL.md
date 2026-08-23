@@ -6636,3 +6636,132 @@ This subsection:
 Publish this checkpoint and independently verify GitHub.
 
 Then implement the guarded clean-machine activation and runtime verification flow. It must refuse reference-like/nonempty application state, require every offline prerequisite to validate before activation, preserve the exact automatic chain, and never infer an application-specific Ollama caller.
+
+## 2026-08-23 16:30 PDT - GX10 guarded activation and runtime verification
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The final clean-machine activation boundary is now implemented with reference-like-state refusal, complete offline prerequisite verification, exact ordered activation, and failure rollback.
+
+Added:
+
+- `components/gx10/install/verify-runtime.py`
+- `components/gx10/install/activate-runtime.py`
+- `components/gx10/tests/test_runtime_activation.py`
+
+### Preactivation runtime gate
+
+Before service state can change, the runtime verifier requires:
+
+- the exact neutral runtime identity, primary group, home, non-login shell, locked password, and absence of supplementary groups
+- exact public directory ownership and modes
+- real nonsymlinked, single-linked private key, known-hosts, configuration, database, application, and unit files
+- nonempty protected SSH input files
+- an exact three-key runtime configuration with valid host/user/port types, without printing values
+- all installed application and pipeline unit bytes identical to their repository sources
+- SQLite `quick_check=ok`
+- the exact public reconstructed SQLite schema and suppression corpus
+- SQLite `user_version=0` and `application_id=0`
+- zero rows in all four application state/event tables
+- empty incoming, processed, and temporary spool directories
+- no SQLite journal/WAL/shared-memory sidecars
+- all three required systemd units loaded from the exact public fragment paths
+- zero systemd drop-ins for the pipeline service, timer, and Ollama
+- the pipeline service static
+- the pipeline timer and Ollama disabled
+- all three runtime units inactive
+- captured effective Ollama hard/soft file-descriptor limits
+
+These checks make accidental execution against an already-used or reference-like deployment fail before activation.
+
+### Full offline model gate
+
+The Ollama verifier now supports `--hash-blobs`.
+
+In addition to the previously validated manifest/path/config/size contract, that mode:
+
+- accepts only canonical lowercase SHA-256 descriptor syntax
+- hashes each unique referenced blob once
+- compares its content digest with the digest declared by the manifest
+
+The activator always combines `--offline` with `--hash-blobs` before starting Ollama. This can be expensive for the captured model inventory, but it ensures that a correctly named and sized corrupt blob cannot pass activation.
+
+The live reference was not subjected to this content-hashing mode. No live model blob contents were read during this subsection.
+
+### Activation authorization and order
+
+Activation requires root and two exact independent confirmations:
+
+- `CLEAN_INSTALL_CONFIRM=YES-CLEAN-GX10`
+- `GX10_ACTIVATE_CONFIRM=ENABLE-VERIFIED-GX10`
+
+The activator then runs:
+
+1. platform verification
+2. preactivation runtime verification
+3. offline Ollama verification with full blob hashing
+4. enable/start Ollama
+5. wait for exact active Ollama verification
+6. enable/start the pipeline timer
+7. active runtime verification
+8. final active Ollama verification
+
+Only these units become enabled:
+
+- `ollama.service`
+- `network-log-gx10.timer`
+
+The pipeline service remains static. Its captured unit still contains only fetch followed by ingest. Deterministic enrichment remains unscheduled.
+
+### Failure rollback
+
+If a post-preflight activation step fails, the activator:
+
+- stops a potentially triggered pipeline service when the timer had been entered
+- disables/stops changed units in reverse order
+- returns failure instead of claiming a partial activation passed
+
+Preactivation failures make no service-state change.
+
+### Validation
+
+The full GX10 suite now reports:
+
+- 39 tests passing
+- exact empty initialized database accepted
+- nonempty application state refused
+- unexpected schema object refused
+- preexisting spool content refused
+- both confirmation phrases required
+- activation order fixed as Ollama then timer
+- full blob hashing required by activation
+- valid model content hash accepted and mismatch refused
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- shell and Python syntax validation passing
+
+### Safety boundary
+
+This subsection:
+
+- used only temporary synthetic SQLite databases and model-blob fixtures
+- did not execute the activator or runtime verifier against GX10
+- did not read the production application database
+- did not read live model blob contents
+- did not call the Ollama API, pull a model, or run inference
+- did not execute fetch, ingest, or deterministic enrichment
+- did not enable, disable, start, stop, or restart any reference-system unit
+- did not write to either reference system
+
+### Clean-machine validation status
+
+The scripts are synthetically validated but have not been executed end to end on a disposable Ubuntu 24.04 arm64 GX10-class host.
+
+That remains a later validation gate rather than being falsely marked complete.
+
+### Next action
+
+Publish this activation checkpoint and independently verify GitHub.
+
+Then write the complete clean-machine GX10 operator runbook, perform the final item-12 structural/public-safety audit, and close the public rebuild-package milestone without claiming disposable-host validation.

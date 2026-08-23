@@ -34,9 +34,15 @@ Completed:
 - sanitized Ollama unit preserving the captured service contract
 - offline six-manifest/model-blob verifier and active loopback runtime verifier
 - live read-only `GX10_PLATFORM_VERIFY=PASS` and `GX10_OLLAMA_VERIFY=PASS`
-- 31 synthetic tests passing
+- complete preactivation verifier with reference-like/nonempty-state refusal
+- exact installed-source, configuration, SQLite, filesystem, systemd, and effective-limit verification
+- dual-confirmation activator with full offline blob hashing, ordered enablement, and failure rollback
+- only Ollama and the fetch/ingest timer are activated; deterministic enrichment remains unscheduled
+- 39 synthetic tests passing
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.
+
+The activation flow also refuses nonempty spool directories, any application-state rows, SQLite sidecar state, altered schema or suppression state, active/enabled runtime units, unexpected unit drop-ins, and installed artifacts that differ from the repository. Clean-machine activation has not been executed because no disposable GX10-class validation target is available.
 
 ## Public-safety boundary
 

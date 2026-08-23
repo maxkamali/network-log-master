@@ -110,3 +110,20 @@ See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boun
 The large model blobs are intentionally not stored in Git. Before activation, the operator must populate the protected model root from an independently obtained offline model store matching the captured contract. `install/verify-ollama.py --offline` verifies the exact six-manifest inventory, manifest references and hashes, config digests, declared bytes, and every referenced blob size without calling the Ollama API. The normal mode additionally requires the service active/enabled and exactly one loopback TCP listener.
 
 No reconstruction artifact creates an application-specific Ollama caller. The proven automatic application chain remains `timer -> fetch -> ingest`.
+
+## Guarded activation and runtime verification
+
+`install/verify-runtime.py --preactivation` validates the complete public filesystem, identity, configuration, exact installed-source, SQLite, systemd fragment/drop-in, effective-limit, inactive-unit, empty-spool, and empty-application-state boundary. It fails if the host resembles an already-used or reference deployment.
+
+`install/activate-runtime.py` requires both clean-install and activation-specific confirmation phrases. It runs the platform, preactivation runtime, exact Ollama binary/unit/model, and full model-blob hash gates before enabling anything. Activation order is Ollama first and the pipeline timer second. If activation or final verification fails, it stops any triggered pipeline service and disables/stops the units it changed.
+
+The model-blob hashing pass reads every unique blob and may take substantial time. It makes no API call and runs no inference.
+
+Successful activation enables exactly:
+
+- `ollama.service`
+- `network-log-gx10.timer`
+
+The pipeline service remains static and deterministic enrichment remains unscheduled. Starting the timer authorizes the proven automatic `fetch -> ingest` behavior, so run activation only after the operator has reviewed the final clean-machine runbook and confirmed the transport endpoint.
+
+Do not run the activation script against the working reference system.

@@ -53,6 +53,26 @@ class OllamaContractTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'invalid Ollama blob'):
                 VERIFIER.validate_model_blob(link, 4)
 
+    def test_model_blob_hash_is_verified_when_requested(self):
+        with tempfile.TemporaryDirectory() as directory:
+            blob = Path(directory) / 'blob'
+            blob.write_bytes(b'blob')
+            VERIFIER.validate_model_blob(
+                blob,
+                4,
+                expected_digest=(
+                    'fa2c8cc4f28176bbeed4b736df569a34c79cd3723e9ec42f9674b4d46ac6b8b8'
+                ),
+                hash_content=True,
+            )
+            with self.assertRaisesRegex(ValueError, 'hash differs'):
+                VERIFIER.validate_model_blob(
+                    blob,
+                    4,
+                    expected_digest='0' * 64,
+                    hash_content=True,
+                )
+
     def test_platform_verifier_uses_captured_cuda_path(self):
         self.assertEqual(
             PLATFORM_VERIFIER.CUDA_COMPILER,

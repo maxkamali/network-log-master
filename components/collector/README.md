@@ -36,10 +36,12 @@ Environment-specific credentials, addresses, usernames, SSH public keys, certifi
 - `install-packages.sh` — clean-machine package installation flow
 - `verify-packages.sh` — independent package/version verifier
 - `render-configs.py` — environment-specific configuration renderer
-- `install-runtime.sh` — clean-machine runtime/configuration installer, still undergoing final Grafana integration
+- `install-runtime.sh` — clean-machine runtime/configuration installer with guarded service release, secure Grafana bootstrap, and dashboard reconstruction
 - `verify-runtime.sh` — independent live runtime verifier
 
 The package verifier passed against the working reference collector with `COLLECTOR_PACKAGE_VERIFY=PASS`.
+
+Package installation now establishes a no-autostart boundary before apt transactions using a temporary Debian `policy-rc.d` guard and persistent systemd condition guards. Runtime configuration releases those guards only at validated start boundaries. Synthetic systemd testing passed with `PACKAGE_NO_AUTOSTART_SYNTHETIC_PROOF=PASS`.
 
 Do not execute `install-runtime.sh` against the working reference collector. It contains a clean-install guard and is intended for reconstruction on a clean machine.
 
@@ -151,11 +153,10 @@ For the detailed list of completed validations, known incomplete work, and clean
 
 `docs/CURRENT_STATE.md` is authoritative. At the current checkpoint the collector sequence is:
 
-1. package-install no-autostart protection
-2. installer/public-safety validation
-3. final collector operator/rebuild documentation
-4. final collector sanitation/milestone closure
-5. clean-machine collector rebuild validation when practical
+1. installer/public-safety validation
+2. final collector operator/rebuild documentation
+3. final collector sanitation/milestone closure
+4. clean-machine collector rebuild validation when practical
 
 Do not skip ahead without updating `docs/CURRENT_STATE.md` first.
 
@@ -169,3 +170,4 @@ Do not skip ahead without updating `docs/CURRENT_STATE.md` first.
 - Private/environment-specific identity stays outside the public repository.
 - Firewall/nftables reconstruction is intentionally out of scope; operator documentation should state required connectivity prerequisites instead.
 - After each completed validated sub-section, append and push a project-journal entry before materially entering the next sub-section.
+- During long or risk-heavy sub-sections, publish validated intermediate recovery checkpoints when they reduce reconstruction risk without prematurely advancing `CURRENT_STATE.md`.

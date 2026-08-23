@@ -118,6 +118,10 @@ The collector rebuild package separates installation from verification:
 - runtime installer: `components/collector/install/install-runtime.sh`
 - independent runtime verifier: `components/collector/install/verify-runtime.sh`
 
+Package installation has a fail-closed no-autostart boundary. Before apt transactions begin, a temporary Debian service-policy guard and persistent systemd condition guards prevent unconfigured collector services from becoming active. Existing active SSH management access is preserved; an initially inactive SSH service is held until the transport configuration validates.
+
+The runtime installer uses short-lived authorization tokens for required bootstrap starts without permanently removing the persistent guard. Vector, ClickHouse, and Grafana guards are removed only at the final configured-service activation boundary. A synthetic systemd proof validated the hold, temporary authorization, reassertion, and final release semantics without changing the working collector's service states.
+
 The runtime installer is intended for a clean collector. Do not execute it against the working reference collector.
 
 Rebuild inputs that are private or environment-specific are supplied by the operator through environment values and/or private files. They are not stored in the public repository.

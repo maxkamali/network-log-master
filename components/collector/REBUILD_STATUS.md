@@ -40,6 +40,20 @@ The package verifier passed against the reference collector:
 
 The rebuild package installer installs explicit captured versions. It does not invent an apt hold policy that is absent from production.
 
+Package-install no-autostart protection is complete. Before apt transactions, the installer installs a temporary `policy-rc.d` deny guard plus persistent systemd condition guards for Vector, ClickHouse, and Grafana. Existing active SSH management access is preserved; otherwise SSH is held until transport configuration is validated.
+
+Runtime installation uses short-lived authorization for required pre-final starts while retaining persistent guards, and permanently releases the collector guards only at final configured-service activation.
+
+Validation includes:
+
+- `PACKAGE_NO_AUTOSTART_FAILURE_PATH_VALIDATION=PASS`
+- `SYSTEMD_GUARD_BLOCK=PASS`
+- `SYSTEMD_TEMPORARY_AUTHORIZATION=PASS`
+- `SYSTEMD_GUARD_REASSERTION=PASS`
+- `SYSTEMD_FINAL_RELEASE=PASS`
+- `collector_service_state_unchanged=PASS`
+- `PACKAGE_NO_AUTOSTART_SYNTHETIC_PROOF=PASS`
+
 ## Configuration renderer
 
 `install/render-configs.py` renders environment-specific configuration using operator-supplied values.
@@ -318,13 +332,24 @@ Grafana dashboard restore/verification is also integrated:
 7. `verify-dashboards.py` independently verifies all four captured resources after restore.
 8. Python `-B` prevents runtime bytecode cache files from being written into the repository.
 
+Package no-autostart protection is integrated across package and runtime installation:
+
+1. A temporary `policy-rc.d` prevents policy-aware package maintainer scripts from starting/restarting services during package transactions.
+2. Persistent systemd condition guards are installed before package transactions for Vector, ClickHouse, and Grafana.
+3. An already-active SSH management plane is preserved rather than deliberately interrupted.
+4. If SSH is initially inactive, service/socket guards hold it until transport configuration and `sshd -t` succeed.
+5. ClickHouse bootstrap uses a short-lived authorization token without permanently removing its guard.
+6. Grafana loopback administrator bootstrap uses the same temporary-authorization mechanism while retaining its persistent guard.
+7. The authorization token is removed after each intentional start and through runtime-installer failure cleanup.
+8. Vector, ClickHouse, and Grafana guards are permanently released only at the final configured-service activation boundary.
+9. A synthetic systemd proof validated block, temporary authorization, reassertion, and final release semantics without changing real collector unit states.
+
 Earlier patch attempts failed safely because of ambiguous anchors and heredoc collisions. Later validation also exposed two useful corrections before publication: Grafana CLI configuration overrides must use `--configOverrides`, and the CLI must run from a working directory traversable by the `grafana` account.
 
 ## Detailed remaining collector work
 
 Use `docs/CURRENT_STATE.md` for the authoritative ordering/status. The remaining collector work currently consists of:
 
-- package-install no-autostart protection
 - installer structural and public-safety validation
 - complete collector README/operator rebuild documentation
 - final staged public-repository sanitation gate

@@ -43,14 +43,14 @@ Completed capture includes:
 - proven API-based dashboard restoration and verification tooling
 - secure Grafana administrator bootstrap wiring with loopback-only first start and stdin password reset
 - dashboard restore/verification wiring in the clean-machine runtime installer
+- package-install no-autostart protection with synthetic systemd behavior proof
 
 Remaining collector gates:
 
-1. package-install no-autostart protection before first configuration
-2. installer structural, credential-exposure, and public-safety validation
-3. complete collector operator/rebuild documentation
-4. final collector sanitation/publication gate
-5. clean-machine collector rebuild validation when practical
+1. installer structural, credential-exposure, and public-safety validation
+2. complete collector operator/rebuild documentation
+3. final collector sanitation/publication gate
+4. clean-machine collector rebuild validation when practical
 
 Exit gate: another engineer/AI can reconstruct the current collector on a clean server from the repository plus operator-supplied environment values without undocumented implementation memory.
 
@@ -149,3 +149,5 @@ After every completed project sub-section:
 3. push the journal update to GitHub
 4. update `docs/CURRENT_STATE.md` when execution order/current state changes
 5. only then proceed materially into the next sub-section
+
+For long or risk-heavy sub-sections, publish intermediate validated recovery checkpoints when useful, while keeping the current `NEXT` item unchanged until the sub-section is complete.

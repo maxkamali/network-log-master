@@ -97,6 +97,8 @@ Important completed collector validation includes:
 - `GRAFANA_CLI_WORKDIR_FIX_VALIDATION=PASS`
 - `GRAFANA_CLI_TEMP_DATABASE_TARGETING=PASS`
 - `GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
+- `PACKAGE_NO_AUTOSTART_FAILURE_PATH_VALIDATION=PASS`
+- `PACKAGE_NO_AUTOSTART_SYNTHETIC_PROOF=PASS`
 
 Detailed component state is in `components/collector/REBUILD_STATUS.md`.
 
@@ -154,6 +156,34 @@ A non-destructive targeting proof used a temporary copy of the Grafana database 
 
 The clean-machine runtime installer itself has not been executed against the working reference collector.
 
+## Package-install no-autostart protection
+
+Status: `DONE` for clean-machine package/runtime installer wiring and synthetic behavioral proof; clean-machine end-to-end execution remains a later collector validation gate.
+
+`install-packages.sh` establishes the package-install safety boundary before apt transactions begin:
+
+- a temporary `policy-rc.d` denies policy-aware package service starts/restarts
+- persistent systemd `ConditionPathExists` guards hold Vector, ClickHouse, and Grafana until runtime configuration deliberately authorizes them
+- an already-active SSH management plane is preserved
+- an initially inactive SSH service/socket pair is held until transport configuration validates
+- package completion verifies guarded collector services remain inactive
+- the temporary `policy-rc.d` is removed after the package transaction
+
+`install-runtime.sh` validates the same guard contract. ClickHouse, an initially inactive SSH service, and loopback-bootstrap Grafana use short-lived authorized starts while their persistent guards remain installed. The authorization token is removed immediately and through `EXIT` cleanup. Vector, ClickHouse, and Grafana guards are permanently removed only at the final configured-service activation boundary.
+
+A synthetic temporary systemd unit proved unauthorized blocking, temporary authorization, guard reassertion after token removal, and normal start after permanent release. All real collector service active/enabled states were unchanged by that proof.
+
+Completed validation includes:
+
+- `PACKAGE_NO_AUTOSTART_PATCH_VALIDATION=PASS`
+- `PACKAGE_NO_AUTOSTART_FAILURE_PATH_VALIDATION=PASS`
+- `SYSTEMD_GUARD_BLOCK=PASS`
+- `SYSTEMD_TEMPORARY_AUTHORIZATION=PASS`
+- `SYSTEMD_GUARD_REASSERTION=PASS`
+- `SYSTEMD_FINAL_RELEASE=PASS`
+- `collector_service_state_unchanged=PASS`
+- `PACKAGE_NO_AUTOSTART_SYNTHETIC_PROOF=PASS`
+
 ## GX10 state
 
 Status: `NOT STARTED` for complete public rebuild capture.
@@ -191,8 +221,8 @@ Long-lived incident correlation and production LLM orchestration remain separate
 4. `DONE` — establish repository recovery/journal operating rules and canonical startup documentation.
 5. `DONE` — secure Grafana administrator bootstrap is wired into `components/collector/install/install-runtime.sh` with private-file input, loopback-only first startup, explicit Grafana CLI path/data targeting, failure cleanup, and non-destructive temporary-database targeting proof.
 6. `DONE` — `restore-dashboards.py` and `verify-dashboards.py` are wired into the clean-machine collector runtime installer after HTTPS health and datasource verification, using loopback HTTPS and the private administrator password file.
-7. `NEXT` — add package-install no-autostart protection so services cannot transiently expose an unconfigured first-start state.
-8. `NOT STARTED` — re-run collector installer structural, credential-exposure, and public-safety validation.
+7. `DONE` — package-install no-autostart protection uses a temporary Debian service-policy guard plus persistent systemd condition guards, with failure-safe runtime authorization and synthetic behavior proof.
+8. `NEXT` — re-run collector installer structural, credential-exposure, and public-safety validation.
 9. `NOT STARTED` — finish collector README and operator-facing clean-machine rebuild documentation.
 10. `NOT STARTED` — run final collector public sanitation and close the collector rebuild milestone.
 11. `NOT STARTED` — perform a clean-machine collector rebuild validation when practical.
@@ -215,3 +245,5 @@ Do not skip ahead unless this execution order is explicitly updated first. Only 
 ## Continuity rule
 
 After each completed project sub-section passes its validation checkpoint, append the result to `docs/PROJECT_JOURNAL.md` and push the journal update to GitHub before materially proceeding into the next sub-section.
+
+For long, risk-heavy, or multi-step sub-sections, publish meaningful validated intermediate implementation/journal checkpoints when they create useful recovery points. Intermediate checkpoints do not advance the single `NEXT` item until the sub-section is actually complete.

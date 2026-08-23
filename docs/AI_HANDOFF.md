@@ -74,6 +74,8 @@ Key validated gates include:
 - `GRAFANA_DASHBOARD_LIVE_NONDESTRUCTIVE_TEST=PASS`
 - `GRAFANA_CLI_TEMP_DATABASE_TARGETING=PASS`
 - `GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
+- `PACKAGE_NO_AUTOSTART_FAILURE_PATH_VALIDATION=PASS`
+- `PACKAGE_NO_AUTOSTART_SYNTHETIC_PROOF=PASS`
 
 Detailed state is in `components/collector/REBUILD_STATUS.md`.
 
@@ -128,11 +130,25 @@ The installer now:
 - runs `verify-dashboards.py` after restore
 - uses Python `-B` for both runtime dashboard commands
 
-The next implementation task is package-install no-autostart protection so package installation cannot transiently expose an unconfigured service before the runtime installer has applied the captured configuration.
+Package-install no-autostart protection is complete.
 
-Do not execute the clean-machine runtime installer against the working collector.
+The package/runtime contract now uses:
 
-After the package no-autostart sub-section validates, update and push `docs/PROJECT_JOURNAL.md` before materially proceeding to installer structural/public-safety validation.
+- a temporary `policy-rc.d` during package transactions
+- persistent systemd condition guards for Vector, ClickHouse, and Grafana
+- preservation of an already-active SSH management plane
+- guarded delayed SSH start when SSH was initially inactive
+- short-lived authorization for ClickHouse bootstrap and loopback Grafana bootstrap
+- `EXIT` cleanup of the temporary authorization token
+- permanent collector-guard release only at final configured-service activation
+
+A synthetic systemd unit proved unauthorized blocking, temporary authorization, guard reassertion after token removal, and normal start after final guard removal. Real collector service state was unchanged.
+
+The next implementation task is the full collector installer structural, credential-exposure, and public-safety validation gate.
+
+Do not execute either clean-machine installer against the working collector.
+
+After that validation sub-section completes, update and push `docs/PROJECT_JOURNAL.md` before proceeding to final collector operator/rebuild documentation.
 
 ## Working method
 
@@ -146,6 +162,8 @@ After the package no-autostart sub-section validates, update and push `docs/PROJ
 - use fixtures, negative paths, replay, idempotency checks, and non-destructive API validation
 - update `CURRENT_STATE.md` when execution order or verified current state changes
 - append and push `PROJECT_JOURNAL.md` after every completed validated sub-section
+- publish intermediate validated GitHub/journal checkpoints during long or risk-heavy sub-sections when they materially improve recovery
+- do not advance `CURRENT_STATE.md` merely because an intermediate checkpoint was published
 - update architecture/data contracts only when durable system design changes
 - use `PUBLICATION_CHECKLIST.md` before public operational/code publication
 

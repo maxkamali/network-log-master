@@ -26,6 +26,10 @@ Completed:
 - exact two-pattern functional suppression seed with neutral nonfunctional metadata
 - captured ingest/enrichment schema migrators proven no-op against the initialized schema
 - 18 synthetic configuration/application/database tests passing
+- complete sanitized service/timer capture preserving fetch-then-ingest order, cadence, and all live hardening directives
+- clean-machine application/unit installer with no-overwrite, ownership/mode preflight, systemd verification, and no automatic activation
+- deterministic enrichment remains intentionally unscheduled
+- 26 synthetic tests passing
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.
 

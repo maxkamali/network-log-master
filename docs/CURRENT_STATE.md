@@ -233,6 +233,8 @@ The three live custom application implementations are now captured in public-saf
 
 Deterministic SQLite initialization now reproduces all five recovered table DDL hashes, thirteen indexes, three foreign keys, empty application state, and the two functional suppression patterns. The captured ingest/enrichment schema migrators are no-ops against the initialized schema. The full GX10 reconstruction suite now has 18 passing tests.
 
+The full live service/timer files are now captured with only identity-bearing values replaced. The public service preserves both `ExecStart` operations in fetch-then-ingest order and every captured hardening directive; the timer preserves the monotonic cadence. A guarded installer verifies exact database/config prerequisites and installs applications/units without enabling or starting them. The suite now has 26 passing tests.
+
 The known application hashes remain:
 
 - fetch: `662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
@@ -274,7 +276,7 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 9. `DONE` — collector README and operator-facing clean-machine rebuild documentation completed and validated.
 10. `DONE` — final collector public sanitation passed and the public collector rebuild-package/documentation milestone was closed.
 11. `DEFERRED` — clean-machine collector rebuild validation remains outstanding because no disposable Debian 13 amd64 validation system is currently available.
-12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package; publish SQLite initialization, then implement the service/timer templates preserving `timer -> fetch -> ingest` and the captured hardening contract.
+12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package; publish service/timer reconstruction, then implement package/Ollama verification and final clean-machine activation/verification flow.
 13. `NOT STARTED` — validate the GX10 rebuild package and operator documentation.
 14. `NOT STARTED` — reconcile and update full two-server architecture, operations, and rebuild documentation.
 15. `NOT STARTED` — run final repository sanitation and two-server acceptance validation.

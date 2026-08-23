@@ -1,0 +1,27 @@
+# GX10 systemd provenance
+
+The public service and timer were captured from the working GX10 reference system by exact live unit hash.
+
+Live hashes:
+
+- service: `0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
+- timer: `5371995539846d4cca6014a70548e95c942e9f601d0736b06f4bda61c1ccc0f5`
+
+Public hashes:
+
+- `network-log-gx10.service`: `6970f861fcde7e2f1c59a80264fa79ddda6a6ceb2f9dc3511afbd5c88bf694bf`
+- `network-log-gx10.timer`: `25939b7ce8f424840cef35ebc58635919d706b104408094d164e342081a77436`
+
+The public units differ only where live values are identity-bearing:
+
+- unit descriptions and filenames use neutral project naming
+- service user/group use the public runtime identity
+- executable paths use the public libexec layout
+- writable paths use the public state/spool layout
+- the timer's target unit uses the public service filename
+
+The service/timer behavior and all other directives are retained from the live files.
+
+The sanitizer required fetch then ingest `ExecStart` order, exactly two known writable path roles, zero environment directives, no unknown absolute paths, and no IPv4 literals.
+
+Deterministic enrichment remains absent from the service by design because no live automatic invocation was discovered.

@@ -6363,3 +6363,145 @@ This subsection:
 Publish this validated SQLite checkpoint and independently verify GitHub.
 
 Then implement public service/timer templates preserving the captured `timer -> fetch -> ingest` chain, cadence, hardening, runtime identity, writable paths, and absence of automatic enrichment invocation.
+
+## 2026-08-23 16:19 PDT - GX10 service and timer reconstruction
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The live GX10 service/timer definitions are captured in public-safe form, and the clean-machine application/unit installation boundary is implemented and validated.
+
+### Live unit capture
+
+The live files were resolved by their recorded SHA-256 values:
+
+- service: `0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
+- timer: `5371995539846d4cca6014a70548e95c942e9f601d0736b06f4bda61c1ccc0f5`
+
+Added public units:
+
+- `components/gx10/systemd/network-log-gx10.service`
+- `components/gx10/systemd/network-log-gx10.timer`
+- `components/gx10/systemd/PROVENANCE.md`
+
+Public hashes:
+
+- service: `6970f861fcde7e2f1c59a80264fa79ddda6a6ceb2f9dc3511afbd5c88bf694bf`
+- timer: `25939b7ce8f424840cef35ebc58635919d706b104408094d164e342081a77436`
+
+### Sanitized identity boundary
+
+The capture replaced only:
+
+- identity-bearing unit descriptions/filenames
+- private live service user/group names
+- private application executable paths
+- private state/spool writable paths
+- the timer's identity-bearing target unit name
+
+The sanitizer required:
+
+- exactly two known `ExecStart` programs
+- fetch followed by ingest
+- exactly two known writable path roles
+- no environment or environment-file directives
+- no unknown absolute paths
+- no IPv4 literals
+
+### Preserved service contract
+
+The public service retains:
+
+- `Type=oneshot`
+- the two ordered `ExecStart` operations
+- neutral dedicated runtime user/group
+- `UMask=0027`
+- `NoNewPrivileges=yes`
+- `PrivateTmp=yes`
+- `PrivateDevices=yes`
+- `ProtectSystem=strict`
+- `ProtectHome=yes`
+- state and spool as the only writable path roles
+- `ProtectKernelTunables=yes`
+- `ProtectKernelModules=yes`
+- `ProtectKernelLogs=yes`
+- `ProtectControlGroups=yes`
+- `RestrictNamespaces=yes`
+- `LockPersonality=yes`
+- empty capability bounding and ambient sets
+- `RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6`
+
+Several of these hardening directives were beyond the shorter handoff summary but were preserved from the complete live file.
+
+Deterministic enrichment remains absent from `ExecStart`.
+
+### Preserved timer contract
+
+The timer retains:
+
+- `OnBootSec=2min`
+- `OnUnitInactiveSec=1min`
+- `AccuracySec=5s`
+- no calendar schedule
+- no randomized-delay directive
+- target `network-log-gx10.service`
+- installation under `timers.target`
+
+### Clean-machine application/unit installer
+
+Added:
+
+- `components/gx10/install/install-applications.py`
+- `components/gx10/tests/test_application_install.py`
+- `components/gx10/tests/test_systemd_contract.py`
+
+The installer:
+
+- requires root and `CLEAN_INSTALL_CONFIRM=YES-CLEAN-GX10`
+- requires the initialized database at runtime-user/runtime-group mode `0640`
+- requires the rendered runtime configuration at root/runtime-group mode `0640`
+- requires both prerequisite files to be regular, non-symlinked, and single-linked
+- preflights every source and destination before installation
+- reuses exact existing artifacts only
+- refuses divergent, symbolic-link, or hard-linked destinations
+- publishes each new file atomically without replacement
+- installs application executables root-owned mode `0755`
+- installs the configuration module and units root-owned mode `0644`
+- runs `systemd-analyze verify`
+- reloads systemd only after all artifacts validate
+- does not enable or start the timer/service
+
+### Validation
+
+The full GX10 suite now reports:
+
+- 26 tests passing
+- exact fetch-then-ingest order
+- deterministic enrichment absent from automatic execution
+- all live hardening directives present
+- exact two-role writable-path boundary
+- exact timer cadence
+- atomic install/reuse passing
+- divergent/symlink/hard-link refusal passing
+- database/config ownership and mode preflight passing
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `gx10_python_compile=PASS`
+
+### Safety boundary
+
+This subsection:
+
+- read only the two known live unit files
+- did not print or publish private unit names, users/groups, or paths
+- did not execute any pipeline application
+- did not install a unit on GX10
+- did not call `daemon-reload` on GX10
+- did not enable, disable, start, stop, or restart any service/timer
+- did not write to either reference system
+
+### Next action
+
+Publish this checkpoint and independently verify GitHub.
+
+Then implement package/Ollama verification and the final clean-machine activation/runtime verification flow without claiming or creating an application-specific Ollama caller.

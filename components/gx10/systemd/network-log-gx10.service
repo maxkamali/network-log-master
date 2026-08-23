@@ -1,0 +1,37 @@
+[Unit]
+Description=Network log GX10 fetch and ingest pipeline
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=network-log-agent
+Group=network-log-agent
+
+ExecStart=/usr/local/libexec/network-log-gx10/fetch-spool.py
+ExecStart=/usr/local/libexec/network-log-gx10/ingest-spool.py
+
+UMask=0027
+
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+
+ProtectSystem=strict
+ProtectHome=yes
+
+ReadWritePaths=/var/lib/network-log-gx10
+ReadWritePaths=/var/spool/network-log-gx10
+
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+
+RestrictNamespaces=yes
+LockPersonality=yes
+
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6

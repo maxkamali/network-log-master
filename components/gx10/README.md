@@ -86,3 +86,15 @@ The deterministic-enrichment source is captured for faithful reconstruction and 
 The historical suppression-rule names and reasons were not exposed during rediscovery and no initializer survived. The public rebuild therefore uses neutral names/reasons while preserving functional IDs, evaluation order, types, patterns, and enabled state.
 
 Do not run the initializer against the working GX10 reference system.
+
+## Service and timer reconstruction
+
+`systemd/network-log-gx10.service` and `systemd/network-log-gx10.timer` preserve the complete captured live scheduling and hardening contract with neutral public identity/path values.
+
+The automatic chain remains exactly:
+
+`timer -> fetch -> ingest`
+
+`install/install-applications.py` installs the four application files and two units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting the timer.
+
+See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boundary.

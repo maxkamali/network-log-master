@@ -29,7 +29,12 @@ Completed:
 - complete sanitized service/timer capture preserving fetch-then-ingest order, cadence, and all live hardening directives
 - clean-machine application/unit installer with no-overwrite, ownership/mode preflight, systemd verification, and no automatic activation
 - deterministic enrichment remains intentionally unscheduled
-- 26 synthetic tests passing
+- exact pinned application-package installer and fail-closed platform verifier
+- exact operator-supplied Ollama binary installer with no automatic activation
+- sanitized Ollama unit preserving the captured service contract
+- offline six-manifest/model-blob verifier and active loopback runtime verifier
+- live read-only `GX10_PLATFORM_VERIFY=PASS` and `GX10_OLLAMA_VERIFY=PASS`
+- 31 synthetic tests passing
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.
 
@@ -178,6 +183,8 @@ Rediscovery found no application-specific network-observability caller of Ollama
 The collector provides a validated write-only AI-result return boundary, but rediscovery found no GX10 producer executable, wrapper, service, or retained transfer command.
 
 The rebuild must reproduce installed infrastructure and proven application behavior without inventing production LLM orchestration or a result producer.
+
+The public package now installs the exact captured Ollama executable from an operator-supplied file, creates the service/model-storage boundary, and verifies the complete captured model inventory. Model blobs are deliberately external to Git and must be populated before activation. Neither installation nor offline verification calls the Ollama API, pulls a model, or runs inference.
 
 ## Runtime identity and filesystem contract
 

@@ -98,3 +98,15 @@ The automatic chain remains exactly:
 `install/install-applications.py` installs the four application files and two units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting the timer.
 
 See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boundary.
+
+## Platform packages and Ollama
+
+`install/versions.env` records the captured public platform/package checkpoints. `install/install-packages.sh` installs only the exact application-level Debian dependencies after an explicit clean-machine confirmation. Kernel, NVIDIA driver, and CUDA provisioning remain operator prerequisites because rediscovery did not recover a trustworthy historical installer for them.
+
+`install/verify-platform.py` fails closed unless the clean host matches the captured Ubuntu/arm64, kernel, driver, CUDA compiler, Python/SQLite, SFTP, and Zstandard contract. CUDA is resolved at the captured public path `/usr/local/cuda/bin/nvcc`; it is not required to be present in a privileged command's reduced `PATH`.
+
+`install/install-ollama.py` requires an operator-supplied binary with the exact captured size and SHA-256. It creates the locked service identity and model-root boundary, installs the binary and sanitized unit without replacing divergent artifacts, verifies the unit, and reloads systemd. It never enables or starts Ollama.
+
+The large model blobs are intentionally not stored in Git. Before activation, the operator must populate the protected model root from an independently obtained offline model store matching the captured contract. `install/verify-ollama.py --offline` verifies the exact six-manifest inventory, manifest references and hashes, config digests, declared bytes, and every referenced blob size without calling the Ollama API. The normal mode additionally requires the service active/enabled and exactly one loopback TCP listener.
+
+No reconstruction artifact creates an application-specific Ollama caller. The proven automatic application chain remains `timer -> fetch -> ingest`.

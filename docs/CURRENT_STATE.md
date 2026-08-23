@@ -257,9 +257,9 @@ Status: `ACTIVE`
 
 The project is running from the operator-controlled VM. Public GitHub `main` and authenticated read-only command execution to both reference-system roles were verified before item 12N resumed.
 
-The collector VM alias currently omits the captured nonstandard SSH port. Connectivity succeeds with a one-shot override using the already-captured private transport value; the private value is not published. Correcting local SSH convenience configuration is not a repository requirement.
+Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, corrected item 12N validation, and rediscovery closure audit are complete. The next technical action is the first public GX10 reconstruction subsection defined in `components/gx10/REBUILD_STATUS.md`.
+The environment transition, corrected item 12N validation, rediscovery closure audit, filesystem/application/SQLite/service reconstruction, and package/Ollama reconstruction are complete. The next technical action is the guarded clean-machine activation/runtime verification flow defined in `components/gx10/REBUILD_STATUS.md`.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -276,7 +276,7 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 9. `DONE` — collector README and operator-facing clean-machine rebuild documentation completed and validated.
 10. `DONE` — final collector public sanitation passed and the public collector rebuild-package/documentation milestone was closed.
 11. `DEFERRED` — clean-machine collector rebuild validation remains outstanding because no disposable Debian 13 amd64 validation system is currently available.
-12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package; publish service/timer reconstruction, then implement package/Ollama verification and final clean-machine activation/verification flow.
+12. `NEXT` — reconstruct the captured GX10 implementation as a public clean-machine rebuild package; package/Ollama verification is complete, and guarded clean-machine activation/runtime verification is next.
 13. `NOT STARTED` — validate the GX10 rebuild package and operator documentation.
 14. `NOT STARTED` — reconcile and update full two-server architecture, operations, and rebuild documentation.
 15. `NOT STARTED` — run final repository sanitation and two-server acceptance validation.

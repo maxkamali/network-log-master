@@ -6505,3 +6505,134 @@ This subsection:
 Publish this checkpoint and independently verify GitHub.
 
 Then implement package/Ollama verification and the final clean-machine activation/runtime verification flow without claiming or creating an application-specific Ollama caller.
+
+## 2026-08-23 16:25 PDT - GX10 package and Ollama reconstruction
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The captured platform dependency and Ollama infrastructure contracts are now represented by guarded public installers and fail-closed verifiers.
+
+### Platform and package boundary
+
+Added:
+
+- `components/gx10/install/versions.env`
+- `components/gx10/install/install-packages.sh`
+- `components/gx10/install/verify-platform.py`
+
+The version manifest records the captured public baseline for:
+
+- Ubuntu 24.04 arm64
+- kernel `6.17.0-1029-nvidia`
+- NVIDIA driver `580.173.02`
+- CUDA compiler build `V13.0.88`
+- Python `3.12.3` and SQLite runtime `3.45.1`
+- `python3.12-minimal` version `3.12.3-1ubuntu0.15`
+- `openssh-client` version `1:9.6p1-3ubuntu13.18`
+- `zstd` version `1.5.5+dfsg2-2build1.1`
+
+The package installer requires root and `CLEAN_INSTALL_CONFIRM=YES-CLEAN-GX10`, checks the operating-system/architecture boundary, and installs only the exact three application-level Debian package versions.
+
+Rediscovery did not recover trustworthy kernel, driver, or CUDA installation provenance. The public rebuild therefore verifies those prerequisites rather than inventing an installer and representing it as recovered history.
+
+The first privileged revalidation probe could not resolve `nvcc` through its reduced command path. A bounded read-only path check established that the captured compiler is present at `/usr/local/cuda/bin/nvcc`. The verifier now invokes that exact public path. This was command-path resolution, not platform drift.
+
+The complete live platform verifier then returned:
+
+`GX10_PLATFORM_VERIFY=PASS`
+
+### Ollama installation boundary
+
+Added:
+
+- `components/gx10/systemd/ollama.service`
+- `components/gx10/install/install-ollama.py`
+- `components/gx10/install/verify-ollama.py`
+- `components/gx10/tests/test_ollama_contract.py`
+
+The public unit preserves the live executable, service identity, restart behavior, service environment, and enablement target. Only the description was neutralized.
+
+- live unit SHA-256: `11758d469d3f103e53a9612a8ffcb3a3e61834c994c08d412bb051f3c827dbd3`
+- public unit SHA-256: `d8774a8a664856242805d0e5a78297db31865e2b56727edd8d16764921858cd4`
+
+The clean-machine installer:
+
+- requires root and the explicit clean-machine confirmation
+- requires an operator-supplied exact Ollama binary
+- verifies captured size `35792104` and SHA-256 `26f44ca89143f2326a3aad98b2cb5e8b5af9397aef7001cd8d022e90d6e0b55e`
+- creates or validates the locked `ollama` service identity and protected model root
+- installs the binary and unit atomically without replacing divergent files
+- validates the unit and reloads systemd
+- does not enable or start the service
+
+The public repository does not contain the large model blobs. They remain an external operator-supplied prerequisite which must match the captured offline model-store contract before activation.
+
+### Ollama verification boundary
+
+The offline verifier requires:
+
+- the exact executable size/hash and public unit hash
+- the captured service identity, model-root ownership, and mode
+- exactly six expected manifest paths and hashes
+- the captured config digest for every model
+- the captured total declared bytes for every manifest
+- every referenced blob present as a real nonsymlinked file with its declared size
+
+Normal runtime mode additionally requires:
+
+- `ollama.service` active
+- `ollama.service` enabled
+- exactly one TCP listener on port `11434`
+- that listener bound only to loopback
+
+The verifier does not call the Ollama API or execute a model operation.
+
+After substituting only the already-captured live unit hash for the public sanitized-unit hash, the complete read-only live verifier returned:
+
+`GX10_OLLAMA_VERIFY=PASS`
+
+This revalidated the currently installed binary, live unit, complete model metadata/blob-size contract, service state, enablement, and listener boundary.
+
+### Preserved absence
+
+No installer, unit, verifier, or test connects Ollama to fetch, ingest, deterministic enrichment, or the collector result-return boundary.
+
+The proven automatic application chain remains:
+
+`timer -> fetch -> ingest`
+
+### Validation
+
+The full GX10 suite now reports:
+
+- 31 tests passing
+- exact six-manifest inventory contract
+- invalid Ollama binary rejection
+- symbolic-link model-blob rejection
+- fixed captured CUDA compiler path
+- no pipeline application reference in the Ollama unit
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- shell syntax validation passing
+- Python syntax validation passing with an isolated temporary bytecode cache
+
+### Safety boundary
+
+This subsection:
+
+- did not install packages on either reference system
+- did not run any clean-machine installer on GX10
+- did not write, copy, or read model blob contents
+- did not call the Ollama API
+- did not pull a model or run inference
+- did not open the production application database
+- did not execute the fetch, ingest, or enrichment applications
+- did not enable, disable, start, stop, or restart a service/timer
+- did not write to either reference system
+
+### Next action
+
+Publish this checkpoint and independently verify GitHub.
+
+Then implement the guarded clean-machine activation and runtime verification flow. It must refuse reference-like/nonempty application state, require every offline prerequisite to validate before activation, preserve the exact automatic chain, and never infer an application-specific Ollama caller.

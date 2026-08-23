@@ -25,3 +25,14 @@ The service/timer behavior and all other directives are retained from the live f
 The sanitizer required fetch then ingest `ExecStart` order, exactly two known writable path roles, zero environment directives, no unknown absolute paths, and no IPv4 literals.
 
 Deterministic enrichment remains absent from the service by design because no live automatic invocation was discovered.
+
+## Ollama service
+
+`ollama.service` reproduces the separately captured local-model runtime unit.
+
+- live unit SHA-256: `11758d469d3f103e53a9612a8ffcb3a3e61834c994c08d412bb051f3c827dbd3`
+- public unit SHA-256: `d8774a8a664856242805d0e5a78297db31865e2b56727edd8d16764921858cd4`
+
+Only the identity-bearing description was changed. The executable, service identity, restart behavior, service environment, enablement target, and absence of pipeline application references are preserved.
+
+The effective live file-descriptor limits are platform/service-manager state rather than explicit directives in the captured fragment. Platform/runtime verification must check effective state instead of inventing an explicit unit directive and presenting it as recovered configuration.

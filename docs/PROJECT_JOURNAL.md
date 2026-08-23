@@ -3865,3 +3865,543 @@ That inspection should establish:
 - whether any Ollama or model invocation actually exists
 
 Do not execute the candidate or read application-data rows while performing the structural inspection.
+
+## 2026-08-23 12:13 PDT - GX10 item 12G deterministic enrichment contract
+
+### Status
+
+`IN PROGRESS` — execution-order item 12 remains the single `NEXT` item.
+
+The second downstream GX10 custom Python executable was inspected read-only.
+
+Its deterministic enrichment/classification contract and current SQLite schema are now captured without executing the component, selecting production event rows, or reading the suppression-rule corpus.
+
+The live identity-bearing executable filename and private database path are intentionally omitted from the public journal.
+
+### Provenance
+
+The enrichment component is:
+
+- Python
+- root-owned
+- mode `0755`
+- 23011 bytes
+- 1071 source lines
+
+SHA-256:
+
+`6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+
+Python AST parsing and in-memory compilation passed.
+
+The component remained unchanged throughout inspection.
+
+### Classification version
+
+The current classification version is:
+
+`3`
+
+This value is stored with enrichment records through the `classification_version` field.
+
+### Implementation structure
+
+Five standard-library imports were observed:
+
+- `datetime`
+- `json`
+- `re`
+- `sqlite3`
+- `sys`
+
+Nine top-level functions were identified:
+
+- `bgp_key`
+- `classify`
+- `classify_bgp`
+- `ensure_schema`
+- `extract_event_code`
+- `generic_family_from_code`
+- `load_suppression_rules`
+- `main`
+- `suppression_for`
+
+The main call graph includes:
+
+- `main -> ensure_schema`
+- `main -> extract_event_code`
+- `main -> classify`
+- `main -> load_suppression_rules`
+- `main -> suppression_for`
+- `classify -> classify_bgp`
+- `classify -> generic_family_from_code`
+- `classify_bgp -> bgp_key`
+
+### Deterministic rather than LLM execution
+
+The enrichment component contains:
+
+- no Ollama literal
+- no known model literal
+- no HTTP URL literal
+- no network-oriented Python module import
+- no subprocess module import
+- no subprocess API call
+
+The inspected enrichment stage is therefore deterministic local classification over SQLite-backed event state.
+
+No evidence was found that this executable invokes Ollama or any local language model.
+
+Any LLM orchestration, if it exists elsewhere in the GX10 deployment, remains a separate implementation target.
+
+### Regex classifier inventory
+
+Twelve compiled regex classifiers were identified:
+
+- `ARISTA_BGP_ADJ_RE`
+- `ARISTA_BGP_CLEAR_RE`
+- `ARISTA_BGP_NOTIFICATION_RE`
+- `EVENT_CODE_FALLBACK_RE`
+- `EVENT_CODE_RE`
+- `INTERFACE_RE`
+- `IOSXR_BGP_ADJ_RE`
+- `IOSXR_BGP_NSR_RE`
+- `NXOS_OSPF_PROCESS_RE`
+- `OSPF_NEIGHBOR_RE`
+- `PROCESS_RE`
+- `REPEAT_RE`
+
+All inspected regexes compiled successfully.
+
+The source values of these expressions were intentionally not dumped during discovery.
+
+Their exact implementation must be preserved when the public-safe executable source is captured rather than reconstructed approximately from the journal.
+
+### Event-code extraction
+
+Event-code extraction uses:
+
+- a primary event-code regex
+- a fallback event-code regex
+
+The extracted event code feeds both:
+
+- deterministic classification
+- suppression-rule matching
+
+### BGP classification
+
+The BGP classifier has the signature:
+
+`classify_bgp(event_code, message, device)`
+
+Observed vendor hints include:
+
+- `arista_eos`
+- `cisco_ios_xr`
+- `unknown`
+
+Observed protocol value:
+
+`bgp`
+
+Observed entity types include:
+
+- `bgp_peer`
+- generic `bgp`
+
+Observed state values include:
+
+- `up`
+- `down`
+- `clear_requested`
+- `notification`
+- `nsr_disabled_standby`
+
+Observed signal types include:
+
+- `recovery`
+- `state_transition`
+- `administrative_action`
+- `protocol_notification`
+- `supporting_evidence`
+- generic `observation`
+
+The BGP entity-key function accepts:
+
+- device
+- VRF
+- peer
+
+and returns a BGP-prefixed compound entity key.
+
+Exact normalization of the VRF and peer portions must be retained from source rather than inferred from the structural output.
+
+### OSPF classification
+
+Observed OSPF behavior includes:
+
+- family `ospf`
+- vendor hint `cisco_nxos`
+- protocol `ospf`
+- entity type `ospf_neighbor`
+
+The entity key is built from:
+
+- device
+- process
+- neighbor
+
+Observed OSPF states/signals include:
+
+- state `retransmissions`
+- signal type `degradation`
+- state `down`
+- state `up`
+- signal type `state_transition`
+- signal type `recovery`
+
+The classifier uses dedicated OSPF neighbor and process regexes.
+
+### Interface classification
+
+Observed interface classification includes:
+
+- vendor hint `cisco_nxos`
+- protocol `ethernet`
+- entity type `interface`
+
+The interface entity key is constructed from:
+
+- device
+- interface
+
+The classifier carries explicit state and signal-type values for the matched interface event.
+
+An `IF_DOWN` classification label is explicitly compared in the current implementation.
+
+### Process classification
+
+Observed process classification includes:
+
+- family `process`
+- entity type `process`
+- vendor hint `unknown`
+- generic observation signal behavior
+
+The entity key is built from:
+
+- device
+- process name
+
+### Syslog-repeat classification
+
+A dedicated `REPEAT_RE` classifier is actively used by `classify()`.
+
+Observed repeat classification includes:
+
+- family `syslog_repeat`
+- entity type `syslog_stream`
+- entity key prefixed by `SYSLOG_REPEAT`
+- state `repeat`
+- signal type `repeat_notice`
+
+The repeat count is parsed as an integer.
+
+The default non-repeat classifier result uses a repeat count of `1`.
+
+### Generic classification fallback
+
+The generic classifier can return:
+
+- an extracted/generic family
+- vendor hint `unknown`
+- no entity type
+- no entity key
+- no state
+- signal type `observation`
+- repeat count `1`
+
+This provides a deterministic fallback for events not matched by the more specific protocol classifiers.
+
+### Enrichment result fields
+
+The current enrichment insert explicitly contains 16 fields:
+
+- `event_id`
+- `event_code`
+- `family`
+- `device`
+- `entity_type`
+- `entity_key`
+- `state`
+- `attention_eligible`
+- `suppression_rule_id`
+- `classified_at`
+- `repeat_count`
+- `classification_version`
+- `vendor_hint`
+- `protocol`
+- `signal_type`
+- `attributes_json`
+
+This matches the current live `event_enrichment` table column set.
+
+### `event_enrichment` schema
+
+Read-only immutable SQLite metadata confirms the current table contains:
+
+- `event_id INTEGER` — primary key
+- `event_code TEXT NOT NULL`
+- `family TEXT NOT NULL`
+- `device TEXT NOT NULL`
+- `entity_type TEXT`
+- `entity_key TEXT`
+- `state TEXT`
+- `attention_eligible INTEGER NOT NULL`
+- `suppression_rule_id INTEGER`
+- `classified_at TEXT NOT NULL`
+- `repeat_count INTEGER NOT NULL`
+- `classification_version INTEGER NOT NULL`
+- `vendor_hint TEXT NOT NULL`
+- `protocol TEXT NOT NULL`
+- `signal_type TEXT NOT NULL`
+- `attributes_json TEXT NOT NULL`
+
+Defaults exist on several enrichment fields.
+
+The literal default values were not printed during metadata inspection and are therefore not asserted in this checkpoint.
+
+### Enrichment indexes
+
+Current non-unique indexes include:
+
+- `event_code`
+- `family`
+- `attention_eligible`
+- `entity_type, entity_key`
+- `protocol`
+- `signal_type`
+- `vendor_hint`
+
+These indexes are part of the currently functional GX10 enrichment-query contract and should be represented by the rebuild schema.
+
+### Enrichment foreign keys
+
+The live schema confirms:
+
+`event_enrichment.event_id -> recent_events.id`
+
+and:
+
+`event_enrichment.suppression_rule_id -> suppression_rules.id`
+
+This ties deterministic classification one-to-one to the ingested event identifier while preserving the identity of the matching suppression rule when applicable.
+
+### Suppression engine architecture
+
+Suppression logic is not hardcoded as the known production rule strings inside this executable.
+
+Instead, rules are loaded from the SQLite `suppression_rules` table.
+
+The loader selects:
+
+- `id`
+- `name`
+- `rule_type`
+- `pattern`
+
+The loader query contains both:
+
+- a `WHERE` clause
+- an `ORDER BY` clause
+
+The exact filter/order expressions were not printed by this inspection and are not inferred here.
+
+### Supported suppression-rule types
+
+The current `suppression_for()` implementation supports exactly three observed rule types:
+
+- `event_code_exact`
+- `event_code_prefix`
+- `message_regex`
+
+This establishes the public rebuild rule-engine contract.
+
+The actual live rule rows remain intentionally uncaptured at this subsection boundary.
+
+### `suppression_rules` schema
+
+Read-only immutable SQLite metadata confirms the table contains:
+
+- `id INTEGER` — primary key
+- `name TEXT NOT NULL`
+- `rule_type TEXT NOT NULL`
+- `pattern TEXT NOT NULL`
+- `enabled INTEGER NOT NULL`
+- `reason TEXT NOT NULL`
+- `created_at TEXT NOT NULL`
+
+A default exists for:
+
+`enabled`
+
+and for:
+
+`reason`
+
+The literal default values were not printed during metadata inspection and are not asserted here.
+
+The table has a unique constraint on:
+
+`name`
+
+There are no foreign keys originating from `suppression_rules`.
+
+### Attention eligibility
+
+The enrichment stage contains explicit:
+
+- `suppressed`
+- `suppressed_this_run`
+- `suppression_rule_id`
+- `eligible`
+- `attention_eligible`
+
+state variables.
+
+The final `attention_eligible` value is assigned as a conditional integer `0` or `1`.
+
+The structural inspection did not print the full condition expression, so this checkpoint does not overstate the exact predicate.
+
+That predicate should be retained directly from source during public-safe implementation capture.
+
+### Classifier state model
+
+Observed state-oriented values include:
+
+- `up`
+- `down`
+- `clear_requested`
+- `notification`
+- `nsr_disabled_standby`
+- `retransmissions`
+- `repeat`
+
+Observed signal taxonomy includes:
+
+- `observation`
+- `supporting_evidence`
+- `state_transition`
+- `recovery`
+- `administrative_action`
+- `protocol_notification`
+- `degradation`
+- `repeat_notice`
+
+This is deterministic classification state, not long-lived incident lifecycle state.
+
+No separate incident correlator was identified in this executable.
+
+### SQLite role
+
+The component queries:
+
+- `recent_events`
+- `event_enrichment`
+- `suppression_rules`
+
+and inserts into:
+
+- `event_enrichment`
+
+The component also performs enrichment schema compatibility/index work.
+
+As with the local-ingest executable, the base-table creator was not identified from this file.
+
+The final live table schemas are nevertheless independently captured from SQLite metadata and can therefore be reconstructed without relying on historical schema-creation code.
+
+### Read-only live-schema safety
+
+The existing application database was opened using:
+
+- `mode=ro`
+- `immutable=1`
+- `PRAGMA query_only=ON`
+
+Only SQLite schema metadata was read.
+
+No production event rows were selected.
+
+No suppression-rule rows were selected.
+
+### Validator interpretation
+
+The first item-12G classifier reported zero relevant module-level mappings.
+
+That does not mean classification mappings are absent.
+
+The implementation expresses most classification semantics procedurally through:
+
+- regex matches
+- conditional branches
+- return dictionaries
+
+rather than large module-level mapping dictionaries.
+
+The semantic closeout captured these procedural return fields directly.
+
+### Item 12G conclusion
+
+The current GX10 enrichment stage is a deterministic classification and suppression engine at classification version 3.
+
+It provides:
+
+- event-code extraction
+- BGP classification
+- OSPF classification
+- interface classification
+- process classification
+- repeat-event classification
+- generic fallback classification
+- entity-key construction
+- state and signal classification
+- SQLite-backed suppression matching
+- attention-eligibility output
+- indexed durable enrichment storage
+
+It does not itself invoke Ollama or another local model.
+
+### Unresolved boundary
+
+The actual rows in `suppression_rules` were intentionally not read during item 12G.
+
+The rule-engine schema and matching semantics are captured, but the clean rebuild still requires a public-safe reconstruction of the current rule corpus.
+
+That corpus must be inspected separately because rule patterns and reasons need an explicit public-safety review before publication.
+
+### Next action
+
+Continue execution-order item 12 with a bounded read-only inspection of the active suppression-rule corpus.
+
+For each rule, inspect only:
+
+- rule identifier/name
+- enabled state
+- rule type
+- pattern classification
+- reason classification
+
+Before printing any literal pattern or reason, test it for:
+
+- IP addresses
+- hostnames
+- usernames
+- organization names
+- private paths
+- secrets
+- other deployment-specific identity
+
+Publish literal values only when they are confirmed generic and public-safe.
+
+The known generic IPv6 neighbor-discovery suppressions should be recoverable through this process without exposing unrelated deployment-specific rules.

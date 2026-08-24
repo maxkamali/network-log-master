@@ -45,7 +45,7 @@ Completed results:
 
 - normalizer: 73 tests passing under the required Python 3.13 runtime
 - normalizer public gate: `PASS`
-- GX10: 49 tests passing
+- GX10 rebuild baseline at final repository acceptance: 49 tests passing
 - `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 - root sanitation gate: 5 tests passing
@@ -69,6 +69,7 @@ The later production-normalizer work advanced after the rebuild-acceptance check
 - forward-only GX10 handoff and rollback synthetic rehearsal: `PASS`
 - live GX10 handoff cutover: `PASS` with immutable-floor identity continuity, exact collector/GX10 hash and record-count parity, zero duplicate event identities, and retained raw-view rollback
 - transitional GX10 parser retirement: `PASS` with exact-hash replacement, zero scheduler references, canonical projection live-copy rehearsal, historical version-3 preservation, unchanged live database, and protected rollback
+- deterministic GX10 incident engine: `PASS` with 63 current tests, guarded schema/artifact migration, private live-copy execution, cursor-reset idempotency, independent exact-state reproduction, unscheduled working-system installation, protected pre-migration backup, unchanged automatic chain, and successful ordinary post-migration fetch/ingest cadence
 
 The exact forward-identity contract, live evidence, retained rollback, and next stability/retirement gate are in `docs/NORMALIZER_HANDOFF.md` and `docs/CURRENT_STATE.md`.
 

@@ -10,7 +10,7 @@ Clean-machine GX10 validation is `WAIVED BY OPERATOR` because no disposable Ubun
 
 The later collector-normalizer production integration completed its forward-only GX10 handoff cutover on 2026-08-24. The unchanged fetch/ingest pipeline reached exact collector-ledger parity across the reviewed multi-cadence window. Item 24 then replaced the unscheduled live transitional vendor/message reparser under its exact captured hash with the canonical schema-version-1 projector. The replacement has zero scheduler references, the live database was unchanged, all historical version-3 rows remain, and a root-only exact legacy rollback copy is retained.
 
-Item 25 now has a deterministic incident-engine candidate with passing private working-database-copy rehearsal. The clean rebuild contract includes its three-table append-only extension and exact engine artifact, while the working GX10 system remains unmigrated and the proven automatic chain remains unchanged. The unscheduled live schema/artifact migration remains a separate activation gate.
+Item 25 is complete. The deterministic incident engine passed private working-database-copy rehearsal, cursor-reset replay, and an independent exact-state rebuild. Its three-table append-only extension and exact engine artifact are installed on the working GX10 system under a protected pre-migration backup with zero state, cursors, or scheduler references. The proven automatic chain remains unchanged.
 
 This document is the component recovery authority for the active GX10 milestone. `docs/CURRENT_STATE.md` remains the authority for project-wide execution order and the single `NEXT` item.
 
@@ -206,7 +206,7 @@ The candidate neither parses messages nor calls Ollama. It has no systemd/cron r
 
 The private live-copy gate migrated an online SQLite backup, projected `5725` canonical rows from `952789` stored events, preserved `24207` historical version-3 rows, and applied local suppression to `4272` projected rows. Incident processing produced `17` deterministic instances, `311` evidence rows, `341` transitions, and `3` active instances. Normal rerun and cursor-reset replay changed no incident state. A second independent migration/projection/engine run from the protected pre-migration copy produced the exact same state SHA-256 `91e0ba1f8968dbf34480334126aeefc4ab5115861a37d4659e77c48b4cacdfa4`.
 
-The working database retained zero version-4 rows, no incident schema/state/cursor, and unchanged scheduling throughout this rehearsal. See `docs/INCIDENT_ENGINE.md` for the remaining activation and rollback gates.
+The working database retained zero version-4 rows and unchanged scheduling throughout rehearsal. The later guarded unscheduled migration installed exactly three empty incident tables and the exact engine artifact while retaining zero projection/incident cursors and zero scheduler references. One ordinary post-migration fetch/ingest cadence advanced source files from `10503` to `10504` and recent events from `953349` to `953430`, with historical version-3 rows unchanged at `24207` and zero service restarts. See `docs/INCIDENT_ENGINE.md` for the remaining managed-invocation gate.
 
 ## Ollama and result-return boundary
 

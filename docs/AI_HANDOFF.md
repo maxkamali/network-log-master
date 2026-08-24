@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-The final repository rebuild milestone is published. On 2026-08-23, the operator explicitly waived unavailable disposable clean-two-server execution and accepted the residual risk without labeling that execution passed. Collector-side production-normalizer integration, shadow catch-up, forward-only production handoff, multi-cadence stability review, and transitional GX10 parser retirement are complete. The protected immutable-floor cutover passed exact collector/GX10 parity, all schedules resumed, and both the raw-view mount rollback and legacy-enrichment rollback remain protected. Item 25 is deterministic incident-engine design over canonical normalized observations.
+The final repository rebuild milestone is published. On 2026-08-23, the operator explicitly waived unavailable disposable clean-two-server execution and accepted the residual risk without labeling that execution passed. Collector-side production-normalizer integration, shadow catch-up, forward-only production handoff, multi-cadence stability review, transitional GX10 parser retirement, and deterministic incident-engine item 25 are complete. The protected immutable-floor cutover passed exact collector/GX10 parity, all schedules resumed, and the raw-view mount, legacy-enrichment, and pre-incident-migration rollback evidence remain protected. Item 26 is the managed canonical-projection/incident invocation boundary; it must not silently add Ollama or result production.
 
 The proven automatic application chain is:
 
@@ -137,7 +137,7 @@ The proven automatic application chain is:
 
 Preserve these rediscovery boundaries:
 
-- historical deterministic enrichment had no discovered automatic invocation; its canonical projector replacement also remains unscheduled
+- historical deterministic enrichment had no discovered automatic invocation; its canonical projector replacement and the installed incident engine remain unscheduled
 - Ollama is active with six complete models but has no discovered application-specific observability-pipeline caller
 - the collector result-return boundary exists but has no discovered GX10 producer
 - the original SQLite/bootstrap initializer did not survive the bounded search; reconstruct from the captured effective schema

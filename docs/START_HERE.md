@@ -56,7 +56,8 @@ The current high-level order is:
 
 1. preserve the completed two-server rebuild package and validated raw production path
 2. advance production normalization only through the documented shadow, handoff, authorization, and rollback gates
-3. build the deterministic incident engine and local-model orchestration after normalized handoff stability is proven
-4. integrate result return/dashboard behavior and close the end-to-end target only after its acceptance evidence passes
+3. activate deterministic projection/incident processing only through the managed invocation, telemetry, failure-isolation, and rollback gate
+4. build local-model orchestration after deterministic incident state is operational
+5. integrate result return/dashboard behavior and close the end-to-end target only after its acceptance evidence passes
 
 For the exact current task, read `docs/CURRENT_STATE.md`.

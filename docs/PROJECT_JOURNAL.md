@@ -8424,3 +8424,121 @@ Final working-database read-only postcheck retained zero version-4 projection ro
 ### Next action
 
 Publish and independently verify this copy-rehearsal checkpoint. Under the operator's active production authorization, pause only the proven fetch/ingest schedule, apply the published guard to install the incident schema and exact engine artifact without invoking either projector or engine, prove empty incident state and zero scheduler references, resume the existing timer, and verify at least one ordinary fetch/ingest cadence. Retain a protected pre-migration SQLite backup and use empty-state rollback on any failed postcheck.
+
+## 2026-08-24 00:22 PDT - Item 25 completed with unscheduled working-system migration
+
+### Status
+
+Execution-order item 25 is `DONE`. Item 26 is now the single `NEXT` item.
+
+The private live-copy/determinism evidence was published and independently verified on GitHub at:
+
+`36631749b3c64d356f45c79088af5760b81f8723` — `Record deterministic incident copy rehearsal`
+
+Under the operator's active production authorization, only those published exact artifacts were used for the working-system operation.
+
+### Preconditions and schedule freeze
+
+Recorded-hash resolution found exactly one working database, canonical projection artifact, pipeline service unit, and pipeline timer unit without printing their identity-bearing names or paths.
+
+Preconditions passed:
+
+- pipeline timer active/enabled
+- pipeline service inactive after success with zero restarts
+- version-4 projection rows: `0`
+- projection cursor rows: `0`
+- incident tables/cursor: absent
+- installed incident target: absent
+- historical version-3 rows: `24207`
+- published engine/schema/guard hashes exact
+
+The timer was stopped only after the current oneshot settled. The service was allowed to finish normally; it was not killed. Database counters were sampled again only after the schedule was frozen.
+
+### Guarded unscheduled migration
+
+The corrected published guard:
+
+1. validated the canonicalized exact recovered schema, functional suppression corpus, and zero SQLite version markers
+2. created and validated an exclusive root-only `0600` online SQLite backup
+3. applied the three-table/five-index/four-trigger incident extension transactionally
+4. installed the exact engine bytes under a protected root-owned target
+5. verified zero scheduler references and the complete migrated schema/artifact/backup boundary
+
+Markers:
+
+```text
+gx10_incident_engine_migration=applied
+GX10_INCIDENT_ENGINE_MIGRATION=PASS
+gx10_incident_engine_migration=verified
+GX10_INCIDENT_ENGINE_MIGRATION=PASS
+```
+
+Installed engine SHA-256:
+
+`10b1133a00f775e5e5a4a3597156022eb46d62a2c1c2fe6424579af6341bfb6a`
+
+Installed incident schema SHA-256:
+
+`25f4e6a4246c2fe25ac9db726be29accef3d57b268a59f4aa676d851edb52693`
+
+Protected pre-migration backup:
+
+- mode: `0600 root:root`
+- bytes: `1912111104`
+- SHA-256: `b8a2352b5e96cc1007a98cc4062a69e1c1bf4daa2253f2560a88ee87ce195634`
+
+The identity-bearing live path is intentionally omitted.
+
+### Empty-state and ordinary-cadence proof
+
+Neither the projector nor incident engine was invoked. Immediate post-migration state was:
+
+- incident tables: exactly `3`
+- incidents/evidence/transitions: `0 / 0 / 0`
+- canonical version-4 rows: `0`
+- projection/incident cursors: `0 / 0`
+- incident scheduler references: `0`
+- historical version-3 rows: `24207`
+- source-file/recent-event counts unchanged while frozen
+
+The existing timer was then restarted without changing enablement. One ordinary automatic `fetch -> ingest` cadence passed:
+
+- source files: `10503 -> 10504`
+- recent events: `953349 -> 953430`
+- historical version-3 rows: `24207`
+- canonical version-4 rows: `0`
+- incidents/evidence/transitions: `0 / 0 / 0`
+- projection/incident cursors: `0 / 0`
+- timer: active/enabled
+- service result: success
+- service restarts: `0`
+
+Final marker:
+
+`GX10_INCIDENT_ENGINE_UNSCHEDULED_MIGRATION=PASS`
+
+### Cleanup and retained recovery
+
+Removed only the two failed rehearsal copies, successful working/determinism rehearsal copies, temporary transfer directories, and temporary private orchestration helpers. Those artifacts were agent-created and are not recoverable, but all durable public-safe evidence is journaled.
+
+Retained:
+
+- published GitHub candidate, correction, rehearsal, and completion history
+- installed exact unscheduled engine and incident schema
+- root-only protected pre-migration SQLite backup
+- existing projection rollback and historical version-3 evidence
+- unchanged raw/normalized handoff recovery boundaries
+
+Because incident state and its cursor remain empty, the guard's narrow empty-state rollback is still available. Once managed incident processing begins, that destructive schema rollback must not be used; the state must be retained and invocation disabled instead.
+
+### Validation and next action
+
+Repository validation remains:
+
+- GX10 suite: `63 passed`
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
+- current-tree/history/link/ref public validation: `PASS`
+- `git diff --check`: `PASS`
+
+Publish and independently verify this item-25 completion checkpoint. Then begin item 26 by designing a managed projection-before-incident invocation boundary with explicit concurrency exclusion, resource limits, telemetry, backlog behavior, failure isolation, disable/rollback controls, initial backfill, and steady-state proof. Do not add Ollama invocation or result production during item 26.

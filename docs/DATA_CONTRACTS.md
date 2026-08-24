@@ -131,7 +131,7 @@ Transport/file rules:
 
 ## GX10 SQLite working-state contract - current
 
-The reconstructed database contains exactly:
+The recovered base contains exactly:
 
 - `agent_state`
 - `source_files`
@@ -141,9 +141,18 @@ The reconstructed database contains exactly:
 - 13 explicit indexes
 - 3 foreign keys
 
-The exact DDL is `components/gx10/sql/initialize.sql`. The database is replaceable working state rather than the authoritative raw archive.
+The exact recovered-base DDL is `components/gx10/sql/initialize.sql`. Item 25 deliberately extends that base with:
 
-Current automatic writes are limited to fetch/ingest state and `recent_events`. `event_enrichment` keeps historical classification-version-3 rows. The separate unscheduled projector can add version-4 rows only from exact normalized schema-version-1 fields plus the existing local suppression rules; it performs no vendor/message reparsing and was not invoked against the live database during retirement.
+- `incidents`
+- `incident_evidence`
+- `incident_transitions`
+- 5 explicit incident indexes
+- 5 incident foreign keys
+- 4 append-only enforcement triggers
+
+The extension DDL is `components/gx10/sql/incident-v1.sql`. The database is replaceable working state rather than the authoritative raw archive.
+
+Current automatic writes remain limited to fetch/ingest state and `recent_events`. `event_enrichment` keeps historical classification-version-3 rows. The separate unscheduled projector can add version-4 rows only from exact normalized schema-version-1 fields plus the existing local suppression rules; it performs no vendor/message reparsing. The installed incident engine consumes only those version-4 rows. The working incident tables and both projection/incident cursors remain empty until the managed-invocation gate passes.
 
 ## AI result contract
 
@@ -181,7 +190,7 @@ Current boundary status:
 
 Therefore the schema is an active collector-side capability contract, not evidence that the current GX10 produces AI results.
 
-## Incident contract - target
+## Incident contract - deterministic implementation
 
 An incident is a durable deterministic object assembled from observations.
 
@@ -191,8 +200,8 @@ Target lifecycle:
 CANDIDATE -> OPEN -> RECOVERING -> RESOLVED
 ```
 
-Incident state should retain compact evidence, first/last seen times, occurrence counters, entity identity, current state, and rolling context summaries.
+Incident state retains append-only evidence/transitions, first/last seen times, occurrence and canonical repeat counters, entity identity, current state, and exact 60-minute/180-minute/24-hour rolling context summaries.
 
 The local LLM consumes an incident packet and returns analysis; it does not become the canonical incident database.
 
-No production incident packet/producer implementation is currently claimed. This section defines the target contract for future deterministic incident-engine and local-reasoning work.
+The deterministic schema/engine contract is implemented, copy-rehearsed, independently reproduced, and installed unscheduled. No production incident packet, managed invocation, Ollama caller, or result producer is currently claimed; those remain later gates.

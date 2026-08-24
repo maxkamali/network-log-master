@@ -91,7 +91,7 @@ collector capture
   -> ClickHouse/Grafana
 ```
 
-The collector-side normalizer has passed selected replay/parity, complete live shadow validation, and the production GX10 handoff gate. Its integration remains a separate durable-file worker reading settled collector backlog files without changing Vector's raw sinks. A forward-only handoff view now exposes only verified normalized outputs at or after an immutable floor while retaining the original GX10 transport identity. The raw and shadow histories and exact raw-view rollback remain preserved. After a multi-cadence stability review, transitional GX10 vendor/message reparsing was replaced by an unscheduled canonical-field projector that preserves local suppression policy and historical enrichment evidence. The GX10 incident engine, wake policy, Ollama caller, and result producer remain future implementation, not reconstructed current behavior.
+The collector-side normalizer has passed selected replay/parity, complete live shadow validation, and the production GX10 handoff gate. Its integration remains a separate durable-file worker reading settled collector backlog files without changing Vector's raw sinks. A forward-only handoff view now exposes only verified normalized outputs at or after an immutable floor while retaining the original GX10 transport identity. The raw and shadow histories and exact raw-view rollback remain preserved. After a multi-cadence stability review, transitional GX10 vendor/message reparsing was replaced by an unscheduled canonical-field projector that preserves local suppression policy and historical enrichment evidence. The deterministic GX10 incident schema and engine are now installed under protected rollback after replay/determinism proof, but remain unscheduled and empty. Managed projection/incident invocation, wake policy, Ollama caller, and result producer remain later implementation gates.
 
 ## Capture-first contract
 
@@ -117,7 +117,7 @@ CANDIDATE -> OPEN -> RECOVERING -> RESOLVED
 
 The LLM may summarize or explain an incident but does not decide canonical identity, deduplication, or lifecycle state.
 
-The long-lived incident engine is a future implementation milestone. Collector and GX10 rebuild capture are now complete, so later roadmap work may design that engine without misrepresenting it as existing behavior.
+The long-lived deterministic incident engine is implemented and installed unscheduled. Its identity, evidence, lifecycle, repeat, rolling-context, transaction, and replay contracts are documented in `docs/INCIDENT_ENGINE.md`. Managed invocation is deliberately separate from implementation: the current automatic chain still does not project canonical rows or process incidents.
 
 ## Context model
 

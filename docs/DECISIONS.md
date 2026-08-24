@@ -356,7 +356,7 @@ Consequence:
 
 ## ADR-020 - Incident truth is deterministic, event-sourced, and independent of the LLM
 
-**Status:** Accepted
+**Status:** Accepted and implemented
 
 GX10 incident identity, evidence membership, lifecycle, repeat accounting, and rolling context are owned by a deterministic SQLite engine over canonical classification-version-4 projections. A local model may later explain or summarize this state but cannot create identity or mutate lifecycle truth.
 

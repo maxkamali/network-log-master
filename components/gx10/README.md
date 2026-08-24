@@ -25,12 +25,12 @@ Current state:
 - secure backlog fetch and durable ingest are operational
 - replay/idempotency protections exist in the ingest path
 - normalized schema-version-1 projection is implemented as the deliberate replacement for transitional vendor/message reparsing
-- a deterministic version-1 incident engine and append-only schema are implemented as an unscheduled repository candidate
+- a deterministic version-1 incident engine and append-only schema are implemented, validated, and installed unscheduled on the working system under protected backup
 - the proven automatic chain is `timer -> fetch -> ingest`
 - canonical projection and incident processing remain deliberately absent from the automatic invocation chain
 - Ollama is active with six complete model manifests, but no application-specific observability-pipeline caller was discovered
 - secure collector-side AI-result return transport is proven, but no GX10 result producer was discovered
-- production incident activation and local-LLM orchestration remain future gated phases
+- managed projection/incident invocation and local-LLM orchestration remain future gated phases
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 

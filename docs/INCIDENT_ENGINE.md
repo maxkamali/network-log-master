@@ -2,7 +2,7 @@
 
 ## Status and authority boundary
 
-The version-1 incident engine is a validated repository candidate under execution-order item 25. Its private working-database-copy and independent deterministic rebuild gates pass. It is not yet installed, scheduled, or active on the working GX10 system.
+The version-1 incident engine completed execution-order item 25. Its private working-database-copy, cursor-reset replay, independent deterministic rebuild, and guarded unscheduled working-system migration gates pass. The schema and exact engine artifact are installed on GX10 with zero incident state/cursors and a protected pre-migration backup; neither projection nor incident processing is scheduled or active.
 
 The engine consumes only classification-version-4 rows created by the canonical normalized-field projector. It does not parse raw messages, infer identity with an LLM, call Ollama, or emit AI results. Canonical normalized records remain observation authority; deterministic SQLite state remains incident identity and lifecycle authority.
 
@@ -78,16 +78,34 @@ Malformed canonical projection data, schema drift, invalid cursor state, contrad
 
 The clean-machine initializer and runtime verifier include the incident schema, and the application installer includes the engine, but the systemd service remains exactly `fetch -> ingest`. Installing the candidate does not run the projector or engine.
 
-## Remaining activation gate
+## Working-system unscheduled migration
+
+The copy-rehearsal checkpoint was published and independently verified at `36631749b3c64d356f45c79088af5760b81f8723`. Under explicit production authorization, the existing timer was paused only after its oneshot settled. The published guard then installed the exact incident schema and engine without invoking either projector or engine.
+
+Postconditions were:
+
+- exactly three installed incident tables, all empty
+- zero version-4 projection rows
+- zero projection and incident cursors
+- zero scheduler references to the incident engine
+- all `24207` historical version-3 rows preserved
+- root-only validated pre-migration backup retained
+- existing timer active/enabled after migration
+- one ordinary fetch/ingest cadence advanced by one source file and 81 recent events
+- pipeline result successful with zero restarts
+
+The protected SQLite backup is `1912111104` bytes with SHA-256 `b8a2352b5e96cc1007a98cc4062a69e1c1bf4daa2253f2560a88ee87ce195634`. Its identity-bearing live path is intentionally not published.
+
+## Remaining managed-invocation gate
 
 Before the working GX10 database or invocation chain changes:
 
-1. publish and independently verify the exact candidate hashes
-2. rehearse base-schema migration, canonical projection, incident processing, replay, and invariants on a protected SQLite backup copy
-3. confirm the working database and installed artifacts still match the recorded preconditions
-4. stage only published exact-hash artifacts
-5. install the schema and engine unscheduled under a protected rollback boundary
-6. separately authorize and validate any one-time projection/incident backfill or recurring schedule
-7. retain incident state if populated; do not use destructive empty-state rollback after processing begins
+1. design one explicit managed order: canonical projection before incident processing
+2. preserve the existing fetch/ingest service and its failure isolation unless a separately validated unit arrangement supersedes it
+3. expose deterministic success/failure, backlog/cursor lag, counts, duration, and last-watermark telemetry
+4. define CPU/memory/time limits and concurrency exclusion against database writers
+5. rehearse initial backfill, steady-state no-op, newly appended input, failed projection, failed incident transaction, disable, and rollback behavior
+6. separately authorize live invocation only after exact artifacts and all preconditions are published
+7. retain incident state after processing begins; do not use destructive empty-state rollback once any incident or incident cursor exists
 
 An Ollama caller, wake policy, AI-result producer, and result-return schedule remain later milestones.

@@ -106,22 +106,22 @@ After the current system is reconstructable:
 
 ## Milestone 6 - Deterministic incident engine on GX10
 
-Status: `NEXT`
+Status: `DONE`
 
-1. `NEXT` — design and implement canonical incident identity and lifecycle
-2. implement append-only transitions/evidence
-3. implement repeat/burst accounting
-4. implement rolling compact context summaries
-5. implement replay/idempotency tests
-6. exercise against stored prepared observations
+1. `DONE` — design and implement canonical incident identity and lifecycle
+2. `DONE` — implement append-only transitions/evidence
+3. `DONE` — implement repeat/burst accounting
+4. `DONE` — implement rolling compact context summaries
+5. `DONE` — implement replay/idempotency tests
+6. `DONE` — exercise against stored prepared observations, reproduce the exact state independently, and install schema/engine unscheduled under protected rollback
 
 Exit gate: replaying the same input cannot create duplicate canonical incidents or contradictory state.
 
 ## Milestone 7 - Steady-state local reasoning
 
-Status: `FUTURE IMPLEMENTATION`
+Status: `NEXT`
 
-1. package correlation as a managed service
+1. `NEXT` — package canonical projection and incident correlation behind a managed, observable, rollback-protected invocation boundary
 2. add health/backlog telemetry
 3. implement deterministic LLM wake policy
 4. assemble compact incident packets

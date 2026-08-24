@@ -9710,3 +9710,47 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify this exact inactive-correction checkpoint. Then create the protected pre-activation backup and execute exactly one bounded production cycle while the corrected timer remains disabled. Enable the timer only if the separate activator and post-cycle verifier pass.
+
+## 2026-08-24 02:46 PDT - Item 29 protected initial production activation passed
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The exact inactive-correction evidence was published and independently matched on GitHub at:
+
+`40305b7ffcf8a299de0098d1f2ee8812fe6a3191` — `Record inactive reasoning timer correction`
+
+The first private orchestration attempt rejected transient deterministic lag caused by an ordinary incoming batch. It stopped before creating the recovery parent or backup and before starting any service, building any packet, or calling the model. The managed reasoning boundary remained disabled, inactive, and empty.
+
+The private wrapper was narrowed to permit read-only deterministic lag only before pausing the fetch/ingest timer, while still requiring empty reasoning state. It then required the fetch/ingest oneshot to settle and explicitly ran the existing correlation service to exact zero lag before invoking the unchanged published activator.
+
+The activator created and validated a new root-only online backup, ran exactly one managed production cycle while the reasoning timer was still disabled, and passed the installed-state verifier. That cycle built four packets and made one successful model call with one canonical result, leaving three pending and no failed or unreconciled run. Only then did it enable the corrected start-relative timer and pass the active verifier. The private wrapper restored the independent fetch/ingest timer in its unconditional cleanup path.
+
+```text
+recent_max_id=966859
+projection_lag=0
+incident_lag=0
+reasoning_packets=4
+reasoning_pending=3
+reasoning_model_versions=1
+reasoning_prompt_versions=1
+reasoning_runs=1
+reasoning_succeeded=1
+reasoning_failures=0
+reasoning_results=1
+reasoning_started=0
+protected_backup_bytes=1951907840
+protected_backup_sha256=7153ffb3ee9677c1c2c397638e8d22530bd01b6cfc9cad9deee8e763c2993d6d
+protected_backup_mode=0600
+pipeline_timer_resumed=yes
+correlation_timer_active=yes
+managed_reasoning_timer_active=yes
+managed_reasoning_restarts=0
+collector_result_return_enabled=no
+GX10_MANAGED_REASONING_INITIAL_ACTIVATION=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, or connection value was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this activation checkpoint. Then observe multiple natural five-minute cadences, proving one-inference maximum, exact aggregate count progression, zero failures/`STARTED` rows/restarts, deterministic zero lag, and healthy independent timers before completing item 29.

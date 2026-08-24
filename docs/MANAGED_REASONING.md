@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has a published repository candidate, passing synthetic tests, passing protected current-production-state-copy rehearsal, and exact inactive working-system installation. A final pre-activation review caught that the initial boot-relative timer could fire immediately when enabled on a long-running host. Activation was not attempted. The published corrected candidate uses a start-relative initial delay and was atomically applied only over the exact inactive predecessor. The runner/service/timer/private binding is installed, but the timer remains disabled and the service inactive. Production remains at zero reasoning packets, model versions, prompt versions, runs, and results, and no production inference has run.
+Execution-order item 29 has a published repository candidate, passing synthetic tests, passing protected current-production-state-copy rehearsal, exact inactive working-system installation, and protected initial production activation. A final pre-activation review caught and corrected the initial boot-relative timer before any inference. The corrected start-relative timer was atomically applied only over the exact inactive predecessor. The activator then created a protected backup, completed exactly one bounded production cycle while the timer was disabled, passed aggregate verification, and enabled the timer. Multiple independent natural-cadence gates remain before item 29 can complete.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -92,7 +92,7 @@ Twenty-one focused tests currently prove:
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `136` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, and the exact inactive timer correction have passed. Initial production activation and multiple scheduled-cadence evidence remain separate gates. Collector result return is outside item 29.
+The full GX10 suite currently passes `136` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, and protected initial production activation have passed. Multiple scheduled-cadence evidence remains the completion gate. Collector result return is outside item 29.
 
 ## Protected current-state-copy evidence
 
@@ -161,7 +161,37 @@ Before activation, review found that the installed `OnBootSec` timer could becom
 
 The correction was published at `abbaa53ad50f00d7728379b602bd064c38d4b009`, independently matched on GitHub, staged exactly on GX10, and passed all 136 tests there after repository-mode normalization. The installer accepted only the exact inactive predecessor and atomically upgraded it. Post-upgrade verification proved the corrected timer still disabled/inactive, the service inactive, zero restarts, zero reasoning rows of every type, caught-up deterministic watermarks, healthy dependencies, and no production inference.
 
-The protected pre-activation backup, one bounded initial production cycle, timer enablement, and scheduled-cadence gates remain separate.
+## Protected initial production activation
+
+The first activation attempt failed closed before backup creation or service execution because ordinary incoming input created transient deterministic lag during the pre-stop observation. The private orchestration wrapper was narrowed to accept that read-only pre-stop lag while still requiring empty reasoning state, then require exact catch-up after pausing only the fetch/ingest timer. The published activator itself did not change.
+
+The corrected attempt paused the fetch/ingest timer, waited for its oneshot to settle, ran deterministic correlation to zero lag, and created a new root-only mode-`0600` SQLite online backup. With the reasoning timer still disabled, exactly one managed cycle built four packets and completed one successful inference/result, leaving three pending. The activator verified zero failures and zero `STARTED` reservations before enabling the corrected timer. It then restored the fetch/ingest timer; the correlation and Ollama dependencies remained healthy.
+
+```text
+recent_max_id=966859
+projection_lag=0
+incident_lag=0
+reasoning_packets=4
+reasoning_pending=3
+reasoning_model_versions=1
+reasoning_prompt_versions=1
+reasoning_runs=1
+reasoning_succeeded=1
+reasoning_failures=0
+reasoning_results=1
+reasoning_started=0
+protected_backup_bytes=1951907840
+protected_backup_sha256=7153ffb3ee9677c1c2c397638e8d22530bd01b6cfc9cad9deee8e763c2993d6d
+protected_backup_mode=0600
+pipeline_timer_resumed=yes
+correlation_timer_active=yes
+managed_reasoning_timer_active=yes
+managed_reasoning_restarts=0
+collector_result_return_enabled=no
+GX10_MANAGED_REASONING_INITIAL_ACTIVATION=PASS
+```
+
+The protected backup path and all packet/result content remain private. Multiple independent natural-cadence gates remain.
 
 ## Exact candidate artifacts
 

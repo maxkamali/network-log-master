@@ -10013,3 +10013,44 @@ GX10_MANAGED_REASONING_DRAIN_CADENCE_1=PASS
 ### Next action
 
 Run the full public gate, publish, and independently verify this first corrected cadence. Then continue natural monitoring without manual service invocation; require the same fixed packet count and exact one-packet pending drain for at least two more independent cadences.
+
+## 2026-08-24 03:20 PDT - Item 29 second corrected cadence isolated invalid output and disabled safely
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The first corrected natural-drain checkpoint was published and independently matched on GitHub at:
+
+`64e26da90c5e8a5c3401f8687b94f0c4a4842cf1` — `Record first corrected reasoning cadence`
+
+No service was manually triggered. The second corrected natural cadence deferred packet construction, kept total packets fixed at 12, and consumed exactly one pending reservation. The local model response failed the unchanged strict output contract. The caller stored one terminal `INVALID_OUTPUT` run, no result, and no invalid model content. The service exited nonzero as designed.
+
+The rollout monitor rejected the cadence because success/result counts no longer equaled total runs. Only the managed reasoning timer was immediately disabled and stopped before another cadence. Fetch/ingest and deterministic correlation remained active. Aggregate diagnosis proved six pending packets, five successful runs/results, one terminal safe failure, zero `STARTED` reservations, zero restarts, and deterministic zero lag.
+
+```text
+recent_max_id=969964
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_pending=6
+reasoning_model_versions=1
+reasoning_prompt_versions=1
+reasoning_runs=6
+reasoning_started=0
+reasoning_succeeded=5
+reasoning_failures=1
+reasoning_results=5
+run_status_invalid_output=1
+run_status_succeeded=5
+managed_service_result=exit-code
+managed_service_exit_status=1
+managed_reasoning_restarts=0
+managed_reasoning_timer_enabled=disabled
+managed_reasoning_timer_active=inactive
+GX10_MANAGED_REASONING_DIAGNOSIS=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, connection value, or invalid model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this terminal-safe-failure checkpoint. On a fresh protected copy only, remove the terminal diagnostic reservation under an explicitly local-only trigger override and rerun the same selected packet through the unchanged caller/validator. If it succeeds, treat production failure as reviewed stochastic evidence and resume without rewriting it. If it fails consistently, keep reasoning disabled and correct prompt/model compatibility before any resume.

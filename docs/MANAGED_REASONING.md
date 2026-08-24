@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Two natural cadences exposed unbounded admission, growing pending from three to six to nine, so reasoning was disabled with append-only state preserved. The published 138-test correction defers construction whenever pending exists and requires an exact one-packet drain. It passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. Packets stayed fixed at 12 while pending fell 9→8→7 and successful runs/results rose 3→4→5. Additional natural drain cadences remain.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. The published 138-test backlog correction passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. The second corrected natural cadence also kept packets fixed at 12 and reduced pending 7→6, but its single model response failed strict output validation. The caller stored one terminal `INVALID_OUTPUT` run and no result or invalid content. Reasoning was disabled with zero `STARTED` rows or restarts. Production now preserves 12 packets, six pending, six runs, five successful results, and one explicit safe failure while private-copy diagnosis proceeds.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -95,7 +95,7 @@ Twenty-three focused tests currently prove:
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `138` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, bounded-backlog current-state-copy rehearsal, exact inactive runner upgrade, and protected corrected resume have passed. Multiple natural production drain cadences remain. Collector result return is outside item 29.
+The full GX10 suite currently passes `138` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, bounded-backlog current-state-copy rehearsal, exact inactive runner upgrade, protected corrected resume, and one corrected natural drain cadence have passed. The next cadence exercised terminal invalid-output isolation and was disabled for diagnosis; no validation rule is being weakened. Collector result return is outside item 29.
 
 ## Protected current-state-copy evidence
 
@@ -197,6 +197,8 @@ GX10_MANAGED_REASONING_INITIAL_ACTIVATION=PASS
 The protected backup path and all packet/result content remain private.
 
 The first corrected natural cadence was timer-driven and kept packet count fixed at 12 while pending fell from eight to seven and successful runs/results rose from four to five. It retained zero deterministic lag, failures, `STARTED` reservations, or restarts, and all independent timers remained healthy.
+
+The second corrected natural cadence again deferred construction and kept packets fixed while consuming exactly one pending reservation, but the model response failed the unchanged strict output contract. The caller stored only one terminal `INVALID_OUTPUT` run; no result or invalid model content was stored. The service exited nonzero as designed, and the rollout monitor disabled the reasoning timer before another cadence. A post-disable diagnosis proved pending six, five successes/results, one terminal failure, zero `STARTED` rows/restarts, and deterministic zero lag.
 
 ## Natural-cadence backlog failure and safe disable
 

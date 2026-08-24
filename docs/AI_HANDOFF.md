@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-The final repository rebuild milestone is published. Item 29's first natural cadences exposed backlog growth, so reasoning was disabled with append-only state preserved. The published 138-test correction defers construction whenever pending exists. It passed protected-copy rehearsal, exact inactive installation, and protected production resume. The first natural drain also passed with packets fixed at 12, pending 8→7, runs/results 4→5, and all health gates clean. Publish this evidence and collect additional exact one-packet natural drain cadences. Do not add collector result production in item 29.
+The final repository rebuild milestone is published. Item 29's 138-test backlog correction passed protected-copy rehearsal, exact inactive installation, protected resume, and one natural drain. The second natural drain kept packets fixed and pending fell 7→6, but strict validation stored one terminal `INVALID_OUTPUT` run and no result/content. Reasoning is disabled with five successes/results, one safe failure, zero `STARTED` rows/restarts, and zero deterministic lag. Publish this safe-disable evidence, then reproduce only on a protected copy without weakening validation or retrying production. Do not add collector result production in item 29.
 
 The active automatic application chains are:
 

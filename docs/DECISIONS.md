@@ -456,7 +456,7 @@ Consequence:
 
 ## ADR-024 - Managed reasoning is separately scheduled, bounded, and fail-closed
 
-**Status:** Accepted and active under corrected drain-cadence review
+**Status:** Accepted; timer disabled after terminal invalid-output cadence
 
 Packet construction and local inference use a third independently disableable oneshot/timer boundary after deterministic correlation. Each locked cycle runs deterministic packet construction once and permits at most one exact-version inference reservation.
 

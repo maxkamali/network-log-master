@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Two natural cadences exposed unbounded admission, growing pending from three to six to nine, so reasoning was disabled with append-only state preserved. The published 138-test correction defers construction whenever pending exists and requires an exact one-packet drain. It passed protected-copy rehearsal, exact inactive installation, and protected production resume. The corrected resume cycle kept packets fixed at 12, reduced pending 9→8, advanced successful runs/results 3→4, and enabled the timer only after verification. New natural drain cadences remain.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Two natural cadences exposed unbounded admission, growing pending from three to six to nine, so reasoning was disabled with append-only state preserved. The published 138-test correction defers construction whenever pending exists and requires an exact one-packet drain. It passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. Packets stayed fixed at 12 while pending fell 9→8→7 and successful runs/results rose 3→4→5. Additional natural drain cadences remain.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -195,6 +195,8 @@ GX10_MANAGED_REASONING_INITIAL_ACTIVATION=PASS
 ```
 
 The protected backup path and all packet/result content remain private.
+
+The first corrected natural cadence was timer-driven and kept packet count fixed at 12 while pending fell from eight to seven and successful runs/results rose from four to five. It retained zero deterministic lag, failures, `STARTED` reservations, or restarts, and all independent timers remained healthy.
 
 ## Natural-cadence backlog failure and safe disable
 

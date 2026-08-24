@@ -9978,3 +9978,38 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify this corrected-resume checkpoint. Then observe multiple natural five-minute cadences. Every reviewed cycle must keep packets fixed at 12, reduce pending by exactly one, add exactly one successful run/result, retain zero failure/`STARTED` rows/restarts and deterministic zero lag, and keep all independent production schedules healthy.
+
+## 2026-08-24 03:14 PDT - Item 29 first corrected natural drain cadence passed
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The corrected-resume checkpoint was published and independently matched on GitHub at:
+
+`18154004d5c91d4eedfa86b0c196249de339c931` — `Record corrected managed reasoning resume`
+
+No service was manually triggered. The corrected timer's first natural cadence deferred packet construction, kept total packets fixed at 12, reduced pending from eight to seven, and advanced successful runs/results from four to five. Deterministic watermarks were exactly caught up; failures, `STARTED` reservations, and restarts remained zero; fetch/ingest, correlation, and reasoning timers were all active.
+
+```text
+recent_max_id=969312
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_pending=7
+reasoning_model_versions=1
+reasoning_prompt_versions=1
+reasoning_runs=5
+reasoning_started=0
+reasoning_succeeded=5
+reasoning_failures=0
+reasoning_results=5
+managed_reasoning_restarts=0
+pipeline_timer_active=yes
+correlation_timer_active=yes
+managed_reasoning_timer_active=yes
+collector_result_return_enabled=no
+GX10_MANAGED_REASONING_DRAIN_CADENCE_1=PASS
+```
+
+### Next action
+
+Run the full public gate, publish, and independently verify this first corrected cadence. Then continue natural monitoring without manual service invocation; require the same fixed packet count and exact one-packet pending drain for at least two more independent cadences.

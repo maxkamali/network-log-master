@@ -10,6 +10,8 @@ Clean-machine GX10 validation is `WAIVED BY OPERATOR` because no disposable Ubun
 
 The later collector-normalizer production integration completed its forward-only GX10 handoff cutover on 2026-08-24. The unchanged fetch/ingest pipeline reached exact collector-ledger parity across the reviewed multi-cadence window. Item 24 then replaced the unscheduled live transitional vendor/message reparser under its exact captured hash with the canonical schema-version-1 projector. The replacement has zero scheduler references, the live database was unchanged, all historical version-3 rows remain, and a root-only exact legacy rollback copy is retained.
 
+Item 25 now has a repository-only deterministic incident-engine candidate. The clean rebuild contract includes its three-table append-only extension and exact engine artifact, while the working GX10 system remains unmigrated and the proven automatic chain remains unchanged. Private database-copy rehearsal and a separate live activation gate remain pending.
+
 This document is the component recovery authority for the active GX10 milestone. `docs/CURRENT_STATE.md` remains the authority for project-wide execution order and the single `NEXT` item.
 
 ## Reconstruction progress
@@ -31,6 +33,9 @@ Completed:
 - complete sanitized service/timer capture preserving fetch-then-ingest order, cadence, and all live hardening directives
 - clean-machine application/unit installer with no-overwrite, ownership/mode preflight, systemd verification, and no automatic activation
 - canonical projection remains intentionally unscheduled
+- deterministic incident schema/engine candidate with stable instance identity, append-only evidence/transitions, event-time lifecycle, repeat accounting, rolling context, and two-layer replay protection
+- guarded existing-database migration with exact schema/artifact hashes, protected SQLite backup, zero-scheduler-reference enforcement, and empty-state-only rollback
+- clean-machine initialization and verification include the incident extension while leaving projection and incident processing unscheduled
 - exact pinned application-package installer and fail-closed platform verifier
 - exact operator-supplied Ollama binary installer with no automatic activation
 - guarded offline model-store importer with source/target content hashing, no overwrite, and resumable exact reuse
@@ -43,12 +48,12 @@ Completed:
 - only Ollama and the fetch/ingest timer are activated; canonical projection remains unscheduled
 - complete clean-machine operator runbook
 - final structural, syntax, generated/private-artifact, IPv4/public-safety, unit-test, and filesystem-contract audit
-- 49 synthetic tests passing
+- 61 synthetic tests passing
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.
 
-The activation flow also refuses nonempty spool directories, any application-state rows, SQLite sidecar state, altered schema or suppression state, active/enabled runtime units, unexpected unit drop-ins, and installed artifacts that differ from the repository. Clean-machine activation has not been executed because no disposable GX10-class validation target is available.
+The activation flow also refuses nonempty spool directories, any application-state rows including incident state, SQLite sidecar state, altered schema or suppression state, active/enabled runtime units, unexpected unit drop-ins, and installed artifacts that differ from the repository. Clean-machine activation has not been executed because no disposable GX10-class validation target is available.
 
 ## Public-safety boundary
 
@@ -174,6 +179,8 @@ No surviving base-schema/bootstrap initializer was found in the bounded search, 
 
 Reconstruction must create the captured effective schema directly. It must not invent historical migration provenance and present it as discovered behavior.
 
+The item-25 target-state extension is deliberately separate from that recovered baseline. It adds `incidents`, `incident_evidence`, and `incident_transitions`, five explicit indexes, and four append-only triggers. The existing-system guard requires the exact recovered base before applying the extension and does not rewrite historical rows.
+
 ## Historical deterministic enrichment and canonical projection
 
 The captured deterministic classifier is version 3. Its source behavior, schema writes, vendor/event classification, repeat handling, and complete two-rule active suppression corpus are captured in items 12G and 12H.
@@ -188,6 +195,14 @@ The executable exists, but rediscovery found:
 The normalized production handoff made reparsing those same vendor messages a duplicate and potentially divergent authority. The item-24 replacement therefore projects exact normalized event fields as classification version 4, retains the two local enabled suppression rules, preserves all version-3 history, and advances through an atomic cursor. It remains unscheduled; automatically adding it to the pipeline would be a separate implementation change.
 
 An on-server copy rehearsal scanned `949845` stored events, projected `2781` exact canonical rows, preserved `24207` historical version-3 rows, applied local suppression to `1984` rows, and projected zero rows on the second run. The live database was unchanged.
+
+## Deterministic incident candidate
+
+The version-1 candidate consumes only classification-version-4 projections. Correlation identity is derived from canonical family/protocol/entity identity; each recurrence receives a deterministic instance ID bound to its first immutable source observation. Evidence and transitions are append-only, one active instance per correlation key is enforced by SQLite, and mutable incident rows materialize repeat totals, state changes, strongest severity, and 60-minute/180-minute/24-hour context.
+
+Lifecycle is deterministic and event-time based: explicit down-class transitions open immediately, degradation requires repeated adverse evidence within 15 minutes, recovery enters a five-minute quiet state, relapse reopens, and later recurrence creates a new instance. Cursor advancement and incident changes share one transaction, while unique evidence event IDs preserve idempotency even after cursor reset.
+
+The candidate neither parses messages nor calls Ollama. It has no systemd/cron reference and is not installed on the working GX10 system at this checkpoint. See `docs/INCIDENT_ENGINE.md` for its activation and rollback gates.
 
 ## Ollama and result-return boundary
 

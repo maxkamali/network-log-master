@@ -10,7 +10,7 @@ It reproduces:
 - read-only SFTP backlog fetch
 - replay-safe local SQLite ingest
 - the captured deterministic-enrichment executable, intentionally unscheduled
-- the exact reconstructed SQLite schema and two functional suppression patterns
+- the exact reconstructed SQLite base, deterministic incident extension, and two functional suppression patterns
 - the automatic `timer -> fetch -> ingest` chain
 - the captured Ollama executable, service, loopback listener, and six-model store
 
@@ -253,7 +253,7 @@ Do not paste private transport values or production log content into the public 
 - A partially copied model store may be resumed only when every existing artifact is exact. Divergent files require operator investigation; the importer never replaces them.
 - Preactivation refuses a used database, spool content, SQLite sidecars, active units, enabled runtime units, unit drop-ins, or altered installed artifacts.
 - Do not use this runbook to repair or modify the working reference GX10.
-- Do not add an enrichment timer, an Ollama pipeline caller, or a result-return producer as part of reconstruction. Those are separate future implementation decisions.
+- Do not add a projection/incident timer, an Ollama pipeline caller, or a result-return producer as part of reconstruction. Those are separate future implementation decisions. The installed incident engine is inert until a separately validated invocation gate is approved.
 
 ## Current validation status
 

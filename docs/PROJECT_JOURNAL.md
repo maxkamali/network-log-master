@@ -8234,3 +8234,59 @@ Removed only explicit agent-created temporary transfer/staging artifacts from th
 ### Next action
 
 Publish and independently verify this item-24 completion checkpoint. Then begin item 25 by defining the deterministic incident data model and replay/idempotency contracts over canonical normalized observations. Do not schedule projection, invoke Ollama, or create a result producer merely to lengthen the pipeline; each requires its own explicit design and validation gate.
+
+## 2026-08-24 00:07 PDT - Deterministic incident candidate and guarded migration validated locally
+
+### Status
+
+Execution-order item 25 remains the single `NEXT` item and is in progress.
+
+No working GX10 application, database, unit, schedule, or model state changed in this subsection. The repository now contains the deterministic incident engine, append-only schema extension, clean-install integration, and guarded existing-database migration needed for private copy rehearsal.
+
+### Deterministic authority contract
+
+The version-1 engine consumes only canonical classification-version-4 projections. It does not parse raw messages, call Ollama, or allow a model to own incident identity or lifecycle.
+
+Selected deterministic contracts are:
+
+- correlation key from canonical family/protocol/entity type/entity key
+- recurrence-specific incident ID from that correlation key plus the first immutable source-file/record identity
+- one non-resolved incident per correlation key, enforced by a unique partial index
+- append-only evidence and lifecycle transition tables enforced by SQLite triggers
+- `CANDIDATE`, `OPEN`, `RECOVERING`, and `RESOLVED` lifecycle with an explicit transition allowlist
+- immediate opening for explicit down-class state transitions
+- two-adverse-observation promotion for other degradation inside a fixed 15-minute window
+- candidate timeout fixed to the first adverse observation, not extended by supporting evidence
+- recovery quiet resolution after five minutes and relapse reopening before that deadline
+- deterministic 60-minute, 180-minute, and 24-hour compact context
+- occurrence, canonical repeat-count, state-change, and strongest-severity materialization over immutable evidence
+
+Timeouts are swept before each later observation is correlated at the monotonic processed event-time watermark. This prevents a late recovery or supporting observation from extending a candidate whose fixed deadline already passed.
+
+### Replay and migration boundary
+
+Each bounded batch commits evidence, transitions, incident aggregates, timeout changes, and the versioned cursor in one `BEGIN IMMEDIATE` transaction. Unique evidence event IDs preserve idempotency even if the cursor is removed and input is replayed.
+
+The clean-machine initializer/verifier now includes the three-table, five-index, four-trigger incident extension and exact incident-engine artifact, but the systemd chain remains exactly `timer -> fetch -> ingest`. Projection and incident processing are still unscheduled.
+
+The existing-system migration guard requires exact repository hashes, exact base/migrated schema inventories, root plus explicit confirmation, protected target/backup parents, an absent engine target, and zero systemd/cron references. It creates and validates a root-only SQLite backup before applying the migration. Rollback removes only the new empty schema and engine and refuses once either incident state or the engine cursor exists.
+
+Candidate hashes:
+
+- incident engine: `10b1133a00f775e5e5a4a3597156022eb46d62a2c1c2fe6424579af6341bfb6a`
+- incident schema: `25f4e6a4246c2fe25ac9db726be29accef3d57b268a59f4aa676d851edb52693`
+- migration guard: `b15c650e41a9c6f1b540d307e49e5218a66d0131b65acc422f69cafc692aa924`
+
+### Synthetic and repository validation
+
+Tests prove immediate opening, repeated-degradation promotion, supporting evidence, recovery, quiet resolution, relapse, recurrence identity, fixed candidate deadlines, replay after cursor reset, aggregate/context accounting, malformed-input transaction rollback, append-only trigger enforcement, exact migration apply/verify/rollback, schema-drift refusal, scheduler-reference refusal, and populated-state rollback refusal.
+
+- GX10 suite: `61 passed`
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
+- current-tree/history/link/ref public validation: `PASS`
+- `git diff --check`: `PASS`
+
+### Next action
+
+Publish and independently verify this intermediate item-25 checkpoint. Then use only its published exact artifacts for a protected private copy of the working GX10 database: apply the migration, run canonical projection, run incident processing, verify replay no-op and all schema/identity/evidence/transition/context invariants, and remove only the temporary rehearsal copy after success. Do not migrate or schedule the working database merely because copy rehearsal passes; record a separate activation decision and gate.

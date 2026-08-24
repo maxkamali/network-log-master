@@ -13,6 +13,7 @@ APPLICATIONS = {
     'fetch': SBIN_DIR / 'fetch-spool.py',
     'ingest': SBIN_DIR / 'ingest-spool.py',
     'projection': SBIN_DIR / 'enrich-events.py',
+    'incident': SBIN_DIR / 'incident-engine.py',
 }
 PUBLIC_ABSOLUTE_PREFIXES = (
     '/etc/network-log-gx10/',

@@ -46,6 +46,9 @@ class SystemdContractTests(unittest.TestCase):
         self.assertFalse(
             any('enrich-events' in value for value in values['ExecStart'])
         )
+        self.assertFalse(
+            any('incident-engine' in value for value in values['ExecStart'])
+        )
         self.assertEqual(values['UMask'], ['0027'])
         self.assertNotIn('Environment', values)
         self.assertNotIn('EnvironmentFile', values)

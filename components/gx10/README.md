@@ -25,11 +25,12 @@ Current state:
 - secure backlog fetch and durable ingest are operational
 - replay/idempotency protections exist in the ingest path
 - normalized schema-version-1 projection is implemented as the deliberate replacement for transitional vendor/message reparsing
+- a deterministic version-1 incident engine and append-only schema are implemented as an unscheduled repository candidate
 - the proven automatic chain is `timer -> fetch -> ingest`
-- canonical projection remains deliberately absent from the automatic invocation chain
+- canonical projection and incident processing remain deliberately absent from the automatic invocation chain
 - Ollama is active with six complete model manifests, but no application-specific observability-pipeline caller was discovered
 - secure collector-side AI-result return transport is proven, but no GX10 result producer was discovered
-- the long-lived deterministic incident engine and production LLM orchestration remain future build phases
+- production incident activation and local-LLM orchestration remain future gated phases
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -56,11 +57,12 @@ Run the safe repository validation with:
 
 ## Captured application implementations
 
-The three live custom applications are captured under `sbin/` with deployment values removed:
+The three rediscovered live custom applications and the new incident candidate are under `sbin/` with deployment values removed:
 
 - `fetch-spool.py`
 - `ingest-spool.py`
 - `enrich-events.py` — compatibility filename now containing the canonical normalized-field projector
+- `incident-engine.py` — deterministic incident identity, evidence, lifecycle, repeat, and rolling-context engine
 
 `sbin/runtime_config.py` loads the protected runtime configuration rendered by `install/render-runtime-config.py`. See `sbin/PROVENANCE.md` for live hashes and the function-level parity proof.
 
@@ -76,14 +78,14 @@ The original deterministic-enrichment source/hash remains recorded for provenanc
 
 ## SQLite initialization
 
-`sql/initialize.sql` reconstructs the complete effective SQLite contract recovered in item 12M:
+`sql/initialize.sql` preserves the complete effective SQLite base contract recovered in item 12M:
 
 - 5 application tables
 - 13 explicit indexes
 - 3 foreign keys
 - the two enabled exact-match suppression patterns from item 12H
 
-`install/initialize-database.py` creates the database atomically, refuses any existing database, validates integrity/schema/corpus before publication, and installs mode `0640` for the dedicated runtime identity.
+`sql/incident-v1.sql` adds the deliberate target-state extension: three incident tables, five explicit indexes, and four append-only triggers. `install/initialize-database.py` creates the base plus this extension atomically, refuses any existing database, validates integrity/schema/corpus before publication, and installs mode `0640` for the dedicated runtime identity.
 
 The historical suppression-rule names and reasons were not exposed during rediscovery and no initializer survived. The public rebuild therefore uses neutral names/reasons while preserving functional IDs, evaluation order, types, patterns, and enabled state.
 
@@ -97,7 +99,7 @@ The automatic chain remains exactly:
 
 `timer -> fetch -> ingest`
 
-`install/install-applications.py` installs the four application files and two units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting the timer. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database.
+`install/install-applications.py` installs the five application files and two units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting the timer. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database. `install/migrate-incident-engine.py` provides the guarded existing-database extension and unscheduled engine installation with exact hashes, a protected SQLite backup, and empty-state-only rollback.
 
 See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boundary.
 
@@ -126,7 +128,7 @@ Successful activation enables exactly:
 - `ollama.service`
 - `network-log-gx10.timer`
 
-The pipeline service remains static and canonical projection remains unscheduled. Starting the timer authorizes only the proven automatic `fetch -> ingest` behavior, so run activation only after the operator has reviewed the final clean-machine runbook and confirmed the transport endpoint.
+The pipeline service remains static; canonical projection and incident processing remain unscheduled. Starting the timer authorizes only the proven automatic `fetch -> ingest` behavior, so run activation only after the operator has reviewed the final clean-machine runbook and confirmed the transport endpoint.
 
 Do not run the activation script against the working reference system.
 

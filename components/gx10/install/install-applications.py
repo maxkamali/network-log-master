@@ -22,6 +22,7 @@ ARTIFACTS = (
     (GX10_DIR / 'sbin' / 'fetch-spool.py', LIBEXEC_DIR / 'fetch-spool.py', 0o755),
     (GX10_DIR / 'sbin' / 'ingest-spool.py', LIBEXEC_DIR / 'ingest-spool.py', 0o755),
     (GX10_DIR / 'sbin' / 'enrich-events.py', LIBEXEC_DIR / 'enrich-events.py', 0o755),
+    (GX10_DIR / 'sbin' / 'incident-engine.py', LIBEXEC_DIR / 'incident-engine.py', 0o755),
     (GX10_DIR / 'sbin' / 'runtime_config.py', LIBEXEC_DIR / 'runtime_config.py', 0o644),
     (
         GX10_DIR / 'systemd' / 'network-log-gx10.service',

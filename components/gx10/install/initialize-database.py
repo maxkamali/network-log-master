@@ -13,6 +13,7 @@ RUNTIME_GROUP = 'network-log-agent'
 DATABASE_PATH = Path('/var/lib/network-log-gx10/state/events.sqlite3')
 SCRIPT_DIR = Path(__file__).resolve().parent
 SCHEMA_PATH = SCRIPT_DIR.parent / 'sql' / 'initialize.sql'
+INCIDENT_SCHEMA_PATH = SCRIPT_DIR.parent / 'sql' / 'incident-v1.sql'
 
 
 def validate_parent(path):
@@ -24,17 +25,32 @@ def validate_parent(path):
         raise ValueError('database parent is not a directory')
 
 
-def validate_database(connection):
+def schema_inventory(connection):
+    return connection.execute(
+        "SELECT type, name, sql FROM sqlite_master "
+        "WHERE name NOT LIKE 'sqlite_%' "
+        "AND type IN ('table', 'index', 'trigger') "
+        "ORDER BY type, name"
+    ).fetchall()
+
+
+def expected_schema_inventory(schema_paths):
+    expected = sqlite3.connect(':memory:')
+    try:
+        for schema_path in schema_paths:
+            expected.executescript(Path(schema_path).read_text(encoding='utf-8'))
+        return schema_inventory(expected)
+    finally:
+        expected.close()
+
+
+def validate_database(connection, schema_paths):
     quick_check = connection.execute('PRAGMA quick_check').fetchone()[0]
     if quick_check != 'ok':
         raise ValueError('SQLite quick_check failed')
 
-    objects = connection.execute(
-        "SELECT COUNT(*) FROM sqlite_master "
-        "WHERE name NOT LIKE 'sqlite_%' AND type IN ('table', 'index')"
-    ).fetchone()[0]
-    if objects != 18:
-        raise ValueError('unexpected SQLite schema object count')
+    if schema_inventory(connection) != expected_schema_inventory(schema_paths):
+        raise ValueError('unexpected SQLite schema contract')
 
     suppression = connection.execute(
         'SELECT id, rule_type, pattern, enabled '
@@ -48,16 +64,24 @@ def validate_database(connection):
         raise ValueError('unexpected suppression corpus')
 
 
-def initialize_database(path, schema_path, uid, gid):
+def initialize_database(
+    path,
+    schema_path,
+    uid,
+    gid,
+    incident_schema_path=INCIDENT_SCHEMA_PATH,
+):
     path = Path(path)
     schema_path = Path(schema_path)
     if path.exists() or path.is_symlink():
         raise ValueError('clean-machine initializer refuses an existing database')
-    if not schema_path.is_file() or schema_path.is_symlink():
-        raise ValueError('schema source is not a real file')
+    incident_schema_path = Path(incident_schema_path)
+    schema_paths = (schema_path, incident_schema_path)
+    for source in schema_paths:
+        if not source.is_file() or source.is_symlink():
+            raise ValueError('schema source is not a real file')
     validate_parent(path)
 
-    schema = schema_path.read_text(encoding='utf-8')
     descriptor, temporary_name = tempfile.mkstemp(
         prefix='.events.sqlite3.',
         dir=path.parent,
@@ -68,8 +92,9 @@ def initialize_database(path, schema_path, uid, gid):
     try:
         connection = sqlite3.connect(temporary_path)
         try:
-            connection.executescript(schema)
-            validate_database(connection)
+            for source in schema_paths:
+                connection.executescript(source.read_text(encoding='utf-8'))
+            validate_database(connection, schema_paths)
         finally:
             connection.close()
 

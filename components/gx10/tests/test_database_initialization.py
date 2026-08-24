@@ -42,21 +42,26 @@ class DatabaseInitializationTests(unittest.TestCase):
         connection.execute('PRAGMA foreign_keys=ON')
         return connection
 
-    def test_effective_schema_matches_recovered_contract(self):
+    def test_recovered_base_schema_is_preserved_with_incident_extension(self):
         with self.connect() as connection:
             objects = connection.execute(
                 "SELECT type, name, sql FROM sqlite_master "
-                "WHERE name NOT LIKE 'sqlite_%' AND type IN ('table', 'index') "
+                "WHERE name NOT LIKE 'sqlite_%' "
+                "AND type IN ('table', 'index', 'trigger') "
                 "ORDER BY type, name"
             ).fetchall()
-            self.assertEqual(len(objects), 18)
+            self.assertEqual(len(objects), 30)
             self.assertEqual(
                 sum(1 for kind, _, _ in objects if kind == 'table'),
-                5,
+                8,
             )
             self.assertEqual(
                 sum(1 for kind, _, _ in objects if kind == 'index'),
-                13,
+                18,
+            )
+            self.assertEqual(
+                sum(1 for kind, _, _ in objects if kind == 'trigger'),
+                4,
             )
 
             tables = {
@@ -74,7 +79,13 @@ class DatabaseInitializationTests(unittest.TestCase):
     def test_foreign_keys_match_recovered_contract(self):
         with self.connect() as connection:
             relationships = set()
-            for table in ('event_enrichment', 'recent_events'):
+            for table in (
+                'event_enrichment',
+                'recent_events',
+                'incidents',
+                'incident_evidence',
+                'incident_transitions',
+            ):
                 for row in connection.execute(f'PRAGMA foreign_key_list({table})'):
                     relationships.add((table, row[3], row[2], row[4]))
             self.assertEqual(
@@ -88,6 +99,11 @@ class DatabaseInitializationTests(unittest.TestCase):
                         'id',
                     ),
                     ('recent_events', 'source_file', 'source_files', 'remote_path'),
+                    ('incidents', 'last_event_id', 'recent_events', 'id'),
+                    ('incident_evidence', 'event_id', 'recent_events', 'id'),
+                    ('incident_evidence', 'incident_id', 'incidents', 'incident_id'),
+                    ('incident_transitions', 'event_id', 'recent_events', 'id'),
+                    ('incident_transitions', 'incident_id', 'incidents', 'incident_id'),
                 },
             )
 
@@ -111,7 +127,15 @@ class DatabaseInitializationTests(unittest.TestCase):
             self.assertEqual(connection.execute('PRAGMA quick_check').fetchone()[0], 'ok')
             self.assertEqual(connection.execute('PRAGMA user_version').fetchone()[0], 0)
             self.assertEqual(connection.execute('PRAGMA application_id').fetchone()[0], 0)
-            for table in ('agent_state', 'source_files', 'recent_events', 'event_enrichment'):
+            for table in (
+                'agent_state',
+                'source_files',
+                'recent_events',
+                'event_enrichment',
+                'incidents',
+                'incident_evidence',
+                'incident_transitions',
+            ):
                 self.assertEqual(
                     connection.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0],
                     0,
@@ -130,7 +154,8 @@ class DatabaseInitializationTests(unittest.TestCase):
         with self.connect() as connection:
             before = connection.execute(
                 "SELECT type, name, sql FROM sqlite_master "
-                "WHERE name NOT LIKE 'sqlite_%' AND type IN ('table', 'index') "
+                "WHERE name NOT LIKE 'sqlite_%' "
+                "AND type IN ('table', 'index', 'trigger') "
                 "ORDER BY type, name"
             ).fetchall()
 
@@ -138,10 +163,14 @@ class DatabaseInitializationTests(unittest.TestCase):
             load_application('projection').validate_database_contract(
                 connection
             )
+            load_application('incident').validate_database_contract(
+                connection
+            )
 
             after = connection.execute(
                 "SELECT type, name, sql FROM sqlite_master "
-                "WHERE name NOT LIKE 'sqlite_%' AND type IN ('table', 'index') "
+                "WHERE name NOT LIKE 'sqlite_%' "
+                "AND type IN ('table', 'index', 'trigger') "
                 "ORDER BY type, name"
             ).fetchall()
             self.assertEqual(after, before)

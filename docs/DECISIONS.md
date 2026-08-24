@@ -353,3 +353,26 @@ Consequence:
 - a transactional cursor makes projection append-only, bounded, resumable, and idempotent
 - projection remains absent from the proven automatic `timer -> fetch -> ingest` chain until a later explicit scheduling decision
 - the live retirement used exact old/new hashes, zero-scheduler-reference preconditions, atomic replacement, a root-only rollback copy, and an unchanged-database postcheck
+
+## ADR-020 - Incident truth is deterministic, event-sourced, and independent of the LLM
+
+**Status:** Accepted
+
+GX10 incident identity, evidence membership, lifecycle, repeat accounting, and rolling context are owned by a deterministic SQLite engine over canonical classification-version-4 projections. A local model may later explain or summarize this state but cannot create identity or mutate lifecycle truth.
+
+Why:
+
+- canonical normalized records now provide one authoritative event/entity/protocol representation
+- replay and recurrence require stable identities derived from immutable source observations
+- lifecycle decisions must remain testable and reproducible without model availability or nondeterministic output
+- append-only evidence and transitions preserve why an incident exists and how it changed
+- model context must be compact and bounded without replacing durable facts
+
+Consequence:
+
+- correlation keys are deterministic hashes of canonical family/protocol/entity identity
+- incident instance IDs also include the first adverse source-file/record identity, so recurrence after resolution is distinct
+- evidence and transition tables are append-only, while one mutable incident row materializes current aggregates and 60-minute, 180-minute, and 24-hour context
+- explicit adverse state transitions may open immediately; other degradations require repeated evidence inside a fixed event-time window
+- transactionally coupled cursor and evidence uniqueness make processing resumable and replay-safe
+- schema migration, installation, historical projection, recurring scheduling, Ollama invocation, and result return remain separately gated operations

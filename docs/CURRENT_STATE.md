@@ -269,7 +269,7 @@ The completed public package provides:
 - reference-like/nonempty-state preactivation refusal
 - dual-confirmation activation with full blob hashing and failure rollback
 - complete clean-machine runbook and two-server integration runbook
-- 93 passing GX10 tests
+- 94 passing GX10 tests
 - `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 

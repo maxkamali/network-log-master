@@ -30,6 +30,15 @@ PERIODIC_EVIDENCE_DELTA = 5
 PERIODIC_REPEAT_DELTA = 10
 CRITICAL_SEVERITIES = {'critical', 'crit', 'alert', 'emergency', 'emerg'}
 OSPF_FAMILIES = {'ospf', 'ospfv3'}
+FORBIDDEN_ATTRIBUTE_KEYS = {
+    'event_json',
+    'local_path',
+    'message',
+    'raw_message',
+    'remote_path',
+    'source_file',
+    'source_path',
+}
 REASON_PRIORITY = {
     'critical_condition': 100,
     'incident_reopened': 95,
@@ -365,16 +374,49 @@ def ordered_reasons(incident, basis, evidence, transitions, previous):
     return sorted(reasons, key=lambda reason: (-REASON_PRIORITY[reason], reason))
 
 
+def sanitize_attribute_value(value):
+    if isinstance(value, dict):
+        result = {}
+        removed = 0
+        for key in sorted(value):
+            if key.casefold() in FORBIDDEN_ATTRIBUTE_KEYS:
+                removed += 1
+                continue
+            child, child_removed = sanitize_attribute_value(value[key])
+            result[key] = child
+            removed += child_removed
+        return result, removed
+    if isinstance(value, list):
+        result = []
+        removed = 0
+        for item in value:
+            child, child_removed = sanitize_attribute_value(item)
+            result.append(child)
+            removed += child_removed
+        return result, removed
+    return value, 0
+
+
 def compact_attributes(value):
     attributes = parse_canonical_object(value, 'incident evidence attributes')
-    canonical = canonical_json(attributes)
+    original = canonical_json(attributes)
+    sanitized, removed = sanitize_attribute_value(attributes)
+    canonical = canonical_json(sanitized)
     size = len(canonical.encode('utf-8'))
     if size <= MAX_ATTRIBUTES_BYTES:
-        return {'attributes': attributes}
+        result = {'attributes': sanitized}
+        if removed:
+            result.update(
+                {
+                    'attributes_redacted_keys': removed,
+                    'attributes_sha256': sha256_text(original),
+                }
+            )
+        return result
     return {
         'attributes_omitted': True,
-        'attributes_sha256': sha256_text(canonical),
-        'attributes_utf8_bytes': size,
+        'attributes_sha256': sha256_text(original),
+        'attributes_utf8_bytes': len(original.encode('utf-8')),
     }
 
 

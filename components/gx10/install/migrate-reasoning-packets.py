@@ -19,7 +19,7 @@ INCIDENT_SCHEMA = GX10_DIR / 'sql' / 'incident-v1.sql'
 REASONING_SCHEMA = GX10_DIR / 'sql' / 'reasoning-v1.sql'
 BUILDER_SOURCE = GX10_DIR / 'sbin' / 'build-reasoning-packets.py'
 BUILDER_SHA256 = (
-    '259f26353714e7ff8adbf627a33dcae6025e933f24fc9f2600b06882c3e16e00'
+    '3543ca1dd5b661c628fbef6e0101c79d0bc236997d229ce354ba9dc618fc8145'
 )
 SCHEMA_SHA256 = (
     'bd46f4a51301c225e051aa6b5e27406ad06c651271d7c82fb3b67ac2b21def90'

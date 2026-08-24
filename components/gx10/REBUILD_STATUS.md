@@ -14,7 +14,7 @@ Item 25 is complete. The deterministic incident engine passed private working-da
 
 Item 26 is complete. The separately managed offline `projection -> incident` service/timer passed private working-database-copy rehearsal, inactive working-system installation, fail-closed activation handling, full initial production backfill, active verification, and three independent scheduled zero-lag cadences. It preserves fetch/ingest unchanged, enforces exact stage hashes and single-cycle locking, converges both cursors in bounded passes, exposes structured health counts, and retains guarded backfill-before-enable activation, verification, and state-preserving disable controls.
 
-Item 27 has a repository-only deterministic wake-policy and compact-packet candidate plus a guarded existing-system migration. Its append-only one-table schema and builder implement fixed reason priorities/cooldowns, lifecycle/special-condition/meaningful-update decisions, deterministic versioned packet identity, bounded fact-only packets, existing-packet tamper detection, and replay-safe no-op behavior. The migration requires the exact base-plus-incident schema and candidate hashes, creates a protected pre-reasoning SQLite backup, installs no schedule, and rolls back only while packets remain empty. Thirteen focused tests pass within the 93-test GX10 suite. No item-27 artifact, schema, packet, invocation, Ollama call, or result producer exists on the working system.
+Item 27 has a repository-only deterministic wake-policy and compact-packet candidate plus a guarded existing-system migration. Its append-only one-table schema and builder implement fixed reason priorities/cooldowns, lifecycle/special-condition/meaningful-update decisions, deterministic versioned packet identity, bounded fact-only packets, recursive raw/source attribute-key exclusion, existing-packet tamper detection, and replay-safe no-op behavior. The migration requires the exact base-plus-incident schema and candidate hashes, creates a protected pre-reasoning SQLite backup, installs no schedule, and rolls back only while packets remain empty. Fourteen focused tests pass within the 94-test GX10 suite. No item-27 artifact, schema, packet, invocation, Ollama call, or result producer exists on the working system.
 
 The private copy full backfill scanned `954790` stored events, projected `7726` canonical rows, suppressed `5830`, and produced `22` incidents, `425` evidence rows, `463` transitions, and `5` active incidents in one 4.3-second managed pass with zero cursor lag. The next pass was a complete no-op. A synthetic appended canonical event advanced both exact watermarks. Malformed projection input rolled back its batch and prevented incident execution; forced incident failure preserved the durable projection and all prior incident state. The working database remained unchanged.
 
@@ -58,7 +58,7 @@ Completed:
 - Ollama, the original fetch/ingest timer, and the separately disableable correlation timer are active; no local-reasoning caller is scheduled
 - complete clean-machine operator runbook
 - final structural, syntax, generated/private-artifact, IPv4/public-safety, unit-test, and filesystem-contract audit
-- 93 synthetic tests passing
+- 94 synthetic tests passing
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.

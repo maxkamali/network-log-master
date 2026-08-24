@@ -52,7 +52,7 @@ Packet version 1 contains only deterministic facts:
 - up to 8 newest lifecycle transitions since the prior packet
 - explicit omitted-row counts when a delta exceeds those slices
 
-Raw messages and source-file identities are excluded. Evidence attributes are included only when their canonical JSON is at most 2048 bytes; larger attributes are represented by byte count and SHA-256. Any other individual text value over 1024 UTF-8 bytes becomes a bounded prefix plus byte count and SHA-256. The complete canonical packet may not exceed 32 KiB.
+Raw messages and source-file identities are excluded. Attribute keys for message/raw-message/event JSON and local/remote/source paths are recursively removed; the packet records the removed-key count and original canonical attribute digest. Remaining evidence attributes are included only when their canonical JSON is at most 2048 bytes; larger attributes are represented by byte count and SHA-256. Any other individual text value over 1024 UTF-8 bytes becomes a bounded prefix plus byte count and SHA-256. The complete canonical packet may not exceed 32 KiB.
 
 ## Transaction and failure behavior
 
@@ -70,8 +70,8 @@ No cursor is required: append-only sequence bases and unique deterministic packe
 Candidate SHA-256 values:
 
 - schema: `bd46f4a51301c225e051aa6b5e27406ad06c651271d7c82fb3b67ac2b21def90`
-- builder: `259f26353714e7ff8adbf627a33dcae6025e933f24fc9f2600b06882c3e16e00`
-- migration guard: `2a576c11d7138a012bb3e6b9e69731c862d50931f9fa5210420bf368a68564af`
+- builder: `3543ca1dd5b661c628fbef6e0101c79d0bc236997d229ce354ba9dc618fc8145`
+- migration guard: `72e425981cb028edc709186688ff40dbd4bc19d9d22b7c11e2f5e5b3644c49fe`
 
 The clean-machine initializer/installer/verifier include the candidate, but base and correlation activation still do not schedule it.
 

@@ -9019,3 +9019,36 @@ Migration-guard SHA-256:
 ### Next action
 
 Run the public gate, publish, and independently verify this migration candidate. Then stage only exact public artifacts on GX10 and execute the guard plus packet-builder behaviors against protected production-state copies. The working database and installed runtime remain unchanged.
+
+## 2026-08-24 01:13 PDT - Packet raw/source attribute exclusion made explicit before copy rehearsal
+
+### Status
+
+Execution-order item 27 remains the single `NEXT` item and is in progress.
+
+The guarded migration candidate was published and independently matched on GitHub at:
+
+`dbe4912f200be85fb4654c51681f0d5bbf221f61` — `Guard reasoning packet schema migration`
+
+Pre-copy contract review identified that excluding top-level raw messages and source paths was insufficient if a future normalized attribute dictionary introduced an equivalently named nested key. The builder now recursively removes these attribute keys before packet construction:
+
+- `message`
+- `raw_message`
+- `event_json`
+- `source_file`
+- `source_path`
+- `remote_path`
+- `local_path`
+
+When any key is removed, the packet records the removal count and SHA-256 of the original canonical attribute object. Safe structured attributes remain. The existing 2048-byte attribute and 32-KiB packet bounds still apply.
+
+A new test proves nested raw/source keys are absent, safe siblings remain, and the redaction evidence is exact. The GX10 suite now contains `94` tests.
+
+Corrected SHA-256 values:
+
+- packet builder: `3543ca1dd5b661c628fbef6e0101c79d0bc236997d229ce354ba9dc618fc8145`
+- migration guard: `72e425981cb028edc709186688ff40dbd4bc19d9d22b7c11e2f5e5b3644c49fe`
+
+### Next action
+
+Run all package/public gates, publish and independently verify the correction, then use only that public checkpoint for production-state-copy rehearsal.

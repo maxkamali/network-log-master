@@ -96,7 +96,7 @@ Published artifacts include:
 - exact Ollama binary and offline six-model-store installation/verification
 - guarded preactivation and dual-confirmation activation
 - complete clean-machine runbook
-- `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 93 tests
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 94 tests
 
 Detailed state is in `components/gx10/REBUILD_STATUS.md`. Disposable Ubuntu 24.04 arm64 GX10-class clean-host execution was unavailable and waived by the operator; it remains empirically unverified.
 

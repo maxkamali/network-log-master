@@ -319,6 +319,28 @@ class ReasoningPacketTests(unittest.TestCase):
         self.assertEqual(len(evidence['attributes_sha256']), 64)
         self.assertNotIn('attributes', evidence)
 
+    def test_raw_and_source_attribute_keys_are_recursively_removed(self):
+        self.add_event(
+            1787551200000,
+            attributes={
+                'safe': 'retained',
+                'raw_message': 'excluded',
+                'nested': [{'source_file': '/excluded', 'state': 'down'}],
+            },
+        )
+        self.assertEqual(self.run_engine(), 0)
+        self.assertEqual(self.run_builder(), 0)
+        evidence = self.packet()['evidence'][0]
+        self.assertEqual(
+            evidence['attributes'],
+            {'nested': [{'state': 'down'}], 'safe': 'retained'},
+        )
+        self.assertEqual(evidence['attributes_redacted_keys'], 2)
+        self.assertEqual(len(evidence['attributes_sha256']), 64)
+        encoded = json.dumps(evidence, sort_keys=True)
+        self.assertNotIn('raw_message', encoded)
+        self.assertNotIn('source_file', encoded)
+
     def test_packet_rows_are_append_only_and_tamper_is_detected(self):
         self.add_event(1787551200000)
         self.assertEqual(self.run_engine(), 0)

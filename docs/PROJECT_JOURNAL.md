@@ -10389,3 +10389,43 @@ GX10_MANAGED_REASONING_R3_CADENCE_2=PASS
 ### Next action
 
 Run the full public gate, publish, and independently verify this cadence. Then continue timer-only monitoring for at least one more natural cadence under the same exact invariants and immediate reasoning-only disable rule.
+
+## 2026-08-24 04:10 PDT - Item 29 completed after third natural r3 cadence
+
+### Status
+
+Execution-order item 29 is complete. The second natural `r3` cadence checkpoint was published and independently matched on GitHub at:
+
+`b633f6749a8a220d24bc2a4473596177a2058010` — `Record second natural r3 cadence`
+
+No service was manually invoked. The third natural `r3` cadence kept total packets fixed at 12, reduced revised-version pending from nine to eight, and advanced total runs from nine to ten plus successes/results from eight to nine. The historical failure remained exactly one. There were zero `STARTED` rows or restarts, deterministic watermarks were caught up, and fetch/ingest, correlation, and reasoning timers were all active.
+
+Together, the protected initial `r3` drain and three independent natural cadences each consumed exactly one revised-version reservation and stored exactly one valid result. The immutable original failure never increased or blocked newer-version progress. Item 29 therefore satisfies bounded invocation, failure isolation, backlog control, provenance, strict-output, protected activation, and multi-cadence production stability gates.
+
+```text
+recent_max_id=974660
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_revised_pending=8
+reasoning_model_versions=1
+reasoning_prompt_versions=2
+reasoning_runs=10
+reasoning_started=0
+reasoning_succeeded=9
+reasoning_failures=1
+reasoning_results=9
+managed_reasoning_restarts=0
+pipeline_timer_active=yes
+correlation_timer_active=yes
+managed_reasoning_timer_active=yes
+collector_result_return_enabled=no
+GX10_MANAGED_REASONING_R3_CADENCE_3=PASS
+ITEM_29_MANAGED_REASONING=COMPLETE
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, connection value, or model output was printed or committed.
+
+### Next action
+
+Execution-order item 30 is the single `NEXT` item. Begin repository/copy-only design and implementation of a versioned idempotent GX10 result outbox that maps only successful append-only reasoning results to the collector's thin JSONL contract. Prove deterministic mapping, provenance, duplicate suppression, atomic publication, crash recovery, strict bounds, and protected-copy behavior before installing any result-writer credential or transmitting to the collector.

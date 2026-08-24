@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 28 is complete. Its published calibrated schema, caller, prompt/configuration artifacts, and output schema were first installed empty and unscheduled on the working GX10 system under a protected pre-inference backup. Item 29 later activated bounded managed invocation. After five successful production results, one response failed the unchanged strict action-text validator and was stored only as terminal `INVALID_OUTPUT`; no invalid content became a result. Managed reasoning is disabled while an item-29 compatibility correction is gated.
+Execution-order items 28 and 29 are complete. The original calibrated schema/caller/configuration/prompt boundary was first installed empty and unscheduled under protected backup. Item 29 later activated bounded managed invocation, safely preserved one terminal `INVALID_OUTPUT`, diagnosed its action-text compatibility cause, and promoted immutable portable prompt revision `r3` through protected-copy, exact-upgrade, protected-resume, and three natural-cadence gates. Managed reasoning is active with strict validation unchanged; collector result production remains a separate item-30 gate.
 
 The installed caller consumes only immutable item-27 packets. It cannot change incidents, evidence, transitions, packets, collector state, or Grafana state.
 
@@ -15,7 +15,7 @@ The calibrated candidate uses the second-smallest model in the captured six-mani
 - model version: `ollama-gemma4-c6eb396d-v1`
 - model manifest SHA-256: `c6eb396dbd5992bbe3f5cdb947e8bbc0ee413d7c17e2beaae69f5d569cf982eb`
 - model config digest: `sha256:f0988ff50a2458c598ff6b1b87b94d0f5c44d73061c2795391878b00b2285e11`
-- prompt version: `incident-assessment-v2`
+- current prompt version: `incident-assessment-v2-r3`
 - output schema version: `2`
 
 The smallest captured model (`qwen3:8b`) passed structural output but failed calibration: one early result under-escalated a critical OSPF case, and stricter attempts safely rejected meaningless or non-packet-derived output. Validation was not weakened. The next bounded candidate, `gemma4:latest`, passed all three synthetic OSPF/interface/BGP cases with strict severity, confidence, action-risk, tag-provenance, canonical-result, and no-op gates. Its exact manifest and active loopback runtime were revalidated. Protected-copy inference passed before the empty unscheduled working-system installation; production invocation remains a separate gate.
@@ -47,7 +47,7 @@ Item 29 reproduced the failed production packet only on protected copies and cla
 - output schema: `13083841c44253b326f1294b930acae435bfdddb458b47c31a9fd385b181abd0`
 - migration guard: `d477ce16df5835a5406e8d02bce8fbe36a94049477ed4c09f158ccd2ac2780ee`
 
-These compatibility bytes passed exact GX10 staging/tests and same-packet protected-copy inference, were installed inactive from their exact predecessors, and completed one fresh-backup `r3` production drain before timer enablement. The original terminal failure remains immutable evidence while natural-cadence validation proceeds.
+These compatibility bytes passed exact GX10 staging/tests and same-packet protected-copy inference, were installed inactive from their exact predecessors, and completed one fresh-backup `r3` production drain plus three natural timer cadences. The original terminal failure remains immutable evidence.
 
 ## Durable state and idempotency
 

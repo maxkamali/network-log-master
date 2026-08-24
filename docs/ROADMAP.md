@@ -119,7 +119,7 @@ Exit gate: replaying the same input cannot create duplicate canonical incidents 
 
 ## Milestone 7 - Steady-state local reasoning
 
-Status: `IN PROGRESS`
+Status: `DONE`
 
 1. `DONE` — packaged canonical projection and incident correlation behind a managed, observable, rollback-protected invocation boundary and activated it through backfill plus multi-cadence gates
 2. `DONE` — added independent watermark/backlog, integrity, incident-aggregate, restart, and timer-health verification for the managed correlation boundary
@@ -129,9 +129,19 @@ Status: `IN PROGRESS`
 6. `DONE` — independently validate strict structured model output through synthetic and protected-copy real-model gates
 7. `DONE` — keep deterministic facts separate from model interpretation through append-only packet/result boundaries
 8. `DONE` — preserve safe no-result behavior when inference is unavailable, invalid, or interrupted
-9. `IN PROGRESS` — package packet building and bounded inference behind a separately disableable, observable managed invocation boundary before production scheduling
+9. `DONE` — packaged packet building and bounded inference behind a separately disableable, observable managed boundary; passed protected activation, compatibility correction, exact upgrade, and multi-cadence production gates while preserving one reviewed terminal failure
 
-## Milestone 8 - AI presentation refinement
+## Milestone 8 - Validated AI result return
+
+Status: `IN PROGRESS`
+
+1. build a versioned deterministic outbox projection from successful append-only reasoning results
+2. prove idempotent mapping, duplicate suppression, atomic ready-file publication, crash recovery, strict output bounds, and protected-copy behavior
+3. separately install the least-privilege write-only transport identity only after repository/copy gates pass
+4. activate one bounded live result return and prove collector validation, ClickHouse ingestion, exact provenance, replay safety, and failure isolation
+5. retain GX10 without direct ClickHouse access and keep all model results nonauthoritative
+
+## Milestone 9 - AI presentation refinement
 
 Status: `FUTURE IMPLEMENTATION`
 

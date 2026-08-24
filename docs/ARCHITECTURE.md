@@ -48,7 +48,7 @@ Target ownership:
 
 GX10 is intentionally not the authoritative raw-log archive, dashboard server, or direct ClickHouse writer.
 
-Current production implementation is narrower than the target. Its automatic behavior has two independent schedules: read-only backlog fetch followed by replay-safe local SQLite ingest, and offline canonical projection followed by deterministic incident correlation. Ollama infrastructure exists. The application-specific versioned item-28 schema/caller/configuration/prompt boundary and item-29 managed `packet build -> one local inference` runner/service/timer are installed under protected gates, but reasoning remains inactive and disabled with zero production state. No result-return producer exists.
+Current production has three independent GX10 schedules: read-only backlog fetch followed by replay-safe local SQLite ingest; offline canonical projection followed by deterministic incident correlation; and bounded packet/backlog draining followed by one strict local-model invocation. The item-29 reasoning boundary passed protected activation, one diagnosed terminal safe failure, immutable portable prompt revision `r3`, exact upgrade, and three natural drain cadences. Reasoning results remain append-only and nonauthoritative. No result-return producer exists.
 
 ## Current data path
 
@@ -64,6 +64,9 @@ GX10
   -> local durable replay-safe ingest
   -> separately scheduled canonical projection
   -> deterministic incident correlation/lifecycle
+  -> deterministic versioned reasoning packets
+  -> separately scheduled bounded local inference
+  -> append-only validated local results
 ```
 
 Separately present but not connected by a discovered GX10 producer:
@@ -75,7 +78,7 @@ collector write-only result transport
   -> Grafana
 ```
 
-Ollama is installed, active, enabled, loopback-only, and has six complete model manifests. No application-specific network-observability caller was found during rediscovery; the reconstructed item-28 caller is now installed empty and unscheduled with no production inference.
+Ollama is installed, active, enabled, and loopback-only with six complete model manifests. No application-specific caller was found during rediscovery; the reconstructed strict caller is now active only through the separately managed item-29 boundary. The collector return path remains disconnected until item 30 and later live-return gates pass.
 
 ## Target data path
 
@@ -93,7 +96,7 @@ collector capture
   -> ClickHouse/Grafana
 ```
 
-The collector-side normalizer has passed selected replay/parity, complete live shadow validation, and the production GX10 handoff gate. Its integration remains a separate durable-file worker reading settled collector backlog files without changing Vector's raw sinks. A forward-only handoff view now exposes only verified normalized outputs at or after an immutable floor while retaining the original GX10 transport identity. The raw and shadow histories and exact raw-view rollback remain preserved. After a multi-cadence stability review, transitional GX10 vendor/message reparsing was replaced by a canonical-field projector that preserves local suppression policy and historical enrichment evidence. The deterministic GX10 incident schema/engine and separately disableable offline managed `projection -> incident` runner/service/timer passed production backfill and multi-cadence activation gates. The deterministic wake-policy/compact-packet schema and builder remain empty and unscheduled. The versioned caller/schema/configuration/prompt boundary is also installed empty and unscheduled under protected backup; it binds immutable packets to exact model/prompt/run versions and strict append-only structured results. Managed invocation and result-production gates remain.
+The collector-side normalizer has passed selected replay/parity, complete live shadow validation, and the production GX10 handoff gate. Its integration remains a separate durable-file worker reading settled collector backlog files without changing Vector's raw sinks. A forward-only handoff view now exposes only verified normalized outputs at or after an immutable floor while retaining the original GX10 transport identity. The raw and shadow histories and exact raw-view rollback remain preserved. After a multi-cadence stability review, transitional GX10 vendor/message reparsing was replaced by a canonical-field projector that preserves local suppression policy and historical enrichment evidence. The deterministic GX10 incident schema/engine and separately disableable offline managed `projection -> incident` runner/service/timer passed production backfill and multi-cadence activation gates. The deterministic wake-policy/compact-packet builder and versioned caller/schema/configuration/prompt boundary are active only through the separately disableable managed reasoning schedule. They bind immutable packets to exact model/prompt/run versions and strict append-only structured results. Result production/return remains the next separately gated boundary.
 
 ## Capture-first contract
 

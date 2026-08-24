@@ -30,10 +30,10 @@ Current state:
 - the original automatic chain remains `timer -> fetch -> ingest`; the correlation chain is independently scheduled and disableable
 - Ollama is active with six complete model manifests, but no application-specific observability-pipeline caller was discovered
 - secure collector-side AI-result return transport is proven, but no GX10 result producer was discovered
-- production packet construction and bounded local-LLM inference have begun behind the separately disableable item-29 gate; collector result production remains a future phase
-- the deterministic wake-policy/compact-packet schema and exact builder are installed unscheduled under protected backup with zero packet rows, invocations, or scheduler references
+- production packet construction and bounded local-LLM inference are active behind the separately disableable item-29 gate; collector result production remains a separate item-30 phase
+- the deterministic wake-policy/compact-packet schema and exact builder are active only through the managed reasoning boundary
 - the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; the original exact artifacts were installed empty under protected backup before item-29 activation
-- the item-29 backlog-deferral correction passed protected-copy, inactive-install, protected-resume, and one natural-drain gates; a later strict invalid-output safe failure was diagnosed, and exact prompt revision `r3` passed remote tests, same-packet protected-copy replay, four-artifact inactive upgrade, and one fresh-backup production drain before timer enablement
+- item 29 is complete after backlog deferral, one safely diagnosed terminal invalid output, exact portable prompt revision `r3`, protected-copy replay, four-artifact upgrade, protected resume, and three natural fixed-packet drain cadences
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -68,7 +68,7 @@ The three rediscovered live custom applications and deliberate post-rediscovery 
 - `incident-engine.py` — deterministic incident identity, evidence, lifecycle, repeat, and rolling-context engine
 - `build-reasoning-packets.py` — deterministic wake selection and bounded append-only packet construction; no inference
 - `run-local-reasoning.py` — exact model/prompt/run binding and strict loopback structured inference; installed but not scheduled
-- `run-managed-reasoning.py` — exact-hash packet/inference wrapper with one-inference-per-cycle locking, pending-backlog builder deferral, and aggregate health; the installed bounded-backlog predecessor remains disabled while the coordinated runtime-config/schema/caller/runner compatibility candidate is gated
+- `run-managed-reasoning.py` — exact-hash packet/inference wrapper with one-inference-per-cycle locking, pending-backlog builder deferral, and aggregate health; exact portable revision `r3` is active after protected upgrade/resume and three natural cadences
 
 `sbin/runtime_config.py` loads the protected runtime configuration rendered by `install/render-runtime-config.py`. See `sbin/PROVENANCE.md` for live hashes and the function-level parity proof.
 
@@ -125,7 +125,7 @@ The large model blobs are intentionally not stored in Git. `install/install-mode
 
 The item-28 application-specific caller and supporting schema/configuration/prompt artifacts were installed empty and unscheduled under protected backup. Item 29 later invoked the boundary through its separately managed schedule; deterministic schedules remain independent of Ollama.
 
-The item-29 service/timer/private binding and exact `r3` bytes are installed. A fresh-backup protected `r3` drain passed and the timer is active for at least three natural-cadence gates. The original invalid-output run remains immutable evidence. See `docs/MANAGED_REASONING.md`.
+The item-29 service/timer/private binding and exact `r3` bytes are installed and active after three natural-cadence gates. The original invalid-output run remains immutable evidence. Item 30 begins with a local versioned result outbox; no result-writer credential or collector transmission is installed yet. See `docs/MANAGED_REASONING.md`.
 
 ## Guarded activation and runtime verification
 

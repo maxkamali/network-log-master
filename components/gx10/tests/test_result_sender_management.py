@@ -18,6 +18,7 @@ SENDER_PATH = GX10_DIR / 'sbin' / 'send-result-outbox.py'
 RUNNER_PATH = GX10_DIR / 'sbin' / 'run-result-sender.py'
 INSTALLER_PATH = GX10_DIR / 'install' / 'install-result-sender.py'
 VERIFIER_PATH = GX10_DIR / 'install' / 'verify-result-sender.py'
+CONFIGURATOR_PATH = GX10_DIR / 'install' / 'configure-result-sender.py'
 SERVICE_PATH = GX10_DIR / 'systemd/network-log-gx10-result-sender.service'
 TIMER_PATH = GX10_DIR / 'systemd/network-log-gx10-result-sender.timer'
 EXAMPLE_PATH = GX10_DIR / 'config/result-sender.example.json'
@@ -36,6 +37,9 @@ class ResultSenderManagementTests(unittest.TestCase):
         cls.runner = load_module('result_sender_runner_test', RUNNER_PATH)
         cls.installer = load_module('result_sender_installer_test', INSTALLER_PATH)
         cls.verifier = load_module('result_sender_verifier_test', VERIFIER_PATH)
+        cls.configurator = load_module(
+            'result_sender_configurator_test', CONFIGURATOR_PATH
+        )
 
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
@@ -227,6 +231,178 @@ class ResultSenderManagementTests(unittest.TestCase):
         self.assertIn('collector.example.invalid', text)
         self.assertNotIn('PRIVATE KEY', text)
         self.assertNotIn('password', text.casefold())
+
+    def private_state(self):
+        ssh_dir = self.root / 'ssh'
+        outbox = self.root / 'outbox'
+        ssh_dir.mkdir()
+        outbox.mkdir()
+        ready = outbox / 'ready'
+        delivered = outbox / 'delivered'
+        ready.mkdir()
+        delivered.mkdir()
+        reader = ssh_dir / 'spool-reader.key'
+        known = ssh_dir / 'known_hosts'
+        reader.write_bytes(b'reader-key\n')
+        known.write_bytes(b'pinned-host\n')
+        return {
+            'uid': 1000,
+            'gid': 1000,
+            'root': outbox,
+            'ready': ready,
+            'delivered': delivered,
+            'identity': ssh_dir / 'result-writer.key',
+            'known_hosts': ssh_dir / 'result-writer-known_hosts',
+        }
+
+    def test_configurator_installs_private_state_last_config_and_stays_inactive(self):
+        state = self.private_state()
+        config = self.root / 'result-sender.json'
+        identity_input = self.root / 'input.key'
+        identity_input.write_bytes(b'writer-key\n')
+        calls = []
+
+        def fake_install(path, data, mode, uid, gid):
+            path = Path(path)
+            path.write_bytes(data)
+            path.chmod(mode)
+            calls.append(path)
+
+        verifier = types.SimpleNamespace(
+            runtime_state=lambda: state,
+            validate_file=lambda *args, **kwargs: None,
+            verify_staged=mock.Mock(),
+            verify_configured=mock.Mock(),
+        )
+        with (
+            mock.patch.object(self.configurator, 'SENDER_CONFIG', config),
+            mock.patch.object(self.configurator, 'load_verifier', return_value=verifier),
+            mock.patch.object(self.configurator, 'require_inactive'),
+            mock.patch.object(
+                self.configurator,
+                'validate_identity_input',
+                return_value='writer-public',
+            ),
+            mock.patch.object(
+                self.configurator,
+                'public_key',
+                return_value='reader-public',
+            ),
+            mock.patch.object(
+                self.configurator,
+                'expected_configuration',
+                return_value=b'{"schema_version":1}\n',
+            ),
+            mock.patch.object(
+                self.configurator,
+                'install_bytes',
+                side_effect=fake_install,
+            ),
+        ):
+            result = self.configurator.configure(identity_input)
+        self.assertEqual(result, {'created': 3, 'reused': 0})
+        self.assertEqual(
+            calls,
+            [
+                state['identity'],
+                state['known_hosts'],
+                config,
+            ],
+        )
+        verifier.verify_staged.assert_called_once_with()
+        verifier.verify_configured.assert_called_once_with()
+
+    def test_configurator_failure_removes_only_new_private_state(self):
+        state = self.private_state()
+        config = self.root / 'result-sender.json'
+        identity_input = self.root / 'input.key'
+        identity_input.write_bytes(b'writer-key\n')
+
+        def fake_install(path, data, mode, uid, gid):
+            Path(path).write_bytes(data)
+
+        verifier = types.SimpleNamespace(
+            runtime_state=lambda: state,
+            validate_file=lambda *args, **kwargs: None,
+            verify_staged=mock.Mock(),
+            verify_configured=mock.Mock(
+                side_effect=ValueError('injected configured verify')
+            ),
+        )
+        with (
+            mock.patch.object(self.configurator, 'SENDER_CONFIG', config),
+            mock.patch.object(self.configurator, 'load_verifier', return_value=verifier),
+            mock.patch.object(self.configurator, 'require_inactive'),
+            mock.patch.object(
+                self.configurator,
+                'validate_identity_input',
+                return_value='writer-public',
+            ),
+            mock.patch.object(
+                self.configurator,
+                'public_key',
+                return_value='reader-public',
+            ),
+            mock.patch.object(
+                self.configurator,
+                'expected_configuration',
+                return_value=b'{"schema_version":1}\n',
+            ),
+            mock.patch.object(
+                self.configurator,
+                'install_bytes',
+                side_effect=fake_install,
+            ),
+        ):
+            with self.assertRaisesRegex(ValueError, 'injected configured verify'):
+                self.configurator.configure(identity_input)
+        self.assertFalse(state['identity'].exists())
+        self.assertFalse(state['known_hosts'].exists())
+        self.assertFalse(config.exists())
+        self.assertTrue((state['identity'].parent / 'spool-reader.key').exists())
+        self.assertTrue((state['identity'].parent / 'known_hosts').exists())
+
+    def test_configurator_refuses_partial_existing_private_state(self):
+        state = self.private_state()
+        config = self.root / 'result-sender.json'
+        state['identity'].write_bytes(b'existing-writer\n')
+        identity_input = self.root / 'input.key'
+        identity_input.write_bytes(b'writer-key\n')
+        verifier = types.SimpleNamespace(
+            runtime_state=lambda: state,
+            validate_file=lambda *args, **kwargs: None,
+        )
+        with (
+            mock.patch.object(self.configurator, 'SENDER_CONFIG', config),
+            mock.patch.object(self.configurator, 'load_verifier', return_value=verifier),
+            mock.patch.object(self.configurator, 'require_inactive'),
+            mock.patch.object(
+                self.configurator,
+                'validate_identity_input',
+                return_value='writer-public',
+            ),
+            mock.patch.object(
+                self.configurator,
+                'public_key',
+                return_value='reader-public',
+            ),
+            mock.patch.object(
+                self.configurator,
+                'expected_configuration',
+                return_value=b'{}\n',
+            ),
+        ):
+            with self.assertRaisesRegex(
+                self.configurator.ConfigureError,
+                'partial',
+            ):
+                self.configurator.configure(identity_input)
+
+    def test_configurator_has_no_sftp_execution_path(self):
+        source = CONFIGURATOR_PATH.read_text(encoding='utf-8')
+        self.assertNotIn('/usr/bin/sftp', source)
+        self.assertNotIn("['sftp'", source)
+        self.assertIn("Path('/usr/bin/ssh-keygen')", source)
 
 
 if __name__ == '__main__':

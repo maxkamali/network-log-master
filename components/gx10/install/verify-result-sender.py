@@ -21,11 +21,13 @@ CONFIG_DIR = Path('/etc/network-log-gx10')
 SYSTEMD_DIR = Path('/etc/systemd/system')
 OUTBOX_CONFIG = CONFIG_DIR / 'result-outbox.json'
 SENDER_CONFIG = CONFIG_DIR / 'result-sender.json'
+RUNTIME_CONFIG = CONFIG_DIR / 'runtime.json'
 SERVICE = 'network-log-gx10-result-sender.service'
 TIMER = 'network-log-gx10-result-sender.timer'
 OUTBOX_SERVICE = 'network-log-gx10-result-outbox.service'
 OUTBOX_TIMER = 'network-log-gx10-result-outbox.timer'
 DROPIN_PATH = SYSTEMD_DIR / f'{SERVICE}.d' / '10-runtime.conf'
+SSH_KEYGEN = Path('/usr/bin/ssh-keygen')
 SAFE_NAME_RE = re.compile(r'^[A-Za-z0-9_.@-]+$')
 ARTIFACTS = (
     (
@@ -188,16 +190,13 @@ def validate_units(state):
         raise ValueError('managed result sender effective group differs')
 
 
-def verify_staged():
+def verify_public_package():
     state = runtime_state()
     for source, target, mode in ARTIFACTS:
         validate_file(target, mode, 0, 0, source=source)
     validate_file(DROPIN_PATH, 0o644, 0, 0)
     if DROPIN_PATH.read_bytes() != render_dropin(state):
         raise ValueError('managed result sender drop-in differs')
-    for path in (SENDER_CONFIG, state['identity'], state['known_hosts']):
-        if Path(path).exists() or Path(path).is_symlink():
-            raise ValueError('managed result sender private state exists')
     validate_file('/usr/bin/sftp', 0o755, 0, 0)
     validate_units(state)
     if systemctl_value(OUTBOX_TIMER, 'UnitFileState') != 'enabled':
@@ -207,20 +206,110 @@ def verify_staged():
     return state
 
 
+def verify_staged():
+    state = verify_public_package()
+    for path in (SENDER_CONFIG, state['identity'], state['known_hosts']):
+        if Path(path).exists() or Path(path).is_symlink():
+            raise ValueError('managed result sender private state exists')
+    return state
+
+
+def public_key(path):
+    result = subprocess.run(
+        [str(SSH_KEYGEN), '-y', '-P', '', '-f', str(path)],
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    fields = result.stdout.strip().split()
+    if (
+        result.returncode != 0
+        or len(fields) != 2
+        or fields[0] != 'ssh-ed25519'
+        or len(fields[1]) < 32
+    ):
+        raise ValueError('managed result sender identity differs')
+    return ' '.join(fields)
+
+
+def verify_configured():
+    state = verify_public_package()
+    validate_file(SENDER_CONFIG, 0o640, 0, state['gid'])
+    validate_file(state['identity'], 0o600, state['uid'], state['gid'])
+    validate_file(state['known_hosts'], 0o600, state['uid'], state['gid'])
+    if not public_key(state['identity']):
+        raise ValueError('managed result sender identity differs')
+    validate_file(RUNTIME_CONFIG, 0o640, 0, state['gid'])
+    try:
+        runtime = json.loads(RUNTIME_CONFIG.read_text(encoding='utf-8'))
+        configured = json.loads(SENDER_CONFIG.read_text(encoding='utf-8'))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError('managed result sender configuration differs') from exc
+    if not isinstance(runtime, dict) or set(runtime) != {
+        'sftp_host',
+        'sftp_port',
+        'sftp_user',
+    }:
+        raise ValueError('managed result sender runtime configuration differs')
+    runner_path = LIBEXEC_DIR / 'run-result-sender.py'
+    specification = importlib.util.spec_from_file_location(
+        'verified_installed_result_sender_runner', runner_path
+    )
+    module = importlib.util.module_from_spec(specification)
+    specification.loader.exec_module(module)
+    parsed = module.parse_config(configured)
+    if (
+        parsed['ready'] != state['ready']
+        or parsed['delivered'] != state['delivered']
+        or parsed['identity'] != state['identity']
+        or parsed['known_hosts'] != state['known_hosts']
+        or parsed['host'] != runtime['sftp_host']
+        or parsed['port'] != int(runtime['sftp_port'])
+        or parsed['user'] != 'ai_results_writer'
+    ):
+        raise ValueError('managed result sender configured values differ')
+    canonical = (
+        json.dumps(configured, separators=(',', ':'), sort_keys=True) + '\n'
+    ).encode('utf-8')
+    if SENDER_CONFIG.read_bytes() != canonical:
+        raise ValueError('managed result sender configuration is not canonical')
+    lookup = (
+        parsed['host']
+        if parsed['port'] == 22
+        else f'[{parsed["host"]}]:{parsed["port"]}'
+    )
+    result = subprocess.run(
+        [str(SSH_KEYGEN), '-F', lookup, '-f', str(state['known_hosts'])],
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if result.returncode != 0 or not result.stdout.strip():
+        raise ValueError('managed result sender pinned host differs')
+    return state
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--staged', action='store_true')
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument('--staged', action='store_true')
+    mode.add_argument('--configured', action='store_true')
     args = parser.parse_args()
     try:
         if os.geteuid() != 0:
             raise ValueError('run the managed result sender verifier as root')
-        if not args.staged:
-            raise ValueError('managed result sender verification mode is absent')
-        verify_staged()
+        if args.configured:
+            verify_configured()
+        else:
+            verify_staged()
         print(
-            'MANAGED_RESULT_SENDER_VERIFY schema=1 staged=yes '
-            'timer_enabled=no service_active=no config_installed=no '
-            'credentials_installed=no'
+            'MANAGED_RESULT_SENDER_VERIFY schema=1 '
+            f'configured={"yes" if args.configured else "no"} '
+            f'config_installed={"yes" if args.configured else "no"} '
+            'timer_enabled=no service_active=no '
+            f'credentials_installed={"yes" if args.configured else "no"}'
         )
         print('GX10_MANAGED_RESULT_SENDER_VERIFY=PASS')
         return 0

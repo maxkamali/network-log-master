@@ -537,7 +537,7 @@ Consequence:
 
 ## ADR-027 - Result sending is single-file, exact-byte, and transport-acknowledged
 
-**Status:** Accepted; inactive managed package installed and verified
+**Status:** Accepted; configured-inactive candidate passed repository/staged gates
 
 The GX10 sender transmits at most one oldest ready result per cycle under the same lock used by the no-network producer. It uploads the existing canonical file under its unchanged deterministic basename and moves it locally to delivered only after the bounded SFTP process returns success.
 
@@ -563,3 +563,6 @@ Consequence:
 - the service is deliberately network-capable but has no capabilities, a strict read-only system, write scope only to the derived outbox, no database access, fixed address families, bounded resources/time, and a required private config condition
 - inactive installation creates no private config, identity, known-hosts file, or enabled schedule
 - the sender package is installed with its timer disabled, service inactive, and all private inputs absent; no credential or live transport is authorized by this decision alone
+- the separate configurator accepts only a root-owned Ed25519 input, proves it differs from the read-only spool identity, copies the existing pinned host into a distinct writer file, and atomically installs canonical configuration last
+- partial or divergent private state is refused; postinstall verification failure removes only newly created inputs; exact existing state is reusable
+- configured verification requires exact private metadata/values/pin plus the unchanged disabled/inactive package and active outbox, and neither configuration nor verification invokes SFTP

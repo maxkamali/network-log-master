@@ -81,6 +81,14 @@ The public example contains only documentation-domain values and reserved writer
 
 The guarded working-system inactive install passed from the exact published/staged package. Independent verification rederived the historical private outbox/runtime identity without printing it, matched every installed public byte and dynamic drop-in, and required absent config/key/writer-known-hosts plus disabled/inactive sender state. The active outbox independently passed at 20 results, 20 ready, zero delivered. Correct private-runtime verification passed correlation and reasoning at zero lag, and a separate identity-withholding check proved the original pipeline timer remained enabled/active with zero service restarts.
 
+## Configured-inactive candidate
+
+The separate configurator derives endpoint and outbox values only from already validated private runtime state. It accepts a root-owned mode-`0400`/`0600` Ed25519 input from `/run`, refuses reuse of the existing read-only spool identity, copies the already pinned host entry into a separate writer known-hosts file, and installs the canonical sender configuration last. The writer identity and writer known-hosts are service-owned mode `0600`; the configuration is root-owned, service-group-readable mode `0640`.
+
+Every target must be either wholly absent or wholly present and independently valid. Partial state is refused. New installation uses no-overwrite publication and directory synchronization; a later validation failure removes only files created by that attempt. Existing exact state is idempotently reusable, while divergent state is refused. Both the configurator and verifier use a fixed `/usr/bin/ssh-keygen`; neither invokes SFTP. The verifier rederives the installed paths, role, endpoint, pinned-host lookup, canonical bytes, metadata, exact installed public package, active outbox, and disabled/inactive zero-restart sender state.
+
+Four new management tests cover config-last installation, failure cleanup, partial-state refusal, and absence of an SFTP execution path. The resulting 182-test GX10 suite and filesystem/package contracts pass locally. The same exact changed bytes pass all 182 tests and the filesystem contract from the retained temporary GX10 candidate tree with exact SHA-256 parity. No live private input has been installed by this gate.
+
 ## Passed repository/copy gates
 
 The 11 focused tests prove:
@@ -103,8 +111,7 @@ After GitHub independently matched the published candidate, the guarded upgrader
 
 ## Remaining gates
 
-1. Publish and independently verify the inactive installed checkpoint.
-2. Implement a separate guarded configurator and configured-inactive verifier. It must generate/install a dedicated writer identity, install only its matching collector authorization, bind a separate pinned known-host file, derive endpoint/outbox values privately, retain exact rollback evidence, and leave the sender disabled.
-3. Pass repository, synthetic failure-cleanup, exact staged, and configured-inactive production verification without invoking SFTP.
-4. Publish the bounded first-live/replay plan, then transmit one file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
-5. Prove an exact replay creates no second ClickHouse row and a controlled malformed/divergent file remains isolated.
+1. Publish and independently verify the configured-inactive candidate.
+2. Generate/install a dedicated writer identity, install only its matching collector authorization, bind the separate pinned known-host file, retain exact rollback evidence, and pass configured-inactive production verification with no SFTP invocation.
+3. Publish the bounded first-live/replay plan, then transmit one file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
+4. Prove an exact replay creates no second ClickHouse row and a controlled malformed/divergent file remains isolated.

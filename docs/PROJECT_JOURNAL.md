@@ -11142,3 +11142,41 @@ No private runtime path, connection value, result/packet/event/entity content, c
 ### Next action
 
 Run the full public gate, publish this inactive-installed checkpoint, and independently verify GitHub. Then implement a separate guarded private-input configurator and configured-inactive verifier with dedicated writer identity generation, exact collector authorization installation, separate pinned known-host input, atomic private configuration, failure rollback, and a hard requirement that the sender timer/service remain disabled/inactive. Do not invoke SFTP or move any outbox file during configuration.
+
+## 2026-08-24 08:16 PDT - Item 30 configured-inactive candidate passed repository/staged gates
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The inactive sender production-install checkpoint was published and independently matched on GitHub at:
+
+`097c92573f11a78422cc502d4a8f061540518e8e` — `Record inactive result sender installation`
+
+The repository now contains a separate private-input configurator and configured-state verifier. The configurator requires the sender timer/service to remain disabled/inactive, derives all endpoint/outbox values from validated private runtime state, accepts only a root-owned mode-`0400`/`0600` Ed25519 input from `/run`, proves it differs from the existing read-only spool identity, copies the existing pinned host into a separate writer-only known-hosts file, and installs canonical root-owned configuration last. It has no SFTP execution path.
+
+Private targets must be wholly absent or wholly present. Partial state is refused. Installation is no-overwrite and directory-synchronized; failure removes only files created by that attempt. Exact existing state is reusable and divergent state fails closed. The verifier independently rederives all paths and roles, exact package bytes, private ownership/modes, canonical configuration, writer-only account, runtime endpoint, pinned-host lookup, active outbox, and disabled/inactive zero-restart sender state.
+
+The four added management tests cover successful config-last order, created-only cleanup after an injected verifier failure, partial-state refusal, and absence of an SFTP call path. All 182 GX10 tests plus package/filesystem contracts pass locally. The exact three changed files were copied to the retained temporary GX10 tree; all 182 tests and the filesystem contract pass there, and their SHA-256 values exactly match the local candidate.
+
+```text
+local_gx10_tests=182
+gx10_staged_gx10_tests=182
+local_result_sender_management_tests=12
+configurator_sha256=40d982a3f1315164c8fa41ab60e03c0b96b6301a239cd92e6496ab42270c1b28
+configured_verifier_sha256=25ce99cd24662f3eede9fed8ebd1be94729250c7f7f34e2e8956ec16aae7c6ab
+management_tests_sha256=80f2e35201eee631c0cf2bd90547badce0aafed108c59b3c2a2db29a1670eac1
+gx10_changed_file_hash_parity=yes
+sender_timer=disabled,inactive
+sender_service=inactive
+live_private_input_installed=no
+collector_authorization_changed=no
+collector_result_transmission_invoked=no
+GX10_RESULT_SENDER_CONFIGURED_INACTIVE_CANDIDATE=PASS
+```
+
+The first remote full-tree package-validator invocation correctly refused because the temporary staged tree is not a Git worktree; this validator depends on `git ls-files`. The complete 182-test staged suite and filesystem contract passed there, while the Git-dependent rebuild-package validator passed in the actual local Git worktree. No candidate or production defect was hidden by that staging-context refusal.
+
+No private runtime path, connection value, result/packet/event/entity content, credential, key material, or model output was printed or committed. No production private state or collector authorization changed.
+
+### Next action
+
+Run the full public gate, publish this configured-inactive candidate, and independently verify GitHub. Then generate the dedicated writer identity, install only its matching collector authorization under an exact guarded append/rollback procedure, run the configurator and independent configured-inactive production checks, and publish that checkpoint before any SFTP invocation or outbox movement.

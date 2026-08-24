@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 remains in progress. The collector-side durable acceptance-ledger candidate passes 11 focused local tests and the same 11 tests from an exact temporary tree on the collector. The working collector still runs the prior gate at this checkpoint; no writer credential, sender, or result transmission is installed.
+Execution-order item 30 remains in progress. The collector-side durable acceptance ledger passes 11 focused local tests, the same 11 tests from an exact temporary tree on the collector, guarded production installation, independent verification, and one natural empty no-op cadence. The exact predecessor is retained under a protected backup. No writer credential, sender, or result transmission is installed.
 
 ## Replay problem
 
@@ -73,12 +73,12 @@ The 11 focused tests prove:
 
 The exact candidate passed the same suite on the collector's Linux/Python runtime from temporary storage. A metadata-only preflight proved the live gate still matched the published predecessor, its timer was enabled/active with zero restarts, the service was idle, all three result spool directories contained zero files, and no acceptance ledger existed.
 
+After GitHub independently matched the published candidate, the guarded upgrader stopped only the gate timer, repeated the exact predecessor/candidate and empty-spool checks, retained mode-private exact rollback bytes, atomically installed the candidate, and ran one empty bootstrap cycle. Independent verification proved the exact installed/backup hashes, service-owned/vector-group mode-`0640` single-link ledger, version/schema/quick-check/immutable triggers, zero rows/files, healthy Vector/ClickHouse, enabled active timer, successful service, and zero restarts. A later natural cadence repeated the exact empty no-op state.
+
 ## Remaining gates
 
-1. Publish and independently verify the repository/copy checkpoint.
-2. Guardedly replace only the collector gate executable with exact rollback bytes while its timer is stopped.
-3. Bootstrap and independently verify the live empty acceptance ledger, exact service/timer health, and unchanged empty spool counts.
-4. Build and test the deterministic GX10 sender without installing a credential or transmitting.
-5. Stage/install the sender inactive, then provision the write-only key separately.
-6. Transmit a bounded first file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
-7. Prove an exact replay creates no second ClickHouse row and a controlled malformed/divergent file remains isolated.
+1. Build and test the deterministic GX10 sender without installing a credential or transmitting.
+2. Prove unchanged exact source bytes, remote deterministic basename, bounded retry/failure behavior, host-key pinning, transport-success acknowledgment, and interruption before local delivered transition on protected copies.
+3. Stage/install the sender inactive, then provision the write-only key separately.
+4. Transmit a bounded first file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
+5. Prove an exact replay creates no second ClickHouse row and a controlled malformed/divergent file remains isolated.

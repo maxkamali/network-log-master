@@ -255,7 +255,7 @@ Captured:
 - service filesystem-access drop-in
 - incoming/ready/rejected workflow
 
-The original live implementation and public capture were validated for exact implementation parity where naming is not environment-specific. The item-30 durable-ledger revision passes 11 local and 11 exact collector-staged tests but is not yet installed at this checkpoint.
+The original live implementation and public capture were validated for exact implementation parity where naming is not environment-specific. The item-30 durable-ledger revision passes 11 local and 11 exact collector-staged tests plus guarded production installation, independent empty-ledger verification, and one natural no-op cadence. Exact predecessor bytes remain protected for rollback.
 
 ## GX10 spool retention
 

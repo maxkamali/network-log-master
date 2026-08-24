@@ -10973,3 +10973,46 @@ No live collector gate/spool/unit was changed. No private connection value, resu
 ### Next action
 
 Publish this repository/copy checkpoint and independently verify GitHub. Then stop only the collector gate timer, require the exact predecessor/candidate hashes and empty-spool preconditions, preserve exact rollback bytes, atomically install the candidate, run one ledger-bootstrap service cycle, independently verify the empty immutable ledger and timer/service health, and publish that live-gate checkpoint. Do not install a writer credential or transmit a result.
+
+## 2026-08-24 05:06 PDT - Item 30 live durable acceptance ledger passed
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The repository/copy durable-acceptance checkpoint was published and independently matched on GitHub at:
+
+`e0d13a79b5a6a3f797d871d93a85b70669cc627a` — `Add durable collector result acceptance`
+
+The guarded production upgrade required the exact published predecessor and candidate hashes, enabled/active timer, settled service, zero restarts, empty incoming/ready/rejected spools, and absence of a prior ledger. It stopped only the result-gate timer, repeated those checks, preserved exact predecessor bytes under a new mode-private root-owned backup, atomically installed the candidate, and ran one explicit empty bootstrap service cycle. Its failure path would restore the exact predecessor and restart the timer.
+
+The bootstrap passed with the exact candidate installed. The new ledger is service-owned, vector-group, mode `0640`, single-link, schema version 1, quick-check clean, and protected by both immutable triggers. It contains zero rows because the live collector result spool was empty. The timer was restored enabled/active; the service retained success and zero restarts; no spool file changed.
+
+A separate read-only verifier independently reproduced the installed/backup hashes, ledger metadata/schema/version/quick-check/triggers/count, empty spool, timer/service health, and active Vector/ClickHouse state. The next natural gate cadence started and exited in the same second, remained a complete empty no-op, and retained the independent verification result.
+
+```text
+published_checkpoint=e0d13a79b5a6a3f797d871d93a85b70669cc627a
+installed_gate_sha256=e23c887e5a4446a19d6ac3730ade130f0f75691fa3730137db1b00847354622f
+protected_predecessor_sha256=6aebc562ab305ec201e687dbce4d1ac85693c52551bd70cf5f6a7a13df0c9515
+acceptance_ledger_version=1
+acceptance_ledger_rows=0
+acceptance_ledger_metadata=service-owner,vector-group,0640,single-link
+acceptance_ledger_integrity=quick-check,immutable-triggers
+incoming_files=0
+ready_jsonl=0
+rejected_files=0
+gate_timer=enabled,active
+gate_service_result=success
+gate_service_restarts=0
+vector=active
+clickhouse=active
+writer_credential_installed=no
+collector_result_transmission_invoked=no
+AI_RESULTS_GATE_LIVE_LEDGER_BOOTSTRAP=PASS
+AI_RESULTS_GATE_LIVE_INDEPENDENT_VERIFY=PASS
+AI_RESULTS_GATE_NATURAL_EMPTY_CADENCE=PASS
+```
+
+No private connection value, backup path, result/packet/event/entity content, credential, key material, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish this live-ledger checkpoint, and independently verify GitHub. Then build the deterministic GX10 sender only in repository/protected-copy state. Require exact-byte/name preservation, pinned host verification, bounded noninteractive SFTP, explicit transport-success acknowledgment, atomic local ready-to-delivered transition under the shared outbox lock, safe interruption/retry, and no credential/transmission during the repository/copy gates.

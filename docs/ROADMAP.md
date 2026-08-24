@@ -135,8 +135,8 @@ Status: `DONE`
 
 Status: `IN PROGRESS`
 
-1. build a versioned deterministic outbox projection from successful append-only reasoning results
-2. prove idempotent mapping, duplicate suppression, atomic ready-file publication, crash recovery, strict output bounds, and protected-copy behavior
+1. `DONE` — build a versioned deterministic outbox projection from successful append-only reasoning results
+2. `DONE` — prove idempotent mapping, duplicate suppression, atomic local publication, crash recovery, strict output bounds, and protected-copy behavior
 3. separately install the least-privilege write-only transport identity only after repository/copy gates pass
 4. activate one bounded live result return and prove collector validation, ClickHouse ingestion, exact provenance, replay safety, and failure isolation
 5. retain GX10 without direct ClickHouse access and keep all model results nonauthoritative

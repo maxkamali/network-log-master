@@ -20,6 +20,8 @@ Item 28 is complete. The smallest captured model passed structural output but fa
 
 Item 29 is complete. Exact published `incident-assessment-v2-r3` passed all 140 tests on GX10, same-packet protected-copy inference, four-file exact inactive upgrade with state unchanged, one fresh-backup production drain, and three natural timer cadences. Across the third cadence, packets stayed 12, revised pending fell 9→8, runs rose 9→10, successes/results rose 8→9, and the historical failure stayed one. Zero `STARTED` rows/restarts, deterministic zero lag, and healthy independent schedules were retained. Item 30 begins with a repository/copy-only versioned result-outbox producer; no writer credentials or collector transmission are yet authorized by that implementation gate.
 
+Item 30 repository/copy gates now pass. The read-only version-1 producer maps only successful append-only results to one canonical collector-compatible JSONL record/file while retaining the complete result and exact packet/model/prompt/request/run provenance. Nine focused tests bring the full suite to 149 and cover terminal-failure exclusion, exact reuse, preflight refusal, atomic interruption/resume, partial recovery, strict directory/lock/file handling, and tamper/symlink refusal. The exact tree passed on GX10; a root-only protected copy with 12 packets, 12 terminal runs, 11 results, and one preserved failure produced exactly 11 collector-valid files, then reused all 11 with zero new bytes while the copy and production health remained unchanged. Nothing is installed and no writer credential or transmission was used. See `docs/RESULT_OUTBOX.md`.
+
 The private copy full backfill scanned `954790` stored events, projected `7726` canonical rows, suppressed `5830`, and produced `22` incidents, `425` evidence rows, `463` transitions, and `5` active incidents in one 4.3-second managed pass with zero cursor lag. The next pass was a complete no-op. A synthetic appended canonical event advanced both exact watermarks. Malformed projection input rolled back its batch and prevented incident execution; forced incident failure preserved the durable projection and all prior incident state. The working database remained unchanged.
 
 The working-system inactive install placed and verified exact projector, incident, runner, service, and timer bytes plus a protected private database/identity binding. The first activation attempt failed before application execution because the clean-rebuild write path did not exist on this historical installation. Correlation remained disabled and the database unchanged. A published portability correction atomically bound write scope only to the validated database parent; a separate cleanup correction cleared stale failed-unit state after preserving the failure evidence.
@@ -62,7 +64,7 @@ Completed:
 - Ollama, the original fetch/ingest timer, and the separately disableable correlation timer are active; no local-reasoning caller is scheduled
 - complete clean-machine operator runbook
 - final structural, syntax, generated/private-artifact, IPv4/public-safety, unit-test, and filesystem-contract audit
-- 115 synthetic tests passing
+- 149 synthetic tests passing at the current item-30 repository candidate
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.

@@ -480,3 +480,28 @@ Consequence:
 - compatibility upgrades are permitted only for the exact predecessor runtime config, output schema, caller, and managed runner while the units are disabled; divergent files are refused and later failure rolls back changed artifacts
 - inactive installation, protected-copy rehearsal, protected initial production cycle, timer enablement, and multi-cadence evidence remain separate gates
 - collector result return remains outside item 29
+
+## ADR-025 - Result projection is read-only, one-run-per-file, and provenance-complete
+
+**Status:** Accepted; repository/protected-copy gates complete
+
+Successful append-only reasoning results are projected through a separate versioned read-only producer. Version 1 emits exactly one canonical newline-terminated JSON record per file and derives the public filename from a truncated SHA-256 of the run ID.
+
+Why:
+
+- terminal failures and in-progress reservations must never appear as results
+- one record per file makes the collector's file/record limits and retry unit explicit
+- a hash-derived filename avoids exposing the run ID through directory listing while retaining deterministic duplicate identity
+- the thin collector columns are insufficient to preserve every structured model field and exact inference provenance
+- result publication must not become a write path back into incident, packet, run, or result truth
+- installation, delivery state, writer credentials, and live transport require independent failure/replay analysis
+
+Consequence:
+
+- the producer opens SQLite read-only in one snapshot and validates integrity, canonical JSON, hashes, identities, statuses, timestamps, and model/prompt/request/run provenance before writing anything
+- the complete canonical result plus versioned provenance remain inside the record; Vector's existing `raw_json` capture preserves the complete line after collector acceptance
+- exact existing files are no-ops, divergence fails before new publication, and only strictly validated producer partials are recoverable
+- publication is lock-protected, same-directory atomic, file/directory `fsync`-backed, size-bounded, and postvalidated
+- the repository/exact GX10 stage and protected-copy gates pass with 149 tests and 11-for-11 result generation plus exact replay
+- no producer artifact, service, timer, writer credential, or sender is installed by this decision
+- a later sender must define durable acknowledgment semantics before it may remove or retransmit a local ready file

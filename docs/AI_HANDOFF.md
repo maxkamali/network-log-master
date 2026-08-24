@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-Item 29 is complete. Exact `incident-assessment-v2-r3` passed 140 GX10 tests, same-packet protected-copy inference, exact inactive upgrade, one fresh-backup production drain, and three natural timer cadences through the unchanged strict validator. The timer is active with 12 packets, eight revised-version pending, two prompt registrations, ten total runs, nine successes/results, one preserved historical failure, zero `STARTED` rows/restarts, and zero deterministic lag. Item 30 is the single `NEXT`: build and prove a versioned/idempotent local result outbox first, without installing writer credentials or transmitting to the collector. Live result return remains a later gate.
+Item 29 is complete. Item 30 is the single `NEXT`, and its repository/protected-copy outbox gates now pass: 149 local and exact GX10-staged tests, one canonical collector-compatible JSONL file per successful run, complete result/provenance retention, failure exclusion, exact reuse/crash recovery, and 11-for-11 protected-copy generation plus no-op replay. The copy had 12 packets, 12 terminal runs, 11 results, and one preserved failure; its bytes and reasoning state were unchanged and every live schedule stayed healthy. The producer is not installed, has no schedule or writer credential, and transmitted nothing. Read `docs/RESULT_OUTBOX.md`; next design an inactive managed local-ready installation before any sender or credential gate.
 
 The active automatic application chains are:
 

@@ -10429,3 +10429,54 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Execution-order item 30 is the single `NEXT` item. Begin repository/copy-only design and implementation of a versioned idempotent GX10 result outbox that maps only successful append-only reasoning results to the collector's thin JSONL contract. Prove deterministic mapping, provenance, duplicate suppression, atomic publication, crash recovery, strict bounds, and protected-copy behavior before installing any result-writer credential or transmitting to the collector.
+
+## 2026-08-24 04:18 PDT - Item 30 result-outbox repository and protected-copy gates passed
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. A versioned read-only result-outbox producer now maps only successful append-only reasoning results to exactly one canonical newline-terminated collector JSONL record/file per run. The thin collector fields are retained while the complete structured result and exact packet/model/prompt/schema/request/run provenance remain in the record. Filenames derive from a versioned truncated run-ID digest and do not expose the run ID in directory listings.
+
+The producer validates one read-only SQLite snapshot, integrity/foreign keys, required tables, the success/result invariant, canonical JSON and hashes, exact cross-table identities/timestamps/schema versions, provenance formats, safe directory/lock/file metadata, one-record/256-KiB bounds, and all preexisting outbox entries before publication. It uses a single nonblocking lock, unique mode-`0600` temporary files, file and directory `fsync`, mode-`0640` atomic publication, exact no-op reuse, and strict producer-partial recovery. It has no network import or transport operation and cannot change the source database.
+
+Nine focused tests cover complete collector-compatible mapping, terminal-failure exclusion, exact reuse, divergence refusal before other publication, interruption after one file plus idempotent resume, strict stale-partial recovery, unexpected-entry refusal, lock contention, digest tamper refusal, and symlink refusal. The complete local gate passed 149 tests, the GX10 filesystem contract, repository sanitation/current-tree/history/link/ref checks, strict Git integrity, and diff hygiene.
+
+The exact staged tree and archive were bound before remote execution:
+
+```text
+staged_tree=2e94f6c8d955324a090e23e708e2b15a2012e301
+staged_archive_sha256=808d8d0fc845e1cece9226cdf9b4dd4edd4889e43bfebdee2e14d2ab97cbf7e6
+producer_sha256=d86dd906428bf74ee875d1b62fc2dca634e1fd39b2318b2d47a94048d8a3e63d
+focused_test_sha256=eb3ee0deb33430ca505378f355d00b4be669f2bb3fbdff695c519ce9f5b9da04
+collector_gate_sha256=6aebc562ab305ec201e687dbce4d1ac85693c52551bd70cf5f6a7a13df0c9515
+local_tests=149
+remote_tests=149
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+```
+
+The exact tree reproduced all 149 tests and the filesystem contract on GX10. A root-only mode-`0600` SQLite online backup then captured 12 packets, 12 terminal runs, 11 successful append-only results, and the one preserved historical failure. The producer created exactly 11 mode-`0640` single-record files. Every file passed the unchanged collector gate. A second invocation created zero files and exactly reused all 11; the complete deterministic outbox digest was unchanged. The protected copy's bytes/hash and reasoning aggregates were unchanged, all three production schedules and their service restart states remained healthy, and no collector connection or transmission occurred.
+
+Two pre-copy wrapper attempts stopped before backup creation: the first incorrectly requested restart telemetry from timer units, and the second used the public neutral pipeline name instead of the deliberately private installed legacy unit. The corrected wrapper separately verified timer activity and service restart state and derived the private pipeline binding without printing it. These were verifier-only corrections; neither failed attempt created the protected-copy root or changed production.
+
+```text
+protected_copy_bytes=1977118720
+protected_copy_sha256=500ef3c51ff14c0724ee3a84ea4d3d471918107d04a9a5557df5c0467e398db8
+copy_packets=12
+copy_runs=12
+copy_results=11
+preserved_failures=1
+outbox_files=11
+outbox_sha256=cbf824b514dced6ebc4e25c3a4a55ad468876424f4f857d8b960cf8ed7310a99
+first_created=11
+second_reused=11
+copy_source_unchanged=yes
+production_health_unchanged=yes
+collector_transmission_invoked=no
+GX10_RESULT_OUTBOX_PROTECTED_COPY=PASS
+```
+
+No result/packet/event/entity content, connection value, private runtime identity, private path, credential, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish this repository/protected-copy checkpoint, and independently verify GitHub. Then design and test an inactive managed local-ready producer installation with explicit durable delivery-state semantics. Do not install a writer credential or transmit to the collector until the inactive boundary passes independently; bounded live result return and ClickHouse verification remain later gates.

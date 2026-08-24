@@ -10277,3 +10277,45 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify this inactive-upgrade checkpoint. Then create a fresh protected pre-resume backup and run exactly one `r3` production drain while the timer remains disabled. Enable the timer only after aggregate verification proves packets fixed at 12, revised pending 12→11, prompt versions 1→2, runs 6→7, successes/results 5→6, the historical failure fixed at one, zero `STARTED` rows, and deterministic zero lag.
+
+## 2026-08-24 03:54 PDT - Item 29 protected r3 production resume passed
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The exact inactive `r3` upgrade checkpoint was published and independently matched on GitHub at:
+
+`78d7cac769271343372ab94fc19872a1a04a6e02` — `Record inactive r3 reasoning upgrade`
+
+A new root-only recovery boundary was created. The private wrapper paused fetch/ingest after its oneshot settled, ran deterministic correlation to exact zero lag, and invoked the unchanged activator while the reasoning timer was still disabled. The activator verified every installed `r3` byte and the historical append-only reasoning state, then created a fresh mode-`0600` SQLite online backup.
+
+Exactly one bounded `r3` production cycle kept packets fixed at 12, reduced revised-version pending from 12 to 11, registered `incident-assessment-v2-r3` once, and added one successful run/result. The original five successes/results and one terminal failure remained unchanged; no `STARTED` row or restart appeared. Only after installed verification passed did the activator enable the timer and pass active verification. The wrapper restored fetch/ingest unconditionally.
+
+```text
+recent_max_id=972391
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_revised_pending=11
+reasoning_model_versions=1
+reasoning_prompt_versions=2
+reasoning_runs=7
+reasoning_started=0
+reasoning_succeeded=6
+reasoning_failures=1
+reasoning_results=6
+protected_backup_bytes=1967226880
+protected_backup_sha256=a9bd09c6f0248bea473c844e5d222cdfd58c1e46cc088de1e2213dc7911cd4db
+protected_backup_mode=0600
+pipeline_timer_resumed=yes
+correlation_timer_active=yes
+managed_reasoning_timer_active=yes
+managed_reasoning_restarts=0
+collector_result_return_enabled=no
+GX10_MANAGED_REASONING_R3_RESUME=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, connection value, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this protected-resume checkpoint. Then observe at least three natural timer cadences without manual service invocation. Require packets fixed at 12, revised pending reduced by exactly one, one new success/result per cadence, exactly one historical failure, zero `STARTED` rows/restarts, deterministic zero lag, and healthy fetch/ingest plus correlation. Disable only reasoning immediately on any new failure.

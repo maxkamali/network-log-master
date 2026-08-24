@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. The published backlog correction passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. The second corrected natural cadence stored one terminal `INVALID_OUTPUT` without result/content and reasoning was disabled. Protected-copy replay classified action text exactly equal to a risk label. Immutable-ID reuse was correctly refused, and prompt revision `r2` proved the local runtime does not enforce `not/enum`. Exact published `incident-assessment-v2-r3` passed 140 remote tests and the same failed packet produced one valid protected-copy result through its portable 25-character generation minimum and unchanged strict validator. The exact four compatibility bytes are installed inactive with the reasoning-state digest unchanged. Production has 12 packets, 12 revised-version pending, one original prompt registration, six original runs, five successful results, one explicit safe failure, and zero `STARTED` rows/restarts. The reasoning timer remains disabled.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. One later terminal invalid output was safely isolated and diagnosed as action text equal to a risk label. Immutable-ID reuse was correctly refused, and prompt revision `r2` proved the local runtime does not enforce `not/enum`. Exact published `incident-assessment-v2-r3` passed 140 remote tests, same-packet protected-copy inference, and exact inactive upgrade. A fresh protected backup then preceded exactly one bounded production `r3` drain through the unchanged strict validator. Production now has 12 packets, 11 revised-version pending, two prompt registrations, seven total runs, six successful results, one preserved safe failure, and zero `STARTED` rows/restarts. Deterministic lag is zero and the reasoning timer is active for natural-cadence validation.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -352,4 +352,27 @@ inactive_upgrade_state_sha256=f0ccc5c597e740d22164815af28f3e15ecff8197c7ffd353af
 inactive_upgrade_reasoning_enabled=no
 inactive_upgrade_production_inference_invoked=no
 GX10_MANAGED_REASONING_R3_INACTIVE_UPGRADE=PASS
+```
+
+The protected `r3` resume paused fetch/ingest only after its oneshot settled, ran deterministic correlation to zero lag, and created a fresh root-only online backup. Exactly one `r3` cycle ran while the reasoning timer was disabled. It kept packets fixed, reduced revised-version pending by one, registered the new prompt revision once, and added one successful run/result while retaining the historical failure. Only then did the activator enable the timer; the private wrapper restored fetch/ingest unconditionally.
+
+```text
+r3_resume_recent_max_id=972391
+r3_resume_projection_lag=0
+r3_resume_incident_lag=0
+r3_resume_packets=12
+r3_resume_revised_pending=11
+r3_resume_model_versions=1
+r3_resume_prompt_versions=2
+r3_resume_runs=7
+r3_resume_started=0
+r3_resume_succeeded=6
+r3_resume_failures=1
+r3_resume_results=6
+r3_resume_backup_bytes=1967226880
+r3_resume_backup_sha256=a9bd09c6f0248bea473c844e5d222cdfd58c1e46cc088de1e2213dc7911cd4db
+r3_resume_backup_mode=0600
+r3_resume_reasoning_timer_active=yes
+r3_resume_restarts=0
+GX10_MANAGED_REASONING_R3_RESUME=PASS
 ```

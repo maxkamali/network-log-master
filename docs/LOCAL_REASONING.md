@@ -47,7 +47,7 @@ Item 29 reproduced the failed production packet only on protected copies and cla
 - output schema: `13083841c44253b326f1294b930acae435bfdddb458b47c31a9fd385b181abd0`
 - migration guard: `d477ce16df5835a5406e8d02bce8fbe36a94049477ed4c09f158ccd2ac2780ee`
 
-These compatibility bytes passed exact GX10 staging/tests and same-packet protected-copy inference and are now installed inactive from their exact predecessors. The production timer remains disabled, no `r3` production inference has run, and the original terminal failure remains immutable evidence.
+These compatibility bytes passed exact GX10 staging/tests and same-packet protected-copy inference, were installed inactive from their exact predecessors, and completed one fresh-backup `r3` production drain before timer enablement. The original terminal failure remains immutable evidence while natural-cadence validation proceeds.
 
 ## Durable state and idempotency
 

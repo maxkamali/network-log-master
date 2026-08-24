@@ -72,6 +72,8 @@ The worker is not inline with Vector. Failure cannot block the existing raw Clic
 
 Repository implementation, packaging, and synthetic validation are complete. The worker is staged and active on the live collector in isolated shadow-only mode. Its output and ledger are not part of the Vector, ClickHouse, or GX10 production path. Complete historical catch-up, five normal-cadence steady-state cycles, full output verification, and unchanged-production checks passed. Production handoff promotion remains separately gated.
 
+The selected handoff design uses an immutable inclusive path floor and a separate verified handoff root. At/after-floor normalized files are copied under their original raw transport names so GX10 retains its existing filename and replay identity. The repository implementation and synthetic rollback proof are complete, but no handoff candidate artifact is installed. The exact authorization, preflight, bind-only activation, verification, and rollback procedure is `docs/NORMALIZER_HANDOFF.md`.
+
 ## GX10 local ingest
 
 Fetched JSONL records are ingested into a local SQLite working database. The captured applications enable foreign-key enforcement where needed and use a 5-second busy timeout; they do not explicitly set WAL mode.

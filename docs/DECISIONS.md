@@ -305,3 +305,27 @@ Consequence:
 - promotion changes only the verified GX10 handoff view and requires a separately reviewed file-identity/idempotency plan
 - live shadow deployment and cutover remain explicit approval gates
 - transitional GX10 parsing is retired only after normalized handoff stability is proven
+
+## ADR-018 - GX10 normalized promotion uses a forward-only identity-preserving handoff view
+
+**Status:** Accepted
+
+Normalized promotion will not directly expose the shadow-output tree and will not replay normalized history under a new remote namespace. A protected immutable plan selects one inclusive first normalized source path. Only verified completed shadow outputs at or after that floor are copied into a separate handoff root, using their original raw relative paths and filenames.
+
+Why:
+
+- the current GX10 fetcher rejects the shadow tree's `.normalized.jsonl.zst` filenames
+- accepting those suffixed names would give previously consumed historical files new `source_files.remote_path` identities and duplicate observations
+- renaming all normalized history to raw names would collide with already processed paths and make the effective transition boundary ambiguous
+- one forward-only floor lets pre-cutover observations remain raw and post-cutover observations become normalized without changing the strict SFTP path contract
+- a separate handoff tree preserves raw and shadow evidence and permits an exact bind-view rollback
+
+Consequence:
+
+- files before the floor may never appear in the normalized handoff tree
+- at/after-floor normalized copies use the unchanged `/spool/<source_path>` identity expected by GX10
+- the plan is bound into a separate versioned handoff ledger and cannot be repointed after initialization
+- publication requires exact shadow-ledger path, hash, Zstandard, cardinality, mode, and ownership evidence and uses synchronized atomic no-overwrite copies rather than hard links
+- successfully ingested at/after-floor files remain idempotent after raw-view rollback because their GX10 remote identities do not change
+- production staging, timer activation, bind switching, and rollback execution require a separate explicit operator authorization and the preflight in `docs/NORMALIZER_HANDOFF.md`
+- the item-22 implementation and rehearsal are repository-only and do not change either reference system

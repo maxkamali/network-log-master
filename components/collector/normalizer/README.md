@@ -12,6 +12,8 @@ This package stages the deterministic Python normalizer as a separate collector-
 
 The architecture and promotion/rollback gates are in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
 
+The forward-only handoff design and synthetic rehearsal are complete in `docs/NORMALIZER_HANDOFF.md`. Its launcher, example plan, and hardened unit candidates are repository-only, excluded from the active shadow manifest, and not installed or enabled on the collector.
+
 ## Artifacts
 
 - `install-shadow.py` — guarded, non-activating staging installer

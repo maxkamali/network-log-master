@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+
+export PYTHONPATH=/usr/local/lib/network-log-normalizer
+
+exec /usr/bin/python3 -B -m network_log_normalizer.handoff "$@"

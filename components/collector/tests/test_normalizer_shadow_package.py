@@ -32,6 +32,7 @@ INSTALLER = load_script("normalizer_shadow_installer", PACKAGE_DIR / "install-sh
 VERIFIER = load_script("normalizer_shadow_verifier", PACKAGE_DIR / "verify-shadow.py")
 
 from network_log_normalizer.shadow import load_inventory, process_source_file
+from network_log_normalizer.handoff import load_handoff_plan
 
 
 def make_fake_zstd(path: Path) -> None:
@@ -150,6 +151,61 @@ class NormalizerShadowPackageTests(unittest.TestCase):
         self.assertNotIn("systemctl\", \"enable", installer)
         self.assertNotIn("systemctl\", \"start", installer)
         self.assertIn("require_timer_inactive_disabled()", installer)
+
+    def test_handoff_assets_are_guarded_repository_only_candidates(self):
+        service = (
+            PACKAGE_DIR
+            / "systemd/network-log-normalizer-handoff.service"
+        ).read_text(encoding="utf-8")
+        timer = (
+            PACKAGE_DIR
+            / "systemd/network-log-normalizer-handoff.timer"
+        ).read_text(encoding="utf-8")
+        required = (
+            "Type=oneshot",
+            "User=network-log-normalizer",
+            "After=network-log-normalizer-shadow.service",
+            "PrivateNetwork=yes",
+            "NoNewPrivileges=yes",
+            "CapabilityBoundingSet=",
+            "RestrictAddressFamilies=AF_UNIX",
+            "IPAddressDeny=any",
+            "ReadOnlyPaths=/var/spool/network-log-normalizer-shadow",
+            "ReadOnlyPaths=/var/lib/network-log-normalizer/state.sqlite3",
+            "ReadOnlyPaths=/etc/network-log-normalizer/handoff-plan.json",
+            "InaccessiblePaths=/var/spool/vector-ai",
+            "InaccessiblePaths=/var/lib/clickhouse",
+            "InaccessiblePaths=/var/spool/ai-results",
+            "ReadWritePaths=/var/spool/network-log-normalizer-handoff",
+        )
+        for value in required:
+            self.assertIn(value, service)
+        self.assertNotIn("SupplementaryGroups=vector", service)
+        self.assertNotIn("Wants=vector.service", service)
+        self.assertIn("OnUnitInactiveSec=1min", timer)
+        self.assertNotIn("Persistent=true", timer)
+
+        plan = load_handoff_plan(
+            PACKAGE_DIR / "handoff-plan.example.json",
+            secure=False,
+        )
+        self.assertEqual(
+            plan.first_normalized_source_path,
+            "2026/08/23/12/syslog-20260823-1234.jsonl.zst",
+        )
+
+        manifest = INSTALLER.load_manifest()
+        self.assertNotIn(
+            Path(
+                "/usr/local/lib/network-log-normalizer/"
+                "network_log_normalizer/handoff.py"
+            ),
+            manifest,
+        )
+        self.assertNotIn(
+            Path("/usr/local/sbin/network-log-normalizer-handoff"),
+            manifest,
+        )
 
     def test_collector_package_versions_pin_reference_dependencies(self):
         values = {}

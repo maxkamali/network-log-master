@@ -8,12 +8,12 @@ Read and verify in this order before changing implementation:
 
 1. `docs/ARCHITECTURE.md` — understand the intended two-server system and ownership boundaries.
 2. `docs/CURRENT_STATE.md` — establish what is actually complete, what is incomplete, and the strict execution order. This file is the authority for the single `NEXT` item.
-3. The relevant component rebuild statuses — `components/collector/REBUILD_STATUS.md` and `components/gx10/REBUILD_STATUS.md`; both component reconstruction milestones are closed and cross-system reconciliation is active.
+3. The relevant component rebuild statuses — `components/collector/REBUILD_STATUS.md` and `components/gx10/REBUILD_STATUS.md`; both component reconstruction milestones are closed.
 4. The latest entries in `docs/PROJECT_JOURNAL.md` — understand recent decisions, failed approaches, validation evidence, and checkpoint history.
 5. `docs/DECISIONS.md` — review durable architecture decisions that constrain implementation choices.
 6. `docs/DATA_CONTRACTS.md`, `docs/OPERATIONS.md`, and `docs/TWO_SERVER_REBUILD.md` — confirm data, operational, and cross-host rebuild contracts.
 7. `docs/ACCEPTANCE.md` — confirm what passed and which unavailable disposable-host executions were waived with residual risk.
-8. Component-specific documentation for the active task.
+8. Component-specific documentation for the active task. For the current production-normalizer work, read `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`, `docs/NORMALIZER_HANDOFF.md`, and `components/collector/normalizer/README.md`.
 9. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
 
 Do not infer a new execution order from the journal. `docs/CURRENT_STATE.md` is the execution authority.
@@ -54,9 +54,9 @@ Use synthetic fixtures and documentation address space when examples require ide
 
 The current high-level order is:
 
-1. finish the collector rebuild package and documentation
-2. capture and reconstruct the GX10 implementation
-3. perform final two-server rebuild documentation and validation
-4. close the project only when the acceptance criterion is satisfied
+1. preserve the completed two-server rebuild package and validated raw production path
+2. advance production normalization only through the documented shadow, handoff, authorization, and rollback gates
+3. build the deterministic incident engine and local-model orchestration after normalized handoff stability is proven
+4. integrate result return/dashboard behavior and close the end-to-end target only after its acceptance evidence passes
 
 For the exact current task, read `docs/CURRENT_STATE.md`.

@@ -91,7 +91,7 @@ collector capture
   -> ClickHouse/Grafana
 ```
 
-The collector-side normalizer has passed selected replay/parity but has not been cut into the production collector path. Its approved first integration is a separate durable-file shadow worker reading settled collector backlog files without changing Vector's raw sinks. The GX10 incident engine, wake policy, Ollama caller, and result producer are future implementation, not reconstructed current behavior.
+The collector-side normalizer has passed selected replay/parity and complete live shadow validation but has not been cut into the GX10 production handoff. Its active first integration is a separate durable-file shadow worker reading settled collector backlog files without changing Vector's raw sinks. The selected later promotion is a forward-only handoff view: only verified normalized outputs at or after an immutable floor retain the original GX10 transport identity. The design/rehearsal is complete, but staging and bind activation remain explicitly unauthorized. The GX10 incident engine, wake policy, Ollama caller, and result producer are future implementation, not reconstructed current behavior.
 
 ## Capture-first contract
 

@@ -195,7 +195,7 @@ No duration or event-volume threshold is invented before actual production rate 
 
 ## Promotion boundary
 
-Promotion does not replace the Vector raw path. It changes only the read-only GX10 handoff view from the raw backlog root to the verified normalized-output root.
+Promotion does not replace the Vector raw path. It changes only the read-only GX10 handoff view from the raw backlog root to a verified forward-only normalized handoff root.
 
 Before that switch:
 
@@ -218,7 +218,7 @@ Rollback must not:
 - alter ClickHouse raw observations
 - attempt to reverse already-ingested GX10 rows in place
 
-Because GX10 idempotency is keyed by source file and record number, cutover and rollback tests must use an explicit namespace/file-identity plan before live promotion. The implementation must fail closed until that plan is selected and verified.
+Because GX10 idempotency is keyed by source file and record number, cutover and rollback use the explicit forward-only file-identity plan in `docs/NORMALIZER_HANDOFF.md`. Verified normalized outputs at or after one immutable inclusive floor are copied into a separate handoff root under their original raw transport names. History before the floor is never exposed through that view. This preserves the current `/spool/<source_path>` namespace across cutover and rollback while avoiding historical replay.
 
 ## Implementation sequence
 
@@ -230,8 +230,8 @@ Because GX10 idempotency is keyed by source file and record number, cutover and 
 6. `DONE` — publish the repository implementation checkpoint
 7. `DONE` — received explicit authorization, established the private inventory, staged the package, and activated it in shadow-only mode
 8. `DONE` — collected/reviewed complete historical catch-up and five normal-cadence steady-state cycles; corrected and live-proved active verifier concurrency handling
-9. `NEXT` — design and rehearse the file-identity-safe GX10 handoff switch and rollback without changing the live handoff
-10. request explicit production-cutover authorization
+9. `DONE` — designed and synthetically rehearsed the forward-only, file-identity-safe GX10 handoff switch and rollback without changing the live handoff
+10. `NEXT` — request explicit production-cutover authorization; only after authorization, build/stage the exact-hash handoff package and execute the documented preflight/cutover evidence gate
 
 ## Non-goals
 

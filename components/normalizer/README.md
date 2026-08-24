@@ -44,4 +44,6 @@ Selected replay/parity is complete: 24 representative observations produced 21 s
 
 The approved collector integration is a separate durable-file shadow worker implemented in `src/network_log_normalizer/shadow.py`. Packaging, systemd hardening, a non-activating installer, and an independent verifier are under `components/collector/normalizer/`.
 
-Do not add parser breadth by default. Live shadow deployment and production promotion remain separate authorization/evidence gates in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
+The repository-only forward handoff candidate is implemented in `src/network_log_normalizer/handoff.py`. It publishes only verified at/after-floor shadow outputs under their original transport identities. Its synthetic cutover and rollback contract is documented in `docs/NORMALIZER_HANDOFF.md`; the handoff candidate is not installed or active on the collector.
+
+Do not add parser breadth by default. Production handoff staging and cutover remain separate authorization/evidence gates in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.

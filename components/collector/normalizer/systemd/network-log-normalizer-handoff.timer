@@ -1,0 +1,12 @@
+[Unit]
+Description=Schedule verified forward-only normalizer GX10 handoff publication
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=1min
+AccuracySec=5s
+RandomizedDelaySec=5s
+Unit=network-log-normalizer-handoff.service
+
+[Install]
+WantedBy=timers.target

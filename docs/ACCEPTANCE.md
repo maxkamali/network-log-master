@@ -59,6 +59,18 @@ Completed results:
 - `git fsck --full --strict`: `PASS`
 - aggregate marker: `FINAL_REPOSITORY_ONLY_ACCEPTANCE=PASS`
 
+## Post-acceptance normalizer integration validation
+
+The later production-normalizer work advanced after the rebuild-acceptance checkpoint without changing its historical evidence:
+
+- live isolated shadow catch-up and steady-state evidence: `PASS`
+- normalizer/parser/replay/shadow/handoff suite: `94 passed`
+- collector shadow/handoff package tests: `11 passed`
+- forward-only GX10 handoff and rollback synthetic rehearsal: `PASS`
+- live GX10 handoff cutover: not yet authorized or performed
+
+The exact forward-identity contract and the remaining production gate are in `docs/NORMALIZER_HANDOFF.md` and `docs/CURRENT_STATE.md`.
+
 ## Public history and remote topology
 
 The final gate scanned all 118 commits reachable during the acceptance run.

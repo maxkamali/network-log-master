@@ -32,6 +32,7 @@ def main() -> int:
                 "install-shadow.py",
                 "verify-shadow.py",
                 "network-log-normalizer-shadow",
+                "network-log-normalizer-handoff",
             } and not os.access(path, os.X_OK):
                 raise ValueError(f"package executable mode missing: {path.name}")
         subprocess.run(

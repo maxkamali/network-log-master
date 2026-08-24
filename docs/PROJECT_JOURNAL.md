@@ -7676,3 +7676,65 @@ Final postchecks established:
 The corrected package has `10` collector-package tests passing. Python syntax, `git diff --check`, and the current-tree/reachable-history/link/ref public-repository gate pass. The previously published `88` normalizer/worker tests remain the implementation baseline; the worker source did not change in this correction.
 
 Item 22 must design and rehearse a file-identity-safe GX10 handoff switch and rollback without changing the live handoff. It must resolve the GX10 `(source_file, record_number)` namespace behavior, define preflight/activation/postcheck/rollback evidence, and preserve both raw and normalized spools. Actual promotion requires a later distinct operator authorization.
+
+## 2026-08-23 21:51 PDT - Forward-only GX10 handoff design and rehearsal closed
+
+### Status
+
+Execution-order item 22 is `DONE`.
+
+Execution-order item 23 is now the single `NEXT` item.
+
+No handoff artifact was installed on the collector, no collector or GX10 service state changed, and the live GX10 bind view remains on the raw backlog. Production staging and cutover remain explicitly authorization-gated.
+
+### Identity defect resolved
+
+Repository review proved the existing GX10 fetcher accepts only raw-style `syslog-YYYYMMDD-HHMM.jsonl.zst` names. The validated shadow tree uses `.normalized.jsonl.zst`, so a direct shadow-root bind would expose files the fetcher ignores.
+
+Changing GX10 to accept the normalized suffix would assign new `source_files.remote_path` values to all historical shadow files and replay observations already represented in `recent_events`. Renaming all normalized history to the original raw names would instead collide with existing paths without defining which side of the transition was authoritative.
+
+The accepted design uses one immutable inclusive source-path floor. Files before the floor remain represented by already consumed raw paths. Verified normalized files at or after the floor are copied into a separate handoff root under their original raw relative paths. GX10 retains its current filename matcher, `/spool/...` namespace, `source_files.remote_path` primary key, and `(source_file, record_number)` uniqueness boundary.
+
+### Repository implementation
+
+The repository-only forward publisher now provides:
+
+- strict duplicate-key and schema validation for a protected handoff plan
+- exact canonical source-path floor validation and plan hashing
+- a version-1 SQLite ledger binding the first floor permanently
+- completed-shadow-row selection only at or after the floor
+- exact shadow path, size, SHA-256, record-cardinality, Zstandard, mode, and runtime-owner verification
+- same-directory temporary copy, content synchronization, rehash, Zstandard test, and atomic no-overwrite publication
+- separate single-link handoff copies under original raw transport names
+- exact crash-window copy adoption and divergence refusal
+- complete stable-state verification across the plan, both ledgers, shadow outputs, and handoff tree
+- missing, orphaned, pre-floor, mutated, hard-linked, wrong-mode, wrong-owner, and unexpected-schema failure boundaries
+- a no-network hardened candidate oneshot/timer and a public example plan
+
+The candidate launcher, unit files, and module are intentionally excluded from the active live-shadow package manifest. A later authorized step must build a separate exact-hash staging package rather than silently modifying the verified live package.
+
+### Synthetic cutover and rollback rehearsal
+
+The rehearsal used three sequential synthetic source paths with the middle path as the first normalized path. It proved:
+
+- no pre-floor file entered the handoff tree
+- at/after-floor copies used the exact raw filename pattern accepted by the unchanged GX10 fetcher
+- the fetcher continued to reject `.normalized` shadow filenames
+- a one-file publication bound advanced durably across cycles and a caught-up retry performed no work
+- handoff/shadow bytes matched while retaining distinct single-link inodes
+- an exact preexisting crash-window copy was adopted
+- mutated handoff bytes and a changed initialized plan failed closed
+- the complete tree, ledger, hashes, Zstandard streams, and record totals verified
+- raw-view rollback attempts for already processed at/after-floor paths did not add source identities or duplicate `(source_file, record_number)` rows
+
+The complete normalizer/worker suite reports `94` passing tests. The collector package validator reports `11` passing tests and `NORMALIZER_SHADOW_PACKAGE_VALIDATION=PASS`.
+
+### Documented live gate
+
+`docs/NORMALIZER_HANDOFF.md` now defines the exact later preflight, future-floor selection, GX10 stop/absence proof, protected runtime layout and ACL, publisher catch-up, bind-only activation, SFTP/hash/cardinality checks, bounded GX10 cycle, postchecks, and mount-only rollback.
+
+The design forbids deleting or rewriting raw, shadow, handoff, or GX10 state. A successfully processed normalized file keeps the same remote identity after raw-view rollback and is skipped. A failed ingest retains the existing transaction rollback/retry behavior.
+
+### Next action
+
+Obtain explicit production-cutover authorization. Only after that approval may the project build and stage the separate exact-hash handoff package, run the live preflight, select the future floor, stop GX10 at the boundary, and switch the read-only bind view. If approval is unavailable, continue only repository, test, documentation, and read-only work.

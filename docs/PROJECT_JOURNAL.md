@@ -11284,3 +11284,34 @@ No private runtime path/value, key content, connection value, result/packet/even
 ### Next action
 
 Run the public gate, publish and independently verify this correction, privately resolve the unique live fetch source only by its published SHA-256, and rerun the configured-inactive GX10 configurator with that source. Then independently verify both hosts and publish the first-live/replay plan before any transport.
+
+## 2026-08-24 08:51 PDT - Item 30 canonical configuration render regression corrected
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The exact-hash captured-runtime derivation was published and independently matched on GitHub at:
+
+`6faeb85c5e2bde6cc0cc0743c61316188d57a5fa` — `Derive captured sender runtime safely`
+
+The fixed private wrapper found exactly one captured fetcher by the published hash and produced a protected temporary exact copy without exposing its path or values. The configurator then stopped before target creation on a missing `json` import introduced during the runtime-source refactor. The temporary source copy was removed by the wrapper and the sender remained disabled/inactive.
+
+The import is restored and a direct regression now executes the real canonical sender-configuration renderer and checks schema, fixed writer role, endpoint/port mapping, sorted compact JSON, and terminal newline. All 185 GX10 tests and package/filesystem contracts pass locally; all 185 tests pass from exact staged bytes on GX10.
+
+```text
+gx10_configure_attempt=safe-refusal-before-target-creation
+gx10_sender_timer=disabled,inactive
+gx10_sender_service=inactive
+local_gx10_tests=185
+gx10_staged_gx10_tests=185
+corrected_configurator_sha256=5d877878af219eff6d0647f1e7df5535a4abba4fd85d0bd47022d4594015ff86
+configured_verifier_sha256=fc6a9c851d6ba845c9776a8aeab6d6fd9df4f4b64b6d2c12e532361b9672d8d0
+management_tests_sha256=e01eb98dd00bce20d071a0f84c7939caee1cd98304699a411b73b38a529d0b4c
+collector_result_transmission_invoked=no
+GX10_CANONICAL_SENDER_CONFIG_RENDER=PASS
+```
+
+No private path/value, key content, connection value, result/packet/event/entity content, credential, or model output was printed or committed. No SFTP invocation or outbox movement occurred.
+
+### Next action
+
+Publish and independently verify this correction, then rerun the same fixed wrapper. Independently verify both hosts and publish the first-live/replay plan before any transport.

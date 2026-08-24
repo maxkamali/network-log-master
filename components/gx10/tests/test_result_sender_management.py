@@ -469,6 +469,22 @@ class ResultSenderManagementTests(unittest.TestCase):
         self.assertEqual(runtime['reader_identity'], reader)
         self.assertEqual(runtime['source_known_hosts'], known)
 
+    def test_configurator_renders_canonical_runtime_configuration(self):
+        state = self.private_state()
+        rendered = self.configurator.expected_configuration(
+            self.runtime_inputs(state),
+            state,
+        )
+        parsed = json.loads(rendered)
+        self.assertEqual(parsed['schema_version'], 1)
+        self.assertEqual(parsed['sftp_user'], 'ai_results_writer')
+        self.assertEqual(parsed['sftp_host'], 'collector.example.invalid')
+        self.assertEqual(parsed['sftp_port'], 1)
+        self.assertEqual(
+            rendered,
+            (json.dumps(parsed, separators=(',', ':'), sort_keys=True) + '\n').encode(),
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

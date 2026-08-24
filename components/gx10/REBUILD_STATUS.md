@@ -12,6 +12,8 @@ The later collector-normalizer production integration completed its forward-only
 
 Item 25 is complete. The deterministic incident engine passed private working-database-copy rehearsal, cursor-reset replay, and an independent exact-state rebuild. Its three-table append-only extension and exact engine artifact are installed on the working GX10 system under a protected pre-migration backup with zero state, cursors, or scheduler references. The proven automatic chain remains unchanged.
 
+Item 26 has an inactive repository candidate for a separately managed offline `projection -> incident` service/timer. It preserves fetch/ingest unchanged, enforces exact stage hashes and single-cycle locking, converges both cursors in bounded passes, exposes structured health counts, and has guarded inactive install, backfill-before-enable activation, verification, and state-preserving disable controls. Private-copy and live activation gates remain pending.
+
 This document is the component recovery authority for the active GX10 milestone. `docs/CURRENT_STATE.md` remains the authority for project-wide execution order and the single `NEXT` item.
 
 ## Reconstruction progress
@@ -48,7 +50,7 @@ Completed:
 - only Ollama and the fetch/ingest timer are activated; canonical projection remains unscheduled
 - complete clean-machine operator runbook
 - final structural, syntax, generated/private-artifact, IPv4/public-safety, unit-test, and filesystem-contract audit
-- 63 synthetic tests passing
+- 78 synthetic tests passing
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.

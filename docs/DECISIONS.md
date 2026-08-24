@@ -376,3 +376,28 @@ Consequence:
 - explicit adverse state transitions may open immediately; other degradations require repeated evidence inside a fixed event-time window
 - transactionally coupled cursor and evidence uniqueness make processing resumable and replay-safe
 - schema migration, installation, historical projection, recurring scheduling, Ollama invocation, and result return remain separately gated operations
+
+## ADR-021 - Deterministic correlation runs in a separate offline managed unit
+
+**Status:** Accepted
+
+Canonical projection and deterministic incident processing will run in one exact ordered wrapper behind a separate oneshot service and timer. The existing fetch/ingest service remains unchanged.
+
+Why:
+
+- projection must complete before incident processing sees new canonical rows
+- correlation failure must not stop durable fetch/ingest
+- independent disable/rollback controls are safer than extending the recovered pipeline unit
+- SQLite transactions already serialize writers, while bounded cursor convergence can absorb rows committed during a cycle
+- local deterministic processing needs no network access or spool write permission
+- explicit wrapper telemetry can expose both stage watermarks and state counts without adding a new telemetry database
+
+Consequence:
+
+- the correlation service invokes only exact-hash projector and incident artifacts in that order
+- a runtime-owned single-instance lock prevents overlapping correlation cycles
+- up to three ordered passes may run to converge with concurrent ingestion; nonzero lag after that is a visible failure
+- the service has an independent timer, CPU/memory/time/task limits, Unix-socket-only address families, and application-state-only write access
+- activation performs one verified timer-disabled backfill before enabling the timer
+- activation failure disables only correlation and preserves deterministic state for replay
+- Ollama, wake policy, result production, and collector result return remain out of scope

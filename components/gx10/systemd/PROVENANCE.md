@@ -26,6 +26,12 @@ The sanitizer required fetch then ingest `ExecStart` order, exactly two known wr
 
 Deterministic enrichment remains absent from the service by design because no live automatic invocation was discovered.
 
+## Managed correlation target units
+
+`network-log-gx10-correlation.service` and `.timer` are deliberate item-26 implementation artifacts, not rediscovered historical units. They preserve the recovered fetch/ingest unit unchanged and provide a separately disableable offline boundary for exact `projection -> incident` ordering.
+
+The service is a hardened non-root oneshot with no network access, application-state-only write scope, explicit CPU/memory/task/time limits, and no inline environment. The timer uses a monotonic one-minute inactive cadence with a five-minute boot delay. Installation does not enable either unit; activation requires its own validated gate.
+
 ## Ollama service
 
 `ollama.service` reproduces the separately captured local-model runtime unit.

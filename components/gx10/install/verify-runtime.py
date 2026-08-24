@@ -40,6 +40,7 @@ ARTIFACTS = (
     (GX10_DIR / 'sbin' / 'ingest-spool.py', LIBEXEC_DIR / 'ingest-spool.py', 0o755),
     (GX10_DIR / 'sbin' / 'enrich-events.py', LIBEXEC_DIR / 'enrich-events.py', 0o755),
     (GX10_DIR / 'sbin' / 'incident-engine.py', LIBEXEC_DIR / 'incident-engine.py', 0o755),
+    (GX10_DIR / 'sbin' / 'run-correlation.py', LIBEXEC_DIR / 'run-correlation.py', 0o755),
     (GX10_DIR / 'sbin' / 'runtime_config.py', LIBEXEC_DIR / 'runtime_config.py', 0o644),
     (
         GX10_DIR / 'systemd' / 'network-log-gx10.service',
@@ -51,11 +52,27 @@ ARTIFACTS = (
         SYSTEMD_DIR / 'network-log-gx10.timer',
         0o644,
     ),
+    (
+        GX10_DIR / 'systemd' / 'network-log-gx10-correlation.service',
+        SYSTEMD_DIR / 'network-log-gx10-correlation.service',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'systemd' / 'network-log-gx10-correlation.timer',
+        SYSTEMD_DIR / 'network-log-gx10-correlation.timer',
+        0o644,
+    ),
 )
 
 UNITS = {
     'network-log-gx10.service': SYSTEMD_DIR / 'network-log-gx10.service',
     'network-log-gx10.timer': SYSTEMD_DIR / 'network-log-gx10.timer',
+    'network-log-gx10-correlation.service': (
+        SYSTEMD_DIR / 'network-log-gx10-correlation.service'
+    ),
+    'network-log-gx10-correlation.timer': (
+        SYSTEMD_DIR / 'network-log-gx10-correlation.timer'
+    ),
     'ollama.service': SYSTEMD_DIR / 'ollama.service',
 }
 
@@ -217,6 +234,8 @@ def validate_systemd_state(active):
     expected_states = {
         'network-log-gx10.service': 'static',
         'network-log-gx10.timer': 'enabled' if active else 'disabled',
+        'network-log-gx10-correlation.service': 'static',
+        'network-log-gx10-correlation.timer': 'disabled',
         'ollama.service': 'enabled' if active else 'disabled',
     }
     for unit, expected in expected_states.items():
@@ -226,6 +245,16 @@ def validate_systemd_state(active):
     ollama_state = systemctl_value('ollama.service', 'ActiveState')
     timer_state = systemctl_value('network-log-gx10.timer', 'ActiveState')
     pipeline_state = systemctl_value('network-log-gx10.service', 'ActiveState')
+    correlation_service_state = systemctl_value(
+        'network-log-gx10-correlation.service',
+        'ActiveState',
+    )
+    correlation_timer_state = systemctl_value(
+        'network-log-gx10-correlation.timer',
+        'ActiveState',
+    )
+    if correlation_service_state != 'inactive' or correlation_timer_state != 'inactive':
+        raise ValueError('managed correlation must remain inactive before its gate')
     if active:
         if ollama_state != 'active' or timer_state != 'active':
             raise ValueError('required runtime unit is not active')

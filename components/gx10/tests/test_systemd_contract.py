@@ -6,6 +6,12 @@ from pathlib import Path
 GX10_DIR = Path(__file__).resolve().parents[1]
 SERVICE_PATH = GX10_DIR / 'systemd' / 'network-log-gx10.service'
 TIMER_PATH = GX10_DIR / 'systemd' / 'network-log-gx10.timer'
+CORRELATION_SERVICE_PATH = (
+    GX10_DIR / 'systemd' / 'network-log-gx10-correlation.service'
+)
+CORRELATION_TIMER_PATH = (
+    GX10_DIR / 'systemd' / 'network-log-gx10-correlation.timer'
+)
 
 
 def parse_unit(path):
@@ -96,6 +102,46 @@ class SystemdContractTests(unittest.TestCase):
         self.assertEqual(timer['Unit'], 'network-log-gx10.service')
         self.assertNotIn('OnCalendar', timer)
         self.assertNotIn('RandomizedDelaySec', timer)
+        self.assertEqual(
+            dict(unit['Install'])['WantedBy'],
+            'timers.target',
+        )
+
+    def test_correlation_service_is_separate_ordered_and_offline(self):
+        unit = parse_unit(CORRELATION_SERVICE_PATH)
+        self.assertEqual(
+            dict(unit['Unit'])['After'],
+            'network-log-gx10.service',
+        )
+        values = defaultdict(list)
+        for key, value in unit['Service']:
+            values[key].append(value)
+        self.assertEqual(values['Type'], ['oneshot'])
+        self.assertEqual(values['User'], ['network-log-agent'])
+        self.assertEqual(values['Group'], ['network-log-agent'])
+        self.assertEqual(
+            values['ExecStart'],
+            ['/usr/local/libexec/network-log-gx10/run-correlation.py'],
+        )
+        self.assertEqual(values['TimeoutStartSec'], ['10min'])
+        self.assertEqual(values['CPUQuota'], ['100%'])
+        self.assertEqual(values['MemoryMax'], ['1G'])
+        self.assertEqual(values['TasksMax'], ['32'])
+        self.assertEqual(values['ReadWritePaths'], ['/var/lib/network-log-gx10'])
+        self.assertEqual(values['RestrictAddressFamilies'], ['AF_UNIX'])
+        self.assertNotIn('Environment', values)
+        self.assertNotIn('EnvironmentFile', values)
+
+    def test_correlation_timer_is_independently_disableable(self):
+        unit = parse_unit(CORRELATION_TIMER_PATH)
+        timer = dict(unit['Timer'])
+        self.assertEqual(timer['OnBootSec'], '5min')
+        self.assertEqual(timer['OnUnitInactiveSec'], '1min')
+        self.assertEqual(timer['AccuracySec'], '5s')
+        self.assertEqual(
+            timer['Unit'],
+            'network-log-gx10-correlation.service',
+        )
         self.assertEqual(
             dict(unit['Install'])['WantedBy'],
             'timers.target',

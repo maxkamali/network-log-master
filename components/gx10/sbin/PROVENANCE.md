@@ -52,3 +52,9 @@ The projector:
 The candidate was rehearsed twice against an on-server SQLite backup: the first run scanned `949845` events and projected `2781` canonical rows while preserving `24207` historical version-3 rows; the second projected zero rows. All projected fields matched an independent re-read, `1984` rows received the existing local suppression policy, and the live database remained unchanged.
 
 The live unscheduled legacy executable was then replaced under its exact old hash and zero-scheduler-reference precondition. The active legacy hash count is zero, the projection hash count is one, and the protected root-only rollback copy retains the exact legacy hash. The live database still has zero version-4 rows and no projection cursor because retirement did not invoke the projector.
+
+## Deterministic incident and managed correlation additions
+
+`incident-engine.py` and `run-correlation.py` are deliberate post-rediscovery implementation artifacts. They are not represented as captured historical applications.
+
+The incident engine owns deterministic identity/lifecycle over classification-version-4 rows. The managed runner validates exact projector/engine hashes, enforces a runtime-owned single-cycle lock, invokes projection before incidents, retries bounded complete passes for cursor convergence with concurrent ingestion, and emits explicit watermark/state telemetry. Neither source imports an Ollama client or implements result return.

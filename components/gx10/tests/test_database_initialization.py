@@ -39,6 +39,7 @@ class DatabaseInitializationTests(unittest.TestCase):
 
     def connect(self):
         connection = sqlite3.connect(self.database)
+        self.addCleanup(connection.close)
         connection.execute('PRAGMA foreign_keys=ON')
         return connection
 

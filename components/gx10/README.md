@@ -26,6 +26,7 @@ Current state:
 - replay/idempotency protections exist in the ingest path
 - normalized schema-version-1 projection is implemented as the deliberate replacement for transitional vendor/message reparsing
 - a deterministic version-1 incident engine and append-only schema are implemented, validated, and installed unscheduled on the working system under protected backup
+- a separate offline managed `projection -> incident` runner/service/timer is implemented as an inactive repository candidate with exact hashes, bounded cursor convergence, resource limits, telemetry, and state-preserving disable behavior
 - the proven automatic chain is `timer -> fetch -> ingest`
 - canonical projection and incident processing remain deliberately absent from the automatic invocation chain
 - Ollama is active with six complete model manifests, but no application-specific observability-pipeline caller was discovered
@@ -99,7 +100,7 @@ The automatic chain remains exactly:
 
 `timer -> fetch -> ingest`
 
-`install/install-applications.py` installs the five application files and two units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting the timer. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database. `install/migrate-incident-engine.py` provides the guarded existing-database extension and unscheduled engine installation with exact hashes, a protected SQLite backup, and empty-state-only rollback.
+`install/install-applications.py` installs the six application files and four pipeline/correlation units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting the correlation timer. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database. `install/migrate-incident-engine.py` provides the guarded existing-database extension and unscheduled engine installation with exact hashes, a protected SQLite backup, and empty-state-only rollback. `install/install-correlation.py`, `activate-correlation.py`, and `verify-correlation.py` implement the separate managed-invocation gate documented in `docs/MANAGED_CORRELATION.md`.
 
 See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boundary.
 

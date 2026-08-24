@@ -254,6 +254,7 @@ Do not paste private transport values or production log content into the public 
 - Preactivation refuses a used database, spool content, SQLite sidecars, active units, enabled runtime units, unit drop-ins, or altered installed artifacts.
 - Do not use this runbook to repair or modify the working reference GX10.
 - Do not add a projection/incident timer, an Ollama pipeline caller, or a result-return producer as part of reconstruction. Those are separate future implementation decisions. The installed incident engine is inert until a separately validated invocation gate is approved.
+- The application installer now places the item-26 correlation runner and unit files, but the base clean-runtime activator deliberately leaves the correlation timer disabled. Use `docs/MANAGED_CORRELATION.md` and its separate verification/activation gate only after the base runtime passes and operator authorization is explicit.
 
 ## Current validation status
 

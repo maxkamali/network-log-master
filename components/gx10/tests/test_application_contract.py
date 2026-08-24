@@ -14,10 +14,12 @@ APPLICATIONS = {
     'ingest': SBIN_DIR / 'ingest-spool.py',
     'projection': SBIN_DIR / 'enrich-events.py',
     'incident': SBIN_DIR / 'incident-engine.py',
+    'correlation': SBIN_DIR / 'run-correlation.py',
 }
 PUBLIC_ABSOLUTE_PREFIXES = (
     '/etc/network-log-gx10/',
     '/usr/bin/',
+    '/usr/local/libexec/network-log-gx10/',
     '/var/lib/network-log-gx10/',
     '/var/spool/network-log-gx10/',
 )

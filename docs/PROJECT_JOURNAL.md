@@ -8542,3 +8542,87 @@ Repository validation remains:
 - `git diff --check`: `PASS`
 
 Publish and independently verify this item-25 completion checkpoint. Then begin item 26 by designing a managed projection-before-incident invocation boundary with explicit concurrency exclusion, resource limits, telemetry, backlog behavior, failure isolation, disable/rollback controls, initial backfill, and steady-state proof. Do not add Ollama invocation or result production during item 26.
+
+## 2026-08-24 00:35 PDT - Managed deterministic-correlation candidate validated locally
+
+### Status
+
+Execution-order item 26 remains the single `NEXT` item and is in progress.
+
+No working-system file, unit, schedule, database row, projector, or incident state changed in this subsection. The repository now contains the managed invocation candidate and its inactive install/verification/activation boundary.
+
+### Selected boundary
+
+Canonical projection and deterministic incident processing run in one exact ordered wrapper:
+
+```text
+projection -> incident
+```
+
+The wrapper is owned by a separate offline oneshot service and monotonic timer. The existing fetch/ingest service and timer are unchanged. Correlation failure therefore cannot stop or disable durable fetch/ingest.
+
+The service has:
+
+- Unix-socket-only address families and no collector/result/Ollama network path
+- only the application-state root writable
+- `CPUQuota=100%`
+- `MemoryMax=1G`
+- `TasksMax=32`
+- `TimeoutStartSec=10min`
+- best-effort I/O priority, `Nice=5`, no capabilities, and the existing hardening family
+
+### Concurrency, ordering, and telemetry
+
+The runner validates the exact projection and incident hashes before loading either stage. A runtime-owned, single-link mode-`0600` advisory lock rejects overlapping managed cycles. SQLite `BEGIN IMMEDIATE` stage transactions serialize writes against concurrent ingest.
+
+To cover rows committed during a correlation cycle, the runner performs up to three complete ordered passes and rechecks both watermarks after each pass. Success requires projection cursor equal to the highest recent-event ID and incident cursor equal to the highest version-4 event ID. Persistent concurrent lag fails visibly and is retried by the next independent cycle.
+
+Every success emits stage markers plus one structured summary with pass count, duration, both cursors/lags, canonical rows, incidents, active incidents, evidence, and transitions. The separate verifier independently checks installed-source equality, metadata, units, private config/drop-in when used, SQLite integrity/foreign keys, incident schema, watermarks, unique active identity, and aggregates.
+
+### Install, activation, and rollback behavior
+
+The existing-system installer:
+
+- installs exact projector, incident engine, runner, service, and timer bytes without overwriting divergence
+- renders one protected private database-path file and one narrowly scoped runtime-identity/pipeline-order drop-in
+- validates the database owner/mode and referenced existing pipeline unit
+- runs `systemd-analyze verify` and reloads systemd
+- refuses a pre-enabled or active correlation unit
+- does not run a stage or enable a timer
+
+The separate activator first verifies inactive installation, runs one explicit timer-disabled backfill, verifies again, then enables/starts only the correlation timer and requires zero-lag active verification. Any failure disables/stops only correlation and preserves all deterministic state for replay; it never restores an old database over newer ingest.
+
+### Synthetic validation
+
+Tests prove:
+
+- projection always precedes incident processing
+- repeat execution is a full no-op
+- new canonical input advances both cursors exactly
+- projection failure prevents incident execution
+- lock contention fails without processing
+- strict private database config fallback
+- active verification rejects projection lag
+- exact projection/incident watermarks pass
+- strict private config/drop-in rendering and injection rejection
+- atomic exact-file reuse and divergent-target refusal
+- initial backfill precedes timer enablement
+- activation failure disables correlation while preserving state
+- systemd separation, offline network boundary, resource limits, and independent timer contract
+
+Candidate SHA-256 values:
+
+- managed runner: `dde1aff929ec52957250ebd86bac01f88554caf20117b95463bc0313e00722c4`
+- service unit: `5dc2525f241f4d0574f695001d11c6cd8e5ff2f5d5597e16afadbedd6ebe0708`
+- timer unit: `af4e5d582eaf76b79e5a0a4acbbe7bff9f2cc6643c36fbc8e9ea81ed7367e73c`
+- inactive installer: `a5d60d1e7b87735c2318629ba31a46e5acc972ef9f95c2d9c4ca167d7a59cc2d`
+- activator: `97ca6602b7f1239c20b5d05c469cbcbef56d1c154cc7959408ce9bebbba989ad`
+- verifier: `49e9060aad9ad256e1aa87b92c66f3f541ff19bb6b3508b51bcd837764d0f27f`
+
+- GX10 suite: `78 passed`
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
+
+### Next action
+
+Complete the full public-repository gate, publish, and independently verify this item-26 candidate. Then use only published exact artifacts for protected working-database-copy rehearsals of inactive install, initial backfill, no-op, newly appended input, failure isolation, verifier behavior, disable, and state preservation before any working-system install.

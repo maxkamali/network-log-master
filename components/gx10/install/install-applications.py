@@ -23,6 +23,7 @@ ARTIFACTS = (
     (GX10_DIR / 'sbin' / 'ingest-spool.py', LIBEXEC_DIR / 'ingest-spool.py', 0o755),
     (GX10_DIR / 'sbin' / 'enrich-events.py', LIBEXEC_DIR / 'enrich-events.py', 0o755),
     (GX10_DIR / 'sbin' / 'incident-engine.py', LIBEXEC_DIR / 'incident-engine.py', 0o755),
+    (GX10_DIR / 'sbin' / 'run-correlation.py', LIBEXEC_DIR / 'run-correlation.py', 0o755),
     (GX10_DIR / 'sbin' / 'runtime_config.py', LIBEXEC_DIR / 'runtime_config.py', 0o644),
     (
         GX10_DIR / 'systemd' / 'network-log-gx10.service',
@@ -32,6 +33,16 @@ ARTIFACTS = (
     (
         GX10_DIR / 'systemd' / 'network-log-gx10.timer',
         SYSTEMD_DIR / 'network-log-gx10.timer',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'systemd' / 'network-log-gx10-correlation.service',
+        SYSTEMD_DIR / 'network-log-gx10-correlation.service',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'systemd' / 'network-log-gx10-correlation.timer',
+        SYSTEMD_DIR / 'network-log-gx10-correlation.timer',
         0o644,
     ),
 )
@@ -128,6 +139,14 @@ def main():
                 'verify',
                 str(SYSTEMD_DIR / 'network-log-gx10.service'),
                 str(SYSTEMD_DIR / 'network-log-gx10.timer'),
+                str(
+                    SYSTEMD_DIR
+                    / 'network-log-gx10-correlation.service'
+                ),
+                str(
+                    SYSTEMD_DIR
+                    / 'network-log-gx10-correlation.timer'
+                ),
             ],
             check=True,
         )

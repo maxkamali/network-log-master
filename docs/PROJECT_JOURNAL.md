@@ -9894,3 +9894,45 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify this protected-copy checkpoint. Then use only the exact staged installer/runner to atomically replace the exact predecessor runner while reasoning remains disabled. Reverify the unchanged 12/9/3/3 state before any resume.
+
+## 2026-08-24 03:07 PDT - Item 29 bounded-backlog runner installed inactive
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The protected backlog-drain rehearsal was published and independently matched on GitHub at:
+
+`8795db8fb86b49a74a5034af2913af76d4bb7519` — `Record backlog drain copy rehearsal`
+
+The exact staged installer accepted the working runner only because it retained the exact published predecessor hash, root ownership, and mode. It atomically installed the corrected runner, reused the already corrected timer and unchanged service/private binding, ran real on-host systemd analysis, and left both reasoning units inactive with the timer disabled.
+
+A digest across all five append-only reasoning tables matched before and after. Production remained at 12 packets, nine pending, and three successful runs/results. No packet was built, no model was called, and no run/result was added. Fetch/ingest and correlation remained active with deterministic zero lag.
+
+```text
+recent_max_id=968772
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_pending=9
+reasoning_model_versions=1
+reasoning_prompt_versions=1
+reasoning_runs=3
+reasoning_started=0
+reasoning_succeeded=3
+reasoning_failures=0
+reasoning_results=3
+reasoning_state_sha256=79f0c9a202327d74dc32e8d8e982bdcc52011d2b762283e78ce9f8889990600c
+managed_reasoning_timer_enabled=no
+managed_reasoning_timer_active=no
+managed_reasoning_service_active=no
+managed_reasoning_restarts=0
+production_inference_invoked=no
+pipeline_timer_active=yes
+correlation_timer_active=yes
+GX10_MANAGED_REASONING_RUNNER_UPGRADE=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, or connection value was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this inactive-upgrade checkpoint. Then create a fresh protected pre-resume backup and use the unchanged fail-closed activator for exactly one corrected production drain while the timer is disabled. Enable the timer only after aggregate verification proves packets fixed at 12, pending 9→8, and runs/results 3→4.

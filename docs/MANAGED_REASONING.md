@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Two natural cadences each completed exactly one successful inference, but each also built four new packets; pending backlog grew from three to six to nine. This failed the stability gate, and the reasoning timer was disabled with all append-only state preserved. The published 138-test bounded-backlog candidate defers packet construction whenever any selected-version packet is pending and requires the one allowed inference attempt to reduce pending count by exactly one. It passed a protected current-production-state-copy real-model drain with deterministic truth unchanged. Fetch/ingest, deterministic correlation, and Ollama remain healthy while the correction awaits exact inactive installation.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Two natural cadences each completed exactly one successful inference, but each also built four new packets; pending backlog grew from three to six to nine. This failed the stability gate, and the reasoning timer was disabled with all append-only state preserved. The published 138-test bounded-backlog correction defers packet construction whenever any selected-version packet is pending and requires the one allowed inference attempt to reduce pending count by exactly one. It passed a protected current-production-state-copy real-model drain and is now installed exactly while the timer remains disabled. Production reasoning state is unchanged at 12 packets, nine pending, and three successful runs/results. Protected resume and new natural drain cadences remain.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -95,7 +95,7 @@ Twenty-three focused tests currently prove:
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `138` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, and the bounded-backlog correction's current-state-copy rehearsal have passed. The first two natural cadences passed per-cycle inference safety but failed bounded-backlog stability. The corrected runner must be installed while disabled and pass new production drain cadences. Collector result return is outside item 29.
+The full GX10 suite currently passes `138` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, the bounded-backlog current-state-copy rehearsal, and exact inactive runner upgrade have passed. The corrected runner must pass a protected resume cycle and new production drain cadences. Collector result return is outside item 29.
 
 ## Protected current-state-copy evidence
 
@@ -240,6 +240,32 @@ GX10_MANAGED_REASONING_BACKLOG_COPY_REHEARSAL=PASS
 
 The protected copy paths and all packet/result content remain private. Production was not invoked or changed.
 
+The exact runner/installer from the published candidate then performed an inactive production upgrade. The timer and service remained disabled/inactive. A complete digest over every packet, model/prompt version, run, and result row matched before and after, while deterministic watermarks remained caught up:
+
+```text
+recent_max_id=968772
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_pending=9
+reasoning_model_versions=1
+reasoning_prompt_versions=1
+reasoning_runs=3
+reasoning_started=0
+reasoning_succeeded=3
+reasoning_failures=0
+reasoning_results=3
+reasoning_state_sha256=79f0c9a202327d74dc32e8d8e982bdcc52011d2b762283e78ce9f8889990600c
+managed_reasoning_timer_enabled=no
+managed_reasoning_timer_active=no
+managed_reasoning_service_active=no
+managed_reasoning_restarts=0
+production_inference_invoked=no
+pipeline_timer_active=yes
+correlation_timer_active=yes
+GX10_MANAGED_REASONING_RUNNER_UPGRADE=PASS
+```
+
 ## Exact candidate artifacts
 
 - managed runner SHA-256: `c0c095661a7042be57230fb8fc856c03f5fe191ab604e4e246138f28156a3bee`
@@ -249,4 +275,4 @@ The protected copy paths and all packet/result content remain private. Productio
 - service SHA-256: `3559ed6a5bdfc98de3544bc6bf7f69cf6459a9cb50083cd96db632a27e52e64a`
 - timer SHA-256: `c284e9d8cbb71775dc6b67b7451bb024d689b4ec27b89de987443a6ff77cad34`
 
-These hashes describe the bounded-backlog candidate. The activator, verifier, service, and corrected timer are byte-identical to the activation candidate; only the runner and installer changed. The working system still has the exact predecessor runner and corrected timer installed inactive.
+These hashes describe the bounded-backlog candidate. The activator, verifier, service, and corrected timer are byte-identical to the activation candidate; only the runner and installer changed. The exact corrected runner and timer are installed inactive on the working system.

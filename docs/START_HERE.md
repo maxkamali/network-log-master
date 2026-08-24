@@ -2,6 +2,10 @@
 
 Use this file as the canonical entry point when resuming the project after a context reset, handoff, or long pause.
 
+## First-time orientation
+
+If you are new to the application, begin with [`docs/ARCHITECTURE.md#application-at-a-glance`](ARCHITECTURE.md#application-at-a-glance). It contains a GitHub-rendered end-to-end diagram, a plain-text equivalent, and the core trust boundaries. In one sentence: the collector durably captures and normalizes network telemetry, GX10 deterministically correlates incidents and runs local AI reasoning, and validated results return to the collector for ClickHouse storage and Grafana presentation.
+
 ## Recovery order
 
 Read and verify in this order before changing implementation:

@@ -6,6 +6,68 @@ The platform turns raw network telemetry into durable observations, deterministi
 
 The architecture is intentionally split across two roles: a durable collector/log server and a replaceable local-inference host named GX10.
 
+## Application at a glance
+
+Network devices send syslog to the collector. The collector preserves the raw records, normalizes a durable file backlog, and exposes only verified forward-going files to GX10. GX10 ingests those files into replay-safe local state, builds deterministic incidents, decides when reasoning is warranted, and asks a loopback-only local Ollama model for a structured explanation. Results return through a separate write-only transport; the collector validates and deduplicates them before ClickHouse stores them and Grafana presents them to an operator.
+
+```mermaid
+flowchart LR
+    devices["Network devices"]
+    operator["Operator"]
+
+    subgraph collector["Collector / log server"]
+        vector["Vector syslog ingress"]
+        raw["Raw ClickHouse storage"]
+        backlog["Durable compressed backlog"]
+        normalizer["Deterministic normalizer<br/>and verified handoff"]
+        gate["AI-result validation<br/>and replay ledger"]
+        updates["Validated AI updates<br/>in ClickHouse"]
+        grafana["Grafana dashboards"]
+    end
+
+    subgraph gx10["GX10 / local inference"]
+        ingest["Read-only fetch<br/>and replay-safe ingest"]
+        incidents["Canonical projection<br/>and incident correlation"]
+        reasoning["Deterministic wake policy<br/>and local Ollama reasoning"]
+        outbox["Validated result outbox<br/>and recurring sender"]
+    end
+
+    devices -->|syslog| vector
+    vector --> raw
+    vector --> backlog
+    backlog --> normalizer
+    normalizer -->|read-only file transport| ingest
+    ingest --> incidents
+    incidents --> reasoning
+    reasoning --> outbox
+    outbox -->|write-only file transport| gate
+    gate --> updates
+    raw --> grafana
+    updates --> grafana
+    grafana --> operator
+```
+
+Plain-text equivalent:
+
+```text
+Network devices
+      | syslog
+      v
+Collector: Vector -> raw ClickHouse
+                  -> durable backlog -> deterministic normalizer -> verified handoff
+                                                                   |
+                                                      read-only file transport
+                                                                   v
+GX10: replay-safe ingest -> canonical projection -> incidents -> wake policy
+      -> local Ollama reasoning -> validated outbox -> recurring sender
+                                                                   |
+                                                      write-only file transport
+                                                                   v
+Collector: validation + replay ledger -> ClickHouse AI updates -> Grafana -> operator
+```
+
+The deterministic layers own event identity, normalization, incident state, wake decisions, and replay safety. The LLM produces nonauthoritative explanation records; it cannot redefine source facts or incident lifecycle. The two file transports use independent least-privilege identities, and GX10 has no direct ClickHouse write path.
+
 ## Rebuildability contract
 
 The current reconstruction/documentation effort is complete only when:
@@ -35,20 +97,20 @@ Owns:
 
 ### GX10
 
-Target ownership:
+Owns:
 
 - receiving/fetching prepared or durable observation backlog
 - compact local working state
-- deterministic incident correlation target
-- repeat/burst accounting target
-- rolling incident context target
+- deterministic incident correlation
+- repeat/burst accounting
+- rolling incident context
 - deciding when the local LLM should run
 - local inference
 - returning thin AI result records
 
 GX10 is intentionally not the authoritative raw-log archive, dashboard server, or direct ClickHouse writer.
 
-Current production has three independent GX10 schedules: read-only backlog fetch followed by replay-safe local SQLite ingest; offline canonical projection followed by deterministic incident correlation; and bounded packet/backlog draining followed by one strict local-model invocation. The item-29 reasoning boundary passed protected activation, one diagnosed terminal safe failure, immutable portable prompt revision `r3`, exact upgrade, and three natural drain cadences. Reasoning results remain append-only and nonauthoritative. No result-return producer exists.
+Current production has independent GX10 schedules for read-only backlog fetch and replay-safe local SQLite ingest, canonical projection and deterministic incident correlation, bounded packet creation and strict local-model invocation, result-outbox projection, and recurring result delivery. Reasoning results remain append-only and nonauthoritative. The result sender uses a dedicated write-only collector identity and cannot access ClickHouse directly.
 
 ## Current data path
 
@@ -57,32 +119,28 @@ Devices
   -> syslog ingress
   -> Vector
      -> ClickHouse raw store
-     -> compressed GX10 backlog
-
-GX10
-  -> restricted read-only backlog fetch
-  -> local durable replay-safe ingest
-  -> separately scheduled canonical projection
-  -> deterministic incident correlation/lifecycle
-  -> deterministic versioned reasoning packets
-  -> separately scheduled bounded local inference
-  -> append-only validated local results
+     -> compressed durable backlog
+        -> collector-side deterministic normalization
+        -> verified forward-only handoff
+           -> GX10 restricted read-only fetch
+           -> local durable replay-safe ingest
+           -> scheduled canonical projection
+           -> deterministic incident correlation/lifecycle
+           -> deterministic versioned reasoning packets
+           -> bounded local inference through loopback Ollama
+           -> append-only validated result outbox
+           -> recurring write-only result sender
+              -> collector validation/quarantine gate
+              -> immutable acceptance ledger
+              -> ClickHouse validated AI updates
+              -> Grafana
 ```
 
-Separately present but not connected by a discovered GX10 producer:
+Ollama is installed, active, enabled, and loopback-only. Rediscovery found no historical application-specific caller or GX10 result producer; the repository therefore records the local caller, result outbox, and return sender as reconstructed additions rather than recovered historical behavior. Their protected activation, replay/conflict handling, natural recurring delivery, collector acceptance, ClickHouse provenance, and final conservation gates passed. Exact current operational evidence is maintained in `docs/CURRENT_STATE.md`, `docs/RESULT_OUTBOX.md`, `docs/RESULT_TRANSPORT.md`, and the latest `docs/PROJECT_JOURNAL.md` entries.
 
-```text
-collector write-only result transport
-  -> validation/quarantine gate
-  -> ClickHouse validated AI updates
-  -> Grafana
-```
+## Implemented target data path
 
-Ollama is installed, active, enabled, and loopback-only with six complete model manifests. No application-specific caller was found during rediscovery; the reconstructed strict caller is active only through item 29. The versioned no-network result-outbox boundary is now active locally with 15-for-15 collector-valid ready files after protected service-ownership/resume correction. No credential or collector transport exists; the return path stays disconnected until timer stability and later credential/live-return gates pass.
-
-## Target data path
-
-Future architecture, after separate implementation and promotion gates, is:
+The intended end-to-end architecture is now implemented on the working systems:
 
 ```text
 collector capture
@@ -96,7 +154,9 @@ collector capture
   -> ClickHouse/Grafana
 ```
 
-The collector-side normalizer has passed selected replay/parity, complete live shadow validation, and the production GX10 handoff gate. Its integration remains a separate durable-file worker reading settled collector backlog files without changing Vector's raw sinks. A forward-only handoff view now exposes only verified normalized outputs at or after an immutable floor while retaining the original GX10 transport identity. The raw and shadow histories and exact raw-view rollback remain preserved. After a multi-cadence stability review, transitional GX10 vendor/message reparsing was replaced by a canonical-field projector that preserves local suppression policy and historical enrichment evidence. The deterministic GX10 incident schema/engine and separately disableable offline managed `projection -> incident` runner/service/timer passed production backfill and multi-cadence activation gates. The deterministic wake-policy/compact-packet builder and versioned caller/schema/configuration/prompt boundary are active only through the separately disableable managed reasoning schedule. They bind immutable packets to exact model/prompt/run versions and strict append-only structured results. The item-30 result-outbox projection, shared-lock ready/delivered state machine, and no-network managed package are installed inactive and empty after copy/package/portability gates; protected local activation, write-only credentials, sender crash-window closure, and collector return remain separate gates.
+The collector-side normalizer passed selected replay/parity, complete live shadow validation, and the production GX10 handoff gate. It remains a separate durable-file worker reading settled collector backlog files without changing Vector's raw sinks. A forward-only handoff view exposes only verified normalized outputs at or after an immutable floor while retaining the original GX10 transport identity. Raw and shadow histories and the exact raw-view rollback remain preserved.
+
+After a multi-cadence stability review, the transitional GX10 vendor/message reparser was replaced by a canonical-field projector that preserves local suppression policy and historical enrichment evidence. The deterministic incident engine, wake-policy packet builder, versioned local caller, result outbox, and recurring sender each remain separately disableable. Result delivery crosses the collector's validation, quarantine, immutable replay-ledger, and ClickHouse ingestion boundaries before presentation. Final end-to-end production and repository closure passed; disposable clean-host execution remains explicitly waived and empirically unverified.
 
 ## Capture-first contract
 
@@ -114,7 +174,7 @@ Collector arrival time is authoritative for event ordering. A device-supplied ti
 
 Syslog records are observations. Incidents are persistent deterministic objects assembled from observations.
 
-Target lifecycle:
+Lifecycle:
 
 ```text
 CANDIDATE -> OPEN -> RECOVERING -> RESOLVED
@@ -126,7 +186,7 @@ The long-lived deterministic incident engine is implemented and active behind a 
 
 ## Context model
 
-The target incident engine should build deterministic compact summaries over approximately:
+The incident engine builds deterministic compact summaries over approximately:
 
 - 60 minutes
 - 180 minutes
@@ -136,7 +196,7 @@ Open incidents persist until resolved. Compact resolved history may remain avail
 
 ## LLM wake policy
 
-Target reasoning runs are event-driven and rate-limited rather than invoked for every record. Approximate intended behavior:
+Reasoning runs are event-driven and rate-limited rather than invoked for every record. Approximate intended behavior:
 
 - periodic analysis when meaningful new evidence exists
 - immediate wake for major/critical conditions
@@ -150,7 +210,7 @@ The exact policy remains deterministic and testable outside the LLM.
 Input and output transport credentials are independent and least-privilege.
 
 - backlog reader: read-only
-- AI result writer boundary: write-only; no current GX10 producer/private-key installation is claimed
+- AI result writer boundary: a dedicated write-only GX10 sender identity, independent of the read-only backlog identity
 - AI results: validated before durable ingestion
 - GX10: no direct ClickHouse write path
 - ClickHouse application listeners: collector-local boundary

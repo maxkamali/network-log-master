@@ -11708,3 +11708,31 @@ No credential, private identifier/path/value, connection value, result/provenanc
 ### Closure action
 
 Publish and independently verify this final closure checkpoint. After publication, ordinary operational monitoring may continue, but any new feature or production behavior change must explicitly reopen execution order in `docs/CURRENT_STATE.md`.
+
+## 2026-08-24 12:29 PDT - Newcomer application diagram and entry-point reconciliation completed
+
+### Status
+
+A post-closure audit found that the authoritative current-state and final journal were current, but the root README and architecture overview still contained pre-cutover statements saying the GX10 result producer was absent, the return path was disconnected, and incident reasoning/result production remained future work. Those entry-point statements were stale relative to the completed item-31 production state.
+
+`docs/ARCHITECTURE.md` now begins with an application-level Mermaid flowchart and an equivalent plain-text diagram. Both show network-device ingress, collector raw storage and normalization, verified read-only handoff, GX10 replay-safe ingest/correlation/local reasoning, the validated outbox and recurring write-only sender, collector validation/replay ledger, ClickHouse AI updates, Grafana, and the operator. The accompanying explanation makes deterministic versus nonauthoritative-LLM ownership and the two independent least-privilege transport boundaries explicit.
+
+The root `README.md` now links the canonical diagram, contains a compact current plain-text flow, declares the end-to-end working-system target complete, and replaces the obsolete GX10/collector milestone summaries with the deployed result-return and final test state. `docs/START_HERE.md` now gives a first-time reader a direct orientation link and one-sentence application description. Historical rediscovery claims remain distinguished from later reconstructed behavior.
+
+Validation passed:
+
+```text
+public_repository_validator_tests=9
+PUBLIC_REPOSITORY_CURRENT_TREE=PASS
+PUBLIC_REPOSITORY_HISTORY=PASS
+PUBLIC_REPOSITORY_LINKS=PASS
+PUBLIC_REPOSITORY_REF_TOPOLOGY=PASS
+PUBLIC_REPOSITORY_VALIDATION=PASS
+git_diff_check=PASS
+```
+
+This was a documentation-only correction. It made no production, credential, service, schedule, database, transport, outbox, ledger, or repository execution-order change, so the completed state remains explicit with no `NEXT` item.
+
+### Closure action
+
+Publish and independently verify this documentation checkpoint on GitHub `main`.

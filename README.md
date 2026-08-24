@@ -6,6 +6,8 @@ This repository is the master public engineering record and active source reposi
 
 Final repository-only rebuild milestone status: `PUBLISHED`. The operator explicitly accepted the residual clean-host execution risk on 2026-08-23 so the project could advance; the unavailable execution is `WAIVED`, not falsely recorded as passed.
 
+End-to-end working-system status: `COMPLETE`. The collector normalization/handoff, GX10 incident reasoning, recurring result return, collector validation/replay protection, ClickHouse ingestion, and Grafana presentation path passed the final production and repository closure audit.
+
 ## Start here
 
 For a fresh engineering or AI session, begin with:
@@ -16,7 +18,7 @@ For a fresh engineering or AI session, begin with:
 4. [`components/collector/REBUILD_STATUS.md`](components/collector/REBUILD_STATUS.md) and [`components/gx10/REBUILD_STATUS.md`](components/gx10/REBUILD_STATUS.md)
 5. the latest entries in [`docs/PROJECT_JOURNAL.md`](docs/PROJECT_JOURNAL.md)
 
-`docs/CURRENT_STATE.md` is the authority for execution order and should contain exactly one item marked `NEXT`.
+`docs/CURRENT_STATE.md` is the authority for execution order. It contains exactly one item marked `NEXT` while work remains and none after an explicit completed-state declaration.
 
 ## Rebuild acceptance criterion
 
@@ -30,28 +32,23 @@ The empirical clean-host proof was unavailable. The operator accepted that resid
 
 ## Core design
 
+The annotated GitHub-rendered diagram, plain-text fallback, and trust-boundary explanation are in [`docs/ARCHITECTURE.md#application-at-a-glance`](docs/ARCHITECTURE.md#application-at-a-glance).
+
 ```text
 Network devices
-    |
-    | syslog
-    v
-Collector / log server
-    |-- Vector ingest and fan-out
-    |-- ClickHouse durable storage
-    |-- captured Vector normalization and fan-out
-    |-- Grafana presentation
-    |-- validated AI-result ingestion
-    |
-    | durable/prepared observations
-    v
-GX10
-    |-- scheduled read-only backlog fetch
-    |-- replay-safe SQLite ingest
-    |-- unscheduled deterministic-enrichment reference
-    |-- local Ollama infrastructure without a pipeline caller
+      | syslog
+      v
+Collector: Vector -> raw ClickHouse
+                  -> durable backlog -> normalizer -> verified handoff
+                                                        | read-only
+                                                        v
+GX10: ingest -> project -> correlate incidents -> local reasoning -> result outbox
+                                                        | write-only
+                                                        v
+Collector: validation + replay ledger -> AI updates -> Grafana -> operator
 ```
 
-The collector has a validated write-only AI-result return boundary, but no GX10 producer for it was discovered. Long-lived incident correlation, automatic LLM reasoning, and result production remain future implementation work.
+The deployed system keeps deterministic truth outside the LLM. The model explains already-correlated incident evidence; deterministic code owns identity, lifecycle, wake policy, replay protection, and acceptance. The read-only observation transport and write-only result transport use independent least-privilege identities, and GX10 never writes directly to ClickHouse.
 
 ## Architectural invariants
 
@@ -92,6 +89,7 @@ The published checkpoint includes:
 - Certbot renewal artifacts
 - SFTP/chroot/ACL/bind-mount transport reconstruction
 - AI-result gate and retention behavior
+- immutable AI-result acceptance ledger with exact-replay and divergent-conflict isolation
 - package and runtime verifiers
 - four Grafana 13 dashboard resources
 - API-based dashboard restore and verification scripts
@@ -102,9 +100,9 @@ The collector public rebuild package, operator documentation, sanitation, and re
 
 ### GX10
 
-GX10's complete public rebuild package is published under [`components/gx10/`](components/gx10/). It preserves the proven `timer -> fetch -> ingest` chain, exact SQLite state, unscheduled canonical normalized-field projection with historical version-3 enrichment retained, platform/dependency contract, Ollama service and six-model store, guarded activation, and the clean-machine runbook.
+GX10's complete public rebuild package is published under [`components/gx10/`](components/gx10/). It preserves the proven `timer -> fetch -> ingest` chain, exact SQLite state, canonical normalized-field projection with historical version-3 enrichment retained, deterministic incident correlation, versioned local reasoning, replay-safe result outbox, recurring write-only sender, platform/dependency contract, Ollama service and six-model store, guarded activation, and the clean-machine runbook.
 
-Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 140 tests. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
+The final GX10 suite passed 186 tests and `GX10_REBUILD_PACKAGE_VALIDATION=PASS`. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
 
 ### Two-server rebuild
 

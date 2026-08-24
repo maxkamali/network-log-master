@@ -10796,3 +10796,71 @@ No private database/outbox path, result/packet/event/entity content, connection 
 ### Next action
 
 Run the full public gate, publish the ownership/resume correction, and independently verify GitHub. Then resume exact protected local activation from the retained populated-disabled state. Require one ready file per current successful result, zero delivered, exact reasoning digest, outbox/reasoning timers active, healthy deterministic schedules, no credential, and no transmission.
+
+## 2026-08-24 04:47 PDT - Item 30 protected local production activation passed
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The service-ownership/resume correction was published and independently matched on GitHub at:
+
+`8ddfda20f219f51e1e54fa2dbc25e74c6c2cfba8` — `Verify service-owned outbox activation`
+
+The exact corrected activator resumed from the 15 retained ready files. Managed reasoning was temporarily disabled and settled. The before/after five-table digest remained exact. The local service was an idempotent no-op because no new successful result had appeared; independent populated-inactive and active verification both found exactly 15 ready, zero delivered, and 15 results. Only after those checks passed did the activator enable the outbox timer and restore reasoning active/enabled.
+
+```text
+reasoning_packets=12
+reasoning_runs=16
+reasoning_results=15
+reasoning_failures=1
+reasoning_sha256=83380943bee52e185fd12cd48236d48798dca26a2bfe9c687ce1cc6e382be3af
+outbox_ready=15
+outbox_delivered=0
+outbox_timer_enabled=yes
+credentials_installed=no
+collector_transmission_invoked=no
+GX10_RESULT_OUTBOX_LOCAL_ACTIVATION=PASS
+GX10_MANAGED_RESULT_OUTBOX_VERIFY=PASS
+```
+
+The first broad postchecks caught the expected live projection lag while fetch/ingest was ahead of its independent correlation cadence; strict zero-lag verification refused the snapshot. A bounded closure wrapper paused only fetch/ingest and reasoning timers, waited for their services to settle, ran deterministic correlation to zero and an idempotent outbox catch-up, restored both timers, and then executed every strict verifier. Two wrapper iterations stopped safely before the final pass while diagnostic propagation and timer-restore ordering were corrected; the `finally` path restored both timers each time.
+
+The final closure independently passed:
+
+- exact installed active outbox verification
+- active managed-reasoning verification at zero projection/incident lag
+- active deterministic-correlation verification at zero lag
+- all 15 ready files through the unchanged collector validation function
+- service UID/GID, mode-`0640`, single-link, one-line JSONL, exact count, and deterministic aggregate digest
+- active outbox/pipeline/correlation/reasoning schedules with zero restarts
+- zero delivered files, credentials, sender, collector connection, or transmission
+
+```text
+recent_max_id=978840
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_pending=2
+reasoning_runs=16
+reasoning_started=0
+reasoning_succeeded=15
+reasoning_failures=1
+reasoning_results=15
+outbox_ready=15
+outbox_delivered=0
+outbox_sha256=65a2b2399018840fe96a3d56291e60ea994e60d12fb8a7fc7ff011bafb2ece9c
+collector_gate_valid_files=15
+outbox_timer_active=yes
+preexisting_schedules_healthy=yes
+pipeline_timer_restored=yes
+reasoning_timer_restored=yes
+credentials_installed=no
+collector_transmission_invoked=no
+GX10_RESULT_OUTBOX_LOCAL_ACTIVATION_POSTCHECK=PASS
+GX10_RESULT_OUTBOX_LOCAL_ACTIVATION_CLOSURE=PASS
+```
+
+No private database/outbox path, result/packet/event/entity content, connection value, private runtime identity, credential, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish this local-activation checkpoint, and independently verify GitHub. Then observe multiple natural outbox timer cadences without manual service invocation. Require exact no-op reuse when results are unchanged and exact one-file catch-up after any new successful reasoning result, with zero delivered/restarts/failures and no credential/transmission.

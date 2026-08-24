@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 repository, protected-copy, inactive-package/install, and activation-correction gates pass. The version-1 producer/managed boundary now passes 159 tests locally and from exact GX10-staged trees. Exact artifacts/configuration are installed with 15 retained ready files, zero delivered, disabled timer after the safe verifier stop, no result-writer credential, and no collector transmission.
+Execution-order item 30 local producer activation passes after the service-ownership/resume correction. The version-1 boundary passes 159 tests locally and from exact GX10-staged trees. Production has 15 collector-valid ready files for 15 successful results, zero delivered, an active no-network timer, healthy preexisting schedules at zero lag, no result-writer credential, and no collector transmission.
 
 ## Boundary
 
@@ -51,4 +51,6 @@ The protected activator now passes 159 local and exact GX10-staged tests plus tw
 
 The first working-system activation safely created 15 ready files, then stopped because the root-run independent verifier incorrectly compared service-owned file UID to its own UID. Failure handling left the outbox timer disabled, restored reasoning active/enabled, retained all exact ready files, and transmitted nothing. The corrected verifier validates against the derived service UID/GID; the activator accepts exact populated-but-disabled state and safely fills only any results added before resume. A new focused ownership test and second protected-copy rehearsal pass.
 
-Next publish the verifier/resume correction and resume the exact protected working-system activation from its retained ready files. Require one ready file per then-current successful result, zero delivered, unchanged reasoning-table digest, active outbox/reasoning timers, collector-valid files, healthy deterministic schedules, and zero credential/transmission. Writer-key installation and live transfer remain later explicit gates.
+The corrected working-system resume retained or idempotently filled one file per result, preserved the exact five-table reasoning digest, enabled the outbox timer, and restored reasoning. A bounded closure briefly paused pipeline/reasoning timers, ran deterministic correlation and an idempotent outbox catch-up, restored both timers, and proved all 15 files through the unchanged collector gate with deterministic aggregate digest `65a2b2399018840fe96a3d56291e60ea994e60d12fb8a7fc7ff011bafb2ece9c`.
+
+Next publish this activation checkpoint and observe natural outbox timer cadences without manual invocation. Require exact no-op reuse when results are unchanged, one new ready file after any new successful reasoning result, zero delivered/restarts/failures, unchanged prior-file digest, healthy schedules, and zero credential/transmission. Writer-key installation and live transfer remain later explicit gates.

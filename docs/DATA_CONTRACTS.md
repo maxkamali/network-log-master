@@ -187,9 +187,9 @@ Current boundary status:
 - accepted files move to the ready area; invalid files move to quarantine with a reason
 - Vector ingests ready records into the ClickHouse `ai_updates` table
 - no historical GX10 producer for this contract was discovered
-- the item-30 version-1 repository/copy-only producer now maps one successful append-only reasoning result to one canonical single-record JSONL file while retaining the full result and versioned provenance; it is not installed and has no writer credential or transport
+- the item-30 version-1 local producer now actively maps one successful append-only reasoning result to one canonical single-record ready JSONL file while retaining the full result and versioned provenance; it has no writer credential or transport
 
-Therefore the collector schema remains an active capability contract. Repository and protected-copy production now pass, but the working GX10 still does not publish or transmit AI results.
+Therefore the collector schema remains an active capability contract. GX10 local production now passes, but no file is published or transmitted to the collector.
 
 ## Incident contract - deterministic implementation
 

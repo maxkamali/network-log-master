@@ -134,7 +134,7 @@ Current validation policy includes:
 
 Validated records are then ingested into ClickHouse and become available to Grafana.
 
-No historical GX10 application producer for this boundary was discovered. The item-30 version-1 producer and no-network managed package now pass repository, exact GX10 staging, protected-copy, isolated install/run, failure-cleanup, and corrected working-system inactive-install gates. Exact artifacts and empty states are installed, but the timer is disabled and the service has never run; no writer credential, sender, or collector transmission exists. Current operations must not claim a working AI-result round trip. See `docs/RESULT_OUTBOX.md`.
+No historical GX10 application producer for this boundary was discovered. The item-30 version-1 no-network local producer is now active after protected activation and has 15 collector-valid ready files, zero delivered, and no writer credential/sender/collector transmission. Current operations must still not claim a working AI-result round trip. See `docs/RESULT_OUTBOX.md`.
 
 ## Grafana operational boundary
 

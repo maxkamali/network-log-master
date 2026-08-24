@@ -97,6 +97,26 @@ class CorrelationInstallTests(unittest.TestCase):
                 os.getgid(),
             )
 
+    def test_missing_standard_parent_can_be_created_exactly(self):
+        target = self.root / 'libexec'
+        created = []
+        INSTALLER.ensure_directory(
+            target,
+            os.getuid(),
+            os.getgid(),
+            0o755,
+            created,
+        )
+        self.assertEqual(created, [target])
+        self.assertEqual(target.stat().st_mode & 0o777, 0o755)
+        INSTALLER.ensure_directory(
+            target,
+            os.getuid(),
+            os.getgid(),
+            0o755,
+            created,
+        )
+
     def test_activation_orders_backfill_before_timer(self):
         database = self.root / 'events.sqlite3'
         database.touch()

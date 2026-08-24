@@ -8691,3 +8691,25 @@ No production event content or identity-bearing path was printed or persisted pu
 ### Next action
 
 Publish and independently verify this copy-rehearsal checkpoint. Then stage only those published exact artifacts for the guarded inactive working-system install. Verify exact installed bytes, rendered private database/identity boundary, systemd analysis, disabled/inactive units, and unchanged database before separately invoking the explicit backfill activator.
+
+## 2026-08-24 00:42 PDT - Existing-system libexec parent creation corrected before install
+
+### Status
+
+Execution-order item 26 remains the single `NEXT` item and is in progress.
+
+The private-copy evidence was published and independently verified at `a5dac45928eb255fd5f480679019d464b3bb0989`. The inactive existing-system installer then failed closed before creating any candidate file, config, drop-in, unit, database row, cursor, or schedule.
+
+The working host did not yet have the standard `/usr/local/libexec` parent. The clean bootstrap creates the full application directory with recursive `install -d`, but the existing-system installer required its immediate parent to preexist.
+
+The installer now creates and verifies only that standard root-owned mode-`0755` parent before creating the application-specific subdirectory. A new test proves exact creation and idempotent reuse. Divergent ownership/mode or a symbolic-link/non-directory target still fails closed.
+
+Corrected inactive-installer SHA-256:
+
+`d6dd51f61ea4cdf2e7328a824c1699a2d12b77b385ff9df97c9881c48408ee3f`
+
+The GX10 suite now contains `79` tests.
+
+### Next action
+
+Run the full package/public gate, publish and independently verify this portability correction, replace only the staged installer with those published bytes, and retry the inactive install. Backfill and timer activation remain prohibited until inactive verification passes.

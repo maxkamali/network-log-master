@@ -216,6 +216,13 @@ def apply_install(database, runtime_user, runtime_group, pipeline_unit):
     created_directories = []
     created_files = []
     try:
+        ensure_directory(
+            LIBEXEC_DIR.parent,
+            0,
+            0,
+            0o755,
+            created_directories,
+        )
         ensure_directory(LIBEXEC_DIR, 0, 0, 0o755, created_directories)
         ensure_directory(CONFIG_DIR, 0, group.gr_gid, 0o750, created_directories)
         ensure_directory(DROPIN_DIR, 0, 0, 0o755, created_directories)

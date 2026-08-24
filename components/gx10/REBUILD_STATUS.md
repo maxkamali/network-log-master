@@ -52,7 +52,7 @@ Completed:
 - only Ollama and the fetch/ingest timer are activated; canonical projection remains unscheduled
 - complete clean-machine operator runbook
 - final structural, syntax, generated/private-artifact, IPv4/public-safety, unit-test, and filesystem-contract audit
-- 78 synthetic tests passing
+- 79 synthetic tests passing
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.

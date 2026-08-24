@@ -91,7 +91,7 @@ The published checkpoint includes:
 - AI-result gate and retention behavior
 - immutable AI-result acceptance ledger with exact-replay and divergent-conflict isolation
 - package and runtime verifiers
-- five Grafana 13 dashboard resources, including the live `AI Incident Analysis` view
+- six Grafana 13 dashboard resources, including the original and enhanced AI incident views
 - API-based dashboard restore and verification scripts
 
 The independent live collector verifier reached `COLLECTOR_RUNTIME_VERIFY=PASS`.
@@ -102,7 +102,7 @@ The collector public rebuild package, operator documentation, sanitation, and re
 
 GX10's complete public rebuild package is published under [`components/gx10/`](components/gx10/). It preserves the proven `timer -> fetch -> ingest` chain, exact SQLite state, canonical normalized-field projection with historical version-3 enrichment retained, deterministic incident correlation, versioned local reasoning, replay-safe result outbox, recurring write-only sender, platform/dependency contract, Ollama service and six-model store, guarded activation, and the clean-machine runbook.
 
-The final GX10 suite passed 186 tests and `GX10_REBUILD_PACKAGE_VALIDATION=PASS`. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
+The current GX10 suite passes 192 tests and `GX10_REBUILD_PACKAGE_VALIDATION=PASS`. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
 
 ### Two-server rebuild
 

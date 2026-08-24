@@ -35,6 +35,7 @@ Current state:
 - the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; the original exact artifacts were installed empty under protected backup before item-29 activation
 - item 29 is complete after backlog deferral, one safely diagnosed terminal invalid output, exact portable prompt revision `r3`, protected-copy replay, four-artifact upgrade, protected resume, and three natural fixed-packet drain cadences
 - item 30 is complete after protected local-producer activation, durable collector acceptance-ledger deployment, configured-inactive writer installation, first-live ClickHouse provenance, exact replay and divergent conflict isolation, 186 local/exact-stage tests, active-state verification, timer-only activation, and natural collector acceptance/ingestion
+- item 33 adds a backward-compatible Device projection to new result files while preserving exact legacy ready/delivered bytes; the current suite passes 192 tests and all production schedules retain zero restarts
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -69,7 +70,7 @@ The three rediscovered live custom applications and deliberate post-rediscovery 
 - `incident-engine.py` — deterministic incident identity, evidence, lifecycle, repeat, and rolling-context engine
 - `build-reasoning-packets.py` — deterministic wake selection and bounded append-only packet construction; no inference
 - `run-local-reasoning.py` — exact model/prompt/run binding and strict loopback structured inference; installed but not scheduled
-- `build-result-outbox.py` — installed read-only versioned successful-result projection to one canonical local JSONL file per run
+- `build-result-outbox.py` — installed read-only versioned successful-result projection to one canonical local JSONL file per run, including deterministic Device identity for new files and exact legacy-byte reuse
 - `run-result-outbox.py` — installed exact-hash managed producer runner with no transport capability
 - `send-result-outbox.py` — deterministic single-file write-only transport core; synthetic tests inject transport, while separately gated production uses a dedicated writer identity
 - `run-result-sender.py` — installed exact-hash managed sender runner behind its independently disableable active timer

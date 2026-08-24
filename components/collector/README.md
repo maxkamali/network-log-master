@@ -205,7 +205,7 @@ The runtime installer reconstructs the captured functional collector state, incl
 - loopback-only first-run Grafana administrator bootstrap
 - Grafana HTTPS configuration
 - certificate issuance/reuse and renewal integration
-- the five captured Grafana dashboards, including `AI Incident Analysis`
+- the six captured Grafana dashboards, including original and enhanced AI incident views
 - final guarded service activation
 
 The runtime installer intentionally refuses a machine where the `observability` ClickHouse database already exists.
@@ -319,7 +319,7 @@ The captured contract includes the required service accounts, grants, Grafana re
 - ClickHouse datasource provisioning template
 - HTTPS systemd override template
 - ClickHouse plugin manifest
-- five captured Grafana 13 dashboards
+- six captured Grafana 13 dashboards
 - API-based dashboard restore/verification tooling
 - a redacted live-query verifier for every `AI Incident Analysis` panel
 
@@ -332,7 +332,7 @@ The following scripts are published and were tested non-destructively against Gr
 - `grafana/scripts/verify-dashboards.py`
 - `grafana/scripts/verify-ai-dashboard-queries.py`
 
-Proven behavior includes exact captured-`spec` round trip, POST create, PUT replace, `dryRun=All` validation without persistence, and successful execution of all seven AI dashboard queries through Grafana's configured ClickHouse datasource.
+Proven behavior includes exact captured-`spec` round trip, POST create, PUT replace, `dryRun=All` validation without persistence, and successful execution of the original seven plus enhanced eight AI dashboard queries through Grafana's configured ClickHouse datasource.
 
 Grafana 13.1.1 also supports secure administrator reset through `/usr/share/grafana/bin/grafana cli admin reset-admin-password --password-from-stdin`.
 

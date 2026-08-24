@@ -12102,3 +12102,51 @@ This guarantees no blank Device cell while preserving the distinction between re
 ### Next action
 
 Pass the focused/full/public gates, publish the explicit-legacy presentation correction, update only the enhanced resource, require all six resources and fifteen queries to pass, prove 146 displayed rows resolve either an authoritative Device or the single explicit legacy label, remove every private stage, reconcile operator/runbook/current-state documentation, and publish closure.
+
+## 2026-08-24 16:55 PDT - Item 33 complete; enhanced AI dashboard and Device identity closed
+
+### Status
+
+Item 33 is `DONE`. There is no remaining numbered `NEXT` item.
+
+Explicit-legacy presentation checkpoint `b505d03802c837b4c5f09ccd58fe070c9bcd0fea` was published and independently matched GitHub `main` before final documentation reconciliation. Only the distinct `AI Incident Analysis - Enhanced` resource changed during the final presentation pass. The original `AI Incident Analysis` resource remained byte-exact with SHA-256 `794719f7cf112babb37c716df16959e631b0f63b81bbe9e503d243ffb36b83e5`.
+
+Final production verification passed:
+
+```text
+grafana_resources_exact=6
+grafana_queries_passed=15
+original_detail_rows=146
+enhanced_latest_rows=73
+enhanced_detail_rows=146
+displayed_rows=146
+authoritative_device_rows=145
+explicitly_unavailable_legacy_rows=1
+blank_device_cells=0
+```
+
+The enhanced copy now provides summary panels, one deterministic latest assessment per incident, complete assessment history, relative time, filterable/paginated medium-row tables, frozen Time/Device columns, wrapped text, severity/disposition color treatment, and tag pills. Both event tables expose Device. Current results carry it directly; exact immutable legacy version-1 files remain accepted and may use the private 12-month run-to-device lookup. The one historical collector row absent from both the current GX10 append-only result database and its immutable payload is labeled `unavailable - legacy record` rather than guessed.
+
+The collector gate, additive ClickHouse schema, clean-install contract, grants, runtime verifier, GX10 producer/sender, dashboard verifier, and query verifier are reconciled. Existing ready/delivered result bytes, filenames, replay identities, provenance, deterministic incident state, and model/prompt behavior were not rewritten or changed. Protected root-only rollback copies remain on their respective hosts; every temporary private transfer/stage was removed after exact verification.
+
+Final validation:
+
+```text
+gx10_tests=192
+collector_tests=50
+public_validator_tests=9
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+collector_installer_syntax=PASS
+PUBLIC_REPOSITORY_CURRENT_TREE=PASS
+PUBLIC_REPOSITORY_HISTORY=PASS
+PUBLIC_REPOSITORY_LINKS=PASS
+PUBLIC_REPOSITORY_REF_TOPOLOGY=PASS
+PUBLIC_REPOSITORY_VALIDATION=PASS
+diff_check=PASS
+```
+
+Vector, ClickHouse, Grafana, the collector result gate, the GX10 pipeline/correlation/reasoning/outbox/sender schedules, and the local model service were active and healthy at closure. Relevant service restart counts remained zero. Public documentation now describes the six-dashboard, fifteen-query contract, the enhanced presentation, direct Device projection, private legacy lookup, explicit unavailable-history behavior, and clean-machine reconstruction boundary without publishing private identities or credentials.
+
+### Next action
+
+None. Normal operation and operator evaluation of the enhanced dashboard continue; the original dashboard remains the immediate rollback/fallback presentation.

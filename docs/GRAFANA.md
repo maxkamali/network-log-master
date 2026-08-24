@@ -23,7 +23,7 @@ The collector rebuild artifacts preserve the current datasource names, UIDs, pro
 
 ## Grafana 13 dashboard resource contract
 
-The current five dashboards are captured as native Grafana 13 unified-resource API documents using:
+The current six dashboards are captured as native Grafana 13 unified-resource API documents using:
 
 `dashboard.grafana.app/v2`
 
@@ -148,7 +148,7 @@ Raw logs remain available through drilldowns when investigation requires them.
 
 ## AI presentation
 
-The live `AI Incident Analysis` dashboard presents the stabilized item-30 result contract from `observability.ai_updates`. It is a separate editable dashboard so exploratory work does not crowd or destabilize the primary NOC view.
+The live `AI Incident Analysis` dashboard presents the stabilized item-30 result contract from `observability.ai_updates`. The separate editable `AI Incident Analysis - Enhanced` copy preserves that original as an immediate fallback while adding a more operational event presentation.
 
 Its default seven-day, one-minute-refresh view contains:
 
@@ -159,7 +159,14 @@ Its default seven-day, one-minute-refresh view contains:
 - severity and status distributions
 - a newest-first 200-row detail table with timestamp, severity, status, title, explanation, occurrence count, tags, model, incident ID, and run ID
 
-Every query is a bounded `SELECT` through the existing read-only datasource, applies the Grafana time range, and avoids exposing the complete `raw_json` provenance object in the dashboard. The permanent redacted verifier executes all seven panels through Grafana's datasource API and reports only frame/row counts.
+The enhanced copy retains those summaries and adds two medium-row, paginated, filterable tables with frozen Time/Device columns, relative time, severity/disposition color badges, wrapped text, and tag pills:
+
+- one deterministic latest assessment per incident
+- complete newest-first assessment history
+
+Current GX10 results project Device directly. Immutable legacy version-1 files remain byte-valid; their devices resolve through the private `ai_result_devices` lookup. One unmatched historical collector row is displayed explicitly as `unavailable - legacy record` rather than guessed or left blank.
+
+Every query is a bounded `SELECT` through the existing read-only datasource, applies the Grafana time range, and avoids exposing the complete `raw_json` provenance object in the dashboard. The permanent redacted verifier executes the original seven plus enhanced eight panels through Grafana's datasource API and reports only frame/row counts.
 
 The governing pattern remains:
 
@@ -171,6 +178,8 @@ The governing pattern remains:
 Grafana must not become the incident state database or a substitute for deterministic correlation.
 
 Item-32 production validation passed create-only `dryRun=All`, exact live resource reread, unchanged exact verification of the four preexisting dashboards, and all seven live datasource queries. No existing dashboard was replaced.
+
+Item-33 production validation passed distinct create/dry-run, exact six-resource reread, all fifteen live datasource queries, backward-compatible GX10/collector Device projection, private legacy mapping, and unchanged exact verification of the original dashboard. Only the distinct enhanced resource was replaced during refinement.
 
 ## Change discipline
 

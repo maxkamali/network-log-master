@@ -162,6 +162,7 @@ AI result records are intentionally thin. Representative fields:
 timestamp
 incident_id
 run_id
+device
 model
 type
 status
@@ -184,12 +185,14 @@ Current boundary status:
 - maximum file size is 256 KiB
 - maximum record count is 100
 - `timestamp`, `title`, and `body` are required and validated
+- new producer records require a nonempty bounded `device`; exact legacy device-less version-1 files remain accepted without rewrite
 - accepted files move to the ready area; invalid files move to quarantine with a reason
 - Vector ingests ready records into the ClickHouse `ai_updates` table
 - no historical GX10 producer for this contract was discovered
 - the reconstructed item-30 version-1 local producer maps one successful append-only reasoning result to one canonical single-record JSONL file while retaining the full result and versioned provenance
 - the dedicated recurring GX10 sender uses an independent write-only identity; exact replay and same-name divergent content are quarantined distinctly through the collector's immutable acceptance ledger
 - accepted results are inserted into ClickHouse exactly once and are available through the live `AI Incident Analysis` Grafana dashboard
+- the enhanced dashboard prefers direct `ai_updates.device`, falls back to the private run-to-device lookup for immutable legacy records, and labels the single unrecoverable historical row explicitly rather than guessing
 
 The complete producer, transport, validation, replay-protection, ClickHouse-ingestion, and Grafana-presentation path is active. Historical rediscovery still correctly records that no predecessor GX10 producer was found; the current path is explicitly reconstructed behavior.
 

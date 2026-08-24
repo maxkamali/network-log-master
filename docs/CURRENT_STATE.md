@@ -26,7 +26,7 @@ Post-closure AI-results Grafana dashboard feature: `DONE` under item 32.
 
 Post-closure local-model comparison: `DONE`. Two identical 13-case synthetic passes retained exact `gemma4:latest`; `nemotron-3.5-lightning:30b` was faster after warm-up but had material strict-contract and noncritical-severity regressions. No production model or runtime state changed.
 
-Post-closure enhanced AI dashboard copy: `IN PROGRESS` under item 33. The distinct sixth live resource and all fifteen original/enhanced queries passed, while the original `AI Incident Analysis` capture remained byte-exact. Operator review then identified that the AI-result contract had never projected authoritative device identity into ClickHouse. Item 33 remains open until the backward-compatible Device projection, private historical backfill, enhanced table columns, and end-to-end production verification pass.
+Post-closure enhanced AI dashboard copy: `DONE` under item 33. The distinct sixth live resource and all fifteen original/enhanced queries pass while the original `AI Incident Analysis` capture remains byte-exact. Device is projected directly for current results, private lookup restores 145 legacy identities, and one unmatched historical collector row is explicitly labeled unavailable rather than guessed.
 
 The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
@@ -109,7 +109,7 @@ The collector checkpoint includes captured and public-safe rebuild artifacts for
 - AI-result validation gate
 - GX10 spool-retention behavior
 - independent collector runtime verification
-- five Grafana 13 dashboard resources, including the live `AI Incident Analysis` dashboard
+- six Grafana 13 dashboard resources, including original and enhanced AI incident dashboards
 - Grafana dashboard restore and verification scripts
 
 Important completed collector validation includes:
@@ -152,7 +152,7 @@ Detailed component state is in `components/collector/REBUILD_STATUS.md`.
 
 Status: `DONE` for capture, restore mechanism, and clean-machine runtime-installer integration; clean-machine end-to-end execution remains a later collector validation gate.
 
-Five current dashboards are captured as Grafana 13 `dashboard.grafana.app/v2` resources.
+Six current dashboards are captured as Grafana 13 `dashboard.grafana.app/v2` resources.
 
 The supported API behavior was proven against Grafana 13.1.1:
 
@@ -178,7 +178,7 @@ Completed validation:
 - `GRAFANA_DASHBOARD_LIVE_NONDESTRUCTIVE_TEST=PASS`
 - `GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
 
-The clean-machine runtime installer restores the five captured dashboards after HTTPS health and datasource verification, runs the independent dashboard verifier, and executes the seven AI-dashboard queries through Grafana's configured read-only ClickHouse datasource. Automatic replacement is intentionally not enabled; an unexpected existing divergent dashboard causes the installer to fail rather than overwrite it.
+The clean-machine runtime installer restores the six captured dashboards after HTTPS health and datasource verification, runs the independent dashboard verifier, and executes all fifteen original/enhanced AI queries through Grafana's configured read-only ClickHouse datasource. Automatic replacement is intentionally not enabled; an unexpected existing divergent dashboard causes the installer to fail rather than overwrite it.
 
 ## Grafana administrator bootstrap
 
@@ -309,7 +309,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, rebuild packages/runbooks, production normalizer/handoff, deterministic incident/reasoning boundaries, managed reasoning, local result production, and recurring write-only result return are active. Item 30's first-live, exact-replay, divergent-conflict, exact-stage, active-schedule, natural acceptance, and ClickHouse provenance gates pass. Item 31's final closure audit passes. Item 32 added only the separately captured `AI Incident Analysis` presentation resource; it did not alter the result producer, transport, collector gate, acceptance ledger, ClickHouse schema/data, datasource identities, or any preexisting dashboard.
+The environment transition, rebuild packages/runbooks, production normalizer/handoff, deterministic incident/reasoning boundaries, managed reasoning, local result production, and recurring write-only result return are active. Item 30's first-live, exact-replay, divergent-conflict, exact-stage, active-schedule, natural acceptance, and ClickHouse provenance gates pass. Item 31's final closure audit passes. Item 32 added the separately captured original AI presentation resource. Item 33 added only its distinct enhanced copy plus the backward-compatible Device projection/legacy lookup; deterministic incident authority, model/prompt behavior, existing result bytes, replay identities, and the original dashboard remain unchanged.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -347,9 +347,9 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 30. `DONE` — completed the separately gated GX10 result-return boundary: durable collector replay ledger and cross-owner publication; 186 local/exact-GX10-staged tests; configured-inactive private writer boundary; first live manual transport; exact ClickHouse raw/provenance proof; distinct exact-replay and same-name conflict isolation; explicit active-state verification; recurring timer activation; three natural deliveries; first natural collector acceptance and exact one-row ClickHouse ingestion; zero sender restarts and healthy zero-lag preexisting schedules.
 31. `DONE` — completed the final production/repository closure audit: exact active conservation at 10 delivered = eight durably accepted + two settling; all eight accepted results have exactly one byte/size/projection/provenance-equivalent ClickHouse row; exact-replay/conflict quarantine evidence remains one pair each; both hosts pass full active health with zero deterministic lag and zero sender restarts; 186 GX10, 30 collector, 14 shadow-package, 11 gate-package, 94 normalizer, and nine repository-validator tests pass; current-tree/history/link/ref sanitation and GitHub checkpoint parity pass; stale current-status documentation was reconciled without deleting rollback or evidence.
 32. `DONE` — built and published a new non-replacing `AI Incident Analysis` dashboard for `observability.ai_updates`; passed five-resource create-only dry-run, exact live resource verification, unchanged exact verification of all four preexisting dashboards, seven-for-seven live datasource queries with data, 38 Python-3.13 collector tests, clean-machine installer integration, documentation reconciliation, and unchanged Grafana/data-path health.
-33. `NEXT` — publish and independently verify the backward-compatible Device-projection checkpoint; protect and upgrade only the GX10 outbox producer/sender, collector result gate/ClickHouse projection, and distinct enhanced dashboard; privately backfill every existing run-to-device mapping; then prove all six resources exact, all fifteen AI queries successful, every AI row has a device, legacy device-less outbox files remain valid, schedules/services are healthy, documentation is reconciled, and the original dashboard remains byte-exact.
+33. `DONE` — created the distinct enhanced dashboard; implemented backward-compatible Device projection with exact legacy-byte reuse; privately restored 145 run-to-device identities; explicitly labeled one unmatched historical row unavailable; passed six-resource exact verification, all fifteen queries, 192 GX10 and 50 collector tests, public-safety gates, active zero-restart schedules/services, private-stage cleanup, and original-dashboard byte-exact proof.
 
-The end-to-end target remains complete. Item 33 is the single `NEXT`. The operator-requested Device column requires a bounded backward-compatible result-projection extension, but does not alter deterministic incident authority, model behavior, existing result bytes, replay identity, or the original dashboard.
+There is no remaining `NEXT` item. The end-to-end target remains complete. Item 33 does not alter deterministic incident authority, model behavior, existing result bytes, replay identity, or the original dashboard.
 
 ## Scope constraints
 

@@ -49,6 +49,7 @@ Representative schema:
 timestamp        DateTime64(3, 'UTC')
 incident_id      String
 run_id           String
+device           String
 model            LowCardinality(String)
 type             LowCardinality(String)
 status           LowCardinality(String)
@@ -63,6 +64,8 @@ raw_json         String
 ```
 
 This table contains accepted AI result records only. Malformed files are rejected before this ingestion boundary.
+
+`observability.ai_result_devices` is a small 12-month private lookup keyed by `run_id`. It supplies device identity only for immutable legacy result files that predate the direct `device` projection. Grafana has read-only access; Vector does not write this table. Current result files carry `device` directly.
 
 ## Grafana semantic view
 

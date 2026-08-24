@@ -20,7 +20,7 @@ ENGINE = MergeTree
 PARTITION BY toYYYYMM(timestamp)
 ORDER BY (timestamp, incident_id)
 TTL timestamp + toIntervalMonth(12)
-SETTINGS index_granularity = 8192
+SETTINGS index_granularity = 8192;
 
 CREATE TABLE observability.ai_result_devices
 (
@@ -31,4 +31,4 @@ CREATE TABLE observability.ai_result_devices
 ENGINE = MergeTree
 ORDER BY run_id
 TTL mapped_at + toIntervalMonth(12)
-SETTINGS index_granularity = 8192
+SETTINGS index_granularity = 8192;

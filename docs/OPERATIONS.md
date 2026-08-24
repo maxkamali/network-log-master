@@ -135,7 +135,7 @@ Current validation policy includes:
 
 Validated records are then ingested into ClickHouse and become available to Grafana.
 
-No historical GX10 application producer for this boundary was discovered. The reconstructed item-30 producer, outbox, dedicated write-only sender, collector validation/replay ledger, and ClickHouse ingestion path are active after protected first-live, exact-replay, divergent-conflict, natural recurring-delivery, and final conservation/provenance gates. The live `AI Incident Analysis` dashboard reads the accepted records through the existing read-only Grafana datasource. See `docs/RESULT_OUTBOX.md`, `docs/RESULT_TRANSPORT.md`, and `docs/GRAFANA.md`.
+No historical GX10 application producer for this boundary was discovered. The reconstructed item-30 producer, outbox, dedicated write-only sender, collector validation/replay ledger, and ClickHouse ingestion path are active after protected first-live, exact-replay, divergent-conflict, natural recurring-delivery, and final conservation/provenance gates. The live original and enhanced AI incident dashboards read accepted records through the existing read-only Grafana datasource. New results project Device directly; immutable legacy records use the private run-to-device lookup where available. See `docs/RESULT_OUTBOX.md`, `docs/RESULT_TRANSPORT.md`, and `docs/GRAFANA.md`.
 
 ## Grafana operational boundary
 
@@ -143,7 +143,7 @@ Grafana is served over HTTPS by the collector and reads ClickHouse through captu
 
 Current dashboard reconstruction uses the supported Grafana 13 `dashboard.grafana.app/v2` API. Rebuild tooling must not write directly into Grafana's SQLite database.
 
-The clean-machine runtime installer restores the five captured dashboard resources only after HTTPS health and both ClickHouse datasources are verified, then runs the independent dashboard verifier and the redacted seven-panel AI query verifier. Runtime restore is fail-closed for unexpected divergent existing dashboards: automatic replacement is not enabled.
+The clean-machine runtime installer restores the six captured dashboard resources only after HTTPS health and both ClickHouse datasources are verified, then runs the independent dashboard verifier and the redacted fifteen-query original/enhanced AI verifier. Runtime restore is fail-closed for unexpected divergent existing dashboards: automatic replacement is not enabled.
 
 The clean-machine Grafana bootstrap sequence is wired so that first startup is loopback-only on `127.0.0.1:3000`, administrator credentials come from an operator-owned private file, the reset runs through `--password-from-stdin`, and the temporary bootstrap override is removed before normal HTTPS exposure. Failure cleanup also removes the temporary override.
 

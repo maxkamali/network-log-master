@@ -11016,3 +11016,39 @@ No private connection value, backup path, result/packet/event/entity content, cr
 ### Next action
 
 Run the full public gate, publish this live-ledger checkpoint, and independently verify GitHub. Then build the deterministic GX10 sender only in repository/protected-copy state. Require exact-byte/name preservation, pinned host verification, bounded noninteractive SFTP, explicit transport-success acknowledgment, atomic local ready-to-delivered transition under the shared outbox lock, safe interruption/retry, and no credential/transmission during the repository/copy gates.
+
+## 2026-08-24 05:10 PDT - Item 30 deterministic sender core passed repository/copy gates
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The live collector acceptance-ledger checkpoint was published and independently matched on GitHub at:
+
+`311dcf9d70e46c11058bf3b388c22e28c395118e` — `Activate durable collector acceptance ledger`
+
+The repository now contains a deterministic result sender core. Under the same nonblocking lock as the no-network producer, it validates every ready/delivered file, canonical one-record JSON, exact top-level producer contract, run-derived filename, service ownership/group/mode/link state, private identity/known-host metadata, directory layout, and SFTP executable boundary before work. It selects at most one oldest embedded result timestamp per cycle with filename tie-breaking.
+
+The fixed SFTP vector is noninteractive and shell-free: batch mode, identities-only, password/keyboard-interactive refusal, strict supplied known-host verification, disabled global known-host fallback, one connection attempt, bounded connect/keepalive/total timeout, captured output, unchanged local path, and unchanged deterministic remote basename. Failure messages do not propagate subprocess output or endpoint values.
+
+Only a successful transport return permits a revalidation and same-filesystem atomic ready-to-delivered rename under the shared lock, followed by both directory synchronizations and exact postvalidation. Nonzero transport leaves ready unchanged. An injected interruption immediately after transport success left the file ready; the next cycle produced the exact same upload batch and completed delivery, directly exercising the crash window now protected by the collector ledger.
+
+Eleven focused tests pass locally and from exact bytes staged in temporary storage on GX10. All transport calls were injected test doubles; no SFTP process contacted the collector. The full GX10 suite now passes 170 tests plus the filesystem contract. The collector gate suite, public repository sanitation, and diff checks also pass.
+
+```text
+local_gx10_tests=170
+local_result_sender_tests=11
+gx10_staged_result_sender_tests=11
+sender_sha256=ff5c08ba1f3ec15017ea26b101f7ed58e901ac937d3d9164e4185dc096a25bc0
+sender_tests_sha256=9fc0fc87a6c3c6c501341e68e54b14414de4bb440e2fc8ff4254da2a7ec392e9
+sender_archive_sha256=4833ad1cceba0a23a1fd8742408bc72eaf007f6c0597b367a927f5642e87710c
+sender_installed=no
+writer_credential_installed=no
+collector_result_transmission_invoked=no
+GX10_RESULT_SENDER_CORE_VALIDATION=PASS
+GX10_RESULT_SENDER_CORE_STAGED_VALIDATION=PASS
+```
+
+No private connection value, result/packet/event/entity content, credential, key material, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish this sender-core checkpoint, and independently verify GitHub. Then add the exact-hash managed runner, hardened but inactive network-capable service/timer, strict private-configuration contract, nonactivating installer, independent verifier, and failure cleanup. Rehearse them only against protected copies/injected transport before installing any live sender artifact or credential.

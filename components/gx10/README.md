@@ -30,7 +30,7 @@ Current state:
 - the original automatic chain remains `timer -> fetch -> ingest`; the correlation chain is independently scheduled and disableable
 - Ollama is active with six complete model manifests, but no application-specific observability-pipeline caller was discovered
 - secure collector-side AI-result return transport is proven; no historical GX10 result producer was discovered
-- production packet construction and bounded local-LLM inference are active behind the separately disableable item-29 gate; the item-30 versioned result-outbox candidate is repository/copy-only and has no installed schedule, writer credential, or collector transmission
+- production packet construction and bounded local-LLM inference are active behind the separately disableable item-29 gate; the item-30 no-network result outbox is active, while the sender core is repository/copy-only with no installed schedule, writer credential, or collector transmission
 - the deterministic wake-policy/compact-packet schema and exact builder are active only through the managed reasoning boundary
 - the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; the original exact artifacts were installed empty under protected backup before item-29 activation
 - item 29 is complete after backlog deferral, one safely diagnosed terminal invalid output, exact portable prompt revision `r3`, protected-copy replay, four-artifact upgrade, protected resume, and three natural fixed-packet drain cadences
@@ -69,8 +69,9 @@ The three rediscovered live custom applications and deliberate post-rediscovery 
 - `incident-engine.py` — deterministic incident identity, evidence, lifecycle, repeat, and rolling-context engine
 - `build-reasoning-packets.py` — deterministic wake selection and bounded append-only packet construction; no inference
 - `run-local-reasoning.py` — exact model/prompt/run binding and strict loopback structured inference; installed but not scheduled
-- `build-result-outbox.py` — read-only, versioned successful-result projection to one canonical local JSONL file per run; repository/copy-only and not installed
-- `run-result-outbox.py` — exact-hash managed producer runner with no transport capability; package-rehearsed and not installed
+- `build-result-outbox.py` — installed read-only versioned successful-result projection to one canonical local JSONL file per run
+- `run-result-outbox.py` — installed exact-hash managed producer runner with no transport capability
+- `send-result-outbox.py` — repository/copy-only deterministic single-file write-only transport core; all tests inject transport and no credential is installed
 - `run-managed-reasoning.py` — exact-hash packet/inference wrapper with one-inference-per-cycle locking, pending-backlog builder deferral, and aggregate health; exact portable revision `r3` is active after protected upgrade/resume and three natural cadences
 
 `sbin/runtime_config.py` loads the protected runtime configuration rendered by `install/render-runtime-config.py`. See `sbin/PROVENANCE.md` for live hashes and the function-level parity proof.
@@ -128,7 +129,7 @@ The large model blobs are intentionally not stored in Git. `install/install-mode
 
 The item-28 application-specific caller and supporting schema/configuration/prompt artifacts were installed empty and unscheduled under protected backup. Item 29 later invoked the boundary through its separately managed schedule; deterministic schedules remain independent of Ollama.
 
-The item-29 service/timer/private binding and exact `r3` bytes are installed and active after three natural-cadence gates. The original invalid-output run remains immutable evidence. Item 30's no-network local outbox is active after 159 tests, protected-copy/package/install/failure-resume gates, exact reasoning-digest preservation, and 15-for-15 collector-compatible ready files. No result-writer credential, sender, delivered state, or collector transmission exists. See `docs/MANAGED_REASONING.md` and `docs/RESULT_OUTBOX.md`.
+The item-29 service/timer/private binding and exact `r3` bytes are installed and active after three natural-cadence gates. The original invalid-output run remains immutable evidence. Item 30's no-network local outbox is active after protected-copy/package/install/failure-resume gates, exact reasoning-digest preservation, and natural one-file catch-up to 16 last-verified collector-compatible ready files. The sender core passes 11 local and 11 exact GX10-staged injected-transport tests but is not installed. No result-writer credential, delivered state, or collector transmission exists. See `docs/MANAGED_REASONING.md`, `docs/RESULT_OUTBOX.md`, and `docs/RESULT_TRANSPORT.md`.
 
 ## Guarded activation and runtime verification
 

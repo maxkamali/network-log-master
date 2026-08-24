@@ -534,3 +534,29 @@ Consequence:
 - the ledger remains authoritative after a ready file is removed, so deterministic sender replay cannot create a second ClickHouse ingestion
 - the sender may move a local ready file to delivered after successful transport completion; collector acceptance/rejection remains independently observable
 - installation and production sender transmission remain separate gates
+
+## ADR-027 - Result sending is single-file, exact-byte, and transport-acknowledged
+
+**Status:** Accepted; repository and exact GX10-staged core gates complete
+
+The GX10 sender transmits at most one oldest ready result per cycle under the same lock used by the no-network producer. It uploads the existing canonical file under its unchanged deterministic basename and moves it locally to delivered only after the bounded SFTP process returns success.
+
+Why:
+
+- exact filename/content replay is the recovery unit protected by the collector acceptance ledger
+- generating a new remote identity or rewriting a record during retry would defeat collector replay suppression
+- one file per cadence bounds transport load and makes progress/failure observable
+- successful upload does not eliminate the interruption window before local acknowledgment
+- private result-writer identity and pinned host material must remain separately provisioned operator input
+
+Consequence:
+
+- the sender independently validates canonical one-record JSONL bytes, run-derived filename, metadata, ready/delivered inventories, and private-file metadata before transport
+- the oldest embedded result timestamp, then filename, provides deterministic starvation-resistant selection
+- SFTP is noninteractive, batch-only, identities-only, password/keyboard authentication disabled, strict known-host checking, connection-attempt/time bounded, and invoked without a shell
+- stderr/stdout and endpoint values are not propagated through application failure output
+- nonzero/timeout/launch failure preserves the ready file unchanged
+- interruption after successful transport but before local rename leaves the ready file for an identical retry; the collector ledger suppresses second acceptance
+- local ready-to-delivered rename is atomic within the shared outbox filesystem and both directories are durability-synchronized
+- delivered means transport completion, while collector acceptance, ingestion, and replay proof remain independent gates
+- the sender core is not installed and no credential or live transport is authorized by this decision alone

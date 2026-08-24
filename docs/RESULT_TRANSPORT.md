@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 remains in progress. The collector-side durable acceptance ledger passes 11 focused local tests, the same 11 tests from an exact temporary tree on the collector, guarded production installation, independent verification, and one natural empty no-op cadence. The exact predecessor is retained under a protected backup. No writer credential, sender, or result transmission is installed.
+Execution-order item 30 remains in progress. The collector-side durable acceptance ledger passes its repository/staged/live bootstrap gates and is active with exact predecessor rollback retained. The deterministic sender core passes 11 focused local tests and the same 11 tests from exact GX10-staged bytes. It is not installed; every transport in those tests was injected, and no writer credential or result transmission exists.
 
 ## Replay problem
 
@@ -55,6 +55,16 @@ The future sender must upload the already-validated local ready file under its u
 
 `delivered` means transport completion, not proven collector ingestion. Collector gate failures, rejected files, Vector ingestion, and ClickHouse row/provenance evidence remain independent end-to-end gates. The sender must retain bounded logs/metrics that expose retries and failures without result content.
 
+## Sender core
+
+The repository core independently validates the outbox root/ready/delivered layout, shared lock, every ready and delivered file, exact service ownership/group/modes/links, 256-KiB/one-line bounds, canonical JSON, exact top-level contract, versioned producer identity, run-derived filename, and timezone-aware timestamps before selecting work. It sends at most one file: the oldest embedded result timestamp, with filename as a stable tie-breaker.
+
+Its SFTP subprocess uses a fixed executable and argument vector without a shell. Batch mode, identities-only behavior, password and keyboard-interactive refusal, strict supplied known-host checking, disabled global known hosts, one connection attempt, bounded connection/keepalive behavior, and a total process timeout are mandatory. The upload batch preserves the exact local absolute path bytes and unchanged remote basename. Process output is captured and never included in sender error messages.
+
+Transport failure leaves ready unchanged. After transport success, the sender revalidates the source and atomically renames it into delivered under the shared producer/sender lock, then synchronizes both directories and postvalidates the exact bytes. An injected interruption after transport success left ready unchanged; the next cycle issued the exact same upload batch and then completed the local transition.
+
+Eleven local and eleven exact GX10-staged tests cover strict command construction, exact-byte/name movement, one-file bound, oldest-first ordering, no-op, transport failure isolation, post-transport interruption/retry, duplicate state, divergent content, private-file metadata, shared-lock contention, and delivered-state validation. All transports are injected test doubles; the core has never contacted the collector.
+
 ## Passed repository/copy gates
 
 The 11 focused tests prove:
@@ -77,8 +87,8 @@ After GitHub independently matched the published candidate, the guarded upgrader
 
 ## Remaining gates
 
-1. Build and test the deterministic GX10 sender without installing a credential or transmitting.
-2. Prove unchanged exact source bytes, remote deterministic basename, bounded retry/failure behavior, host-key pinning, transport-success acknowledgment, and interruption before local delivered transition on protected copies.
-3. Stage/install the sender inactive, then provision the write-only key separately.
+1. Add an exact-hash managed runner, hardened network-capable oneshot/timer, private-configuration contract, nonactivating installer, and independent staged verifier.
+2. Prove inactive install/failure cleanup and protected-copy success/failure/retry behavior without a populated production config, credential, or network call.
+3. Install the package inactive, then provision the write-only key/config separately and verify while still disabled.
 4. Transmit a bounded first file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
 5. Prove an exact replay creates no second ClickHouse row and a controlled malformed/divergent file remains isolated.

@@ -19,7 +19,7 @@ from dashboard_api import (
 )
 
 
-EXPECTED_DASHBOARD_COUNT = 4
+EXPECTED_DASHBOARD_COUNT = 5
 
 
 def require_matching_response(

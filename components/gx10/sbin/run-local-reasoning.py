@@ -22,32 +22,40 @@ except ModuleNotFoundError as exc:
 
 
 DB = load_runtime_config().database_path if load_runtime_config else None
-CONFIG_PATH = Path('/etc/network-log-gx10/reasoning-runtime-v1.json')
-PROMPT_PATH = Path('/etc/network-log-gx10/incident-assessment-v1.txt')
+CONFIG_PATH = Path('/etc/network-log-gx10/reasoning-runtime-v2.json')
+PROMPT_PATH = Path('/etc/network-log-gx10/incident-assessment-v2.txt')
 OUTPUT_SCHEMA_PATH = Path(
-    '/etc/network-log-gx10/incident-assessment-output-v1.json'
+    '/etc/network-log-gx10/incident-assessment-output-v2.json'
 )
 OLLAMA_ENDPOINT = 'http://127.0.0.1:11434/api/chat'
-PROMPT_SHA256 = '8c1fc9ab16bf819ad7884a7c45f65468e0091f7251dba1f285ab4c0859b78262'
+PROMPT_SHA256 = 'c24a1e4a5af021ea66475cdb77c792b19f023caf93f344f64be4dedf1ebb634c'
 OUTPUT_SCHEMA_SHA256 = (
-    'b712ad9d76bdc39a023f04cdd9c680703964ae3feab3cddfb09b152a01cf9e06'
+    '1ec4e28d0d18320c7469d4f1bb26a5c766515ff008c5803d24ce214ded69928a'
 )
 MODEL_MANIFEST_SHA256 = (
-    '500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41'
+    'c6eb396dbd5992bbe3f5cdb947e8bbc0ee413d7c17e2beaae69f5d569cf982eb'
 )
 MODEL_CONFIG_DIGEST = (
-    'sha256:05a61d37b08453e59290add468e3bb2f688e23a01e967fecb0e2fa41218cea76'
+    'sha256:f0988ff50a2458c598ff6b1b87b94d0f5c44d73061c2795391878b00b2285e11'
 )
-MODEL_REFERENCE = 'qwen3:8b'
-MODEL_VERSION = 'ollama-qwen3-8b-500a1f06-v1'
-PROMPT_VERSION = 'incident-assessment-v1'
-VERSION_CREATED_AT = '2026-08-24T08:20:00+00:00'
-OUTPUT_SCHEMA_VERSION = 1
+MODEL_REFERENCE = 'gemma4:latest'
+MODEL_VERSION = 'ollama-gemma4-c6eb396d-v1'
+PROMPT_VERSION = 'incident-assessment-v2'
+VERSION_CREATED_AT = '2026-08-24T08:41:00+00:00'
+OUTPUT_SCHEMA_VERSION = 2
 MAX_ARTIFACT_BYTES = 64 * 1024
 MAX_RESPONSE_BYTES = 128 * 1024
 MAX_RESULT_BYTES = 16 * 1024
 REQUEST_TIMEOUT_SECONDS = 120
 TAG_RE = re.compile(r'^[a-z0-9][a-z0-9._-]*$')
+CHANGE_ACTION_RE = re.compile(
+    r'\b(?:restart|reload|reset|clear|change|configure|disable|enable|bounce|reseat)\b',
+    re.IGNORECASE,
+)
+READ_ONLY_ACTION_RE = re.compile(
+    r'^(?:check|verify|review|inspect|monitor|show|confirm|query|compare|collect|examine)\b',
+    re.IGNORECASE,
+)
 TERMINAL_FAILURES = {
     'INFERENCE_UNAVAILABLE': 'inference_unavailable',
     'INFERENCE_TIMEOUT': 'inference_timeout',
@@ -223,7 +231,7 @@ def load_runtime_artifacts(config_path, prompt_path, output_schema_path):
     if set(config) != EXPECTED_CONFIG_KEYS:
         raise ReasoningError('reasoning runtime configuration keys differ')
     if (
-        config['config_version'] != 1
+        config['config_version'] != 2
         or config['provider'] != 'ollama'
         or config['model_reference'] != MODEL_REFERENCE
         or config['model_version'] != MODEL_VERSION
@@ -356,6 +364,7 @@ def register_versions(connection, config):
 
 def validate_existing_state(connection):
     packet_incidents = {}
+    packet_values = {}
     for row in connection.execute(
         'SELECT packet_id, incident_id, packet_json, packet_sha256 '
         'FROM reasoning_packets ORDER BY packet_id'
@@ -369,6 +378,7 @@ def validate_existing_state(connection):
         ):
             raise ReasoningError('stored reasoning packet differs')
         packet_incidents[row['packet_id']] = row['incident_id']
+        packet_values[row['packet_id']] = packet
 
     results = {
         row['run_id']: row
@@ -406,6 +416,12 @@ def validate_existing_state(connection):
     }
     for run_id, row in results.items():
         result = parse_canonical_object(row['result_json'], 'reasoning result')
+        validated_result = validate_output(
+            result,
+            row['packet_id'],
+            row['incident_id'],
+            packet_values.get(row['packet_id'], {}),
+        )
         if (
             run_id not in run_ids
             or sha256_text(row['result_json']) != row['result_sha256']
@@ -418,13 +434,39 @@ def validate_existing_state(connection):
             or result.get('confidence') != row['confidence']
             or result.get('title') != row['title']
             or result.get('summary') != row['summary']
+            or validated_result != row['result_json']
         ):
             raise ReasoningError('stored reasoning result differs')
+
+
+def allowed_output_tags(packet):
+    candidates = set(packet.get('wake', {}).get('reasons', ()))
+    incident = packet.get('incident', {})
+    for key in (
+        'event_family',
+        'protocol',
+        'entity_type',
+        'severity',
+        'status',
+        'last_observation_state',
+    ):
+        candidates.add(incident.get(key))
+    for evidence in packet.get('evidence', ()):
+        if not isinstance(evidence, dict):
+            continue
+        for key in ('event_code', 'signal_type', 'observation_state'):
+            candidates.add(evidence.get(key))
+    return sorted(
+        value.casefold()
+        for value in candidates
+        if isinstance(value, str) and TAG_RE.fullmatch(value.casefold())
+    )
 
 
 def request_object(config, prompt, output_schema, packet, packet_sha256):
     user_payload = canonical_json(
         {
+            'allowed_tags': allowed_output_tags(packet),
             'packet': packet,
             'packet_sha256': packet_sha256,
         }
@@ -511,6 +553,7 @@ def reserve_next_run(connection, config, prompt, output_schema, started_at):
         'run_id': run_id,
         'packet_id': packet['packet_id'],
         'incident_id': packet['incident_id'],
+        'packet': packet_value,
         'request_json': request_json,
     }
 
@@ -626,7 +669,7 @@ def require_string(value, minimum, maximum, label, single_line=False):
         raise ReasoningError(f'invalid {label}')
 
 
-def validate_output(result, packet_id, incident_id):
+def validate_output(result, packet_id, incident_id, packet):
     try:
         if set(result) != EXPECTED_OUTPUT_KEYS:
             raise ReasoningError('invalid output keys')
@@ -640,8 +683,13 @@ def validate_output(result, packet_id, incident_id):
             raise ReasoningError('invalid output disposition')
         if result['severity'] not in SEVERITIES:
             raise ReasoningError('invalid output severity')
-        if type(result['confidence']) is not int or not 0 <= result['confidence'] <= 100:
+        if type(result['confidence']) is not int or not 0 <= result['confidence'] <= 95:
             raise ReasoningError('invalid output confidence')
+        if (
+            result['disposition'] == 'action_required'
+            and result['confidence'] < 50
+        ):
+            raise ReasoningError('action-required output confidence differs')
         require_string(result['title'], 1, 160, 'output title', single_line=True)
         require_string(result['summary'], 1, 4000, 'output summary')
         causes = result['likely_causes']
@@ -654,21 +702,40 @@ def validate_output(result, packet_id, incident_id):
                 raise ReasoningError('invalid output likely cause')
             require_string(cause['cause'], 1, 300, 'output cause')
             require_string(cause['basis'], 1, 500, 'output cause basis')
-            if type(cause['confidence']) is not int or not 0 <= cause['confidence'] <= 100:
+            if type(cause['confidence']) is not int or not 1 <= cause['confidence'] <= 95:
                 raise ReasoningError('invalid output cause confidence')
         actions = result['recommended_actions']
         if not isinstance(actions, list) or len(actions) > 5:
             raise ReasoningError('invalid output actions')
+        if result['disposition'] == 'action_required' and (
+            len(actions) < 2
+            or not isinstance(actions[0], dict)
+            or actions[0].get('risk') != 'read_only'
+        ):
+            raise ReasoningError('invalid action-required output actions')
         for action in actions:
             if not isinstance(action, dict) or set(action) != {
                 'action', 'priority', 'risk'
             }:
                 raise ReasoningError('invalid output action')
-            require_string(action['action'], 1, 500, 'output action text')
+            require_string(action['action'], 8, 500, 'output action text')
+            if action['action'].casefold() in ACTION_RISKS:
+                raise ReasoningError('invalid output action text')
             if type(action['priority']) is not int or not 1 <= action['priority'] <= 5:
                 raise ReasoningError('invalid output action priority')
             if action['risk'] not in ACTION_RISKS:
                 raise ReasoningError('invalid output action risk')
+            if (
+                CHANGE_ACTION_RE.search(action['action'])
+                and action['risk'] != 'change_requires_approval'
+            ):
+                raise ReasoningError('output change action lacks approval label')
+            if (
+                READ_ONLY_ACTION_RE.search(action['action'])
+                and not CHANGE_ACTION_RE.search(action['action'])
+                and action['risk'] != 'read_only'
+            ):
+                raise ReasoningError('output read-only action risk differs')
         tags = result['tags']
         if (
             not isinstance(tags, list)
@@ -682,6 +749,16 @@ def validate_output(result, packet_id, incident_id):
             )
         ):
             raise ReasoningError('invalid output tags')
+        if not set(tags) <= set(allowed_output_tags(packet)):
+            raise ReasoningError('output tags are not packet-derived')
+        reasons = packet.get('wake', {}).get('reasons')
+        if not isinstance(reasons, list):
+            raise ReasoningError('invalid packet wake reasons')
+        if 'critical_condition' in reasons:
+            if result['severity'] != 'critical':
+                raise ReasoningError('critical output severity differs')
+        elif result['severity'] == 'critical' or 'critical_condition' in tags:
+            raise ReasoningError('noncritical output severity differs')
         result_json = canonical_json(result)
         if len(result_json.encode('utf-8')) > MAX_RESULT_BYTES:
             raise ReasoningError('reasoning output is too large')
@@ -732,6 +809,7 @@ def finalize_success(database, reserved, result, diagnostics, completed_at):
         result,
         reserved['packet_id'],
         reserved['incident_id'],
+        reserved['packet'],
     )
     connection = sqlite3.connect(database)
     connection.row_factory = sqlite3.Row

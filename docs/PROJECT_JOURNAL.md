@@ -9282,3 +9282,68 @@ No working-system artifact/schema/state, production packet, Ollama API call, inf
 ### Next action
 
 Run the public gate, publish, and independently verify this guard. Then use only exact published artifacts for a synthetic loopback local-model quality/failure evaluation before any production-state-copy rehearsal.
+
+## 2026-08-24 01:54 PDT - Item 28 local-model calibration passed with strengthened output contract
+
+### Status
+
+Execution-order item 28 remains the single `NEXT` item and is in progress. No item-28 artifact or schema was installed on the working database and no production packet or production event content was used.
+
+The guarded migration candidate was published and independently matched on GitHub at:
+
+`63f9e0829220957ef4347cdd19d003ed83c1d55a` — `Guard local reasoning schema migration`
+
+### Calibration findings
+
+Only exact candidate artifacts and public-safe synthetic OSPF, interface, and BGP packets were staged in isolated user-owned temporary databases. Initial evaluation of the smallest captured model (`qwen3:8b`) proved the HTTP/JSON/schema path but failed quality gates: one response classified a deterministic critical wake as insufficient evidence, and stricter iterations emitted a meaningless risk-label-only action or a non-packet-derived critical tag.
+
+The caller safely recorded those cases as invalid output with no result row. Incident and packet truth remained unchanged. Validation was not relaxed.
+
+The version-2 prompt/caller contract now additionally enforces:
+
+- deterministic critical/noncritical severity alignment
+- action-required overall confidence from `50` through `95`
+- likely-cause confidence from `1` through `95`
+- two to five action-required steps with a meaningful read-only first action
+- approval-required labels for restart/reload/reset/clear/change/configure/disable/enable/bounce/reseat actions
+- packet-derived tag allowlisting supplied explicitly in each request
+- output schema version `2` with matching structural bounds
+
+The second-smallest captured candidate, exact `gemma4:latest`, then passed all three cases. The final isolated state contained three successful runs and three canonical results; a fourth invocation was an exact no-op.
+
+```text
+synthetic_packets=3
+successful_runs=3
+canonical_results=3
+critical_case_escalated=true
+first_actions_read_only=3
+post_success_noop=yes
+forbidden_result_content=0
+evaluation_state_sha256=0352fb31ff61890325d687a782c4f4324dd9203aa18e9828c0d60c56bfcaebbb
+ITEM28_SYNTHETIC_LOCAL_MODEL_EVAL=PASS
+```
+
+The selected model manifest was independently revalidated at SHA-256 `c6eb396dbd5992bbe3f5cdb947e8bbc0ee413d7c17e2beaae69f5d569cf982eb` while Ollama remained active and loopback-only.
+
+Corrected candidate SHA-256 values:
+
+- inference schema: `6365f99eb834c0561a1246757a4404bbbc7ec831fe910325eff8dcfd92113a90`
+- local-reasoning caller: `e9b894afa16fd5f138cfeec299be58328fd02454db2b53c3e395809e04d58cd0`
+- runtime version configuration: `e7bde8d878e71d8a1b11af01170ff332920aae1df1a65536b516abf5862428f0`
+- system prompt: `c24a1e4a5af021ea66475cdb77c792b19f023caf93f344f64be4dedf1ebb634c`
+- output schema: `1ec4e28d0d18320c7469d4f1bb26a5c766515ff008c5803d24ce214ded69928a`
+- migration guard: `16f75e1138308e4bfa5c5fc3cbdb0337e4bfe4b34dbb73ce062d40577f1a79e7`
+
+Validation:
+
+```text
+115 tests passed
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+```
+
+The original fetch/ingest and correlation timers stayed active. No production database, item-27 packet builder, item-28 table/artifact, scheduler, collector result, or Grafana state changed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this calibrated correction. Then use only that exact checkpoint for protected production-state-copy migration/success/failure/idempotency rehearsal before any unscheduled working-system installation.

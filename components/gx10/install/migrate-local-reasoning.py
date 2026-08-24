@@ -25,30 +25,30 @@ ARTIFACTS = (
     (
         'caller',
         GX10_DIR / 'sbin' / 'run-local-reasoning.py',
-        '9fa6a9ae51b8b1c9eeb2d908def6e09f6a7135526d49469ffefffda5e147bf38',
+        'e9b894afa16fd5f138cfeec299be58328fd02454db2b53c3e395809e04d58cd0',
         0o755,
     ),
     (
         'configuration',
-        GX10_DIR / 'config' / 'reasoning-runtime-v1.json',
-        '8d4846c6cd2dbde9ee8bc3a7b81d8e0a2f99185f84d476adadfeb273b4121d13',
+        GX10_DIR / 'config' / 'reasoning-runtime-v2.json',
+        'e7bde8d878e71d8a1b11af01170ff332920aae1df1a65536b516abf5862428f0',
         0o644,
     ),
     (
         'prompt',
-        GX10_DIR / 'prompts' / 'incident-assessment-v1.txt',
-        '8c1fc9ab16bf819ad7884a7c45f65468e0091f7251dba1f285ab4c0859b78262',
+        GX10_DIR / 'prompts' / 'incident-assessment-v2.txt',
+        'c24a1e4a5af021ea66475cdb77c792b19f023caf93f344f64be4dedf1ebb634c',
         0o644,
     ),
     (
         'output schema',
-        GX10_DIR / 'prompts' / 'incident-assessment-output-v1.json',
-        'b712ad9d76bdc39a023f04cdd9c680703964ae3feab3cddfb09b152a01cf9e06',
+        GX10_DIR / 'prompts' / 'incident-assessment-output-v2.json',
+        '1ec4e28d0d18320c7469d4f1bb26a5c766515ff008c5803d24ce214ded69928a',
         0o644,
     ),
 )
 INFERENCE_SCHEMA_SHA256 = (
-    '777ee4d63e1e8bcdfaaad973843d02145c45537eecd3b36e51e4a343b002ed61'
+    '6365f99eb834c0561a1246757a4404bbbc7ec831fe910325eff8dcfd92113a90'
 )
 TARGET_UID = 0
 TARGET_GID = 0

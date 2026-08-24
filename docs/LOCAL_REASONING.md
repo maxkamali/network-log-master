@@ -2,23 +2,23 @@
 
 ## Status
 
-Execution-order item 28 has a published repository candidate and a guarded existing-system migration candidate. The working GX10 system does not contain the item-28 inference schema, caller, prompt/configuration artifacts, run rows, or result rows. No production reasoning packet has been built and no model inference has been invoked by this project.
+Execution-order item 28 has a published initial repository/guard candidate and a validated calibration correction ready for publication. The working GX10 system does not contain the item-28 inference schema, caller, prompt/configuration artifacts, run rows, or result rows. No production reasoning packet has been built and no production-data inference has been invoked. Synthetic loopback inference ran only against isolated temporary databases.
 
 The candidate consumes only immutable item-27 packets. It cannot change incidents, evidence, transitions, packets, collector state, or Grafana state.
 
 ## Selected version set
 
-The initial bounded candidate uses the smallest model in the captured six-manifest local inventory:
+The calibrated candidate uses the second-smallest model in the captured six-manifest local inventory:
 
 - provider: `ollama`
-- model reference: `qwen3:8b`
-- model version: `ollama-qwen3-8b-500a1f06-v1`
-- model manifest SHA-256: `500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41`
-- model config digest: `sha256:05a61d37b08453e59290add468e3bb2f688e23a01e967fecb0e2fa41218cea76`
-- prompt version: `incident-assessment-v1`
-- output schema version: `1`
+- model reference: `gemma4:latest`
+- model version: `ollama-gemma4-c6eb396d-v1`
+- model manifest SHA-256: `c6eb396dbd5992bbe3f5cdb947e8bbc0ee413d7c17e2beaae69f5d569cf982eb`
+- model config digest: `sha256:f0988ff50a2458c598ff6b1b87b94d0f5c44d73061c2795391878b00b2285e11`
+- prompt version: `incident-assessment-v2`
+- output schema version: `2`
 
-The manifest was revalidated on the working system, with Ollama active/enabled and listening only on loopback. No inference was run. This is a resource-bounded starting selection, not yet an empirical quality claim; synthetic and protected-copy inference gates remain mandatory.
+The smallest captured model (`qwen3:8b`) passed structural output but failed calibration: one early result under-escalated a critical OSPF case, and stricter attempts safely rejected meaningless or non-packet-derived output. Validation was not weakened. The next bounded candidate, `gemma4:latest`, passed all three synthetic OSPF/interface/BGP cases with strict severity, confidence, action-risk, tag-provenance, canonical-result, and no-op gates. Its exact manifest and active loopback runtime were revalidated. Protected-copy inference remains mandatory before any production installation or invocation.
 
 Request options are versioned and deterministic: temperature `0`, seed `27`, context `8192`, and maximum prediction `1024` tokens. The caller sets `stream=false`, disables thinking output, and sends a JSON Schema response format.
 
@@ -26,19 +26,19 @@ Exact repository artifacts:
 
 - inference schema: `components/gx10/sql/inference-v1.sql`
 - caller: `components/gx10/sbin/run-local-reasoning.py`
-- runtime version configuration: `components/gx10/config/reasoning-runtime-v1.json`
-- system prompt: `components/gx10/prompts/incident-assessment-v1.txt`
-- output schema: `components/gx10/prompts/incident-assessment-output-v1.json`
+- runtime version configuration: `components/gx10/config/reasoning-runtime-v2.json`
+- system prompt: `components/gx10/prompts/incident-assessment-v2.txt`
+- output schema: `components/gx10/prompts/incident-assessment-output-v2.json`
 - migration guard: `components/gx10/install/migrate-local-reasoning.py`
 
 Candidate SHA-256 values:
 
-- inference schema: `777ee4d63e1e8bcdfaaad973843d02145c45537eecd3b36e51e4a343b002ed61`
-- caller: `9fa6a9ae51b8b1c9eeb2d908def6e09f6a7135526d49469ffefffda5e147bf38`
-- runtime configuration: `8d4846c6cd2dbde9ee8bc3a7b81d8e0a2f99185f84d476adadfeb273b4121d13`
-- system prompt: `8c1fc9ab16bf819ad7884a7c45f65468e0091f7251dba1f285ab4c0859b78262`
-- output schema: `b712ad9d76bdc39a023f04cdd9c680703964ae3feab3cddfb09b152a01cf9e06`
-- migration guard: `7a41de4f28a5d4e5060cbe2b8cdfb0a96e9cfe160d5e172550b960cdec44862c`
+- inference schema: `6365f99eb834c0561a1246757a4404bbbc7ec831fe910325eff8dcfd92113a90`
+- caller: `e9b894afa16fd5f138cfeec299be58328fd02454db2b53c3e395809e04d58cd0`
+- runtime configuration: `e7bde8d878e71d8a1b11af01170ff332920aae1df1a65536b516abf5862428f0`
+- system prompt: `c24a1e4a5af021ea66475cdb77c792b19f023caf93f344f64be4dedf1ebb634c`
+- output schema: `1ec4e28d0d18320c7469d4f1bb26a5c766515ff008c5803d24ce214ded69928a`
+- migration guard: `16f75e1138308e4bfa5c5fc3cbdb0337e4bfe4b34dbb73ce062d40577f1a79e7`
 
 ## Durable state and idempotency
 
@@ -74,7 +74,7 @@ recommended_actions
 tags
 ```
 
-Packet and incident IDs must match the immutable input exactly. Enumerations, types, counts, string lengths, tags, action risk, and the 16-KiB result ceiling are independently validated in application code even though the same constraints are supplied to Ollama as JSON Schema. Invalid or oversized output is never stored as a result.
+Packet and incident IDs must match the immutable input exactly. Enumerations, types, counts, string lengths, confidence bounds, deterministic severity alignment, packet-derived tag allowlisting, action-risk semantics, and the 16-KiB result ceiling are independently validated in application code even though structural constraints are also supplied to Ollama as JSON Schema. Invalid or oversized output is never stored as a result.
 
 The prompt treats the packet as untrusted data, prohibits invented observations and raw/source content, separates hypotheses from facts, and requires read-only actions before reversible or approval-required changes.
 
@@ -88,10 +88,11 @@ Unavailable, timed-out, transport-error, invalid-response, and invalid-output ou
 
 1. `DONE` — publish and independently verify the repository candidate
 2. `DONE` — add an exact-schema/exact-artifact existing-system migration with protected backup, zero scheduler references, and empty-state-only rollback
-3. run synthetic structured-output quality and failure-path evaluation against the loopback local model without production packet data
-4. rehearse migration, version registration, one-packet success, interruption, invalid output, unavailable runtime, and deterministic rerun on protected production-state copies
-5. install the exact inference schema/caller/configuration/prompt artifacts unscheduled under a new protected backup only after the earlier gates pass
-6. do not invoke a production packet or create a reasoning schedule until a separate managed-invocation gate passes
-7. keep collector result return outside item 28
+3. `DONE` — run synthetic structured-output quality and failure-path evaluation against loopback local models without production packet data; reject the under-calibrated smallest model and select the exact passing Gemma candidate
+4. publish and independently verify the calibrated artifact/guard correction
+5. rehearse migration, version registration, one-packet success, interruption, invalid output, unavailable runtime, and deterministic rerun on protected production-state copies
+6. install the exact inference schema/caller/configuration/prompt artifacts unscheduled under a new protected backup only after the earlier gates pass
+7. do not invoke a production packet or create a reasoning schedule until a separate managed-invocation gate passes
+8. keep collector result return outside item 28
 
 The original fetch/ingest and correlation timers remain independent of this candidate.

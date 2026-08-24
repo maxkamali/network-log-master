@@ -445,7 +445,7 @@ Why:
 
 Consequence:
 
-- version-1 selects the smallest captured local model as a bounded starting point, with empirical quality validation still required
+- calibration first tried the smallest captured model but rejected its under-escalated/meaningless output without weakening validation; the exact second-smallest Gemma candidate passed the bounded synthetic quality set and is the selected version
 - one deterministic `STARTED` reservation blocks duplicate calls; interruption requires later explicit reconciliation rather than automatic takeover
 - a run may transition once to success or a bounded terminal failure status
 - model/prompt registrations and successful canonical results are append-only

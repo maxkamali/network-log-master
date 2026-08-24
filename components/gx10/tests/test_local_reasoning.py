@@ -17,9 +17,9 @@ BASE_SCHEMA = GX10_DIR / 'sql' / 'initialize.sql'
 INCIDENT_SCHEMA = GX10_DIR / 'sql' / 'incident-v1.sql'
 PACKET_SCHEMA = GX10_DIR / 'sql' / 'reasoning-v1.sql'
 INFERENCE_SCHEMA = GX10_DIR / 'sql' / 'inference-v1.sql'
-CONFIG = GX10_DIR / 'config' / 'reasoning-runtime-v1.json'
-PROMPT = GX10_DIR / 'prompts' / 'incident-assessment-v1.txt'
-OUTPUT_SCHEMA = GX10_DIR / 'prompts' / 'incident-assessment-output-v1.json'
+CONFIG = GX10_DIR / 'config' / 'reasoning-runtime-v2.json'
+PROMPT = GX10_DIR / 'prompts' / 'incident-assessment-v2.txt'
+OUTPUT_SCHEMA = GX10_DIR / 'prompts' / 'incident-assessment-output-v2.json'
 
 
 def canonical_json(value):
@@ -157,7 +157,7 @@ class LocalReasoningTests(unittest.TestCase):
     def output(self, packet_id=None, **changes):
         value = {
             'schema': 'gx10-incident-assessment',
-            'schema_version': 1,
+            'schema_version': self.caller.OUTPUT_SCHEMA_VERSION,
             'packet_id': packet_id or self.packet_id,
             'incident_id': self.incident_id,
             'disposition': 'action_required',
@@ -177,9 +177,14 @@ class LocalReasoningTests(unittest.TestCase):
                     'action': 'Inspect interface operational state.',
                     'priority': 1,
                     'risk': 'read_only',
+                },
+                {
+                    'action': 'Review recent approved configuration changes.',
+                    'priority': 2,
+                    'risk': 'read_only',
                 }
             ],
-            'tags': ['interface', 'state-change'],
+            'tags': ['incident_opened', 'open', 'warning'],
         }
         value.update(changes)
         return value
@@ -226,13 +231,14 @@ class LocalReasoningTests(unittest.TestCase):
         self.assertEqual(self.invoke(transport), 0)
         self.assertEqual(len(requests), 1)
         request = requests[0]
-        self.assertEqual(request['model'], 'qwen3:8b')
+        self.assertEqual(request['model'], 'gemma4:latest')
         self.assertIs(request['stream'], False)
         self.assertIs(request['think'], False)
         self.assertEqual(request['options']['temperature'], 0)
         self.assertEqual(request['format']['additionalProperties'], False)
         user = json.loads(request['messages'][1]['content'])
         self.assertEqual(user['packet']['packet_id'], self.packet_id)
+        self.assertIn('incident_opened', user['allowed_tags'])
         self.assertEqual(
             hashlib.sha256(canonical_json(user['packet']).encode()).hexdigest(),
             user['packet_sha256'],
@@ -279,6 +285,68 @@ class LocalReasoningTests(unittest.TestCase):
 
     def test_extra_output_field_is_refused(self):
         bad = self.output(unexpected='value')
+        self.assertEqual(self.invoke(lambda _: self.response(bad)), 1)
+        self.assertEqual(
+            self.rows('SELECT status FROM reasoning_runs'),
+            [('INVALID_OUTPUT',)],
+        )
+
+    def test_noncritical_packet_cannot_be_escalated_to_critical(self):
+        bad = self.output(severity='critical')
+        self.assertEqual(self.invoke(lambda _: self.response(bad)), 1)
+        self.assertEqual(
+            self.rows('SELECT status FROM reasoning_runs'),
+            [('INVALID_OUTPUT',)],
+        )
+
+    def test_action_required_needs_meaningful_read_only_first_action(self):
+        bad = self.output(
+            recommended_actions=[
+                {'action': 'read_only', 'priority': 1, 'risk': 'read_only'},
+                {
+                    'action': 'Restart the interface.',
+                    'priority': 2,
+                    'risk': 'reversible',
+                },
+            ]
+        )
+        self.assertEqual(self.invoke(lambda _: self.response(bad)), 1)
+        self.assertEqual(
+            self.rows('SELECT status FROM reasoning_runs'),
+            [('INVALID_OUTPUT',)],
+        )
+
+    def test_action_required_cannot_claim_zero_confidence(self):
+        bad = self.output(confidence=0)
+        self.assertEqual(self.invoke(lambda _: self.response(bad)), 1)
+        self.assertEqual(
+            self.rows('SELECT status FROM reasoning_runs'),
+            [('INVALID_OUTPUT',)],
+        )
+
+    def test_tags_must_come_from_deterministic_packet_values(self):
+        bad = self.output(tags=['invented-tag'])
+        self.assertEqual(self.invoke(lambda _: self.response(bad)), 1)
+        self.assertEqual(
+            self.rows('SELECT status FROM reasoning_runs'),
+            [('INVALID_OUTPUT',)],
+        )
+
+    def test_change_action_requires_approval_label(self):
+        bad = self.output(
+            recommended_actions=[
+                {
+                    'action': 'Inspect interface operational state.',
+                    'priority': 1,
+                    'risk': 'read_only',
+                },
+                {
+                    'action': 'Restart the interface if it remains down.',
+                    'priority': 2,
+                    'risk': 'reversible',
+                },
+            ]
+        )
         self.assertEqual(self.invoke(lambda _: self.response(bad)), 1)
         self.assertEqual(
             self.rows('SELECT status FROM reasoning_runs'),

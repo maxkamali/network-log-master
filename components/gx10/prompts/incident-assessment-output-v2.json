@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "confidence": {
+      "maximum": 95,
+      "minimum": 50,
+      "type": "integer"
+    },
+    "disposition": {
+      "enum": [
+        "action_required",
+        "monitor",
+        "resolved_no_action",
+        "insufficient_evidence"
+      ],
+      "type": "string"
+    },
+    "incident_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "likely_causes": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "basis": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "cause": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "confidence": {
+            "maximum": 95,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cause",
+          "basis",
+          "confidence"
+        ],
+        "type": "object"
+      },
+      "maxItems": 3,
+      "type": "array"
+    },
+    "packet_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "recommended_actions": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "maxLength": 500,
+            "minLength": 8,
+            "type": "string"
+          },
+          "priority": {
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "risk": {
+            "enum": [
+              "read_only",
+              "reversible",
+              "change_requires_approval"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "priority",
+          "risk"
+        ],
+        "type": "object"
+      },
+      "maxItems": 5,
+      "type": "array"
+    },
+    "schema": {
+      "const": "gx10-incident-assessment",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 2,
+      "type": "integer"
+    },
+    "severity": {
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "informational"
+      ],
+      "type": "string"
+    },
+    "summary": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "type": "string"
+    },
+    "tags": {
+      "items": {
+        "maxLength": 64,
+        "minLength": 1,
+        "pattern": "^[a-z0-9][a-z0-9._-]*$",
+        "type": "string"
+      },
+      "maxItems": 8,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "title": {
+      "maxLength": 160,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "schema_version",
+    "packet_id",
+    "incident_id",
+    "disposition",
+    "severity",
+    "confidence",
+    "title",
+    "summary",
+    "likely_causes",
+    "recommended_actions",
+    "tags"
+  ],
+  "type": "object"
+}

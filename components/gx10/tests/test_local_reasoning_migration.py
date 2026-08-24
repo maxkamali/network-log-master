@@ -36,9 +36,9 @@ class LocalReasoningMigrationTests(unittest.TestCase):
         self.packet_builder.chmod(0o755)
         self.targets = (
             self.install / 'run-local-reasoning.py',
-            self.configuration / 'reasoning-runtime-v1.json',
-            self.configuration / 'incident-assessment-v1.txt',
-            self.configuration / 'incident-assessment-output-v1.json',
+            self.configuration / 'reasoning-runtime-v2.json',
+            self.configuration / 'incident-assessment-v2.txt',
+            self.configuration / 'incident-assessment-output-v2.json',
         )
 
         connection = sqlite3.connect(self.database)

@@ -22,7 +22,7 @@ CREATE TABLE reasoning_prompt_versions (
         length(output_schema_sha256) = 64
     ),
     output_schema_version INTEGER NOT NULL CHECK (
-        output_schema_version = 1
+        output_schema_version BETWEEN 1 AND 65535
     ),
     created_at TEXT NOT NULL
 );
@@ -59,7 +59,9 @@ CREATE TABLE reasoning_results (
     run_id TEXT PRIMARY KEY,
     packet_id TEXT NOT NULL,
     incident_id TEXT NOT NULL,
-    schema_version INTEGER NOT NULL CHECK (schema_version = 1),
+    schema_version INTEGER NOT NULL CHECK (
+        schema_version BETWEEN 1 AND 65535
+    ),
     disposition TEXT NOT NULL CHECK (
         disposition IN (
             'action_required',

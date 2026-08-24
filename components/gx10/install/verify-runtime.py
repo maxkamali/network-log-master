@@ -55,18 +55,18 @@ ARTIFACTS = (
     ),
     (GX10_DIR / 'sbin' / 'runtime_config.py', LIBEXEC_DIR / 'runtime_config.py', 0o644),
     (
-        GX10_DIR / 'config' / 'reasoning-runtime-v1.json',
-        CONFIG_DIR / 'reasoning-runtime-v1.json',
+        GX10_DIR / 'config' / 'reasoning-runtime-v2.json',
+        CONFIG_DIR / 'reasoning-runtime-v2.json',
         0o644,
     ),
     (
-        GX10_DIR / 'prompts' / 'incident-assessment-v1.txt',
-        CONFIG_DIR / 'incident-assessment-v1.txt',
+        GX10_DIR / 'prompts' / 'incident-assessment-v2.txt',
+        CONFIG_DIR / 'incident-assessment-v2.txt',
         0o644,
     ),
     (
-        GX10_DIR / 'prompts' / 'incident-assessment-output-v1.json',
-        CONFIG_DIR / 'incident-assessment-output-v1.json',
+        GX10_DIR / 'prompts' / 'incident-assessment-output-v2.json',
+        CONFIG_DIR / 'incident-assessment-output-v2.json',
         0o644,
     ),
     (

@@ -474,5 +474,6 @@ Consequence:
 - any preexisting `STARTED` reservation fails the cycle before new work
 - each cycle can add at most one run and one result; terminal inference failure remains explicit and nonauthoritative
 - the service can write only beside the validated database and can connect only to IPv4 loopback plus Unix sockets
+- the timer's first scheduled cycle is relative to enablement, not host boot; an exact published inactive predecessor may be atomically upgraded, while any divergent target is refused
 - inactive installation, protected-copy rehearsal, protected initial production cycle, timer enablement, and multi-cadence evidence remain separate gates
 - collector result return remains outside item 29

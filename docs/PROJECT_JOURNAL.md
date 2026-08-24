@@ -9647,3 +9647,28 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify this inactive-install checkpoint. Then use the separate activator to create a new root-only protected pre-activation backup, run exactly one bounded production cycle while the timer is still disabled, verify the resulting aggregate state, and only then enable the reasoning timer. Collector result return remains disabled.
+
+## 2026-08-24 02:38 PDT - Item 29 activation-timing defect caught before activation
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The inactive-install checkpoint was published and independently matched on GitHub at:
+
+`faf1a7548a06d3d2ca226f22c74f2a64cba59a93` — `Install managed reasoning inactive`
+
+A final review before the first production cycle found that the published timer used a boot-relative initial trigger. Because the working host has been running longer than that interval, enabling the timer could make a second cycle immediately due after the activator's deliberately bounded first cycle.
+
+Activation was stopped before the activator ran. No pre-activation backup was created, no packet was built, no run or result row was created, no model was called, and no production inference occurred. The managed timer remains disabled, the managed service remains inactive, and all production reasoning tables remain empty.
+
+The candidate now uses a start-relative five-minute initial delay plus the same five-minute post-cycle cadence. The installer permits this correction only when the existing timer is the exact published inactive predecessor. It upgrades that one file atomically, refuses any divergent target, and rolls back to the exact predecessor if a later installation check fails.
+
+Corrected SHA-256 values:
+
+- installer: `6c8ee52f8a7247275b1812129dc97bbd49c71cf741b5973153ed6391fabf90ba`
+- timer: `c284e9d8cbb71775dc6b67b7451bb024d689b4ec27b89de987443a6ff77cad34`
+
+The runner, activator, verifier, and service are byte-identical to the protected-copy candidate. Twenty-one focused item-29 tests pass within the 136-test GX10 suite.
+
+### Next action
+
+Run the full repository/public gates, publish and independently verify the correction, then stage only that checkpoint. Upgrade the exact old timer while it remains inactive and disabled, reverify empty reasoning state, and publish that production correction before protected activation.

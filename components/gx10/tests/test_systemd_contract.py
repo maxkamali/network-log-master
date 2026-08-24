@@ -190,9 +190,10 @@ class SystemdContractTests(unittest.TestCase):
     def test_reasoning_timer_is_independently_disableable(self):
         unit = parse_unit(REASONING_TIMER_PATH)
         timer = dict(unit['Timer'])
-        self.assertEqual(timer['OnBootSec'], '15min')
+        self.assertEqual(timer['OnActiveSec'], '5min')
         self.assertEqual(timer['OnUnitInactiveSec'], '5min')
         self.assertEqual(timer['AccuracySec'], '15s')
+        self.assertNotIn('OnBootSec', timer)
         self.assertEqual(
             timer['Unit'], 'network-log-gx10-reasoning.service'
         )

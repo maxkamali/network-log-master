@@ -2,7 +2,7 @@
 Description=Schedule network log GX10 managed local reasoning
 
 [Timer]
-OnBootSec=15min
+OnActiveSec=5min
 OnUnitInactiveSec=5min
 AccuracySec=15s
 Unit=network-log-gx10-reasoning.service

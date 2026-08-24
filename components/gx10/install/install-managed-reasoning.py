@@ -84,6 +84,17 @@ REQUIRED_TABLES = {
     'reasoning_runs',
     'reasoning_results',
 }
+PREVIOUS_TIMER_BYTES = (
+    '[Unit]\n'
+    'Description=Schedule network log GX10 managed local reasoning\n'
+    '\n[Timer]\n'
+    'OnBootSec=15min\n'
+    'OnUnitInactiveSec=5min\n'
+    'AccuracySec=15s\n'
+    'Unit=network-log-gx10-reasoning.service\n'
+    '\n[Install]\n'
+    'WantedBy=timers.target\n'
+).encode()
 
 
 class InstallError(ValueError):
@@ -159,6 +170,55 @@ def install_bytes(target, data, mode, uid=0, gid=0):
         temporary.unlink()
         fsync_directory(target.parent)
         return True
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def install_or_upgrade_bytes(
+    target,
+    data,
+    previous_data,
+    mode,
+    uid=0,
+    gid=0,
+):
+    target = Path(target)
+    if not target.exists() and not target.is_symlink():
+        install_bytes(target, data, mode, uid, gid)
+        return 'created'
+    details = validate_regular(
+        target, 'existing managed reasoning upgrade artifact'
+    )
+    if (
+        details.st_uid != uid
+        or details.st_gid != gid
+        or stat.S_IMODE(details.st_mode) != mode
+    ):
+        raise InstallError(
+            'existing managed reasoning upgrade metadata differs'
+        )
+    current = target.read_bytes()
+    if current == data:
+        return 'reused'
+    if current != previous_data:
+        raise InstallError(
+            'existing managed reasoning upgrade artifact differs'
+        )
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f'.{target.name}.', dir=target.parent
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, 'wb') as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chown(temporary, uid, gid)
+        os.chmod(temporary, mode)
+        os.replace(temporary, target)
+        fsync_directory(target.parent)
+        return 'upgraded'
     finally:
         if temporary.exists():
             temporary.unlink()
@@ -313,6 +373,7 @@ def apply_install(
     )
     created_directories = []
     created_files = []
+    upgraded_files = []
     try:
         ensure_directory(
             LIBEXEC_DIR.parent, 0, 0, 0o755, created_directories
@@ -323,7 +384,20 @@ def apply_install(
         )
         ensure_directory(DROPIN_DIR, 0, 0, 0o755, created_directories)
         for source, target, mode in ARTIFACTS:
-            if install_bytes(target, source.read_bytes(), mode):
+            if target == SYSTEMD_DIR / TIMER:
+                action = install_or_upgrade_bytes(
+                    target,
+                    source.read_bytes(),
+                    PREVIOUS_TIMER_BYTES,
+                    mode,
+                )
+                if action == 'created':
+                    created_files.append(target)
+                elif action == 'upgraded':
+                    upgraded_files.append(
+                        (target, PREVIOUS_TIMER_BYTES, source.read_bytes(), mode)
+                    )
+            elif install_bytes(target, source.read_bytes(), mode):
                 created_files.append(target)
         if install_bytes(CONFIG_PATH, config, 0o640, gid=group.gr_gid):
             created_files.append(CONFIG_PATH)
@@ -355,6 +429,13 @@ def apply_install(
                     'managed reasoning unit is already active'
                 )
     except Exception:
+        for path, data, current_data, mode in reversed(upgraded_files):
+            try:
+                install_or_upgrade_bytes(
+                    path, data, current_data, mode
+                )
+            except (InstallError, OSError):
+                pass
         for path in reversed(created_files):
             try:
                 path.unlink()

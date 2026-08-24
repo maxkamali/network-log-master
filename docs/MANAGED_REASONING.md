@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has a published repository candidate, passing synthetic tests, passing protected current-production-state-copy rehearsal, and exact inactive working-system installation. The runner/service/timer/private binding is installed, but the timer is disabled and the service is inactive. Production remains at zero reasoning packets, model versions, prompt versions, runs, and results, and no production inference has run.
+Execution-order item 29 has a published repository candidate, passing synthetic tests, passing protected current-production-state-copy rehearsal, and exact inactive working-system installation. The runner/service/timer/private binding is installed, but the timer is disabled and the service is inactive. A final pre-activation review caught that the initial boot-relative timer could fire immediately when enabled on a long-running host. Activation was not attempted. The corrected candidate uses a start-relative initial delay and an exact-old-hash inactive upgrade. Production remains at zero reasoning packets, model versions, prompt versions, runs, and results, and no production inference has run.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -29,7 +29,7 @@ Packet construction may append deterministic facts for currently qualifying inci
 
 ## Scheduling
 
-The candidate timer waits 15 minutes after boot and then five minutes after each completed oneshot, with 15-second accuracy. It has no `OnCalendar` catch-up behavior. The reasoning schedule is independent of the existing fetch/ingest and correlation timers and can be disabled without changing deterministic or model-result state.
+The corrected candidate timer waits five minutes after it is enabled and then five minutes after each completed oneshot, with 15-second accuracy. It has no boot-relative or `OnCalendar` catch-up trigger, so enabling it on a long-running host cannot cause an immediate unreviewed second inference after the activator's one bounded initial cycle. The reasoning schedule is independent of the existing fetch/ingest and correlation timers and can be disabled without changing deterministic or model-result state.
 
 The service is ordered after the managed correlation service and Ollama, but it does not start or stop either dependency. Private installation binds the actual runtime identity and database parent through a narrowly rendered drop-in. Active verification separately requires the correlation timer and Ollama to be healthy.
 
@@ -63,7 +63,7 @@ An acquired cycle lock makes every preexisting `STARTED` reservation an unreconc
 - the validated application database, runtime identity, and exact installed item-27/item-28 dependency bytes
 - loaded correlation and Ollama dependencies
 - safe absolute database and unit names
-- absent or exact managed runner/service/timer/configuration/drop-in targets
+- absent or exact managed runner/service/timer/configuration/drop-in targets; the timer alone may also be the exact published inactive boot-relative predecessor and is then atomically upgraded
 - inactive and disabled managed reasoning units
 
 It installs only the managed runner, service/timer, private database-path configuration, and runtime-identity/ordering/write-scope drop-in. It runs `systemd-analyze verify` and reloads systemd but does not build packets, call Ollama, or enable the timer.
@@ -74,7 +74,7 @@ It installs only the managed runner, service/timer, private database-path config
 
 ## Candidate validation
 
-Twenty focused tests currently prove:
+Twenty-one focused tests currently prove:
 
 - strict private database configuration
 - exact dependency hashes and file metadata
@@ -86,12 +86,13 @@ Twenty focused tests currently prove:
 - aggregate backlog/run/result health
 - canonical private config/drop-in rendering
 - atomic exact-file reuse and divergence refusal
+- exact-old-hash timer upgrade and divergent-old refusal
 - protected-backup-first activation order
 - activation failure isolation and bounded-cycle enforcement
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `135` tests. Protected current-production-state-copy rehearsal has passed; unscheduled working-system installation, initial production activation, and multiple scheduled-cadence evidence remain separate gates. Collector result return is outside item 29.
+The full GX10 suite currently passes `136` tests. Protected current-production-state-copy rehearsal and unscheduled working-system installation have passed. The corrected timer checkpoint, exact inactive timer upgrade, initial production activation, and multiple scheduled-cadence evidence remain separate gates. Collector result return is outside item 29.
 
 ## Protected current-state-copy evidence
 
@@ -156,15 +157,17 @@ production_inference_invoked=no
 GX10_MANAGED_REASONING_INACTIVE_INSTALL=PASS
 ```
 
-The protected pre-activation backup, one bounded initial production cycle, timer enablement, and scheduled-cadence evidence remain separate later gates.
+Before activation, review found that the installed `OnBootSec` timer could become immediately due when enabled on this long-running host. No activator, backup, packet builder, model call, or reasoning unit was invoked. The timer remains disabled, the service remains inactive, and all reasoning tables remain empty. The corrected candidate replaces that boot-relative trigger with `OnActiveSec=5min` and permits only an exact-byte inactive upgrade of the published predecessor, with rollback if any later installation check fails.
+
+The corrected timer must be published, independently verified, and upgraded while still inactive before the protected pre-activation backup, one bounded initial production cycle, timer enablement, and scheduled-cadence gates.
 
 ## Exact candidate artifacts
 
 - managed runner SHA-256: `f79ed272a8638449bc6a98aefa1758e711a69645950c284869d96e03704432ca`
-- installer SHA-256: `75654a09471dc5ecb99672dc16c326af65fbbe83ed44963010da9e9532535fd0`
+- installer SHA-256: `6c8ee52f8a7247275b1812129dc97bbd49c71cf741b5973153ed6391fabf90ba`
 - activator SHA-256: `04d16e1c3eac68cc04a533bba7571ba5534a2f07af8da566a2f9c725d50b43d3`
 - verifier SHA-256: `b80d3de36cdeac1ea268c9c12a1edfe1dce83e248e57eefff99872ec11622708`
 - service SHA-256: `3559ed6a5bdfc98de3544bc6bf7f69cf6459a9cb50083cd96db632a27e52e64a`
-- timer SHA-256: `0c813a9f8aa695e69e7a383d681b4d5ae9b48abc18879b908bdbb4e5da763e53`
+- timer SHA-256: `c284e9d8cbb71775dc6b67b7451bb024d689b4ec27b89de987443a6ff77cad34`
 
-These hashes describe the initial repository candidate. Any correction requires new hashes, a new validated checkpoint, and restaging before protected-copy or production work.
+These hashes describe the corrected pre-activation candidate. The runner, activator, verifier, and service are byte-identical to the protected-copy candidate; only the installer and timer changed. The exact corrected checkpoint must be staged and the old inactive timer upgraded before activation.

@@ -105,6 +105,47 @@ class ManagedReasoningInstallTests(unittest.TestCase):
                 os.getgid(),
             )
 
+    def test_timer_upgrade_accepts_only_exact_prior_version(self):
+        target = self.root / 'reasoning.timer'
+        target.write_bytes(INSTALLER.PREVIOUS_TIMER_BYTES)
+        target.chmod(0o644)
+        current = b'current timer\n'
+        self.assertEqual(
+            INSTALLER.install_or_upgrade_bytes(
+                target,
+                current,
+                INSTALLER.PREVIOUS_TIMER_BYTES,
+                0o644,
+                os.getuid(),
+                os.getgid(),
+            ),
+            'upgraded',
+        )
+        self.assertEqual(target.read_bytes(), current)
+        self.assertEqual(
+            INSTALLER.install_or_upgrade_bytes(
+                target,
+                current,
+                INSTALLER.PREVIOUS_TIMER_BYTES,
+                0o644,
+                os.getuid(),
+                os.getgid(),
+            ),
+            'reused',
+        )
+        target.write_bytes(b'divergent\n')
+        with self.assertRaisesRegex(
+            INSTALLER.InstallError, 'upgrade artifact differs'
+        ):
+            INSTALLER.install_or_upgrade_bytes(
+                target,
+                current,
+                INSTALLER.PREVIOUS_TIMER_BYTES,
+                0o644,
+                os.getuid(),
+                os.getgid(),
+            )
+
     def test_activation_orders_backup_cycle_then_timer(self):
         database = self.root / 'events.sqlite3'
         database.touch()

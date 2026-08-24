@@ -950,7 +950,7 @@
                         },
                         "pluginVersion": "4.20.0",
                         "queryType": "table",
-                        "rawSql": "SELECT\n    timestamp AS \"Time\",\n    severity AS \"Severity\",\n    status AS \"Assessment\",\n    title AS \"Title\",\n    body AS \"Explanation\",\n    occurrence_count AS \"Occurrences\",\n    arrayStringConcat(tags, \",\") AS \"Tags\",\n    model AS \"Model\",\n    incident_id AS \"Incident ID\",\n    run_id AS \"Run ID\"\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nORDER BY timestamp DESC\nLIMIT 200"
+                        "rawSql": "SELECT\n    timestamp AS \"Time\",\n    severity AS \"Severity\",\n    status AS \"Assessment\",\n    title AS \"Title\",\n    body AS \"Explanation\",\n    occurrence_count AS \"Occurrences\",\n    arrayStringConcat(tags, ',') AS \"Tags\",\n    model AS \"Model\",\n    incident_id AS \"Incident ID\",\n    run_id AS \"Run ID\"\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nORDER BY timestamp DESC\nLIMIT 200"
                       }
                     },
                     "refId": "A",

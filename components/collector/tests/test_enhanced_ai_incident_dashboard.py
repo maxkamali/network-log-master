@@ -140,6 +140,7 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
             self.assertIn(field, sql)
         self.assertIn("ORDER BY timestamp DESC", sql)
         self.assertIn("LIMIT 200", sql)
+        self.assertIn("arrayStringConcat(tags, ',')", sql)
         self.assertTrue(
             property_value(panel, "Explanation", "custom.wrapText")
         )

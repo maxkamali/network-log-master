@@ -11993,3 +11993,17 @@ No existing dashboard, datasource, ClickHouse schema/data, service, schedule, GX
 ### Next action
 
 Run the complete local/public gates for the one-line SQL correction, publish and independently verify it, replace only the distinct enhanced dashboard from that exact checkpoint, reread all six specifications, and require all fifteen AI queries to pass before reconciling closure documentation.
+
+## 2026-08-24 16:18 PDT - Item 33 feed query passed; matching detail-query correction opened
+
+### Status
+
+Item 33 remains in progress. Exact correction checkpoint `4a2c83baf5c65546964dc4d93bb9ba1c8f8dc3a1` was published and independently matched GitHub `main`. Only the distinct enhanced dashboard was replaced; all other resources remained exact. All six complete dashboard specifications then reread exact.
+
+The original seven queries passed. Enhanced panels 1 through 7 also passed, including 70 bounded live rows from the corrected latest-per-incident feed. Enhanced panel 8 failed closed with datasource HTTP 400 before completion. Inspection found its independent tag expression retained the same double-quoted separator defect. The candidate now uses the proper single-quoted separator in both enhanced table queries, with an explicit regression for each expression.
+
+No returned values, event content, or credential was printed. The mode-private temporary administrator credential was removed automatically. No existing dashboard, datasource, ClickHouse schema/data, service, schedule, or data path changed.
+
+### Next action
+
+Publish the complete two-query quote correction after local/public gates, replace only the enhanced resource, and require all fifteen queries plus six-resource exact verification to pass before closure.

@@ -193,6 +193,7 @@ class ManagedReasoningInstallTests(unittest.TestCase):
             {
                 INSTALLER.CONFIG_DIR
                 / 'incident-assessment-output-v2.json',
+                INSTALLER.CONFIG_DIR / 'reasoning-runtime-v2.json',
                 INSTALLER.LIBEXEC_DIR / 'run-local-reasoning.py',
                 INSTALLER.LIBEXEC_DIR / 'run-managed-reasoning.py',
             },
@@ -201,6 +202,7 @@ class ManagedReasoningInstallTests(unittest.TestCase):
             set(INSTALLER.PREVIOUS_ARTIFACT_SHA256.values()),
             {
                 '1ec4e28d0d18320c7469d4f1bb26a5c766515ff008c5803d24ce214ded69928a',
+                'e7bde8d878e71d8a1b11af01170ff332920aae1df1a65536b516abf5862428f0',
                 'e9b894afa16fd5f138cfeec299be58328fd02454db2b53c3e395809e04d58cd0',
                 'c0c095661a7042be57230fb8fc856c03f5fe191ab604e4e246138f28156a3bee',
             },

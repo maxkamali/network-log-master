@@ -31,6 +31,11 @@ SAFE_NAME_RE = re.compile(r'^[A-Za-z0-9_.@-]+$')
 SAFE_PATH_RE = re.compile(r'^/[A-Za-z0-9_./@+-]+$')
 ARTIFACTS = (
     (
+        GX10_DIR / 'config' / 'reasoning-runtime-v2.json',
+        CONFIG_DIR / 'reasoning-runtime-v2.json',
+        0o644,
+    ),
+    (
         GX10_DIR / 'prompts' / 'incident-assessment-output-v2.json',
         CONFIG_DIR / 'incident-assessment-output-v2.json',
         0o644,
@@ -63,11 +68,6 @@ DEPENDENCIES = (
         0o755,
     ),
     (
-        GX10_DIR / 'config' / 'reasoning-runtime-v2.json',
-        CONFIG_DIR / 'reasoning-runtime-v2.json',
-        0o644,
-    ),
-    (
         GX10_DIR / 'prompts' / 'incident-assessment-v2.txt',
         CONFIG_DIR / 'incident-assessment-v2.txt',
         0o644,
@@ -97,6 +97,9 @@ PREVIOUS_TIMER_BYTES = (
     'WantedBy=timers.target\n'
 ).encode()
 PREVIOUS_ARTIFACT_SHA256 = {
+    CONFIG_DIR / 'reasoning-runtime-v2.json': (
+        'e7bde8d878e71d8a1b11af01170ff332920aae1df1a65536b516abf5862428f0'
+    ),
     CONFIG_DIR / 'incident-assessment-output-v2.json': (
         '1ec4e28d0d18320c7469d4f1bb26a5c766515ff008c5803d24ce214ded69928a'
     ),

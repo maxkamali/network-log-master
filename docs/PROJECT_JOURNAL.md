@@ -10098,3 +10098,46 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Publish and independently verify the 140-test compatibility candidate, stage its exact bytes on GX10, and rerun the full remote suite. Then replay the same failed packet only on a fresh protected current-state copy through the strengthened generation schema and unchanged caller validator. Do not install or resume production unless that protected-copy replay succeeds.
+
+## 2026-08-24 03:35 PDT - Item 29 compatibility provenance corrected before inference
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The initial strict generation-schema candidate was published and independently matched on GitHub at:
+
+`706797890dfd399f8ec21d47eaaecab16db195ec` — `Prevent risk labels as reasoning actions`
+
+Its exact archive was staged under a new root-only GX10 boundary. The first remote test run exposed only archive-extraction mode drift; after exact Git-mode normalization, all 140 tests and the filesystem contract passed on GX10. No installed artifact or application state changed.
+
+A fresh protected-copy replay then stopped before model transport and left no new run. The existing append-only prompt-version registration correctly refused the new output-schema hash under the old `incident-assessment-v2` identity. This was a provenance design defect in the candidate, not a runtime/model failure. Production remained unchanged and disabled.
+
+The correction registers immutable prompt revision `incident-assessment-v2-r2` with a distinct creation timestamp while retaining the original system-prompt bytes and exact model version. The runtime configuration joins the schema, caller, and managed runner as a fourth exact-old-hash compatibility artifact. The original prompt registration, five successful results, and one terminal failure remain unchanged; the revised prompt version intentionally sees all 12 packets as a clean new-version backlog.
+
+Focused tests now assert the new prompt-version/output-schema/timestamp registration and exact four-artifact predecessor set. The full 140-test suite, repository sanitation/history/link checks, and strict Git integrity pass locally.
+
+```text
+initial_candidate_commit=706797890dfd399f8ec21d47eaaecab16db195ec
+remote_tests_after_mode_normalization=140
+first_schema_copy_model_invocations=0
+first_schema_copy_new_runs=0
+first_schema_copy_failure_class=immutable_prompt_provenance
+production_changed=no
+production_reasoning_enabled=no
+revised_prompt_version=incident-assessment-v2-r2
+revised_version_pending_packets=12
+runtime_config_sha256=db2122a46e01c32d52aef8516280039477acbf86ae367ae8e6afe533773aa8f4
+output_schema_sha256=d2917c40b867aa801934579e0779f001dc8e71953aaf3ddaa2134d0736f25a51
+local_caller_sha256=0aabe2a84e254d9f9c0286d21774c1bfab8cd3a94577dc84a429fc0226bc95c6
+managed_runner_sha256=fbcf609162df0e5f2b4195404a8f4cbf1f7e6838c52dd22a325197aca6c47b8f
+managed_installer_sha256=06ee615ec577f752f5b443e3d28ea241dd6efe45a3378b4e88126c568d88f698
+local_migrator_sha256=f81fd0a2bd2ceea47e9eca05e33c8addd1e150de8d05106d1ff00bc30e97bde9
+gx10_tests=140
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+PUBLIC_REPOSITORY_VALIDATION=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, connection value, or model output was printed or committed.
+
+### Next action
+
+Publish and independently verify this immutable-provenance correction. Stage and retest only its exact bytes on GX10. On a fresh protected copy, explicitly isolate the previously failed packet within the new prompt revision without exposing content, then require exactly one successful revised-version run/result through the strengthened schema and unchanged validator before any production artifact upgrade.

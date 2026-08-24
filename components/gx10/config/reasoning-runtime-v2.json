@@ -4,7 +4,7 @@
   "model_manifest_sha256": "c6eb396dbd5992bbe3f5cdb947e8bbc0ee413d7c17e2beaae69f5d569cf982eb",
   "model_reference": "gemma4:latest",
   "model_version": "ollama-gemma4-c6eb396d-v1",
-  "prompt_version": "incident-assessment-v2",
+  "prompt_version": "incident-assessment-v2-r2",
   "provider": "ollama",
   "request_options": {
     "num_ctx": 8192,

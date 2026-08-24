@@ -25,13 +25,13 @@ ARTIFACTS = (
     (
         'caller',
         GX10_DIR / 'sbin' / 'run-local-reasoning.py',
-        '31c90b4ef759df097c0c018b6a70adb82a7c1b6939bbd3bd10704f2be70a5f9d',
+        '0aabe2a84e254d9f9c0286d21774c1bfab8cd3a94577dc84a429fc0226bc95c6',
         0o755,
     ),
     (
         'configuration',
         GX10_DIR / 'config' / 'reasoning-runtime-v2.json',
-        'e7bde8d878e71d8a1b11af01170ff332920aae1df1a65536b516abf5862428f0',
+        'db2122a46e01c32d52aef8516280039477acbf86ae367ae8e6afe533773aa8f4',
         0o644,
     ),
     (

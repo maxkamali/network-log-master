@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. The published backlog correction passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. The second corrected natural cadence also kept packets fixed at 12 and reduced pending 7→6, but its single model response failed strict output validation. The caller stored one terminal `INVALID_OUTPUT` run and no result or invalid content. Reasoning was disabled with zero `STARTED` rows or restarts. Protected-copy replay of the same packet reproduced the failure; a second copy-only diagnostic classified one action whose text exactly equaled a risk label. Production remains unchanged at 12 packets, six pending, six runs, five successful results, and one explicit safe failure. A 140-test generation-schema compatibility candidate is awaiting exact remote staging and protected-copy replay.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. The published backlog correction passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. The second corrected natural cadence also kept packets fixed at 12 and reduced pending 7→6, but its single model response failed strict output validation. The caller stored one terminal `INVALID_OUTPUT` run and no result or invalid content. Reasoning was disabled with zero `STARTED` rows or restarts. Protected-copy replay of the same packet reproduced the failure; a second copy-only diagnostic classified one action whose text exactly equaled a risk label. Production remains unchanged at 12 packets, six old-version pending, six runs, five successful results, and one explicit safe failure. The first strengthened-schema copy gate correctly refused to reuse the immutable old prompt-version ID before inference. The corrected 140-test candidate registers prompt revision `incident-assessment-v2-r2`, exposing a clean 12-packet revised-version backlog, and is awaiting exact remote staging and protected-copy replay.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -64,10 +64,10 @@ An acquired cycle lock makes every preexisting `STARTED` reservation an unreconc
 - the validated application database, runtime identity, and exact installed item-27/item-28 dependency bytes
 - loaded correlation and Ollama dependencies
 - safe absolute database and unit names
-- absent or exact managed runner/service/timer/configuration/drop-in targets; the timer may also be the exact published inactive boot-relative predecessor, the runner may be the exact pre-backlog-correction version, and the output schema/caller/runner may be their exact pre-compatibility versions, for atomic upgrade only
+- absent or exact managed runner/service/timer/configuration/drop-in targets; the timer may also be the exact published inactive boot-relative predecessor, the runner may be the exact pre-backlog-correction version, and the runtime config/output schema/caller/runner may be their exact pre-compatibility versions, for atomic upgrade only
 - inactive and disabled managed reasoning units
 
-It installs the managed runner, service/timer, private database-path configuration, runtime-identity/ordering/write-scope drop-in, and only the coordinated output-schema/caller compatibility bytes when their exact predecessors are present. It runs `systemd-analyze verify` and reloads systemd but does not build packets, call Ollama, or enable the timer.
+It installs the managed runner, service/timer, private database-path configuration, runtime-identity/ordering/write-scope drop-in, and only the coordinated runtime-config/output-schema/caller compatibility bytes when their exact predecessors are present. It runs `systemd-analyze verify` and reloads systemd but does not build packets, call Ollama, or enable the timer.
 
 `components/gx10/install/activate-managed-reasoning.py` is a separate confirmation gate. It verifies the complete installed/inactive boundary, creates and validates a new root-only mode-`0600` SQLite online backup, runs exactly one initial bounded service cycle while the timer is disabled, verifies the post-cycle state, and only then enables the timer. Any error disables/stops only managed reasoning and retains its append-only state plus protected backup.
 
@@ -90,7 +90,7 @@ Twenty-four focused item-29 tests currently prove:
 - atomic exact-file reuse and divergence refusal
 - exact-old-hash timer upgrade and divergent-old refusal
 - exact-old-hash runner upgrade and divergent-old refusal
-- exact and narrow schema/caller/runner compatibility-upgrade targets
+- exact and narrow runtime-config/schema/caller/runner compatibility-upgrade targets
 - protected-backup-first activation order
 - activation failure isolation and bounded-cycle enforcement
 - separately disableable, hardened, loopback-only service/timer policy
@@ -205,7 +205,7 @@ The second corrected natural cadence again deferred construction and kept packet
 
 A fresh protected current-state copy removed only the copied terminal diagnostic reservation behind a copy-local no-delete-trigger override, recreated that trigger immediately, and replayed the exact same packet through the unchanged caller at temperature zero. It failed identically. A second independent protected-copy replay classified the response without printing packet or output content: four actions were generated, and one action's text exactly equaled a member of the action-risk enum.
 
-The correction does not relax the caller or rewrite the production failure. The output generation schema now excludes the three risk labels from the action-text field while retaining their separate required `risk` field. The caller continues to reject label-only action text independently. Exact-old-hash installation is limited to the coordinated output schema, caller, and managed runner; the service must remain disabled and any divergent predecessor is refused. Production remained unchanged and disabled throughout diagnosis.
+The correction does not relax the caller or rewrite the production failure. The output generation schema now excludes the three risk labels from the action-text field while retaining their separate required `risk` field. The caller continues to reject label-only action text independently. A first protected-copy gate proved the database correctly refuses a changed schema hash under the existing append-only prompt-version registration; it stopped before run reservation or model transport. The corrected candidate uses prompt revision `incident-assessment-v2-r2` with a distinct immutable creation timestamp. This makes all 12 packets pending for the revised boundary while preserving all original-version runs/results. Exact-old-hash installation is limited to the coordinated runtime config, output schema, caller, and managed runner; the service must remain disabled and any divergent predecessor is refused. Production remained unchanged and disabled throughout diagnosis.
 
 ## Natural-cadence backlog failure and safe disable
 
@@ -308,12 +308,13 @@ The protected backup path and all packet/result content remain private.
 ## Exact candidate artifacts
 
 - output schema SHA-256: `d2917c40b867aa801934579e0779f001dc8e71953aaf3ddaa2134d0736f25a51`
-- local caller SHA-256: `31c90b4ef759df097c0c018b6a70adb82a7c1b6939bbd3bd10704f2be70a5f9d`
-- managed runner SHA-256: `1b4fa5150149cc3556f3ddfec2ed85f1b4c6e61e15fef1989bc0b0a5e39e25fa`
-- installer SHA-256: `4eebf64ef2a9fca3b5b2aa97a737d7f262ba857728badced963bf9a5e5b355e3`
+- runtime configuration SHA-256: `db2122a46e01c32d52aef8516280039477acbf86ae367ae8e6afe533773aa8f4`
+- local caller SHA-256: `0aabe2a84e254d9f9c0286d21774c1bfab8cd3a94577dc84a429fc0226bc95c6`
+- managed runner SHA-256: `fbcf609162df0e5f2b4195404a8f4cbf1f7e6838c52dd22a325197aca6c47b8f`
+- installer SHA-256: `06ee615ec577f752f5b443e3d28ea241dd6efe45a3378b4e88126c568d88f698`
 - activator SHA-256: `04d16e1c3eac68cc04a533bba7571ba5534a2f07af8da566a2f9c725d50b43d3`
 - verifier SHA-256: `b80d3de36cdeac1ea268c9c12a1edfe1dce83e248e57eefff99872ec11622708`
 - service SHA-256: `3559ed6a5bdfc98de3544bc6bf7f69cf6459a9cb50083cd96db632a27e52e64a`
 - timer SHA-256: `c284e9d8cbb71775dc6b67b7451bb024d689b4ec27b89de987443a6ff77cad34`
 
-These hashes describe the generation-schema compatibility candidate. The activator, verifier, service, and corrected timer are byte-identical to the activation candidate. The currently installed output schema, caller, and bounded-backlog runner remain their exact published predecessors while reasoning is disabled; the compatibility bytes are not yet installed.
+These hashes describe the immutable prompt-revision/generation-schema compatibility candidate. The activator, verifier, service, and corrected timer are byte-identical to the activation candidate. The currently installed runtime config, output schema, caller, and bounded-backlog runner remain their exact published predecessors while reasoning is disabled; the compatibility bytes are not yet installed.

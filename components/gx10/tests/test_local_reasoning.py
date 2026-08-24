@@ -247,6 +247,19 @@ class LocalReasoningTests(unittest.TestCase):
             self.rows('SELECT status, error_code FROM reasoning_runs'),
             [('SUCCEEDED', None)],
         )
+        self.assertEqual(
+            self.rows(
+                'SELECT prompt_version,output_schema_sha256,created_at '
+                'FROM reasoning_prompt_versions'
+            ),
+            [
+                (
+                    self.caller.PROMPT_VERSION,
+                    self.caller.OUTPUT_SCHEMA_SHA256,
+                    self.caller.PROMPT_VERSION_CREATED_AT,
+                )
+            ],
+        )
         result = self.rows(
             'SELECT result_json, result_sha256 FROM reasoning_results'
         )[0]

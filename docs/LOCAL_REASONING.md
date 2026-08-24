@@ -40,11 +40,12 @@ Original item-28 candidate SHA-256 values:
 - output schema: `1ec4e28d0d18320c7469d4f1bb26a5c766515ff008c5803d24ce214ded69928a`
 - migration guard: `16f75e1138308e4bfa5c5fc3cbdb0337e4bfe4b34dbb73ce062d40577f1a79e7`
 
-Item 29 reproduced the failed production packet only on protected copies and classified one generated action whose text exactly equaled a risk label. The compatibility candidate strengthens the generation schema with a negative enum for those labels; the existing caller validation remains unchanged. Its coordinated candidate hashes are:
+Item 29 reproduced the failed production packet only on protected copies and classified one generated action whose text exactly equaled a risk label. The compatibility candidate strengthens the generation schema with a negative enum for those labels; the existing caller validation remains unchanged. The first candidate copy gate correctly rejected the changed schema under the existing immutable prompt-version ID before reserving or invoking the model. The corrected boundary therefore registers prompt revision `incident-assessment-v2-r2` with its own creation timestamp, keeps the original system-prompt bytes, and starts a clean exact-version backlog while retaining every original run/result. Its coordinated candidate hashes are:
 
-- caller: `31c90b4ef759df097c0c018b6a70adb82a7c1b6939bbd3bd10704f2be70a5f9d`
+- runtime configuration: `db2122a46e01c32d52aef8516280039477acbf86ae367ae8e6afe533773aa8f4`
+- caller: `0aabe2a84e254d9f9c0286d21774c1bfab8cd3a94577dc84a429fc0226bc95c6`
 - output schema: `d2917c40b867aa801934579e0779f001dc8e71953aaf3ddaa2134d0736f25a51`
-- migration guard: `a776e5869f006c584e42b76301fd7e98ff761c43e6e0682b173b84dba78188dc`
+- migration guard: `f81fd0a2bd2ceea47e9eca05e33c8addd1e150de8d05106d1ff00bc30e97bde9`
 
 These compatibility bytes are not yet installed. The production timer remains disabled and the original terminal failure remains immutable evidence.
 

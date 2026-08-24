@@ -40,8 +40,9 @@ MODEL_CONFIG_DIGEST = (
 )
 MODEL_REFERENCE = 'gemma4:latest'
 MODEL_VERSION = 'ollama-gemma4-c6eb396d-v1'
-PROMPT_VERSION = 'incident-assessment-v2'
-VERSION_CREATED_AT = '2026-08-24T08:41:00+00:00'
+PROMPT_VERSION = 'incident-assessment-v2-r2'
+MODEL_VERSION_CREATED_AT = '2026-08-24T08:41:00+00:00'
+PROMPT_VERSION_CREATED_AT = '2026-08-24T10:35:00+00:00'
 OUTPUT_SCHEMA_VERSION = 2
 MAX_ARTIFACT_BYTES = 64 * 1024
 MAX_RESPONSE_BYTES = 128 * 1024
@@ -316,7 +317,7 @@ def register_versions(connection, config):
             MODEL_MANIFEST_SHA256,
             MODEL_CONFIG_DIGEST,
             options_json,
-            VERSION_CREATED_AT,
+            MODEL_VERSION_CREATED_AT,
         ),
     )
     connection.execute(
@@ -331,7 +332,7 @@ def register_versions(connection, config):
             PROMPT_SHA256,
             OUTPUT_SCHEMA_SHA256,
             OUTPUT_SCHEMA_VERSION,
-            VERSION_CREATED_AT,
+            PROMPT_VERSION_CREATED_AT,
         ),
     )
     model = connection.execute(
@@ -349,7 +350,7 @@ def register_versions(connection, config):
         MODEL_MANIFEST_SHA256,
         MODEL_CONFIG_DIGEST,
         options_json,
-        VERSION_CREATED_AT,
+        MODEL_VERSION_CREATED_AT,
     ):
         raise ReasoningError('registered reasoning model version differs')
     if prompt is None or tuple(prompt) != (
@@ -357,7 +358,7 @@ def register_versions(connection, config):
         PROMPT_SHA256,
         OUTPUT_SCHEMA_SHA256,
         OUTPUT_SCHEMA_VERSION,
-        VERSION_CREATED_AT,
+        PROMPT_VERSION_CREATED_AT,
     ):
         raise ReasoningError('registered reasoning prompt version differs')
 

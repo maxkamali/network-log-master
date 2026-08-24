@@ -206,6 +206,7 @@ class CorrelationInstallTests(unittest.TestCase):
                 ['systemctl', 'start', ACTIVATOR.SERVICE],
                 ['systemctl', 'disable', '--now', ACTIVATOR.TIMER],
                 ['systemctl', 'stop', ACTIVATOR.SERVICE],
+                ['systemctl', 'reset-failed', ACTIVATOR.SERVICE],
             ],
         )
         self.assertEqual(database.read_text(), 'state')

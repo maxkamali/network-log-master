@@ -80,7 +80,7 @@ Success ends with `GX10_MANAGED_CORRELATION=PASS`. Failure includes a UTC timest
 4. enables/starts only the correlation timer
 5. requires active verification with zero projection and incident lag
 
-Any activation error disables/stops only correlation. Projection/incident state is retained because both stages are replay-safe and fetch/ingest may continue independently.
+Any activation error disables/stops only correlation and clears the failed unit flag after the durable journal retains the failure reason. Projection/incident state is retained because both stages are replay-safe and fetch/ingest may continue independently.
 
 Disabling correlation stops/disables its timer and stops its oneshot without removing schema, cursors, incident truth, the existing fetch/ingest chain, or the protected item-25 pre-migration backup.
 

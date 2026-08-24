@@ -31,6 +31,7 @@ def run_verifier(database, mode):
 def disable_runtime():
     subprocess.run(['systemctl', 'disable', '--now', TIMER], check=False)
     subprocess.run(['systemctl', 'stop', SERVICE], check=False)
+    subprocess.run(['systemctl', 'reset-failed', SERVICE], check=False)
 
 
 def activate(database):

@@ -8795,10 +8795,13 @@ The private runtime drop-in now resets the fragment's clean-rebuild write path a
 
 The installer supports an atomic upgrade only when the existing drop-in exactly matches the previously published inactive form. It still refuses every other divergent target. A failed post-upgrade installation restores the exact prior drop-in and reloads systemd.
 
+The first inactive upgrade invocation encountered the service's retained `failed` flag from the namespace failure. The install gate rejected that state and atomically restored the prior drop-in. The activation failure cleanup now stops the service and clears this systemd-only flag after its failure reason has been captured. It does not remove journal evidence or deterministic database state.
+
 Corrected artifact SHA-256 values:
 
 - inactive installer: `16b96d9c3d084ce89cf7f2a5e18aa52e427fdfd26b23159859bd3defe0c75972`
 - verifier: `1e074560abf613075481e96f6af217896782cf65fad7bd48e03ce1df46e55719`
+- activator: `2cf33b6df7c09e82b39b7e2885894df62909923bd200005d962626a6cad95540`
 
 Validation:
 

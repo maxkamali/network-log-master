@@ -7797,3 +7797,62 @@ The database was discovered from the captured ingest source's existing absolute 
 ### Authorization boundary
 
 Both systems are technically ready for the later bounded preflight. The only current blocker is the explicit operator authorization required by item 23. Until it is recorded, work remains limited to repository preparation, testing, documentation, and read-only validation.
+
+## 2026-08-23 22:54 PDT - Production cutover authorized and staging package validated
+
+### Status
+
+Execution-order item 23 remains the single `NEXT` item.
+
+The operator explicitly authorized the documented production cutover scope: stage the separate handoff package, choose a future floor, pause GX10 at the boundary, switch only its read-only spool view, validate a bounded normalized cycle, and retain the mount-only rollback. The authorization does not permit deleting or rewriting raw logs, shadow output, ClickHouse data, or existing GX10 history.
+
+No live write or service-state change occurred in this repository subsection.
+
+### Separate staging package
+
+Added a handoff-only package that does not modify the installed shadow-package manifest:
+
+- guarded `install-handoff.py`
+- independent `verify-handoff.py`
+- exact five-artifact `handoff-package-manifest.json`
+
+The exact installed target set is:
+
+- handoff publisher module
+- handoff launcher
+- independent handoff verifier
+- handoff service unit
+- handoff timer unit
+
+The staging installer:
+
+- requires root plus an exact confirmation phrase
+- requires a private regular single-link plan with mode `0400` or `0600`
+- requires the immutable floor to be at least ten minutes in the future
+- requires the handoff timer absent/inactive and disabled
+- verifies every repository artifact against the handoff-only manifest
+- re-runs the complete active live-shadow verifier before installing anything
+- requires the existing normalizer identity and protected shadow/state/config/library roots
+- creates only an initially empty `0750` handoff root with exact read-only/default ACLs for the existing restricted spool-reader group
+- installs the protected plan and new artifacts with no-overwrite exact-content behavior
+- initializes and binds the separate handoff ledger through the runtime identity
+- verifies both units and reloads definitions without enabling or starting the timer
+- finishes with the independent staged verifier
+
+The independent verifier checks installed hashes, exact inventory, modes/ownership, runtime paths, plan/ledger metadata, handoff ACL, stable timer/service state, complete core handoff evidence, and—only in cutover mode—the exact handoff bind source plus `ro,nosuid,nodev,noexec` options.
+
+### Validation
+
+- full normalizer/parser/replay/shadow/handoff suite: `94 passed`
+- collector shadow/handoff package suite: `14 passed`
+- `NORMALIZER_SHADOW_PACKAGE_VALIDATION=PASS`
+- GX10 reconstruction suite: `42 passed`
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
+- root sanitation tests: `5 passed`
+- current-tree/history/link/ref sanitation: `PASS`
+- `git diff --check`: `PASS`
+
+### Next action
+
+Publish and independently verify this pre-cutover repository checkpoint. Then select a sufficiently future private floor, stage the package without activation, and re-run both systems' live preflight before pausing GX10.

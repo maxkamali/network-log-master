@@ -30,6 +30,14 @@ def load_script(name: str, path: Path):
 PACKAGE_DIR = ROOT / "components/collector/normalizer"
 INSTALLER = load_script("normalizer_shadow_installer", PACKAGE_DIR / "install-shadow.py")
 VERIFIER = load_script("normalizer_shadow_verifier", PACKAGE_DIR / "verify-shadow.py")
+HANDOFF_INSTALLER = load_script(
+    "normalizer_handoff_installer",
+    PACKAGE_DIR / "install-handoff.py",
+)
+HANDOFF_VERIFIER = load_script(
+    "normalizer_handoff_verifier",
+    PACKAGE_DIR / "verify-handoff.py",
+)
 
 from network_log_normalizer.shadow import load_inventory, process_source_file
 from network_log_normalizer.handoff import load_handoff_plan
@@ -205,6 +213,56 @@ class NormalizerShadowPackageTests(unittest.TestCase):
         self.assertNotIn(
             Path("/usr/local/sbin/network-log-normalizer-handoff"),
             manifest,
+        )
+
+    def test_handoff_package_manifest_and_hashes_are_exact(self):
+        manifest = HANDOFF_INSTALLER.load_manifest()
+        self.assertEqual(set(manifest), HANDOFF_INSTALLER.EXPECTED_TARGETS)
+        self.assertEqual(
+            {str(path) for path in manifest},
+            HANDOFF_VERIFIER.EXPECTED_TARGETS,
+        )
+        HANDOFF_INSTALLER.validate_repository_artifacts(manifest)
+        for target, expected in manifest.items():
+            source = HANDOFF_INSTALLER.source_for_target(target)
+            self.assertEqual(HANDOFF_INSTALLER.sha256_file(source), expected)
+
+    def test_handoff_installer_is_nonactivating_and_future_bounded(self):
+        installer = (
+            PACKAGE_DIR / "install-handoff.py"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn('"systemctl", "enable"', installer)
+        self.assertNotIn('"systemctl", "start"', installer)
+        self.assertIn("require_handoff_timer_inactive_disabled()", installer)
+        self.assertEqual(
+            HANDOFF_INSTALLER.plan_floor_datetime(
+                "2026/08/23/12/syslog-20260823-1234.jsonl.zst"
+            ).isoformat(),
+            "2026-08-23T12:34:00+00:00",
+        )
+        with self.assertRaisesRegex(
+            HANDOFF_INSTALLER.InstallError,
+            "path/time differs",
+        ):
+            HANDOFF_INSTALLER.plan_floor_datetime(
+                "2026/08/23/13/syslog-20260823-1234.jsonl.zst"
+            )
+
+    def test_handoff_verifier_requires_stable_modes_and_exact_acl(self):
+        verifier = (
+            PACKAGE_DIR / "verify-handoff.py"
+        ).read_text(encoding="utf-8")
+        for mode in ("staged", "prepared", "cutover"):
+            self.assertIn(f'"{mode}"', verifier)
+        self.assertIn("service must be inactive", verifier)
+        self.assertIn("handoff root ACL differs", verifier)
+        self.assertIn("GX10 SFTP bind source differs", verifier)
+        self.assertIn("NORMALIZER_HANDOFF_RUNTIME_VERIFY=PASS", verifier)
+        self.assertEqual(
+            HANDOFF_VERIFIER.EXPECTED_HANDOFF_ACL.count(
+                "group:ai_spool_readers:r-x"
+            ),
+            2,
         )
 
     def test_collector_package_versions_pin_reference_dependencies(self):

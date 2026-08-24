@@ -231,7 +231,7 @@ Because GX10 idempotency is keyed by source file and record number, cutover and 
 7. `DONE` — received explicit authorization, established the private inventory, staged the package, and activated it in shadow-only mode
 8. `DONE` — collected/reviewed complete historical catch-up and five normal-cadence steady-state cycles; corrected and live-proved active verifier concurrency handling
 9. `DONE` — designed and synthetically rehearsed the forward-only, file-identity-safe GX10 handoff switch and rollback without changing the live handoff
-10. `NEXT` — request explicit production-cutover authorization; only after authorization, build/stage the exact-hash handoff package and execute the documented preflight/cutover evidence gate
+10. `NEXT` — explicit production-cutover authorization is recorded; publish/stage the validated exact-hash handoff package and execute the documented preflight/cutover evidence gate
 
 ## Non-goals
 

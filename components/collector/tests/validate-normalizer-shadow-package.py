@@ -30,7 +30,9 @@ def main() -> int:
                 )
             if path.name in {
                 "install-shadow.py",
+                "install-handoff.py",
                 "verify-shadow.py",
+                "verify-handoff.py",
                 "network-log-normalizer-shadow",
                 "network-log-normalizer-handoff",
             } and not os.access(path, os.X_OK):

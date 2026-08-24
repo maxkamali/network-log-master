@@ -4,7 +4,7 @@
 
 Repository implementation and synthetic validation: complete.
 
-Live collector deployment: active in authorized shadow-only mode as of 2026-08-23; production handoff promotion is not authorized.
+Live collector deployment: active in authorized shadow-only mode as of 2026-08-23. Production handoff promotion is explicitly authorized but has not yet been staged or activated.
 
 Bounded live verification: complete for historical catch-up plus five normal-cadence steady-state cycles. The active verifier tolerates legitimate append-only worker progress by resnapshotting newly completed rows, while still failing on missing, orphaned, mutated, incomplete, or disappearing evidence.
 
@@ -24,6 +24,13 @@ The forward-only handoff design and synthetic rehearsal are complete in `docs/NO
 - `package-manifest.json` — exact installed artifact inventory and SHA-256 values
 - `versions.env` — Python and Zstandard versions observed on the collector reference host
 - `platform-inventory.example.json` — public schema example using documentation-only identities
+- `install-handoff.py` — separately guarded, non-activating handoff staging installer
+- `verify-handoff.py` — independent installed-artifact, ACL, state, content, and bind verifier
+- `handoff-package-manifest.json` — exact hashes for handoff-only installed artifacts
+- `handoff-plan.example.json` — public schema/path example for the private immutable floor
+- `network-log-normalizer-handoff` — forward publisher launcher
+- `systemd/network-log-normalizer-handoff.service` — no-network hardened publisher candidate
+- `systemd/network-log-normalizer-handoff.timer` — one-minute publisher schedule candidate
 
 The worker implementation is `components/normalizer/src/network_log_normalizer/shadow.py`.
 
@@ -108,6 +115,19 @@ Item 19 does not provide an automatic activation command. A later explicitly aut
 7. confirm Vector, ClickHouse, and the current GX10 backlog remain unchanged
 
 Promotion of GX10 to normalized output is a separate later gate.
+
+## Handoff staging procedure
+
+Production staging requires the separately recorded cutover authorization and a private plan whose floor is at least ten minutes in the future. The input plan must be a regular single-link `0400` or `0600` file matching `handoff-plan.example.json`.
+
+```text
+sudo env \
+  NORMALIZER_HANDOFF_INSTALL_CONFIRM=YES-STAGE-NORMALIZER-HANDOFF \
+  HANDOFF_PLAN_FILE=/operator/private/handoff-plan.json \
+  components/collector/normalizer/install-handoff.py
+```
+
+The installer revalidates the complete active shadow runtime, exact repository hashes, future floor, existing identities/paths, empty ACL-protected handoff root, protected installed plan, hardened units, empty initialized handoff ledger, and independent staged mode. It does not enable or start the handoff timer and does not change the GX10 bind mount.
 
 To stop shadow execution without deleting evidence:
 

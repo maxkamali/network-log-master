@@ -4,7 +4,7 @@
 
 Repository design and synthetic rehearsal: complete.
 
-Live collector/GX10 staging and activation: not authorized and not performed.
+Live collector/GX10 staging and activation: explicitly authorized; not yet performed.
 
 This document defines the selected file-identity contract, preflight, activation, verification, and rollback sequence for a later explicitly authorized production cutover. `docs/CURRENT_STATE.md` remains the authority for execution order.
 
@@ -58,7 +58,7 @@ The repository-only candidate consists of:
 - `components/collector/normalizer/systemd/network-log-normalizer-handoff.service`
 - `components/collector/normalizer/systemd/network-log-normalizer-handoff.timer`
 
-These artifacts are deliberately absent from the active shadow package manifest. They are not installed on the collector and the candidate timer is not enabled. A later authorized staging step must add a separate exact-hash handoff package/installer rather than mutating the already verified live shadow package in place.
+These artifacts remain deliberately absent from the active shadow package manifest. A separate handoff-only exact-hash manifest, guarded non-activating installer, and independent runtime verifier are now repository-validated. They are not yet installed on the collector and the candidate timer is not enabled. Staging adds new handoff artifacts without mutating the already verified live shadow package in place.
 
 The publisher:
 
@@ -171,4 +171,4 @@ The repository rehearsal uses three sequential source paths with the middle path
 - the exact handoff ledger schema and file inventory verify
 - raw-view rollback of already processed at/after-floor remote paths creates no duplicate GX10 identities or events
 
-Validation at the item-22 checkpoint reports `94` normalizer/worker tests and `11` collector-package tests passing. No live collector or GX10 state was changed by the rehearsal.
+Validation after the authorized staging-package implementation reports `94` normalizer/worker tests and `14` collector-package tests passing. No live collector or GX10 state was changed by the rehearsal or package implementation.

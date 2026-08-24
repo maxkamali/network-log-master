@@ -101,7 +101,7 @@ After the current system is reconstructable:
 2. `DONE` — implement the repository-side durable shadow worker, validation, packaging, and rollback safeguards
 3. `DONE` — the explicitly authorized private-inventory shadow deployment is active; complete catch-up, steady-state, concurrency, isolation, and unchanged-production validation passed
 4. `DONE` — designed and synthetically rehearsed the immutable-floor, identity-preserving forward handoff and rollback without changing the live handoff
-5. `NEXT` — obtain explicit authorization, then stage the exact-hash handoff package and execute the bounded production cutover/rollback gate
+5. `NEXT` — explicit authorization is recorded; stage the exact-hash handoff package and execute the bounded production cutover/rollback gate
 6. `QUEUED` — retire transitional GX10 vendor parsing deliberately after normalized handoff stability is proven
 
 ## Milestone 6 - Deterministic incident engine on GX10

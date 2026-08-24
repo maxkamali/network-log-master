@@ -2,7 +2,7 @@
 
 ## Status and authority boundary
 
-Execution-order item 27 has a repository-only candidate. The schema, builder, and synthetic tests pass; no reasoning schema or packet-builder artifact is installed on the working GX10 system, no packet has been built from production state, and no service or timer invokes the builder.
+Execution-order item 27 has a repository-only candidate including a guarded existing-system migration. The schema, builder, migration guard, and synthetic tests pass; no reasoning schema or packet-builder artifact is installed on the working GX10 system, no packet has been built from production state, and no service or timer invokes the builder.
 
 The candidate converts deterministic incident state into an append-only queue of compact reasoning packets. It does not call Ollama, select a model, define a prompt, accept model output, write to the collector, or alter incident identity/lifecycle truth.
 
@@ -64,19 +64,21 @@ No cursor is required: append-only sequence bases and unique deterministic packe
 
 - schema: `components/gx10/sql/reasoning-v1.sql`
 - packet builder: `components/gx10/sbin/build-reasoning-packets.py`
+- existing-system migration guard: `components/gx10/install/migrate-reasoning-packets.py`
 - synthetic contract: `components/gx10/tests/test_reasoning_packets.py`
 
 Candidate SHA-256 values:
 
 - schema: `bd46f4a51301c225e051aa6b5e27406ad06c651271d7c82fb3b67ac2b21def90`
 - builder: `259f26353714e7ff8adbf627a33dcae6025e933f24fc9f2600b06882c3e16e00`
+- migration guard: `2a576c11d7138a012bb3e6b9e69731c862d50931f9fa5210420bf368a68564af`
 
 The clean-machine initializer/installer/verifier include the candidate, but base and correlation activation still do not schedule it.
 
 ## Remaining item-27 gates
 
 1. publish and independently verify this repository candidate
-2. add a guarded existing-system schema/artifact migration with protected backup and no scheduler reference
+2. `DONE` — add a guarded existing-system schema/artifact migration with protected backup and no scheduler reference
 3. rehearse schema migration, first packet build, no-op, new qualifying/nonqualifying evidence, lifecycle packets, tamper failure, and deterministic independent reproduction on protected production-state copies
 4. install schema/builder unscheduled only after exact published artifacts and copy gates pass
 5. do not schedule packet construction or inference until a later explicit managed-invocation gate

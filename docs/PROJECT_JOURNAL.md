@@ -8978,3 +8978,44 @@ No production database, artifact, service, timer, Ollama API, model, prompt, res
 ### Next action
 
 Run the full public gate, publish, and independently verify this candidate. Then add a guarded exact-schema/exact-artifact existing-system migration and rehearse migration plus deterministic packet behavior on protected production-state copies before considering any unscheduled working-system installation.
+
+## 2026-08-24 01:10 PDT - Item 27 guarded unscheduled migration candidate built
+
+### Status
+
+Execution-order item 27 remains the single `NEXT` item and is in progress.
+
+The deterministic wake/packet candidate was published and independently matched on GitHub at:
+
+`be366b28d8c3a2211f976e972ccf0c964e3119ef` — `Build deterministic reasoning packet candidate`
+
+The new migration guard requires:
+
+- exact base-plus-incident schema before apply and exact reasoning schema after apply
+- exact published reasoning schema and packet-builder hashes
+- unchanged functional suppression fields
+- SQLite quick/foreign-key checks and zero application/user versions
+- an absent target artifact and zero systemd/cron scheduler references to that target
+- root-owned protected target/backup parent directories
+- a new root-only mode-`0600` SQLite online backup that independently validates as exact pre-reasoning state
+- preserved application-database owner/group/mode
+
+It installs only the reasoning schema and exact mode-`0755` root-owned builder. It creates no unit, timer, cron entry, config, packet, Ollama call, or result path. Rollback removes only the reasoning table/indexes/triggers and exact builder and refuses once any packet exists. It never restores the backup over newer working state.
+
+Five focused migration tests prove apply/verify/empty rollback, exact pre-reasoning backup, divergent-schema refusal before backup, scheduler-reference refusal, and nonempty-packet rollback refusal.
+
+Validation:
+
+```text
+93 tests passed
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+```
+
+Migration-guard SHA-256:
+
+`2a576c11d7138a012bb3e6b9e69731c862d50931f9fa5210420bf368a68564af`
+
+### Next action
+
+Run the public gate, publish, and independently verify this migration candidate. Then stage only exact public artifacts on GX10 and execute the guard plus packet-builder behaviors against protected production-state copies. The working database and installed runtime remain unchanged.

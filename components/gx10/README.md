@@ -33,7 +33,7 @@ Current state:
 - production packet construction and bounded local-LLM inference have begun behind the separately disableable item-29 gate; collector result production remains a future phase
 - the deterministic wake-policy/compact-packet schema and exact builder are installed unscheduled under protected backup with zero packet rows, invocations, or scheduler references
 - the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; the original exact artifacts were installed empty under protected backup before item-29 activation
-- the item-29 backlog-deferral correction passed protected-copy, inactive-install, protected-resume, and one natural-drain gates; a later strict invalid-output safe failure disabled reasoning with append-only state preserved, and exact prompt revision `r3` passed remote tests plus same-packet protected-copy replay before its four-artifact inactive-upgrade gate
+- the item-29 backlog-deferral correction passed protected-copy, inactive-install, protected-resume, and one natural-drain gates; a later strict invalid-output safe failure disabled reasoning with append-only state preserved, and exact prompt revision `r3` passed remote tests, same-packet protected-copy replay, and four-artifact inactive production upgrade with state unchanged
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -125,7 +125,7 @@ The large model blobs are intentionally not stored in Git. `install/install-mode
 
 The item-28 application-specific caller and supporting schema/configuration/prompt artifacts were installed empty and unscheduled under protected backup. Item 29 later invoked the boundary through its separately managed schedule; deterministic schedules remain independent of Ollama.
 
-The item-29 service/timer/private binding and bounded-backlog runner remain installed, but the timer is disabled after a strict invalid-output cadence. Append-only production reasoning state is preserved. Exact prompt revision `r3` passed remote tests and same-packet protected-copy replay; its exact inactive runtime-config/schema/caller/runner upgrade and post-upgrade state verification remain required before protected resume. See `docs/MANAGED_REASONING.md`.
+The item-29 service/timer/private binding remain installed and the timer remains disabled after a strict invalid-output cadence. Exact prompt revision `r3` passed remote tests, same-packet protected-copy replay, and inactive runtime-config/schema/caller/runner upgrade with production state unchanged. A fresh-backup protected `r3` drain remains required before timer enablement. See `docs/MANAGED_REASONING.md`.
 
 ## Guarded activation and runtime verification
 

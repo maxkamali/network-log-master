@@ -10235,3 +10235,45 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify this protected-copy checkpoint. Then use only the exact staged installer to replace the four exact predecessor runtime-config/schema/caller/runner files while reasoning remains disabled. Require unchanged append-only production state/digest, revised-version pending 12, zero `STARTED` rows, and healthy independent schedules before any protected production drain.
+
+## 2026-08-24 03:50 PDT - Item 29 exact r3 compatibility bytes installed inactive
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The successful portable same-packet protected-copy checkpoint was published and independently matched on GitHub at:
+
+`ff5e9f704e33ae7717e22c57c173afb92b42f177` — `Record portable reasoning copy replay`
+
+Using only the exact already tested `r3` staging boundary, the installer accepted each installed production file only because it matched the exact published predecessor hash, root ownership, and mode. It atomically replaced the runtime configuration, output schema, local caller, and managed runner. The corrected timer, service, private binding, prompt, and deterministic builder were reused unchanged.
+
+Reasoning remained disabled and inactive throughout. The complete digest across packets, model/prompt registrations, runs, and results matched before and after. No packet was built, no prompt revision was registered, no model was called, and no run/result was added. The new runner reports all 12 packets pending for `incident-assessment-v2-r3`; the one stored prompt registration and all six original-version runs remain unchanged. Fetch/ingest and correlation stayed healthy at deterministic zero lag.
+
+```text
+recent_max_id=972109
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_revised_pending=12
+reasoning_model_versions=1
+reasoning_prompt_versions=1
+reasoning_runs=6
+reasoning_started=0
+reasoning_succeeded=5
+reasoning_failures=1
+reasoning_results=5
+reasoning_state_sha256=f0ccc5c597e740d22164815af28f3e15ecff8197c7ffd353af6d3cee04e99421
+managed_reasoning_timer_enabled=no
+managed_reasoning_timer_active=no
+managed_reasoning_service_active=no
+managed_reasoning_restarts=0
+production_inference_invoked=no
+pipeline_timer_active=yes
+correlation_timer_active=yes
+GX10_MANAGED_REASONING_R3_INACTIVE_UPGRADE=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, connection value, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this inactive-upgrade checkpoint. Then create a fresh protected pre-resume backup and run exactly one `r3` production drain while the timer remains disabled. Enable the timer only after aggregate verification proves packets fixed at 12, revised pending 12→11, prompt versions 1→2, runs 6→7, successes/results 5→6, the historical failure fixed at one, zero `STARTED` rows, and deterministic zero lag.

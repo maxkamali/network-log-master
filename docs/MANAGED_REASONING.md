@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. The published backlog correction passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. The second corrected natural cadence also kept packets fixed at 12 and reduced pending 7→6, but its single model response failed strict output validation. The caller stored one terminal `INVALID_OUTPUT` run and no result or invalid content. Reasoning was disabled with zero `STARTED` rows or restarts. Protected-copy replay reproduced and classified action text exactly equal to a risk label. Immutable-ID reuse was correctly refused, and prompt revision `r2` proved the local runtime does not enforce `not/enum`. Exact published `incident-assessment-v2-r3` passed 140 remote tests and the same failed packet produced one valid protected-copy result through its portable 25-character generation minimum and unchanged strict validator. Production remains unchanged at 12 packets, six old-version pending, six runs, five successful results, and one explicit safe failure. The four compatibility bytes remain uninstalled.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. The published backlog correction passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. The second corrected natural cadence stored one terminal `INVALID_OUTPUT` without result/content and reasoning was disabled. Protected-copy replay classified action text exactly equal to a risk label. Immutable-ID reuse was correctly refused, and prompt revision `r2` proved the local runtime does not enforce `not/enum`. Exact published `incident-assessment-v2-r3` passed 140 remote tests and the same failed packet produced one valid protected-copy result through its portable 25-character generation minimum and unchanged strict validator. The exact four compatibility bytes are installed inactive with the reasoning-state digest unchanged. Production has 12 packets, 12 revised-version pending, one original prompt registration, six original runs, five successful results, one explicit safe failure, and zero `STARTED` rows/restarts. The reasoning timer remains disabled.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -333,4 +333,23 @@ The protected backup path and all packet/result content remain private.
 - service SHA-256: `3559ed6a5bdfc98de3544bc6bf7f69cf6459a9cb50083cd96db632a27e52e64a`
 - timer SHA-256: `c284e9d8cbb71775dc6b67b7451bb024d689b4ec27b89de987443a6ff77cad34`
 
-These hashes describe the immutable prompt-revision/generation-schema compatibility candidate. The activator, verifier, service, and corrected timer are byte-identical to the activation candidate. The currently installed runtime config, output schema, caller, and bounded-backlog runner remain their exact published predecessors while reasoning is disabled; the compatibility bytes are not yet installed.
+These hashes describe the installed immutable prompt-revision/generation-schema compatibility boundary. The activator, verifier, service, and corrected timer are byte-identical to the activation candidate. The runtime config, output schema, caller, and bounded-backlog runner were upgraded atomically from their exact published predecessors while reasoning remained disabled.
+
+```text
+inactive_upgrade_recent_max_id=972109
+inactive_upgrade_projection_lag=0
+inactive_upgrade_incident_lag=0
+inactive_upgrade_packets=12
+inactive_upgrade_revised_pending=12
+inactive_upgrade_model_versions=1
+inactive_upgrade_prompt_versions=1
+inactive_upgrade_runs=6
+inactive_upgrade_started=0
+inactive_upgrade_succeeded=5
+inactive_upgrade_failures=1
+inactive_upgrade_results=5
+inactive_upgrade_state_sha256=f0ccc5c597e740d22164815af28f3e15ecff8197c7ffd353af6d3cee04e99421
+inactive_upgrade_reasoning_enabled=no
+inactive_upgrade_production_inference_invoked=no
+GX10_MANAGED_REASONING_R3_INACTIVE_UPGRADE=PASS
+```

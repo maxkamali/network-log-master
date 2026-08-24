@@ -242,7 +242,15 @@ def validate_units(active):
         raise ValueError('managed result outbox restart count differs')
 
 
-def verify(database, root, ready, delivered, *, active):
+def verify(
+    database,
+    root,
+    ready,
+    delivered,
+    *,
+    active,
+    allow_populated_inactive=False,
+):
     for source, target, mode in ARTIFACTS:
         validate_file(target, mode, source=source)
     state = validate_database(database)
@@ -258,7 +266,11 @@ def verify(database, root, ready, delivered, *, active):
     ready_names, delivered_names = producer.preflight(
         ready, delivered, records
     )
-    if not active and (ready_names or delivered_names):
+    if (
+        not active
+        and not allow_populated_inactive
+        and (ready_names or delivered_names)
+    ):
         raise ValueError('inactive managed result outbox is not empty')
     if len(ready_names) + len(delivered_names) > state['results']:
         raise ValueError('managed result outbox file count differs')

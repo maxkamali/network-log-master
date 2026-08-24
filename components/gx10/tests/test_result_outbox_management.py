@@ -17,6 +17,7 @@ GX10_DIR = Path(__file__).resolve().parents[1]
 RUNNER_PATH = GX10_DIR / 'sbin' / 'run-result-outbox.py'
 INSTALLER_PATH = GX10_DIR / 'install' / 'install-result-outbox.py'
 VERIFIER_PATH = GX10_DIR / 'install' / 'verify-result-outbox.py'
+ACTIVATOR_PATH = GX10_DIR / 'install' / 'activate-result-outbox.py'
 SERVICE_PATH = (
     GX10_DIR / 'systemd' / 'network-log-gx10-result-outbox.service'
 )
@@ -42,6 +43,9 @@ class ResultOutboxManagementTests(unittest.TestCase):
         )
         cls.verifier = load_module(
             'managed_outbox_verifier_test', VERIFIER_PATH
+        )
+        cls.activator = load_module(
+            'managed_outbox_activator_test', ACTIVATOR_PATH
         )
 
     def setUp(self):
@@ -179,12 +183,31 @@ class ResultOutboxManagementTests(unittest.TestCase):
         ):
             self.verifier.validate_database(database)
 
+    def test_activation_reasoning_snapshot_is_deterministic(self):
+        database = self.create_database()
+        connection = sqlite3.connect(database)
+        connection.execute(
+            "INSERT INTO reasoning_runs VALUES ('run-2','INVALID_OUTPUT')"
+        )
+        connection.commit()
+        connection.close()
+        first = self.activator.reasoning_snapshot(database)
+        second = self.activator.reasoning_snapshot(database)
+        self.assertEqual(first, second)
+        self.assertEqual(first['runs'], 2)
+        self.assertEqual(first['results'], 1)
+        self.assertEqual(first['failures'], 1)
+        self.assertRegex(first['digest'], r'^[0-9a-f]{64}$')
+
     def test_install_sources_and_public_units_have_expected_modes(self):
         for source, _, mode in self.installer.ARTIFACTS:
             self.assertTrue(source.is_file())
             self.assertEqual(stat.S_IMODE(source.stat().st_mode), mode)
         self.assertNotIn('IdentityFile', INSTALLER_PATH.read_text())
         self.assertNotIn('known_hosts', INSTALLER_PATH.read_text())
+        self.assertEqual(
+            stat.S_IMODE(ACTIVATOR_PATH.stat().st_mode), 0o755
+        )
 
 
 if __name__ == '__main__':

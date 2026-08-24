@@ -10688,3 +10688,63 @@ No private database/outbox path, result/packet/event/entity content, connection 
 ### Next action
 
 Run the full public gate, publish this inactive-install checkpoint, and independently verify GitHub. Then design and prove protected local-only activation: create a fresh state checkpoint, run exactly one bounded service cycle while the timer remains disabled, require one collector-valid ready file per then-current successful result and an unchanged SQLite state, and enable the timer only after independent verification. Do not install writer credentials or transmit to the collector.
+
+## 2026-08-24 04:38 PDT - Item 30 protected local activation rehearsal passed
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The corrected inactive-install checkpoint was published and independently matched on GitHub at:
+
+`7ffa933f224857ae639ccaeea8fe0d7814e87431` — `Record inactive result outbox installation`
+
+The protected local-only activator now:
+
+- independently verifies the exact empty inactive installation
+- requires the managed-reasoning timer active/enabled and service nonfailed
+- keeps the outbox timer disabled and temporarily disables only managed reasoning
+- waits for any reasoning oneshot to settle without stopping fetch/ingest or deterministic correlation
+- hashes every row/column of all five reasoning tables in deterministic primary-key order and requires zero `STARTED` plus exactly one preserved failure
+- runs exactly one no-network outbox service cycle
+- requires the exact same post-cycle reasoning digest and one ready file per successful result with zero delivered
+- enables the outbox timer only after independent populated-inactive and active verification
+- restores managed reasoning on success and every failure path
+- disables only the outbox timer on activation error
+
+One focused deterministic-snapshot test brings the complete suite to 158. The exact staged tree passed all 158 tests and the GX10 filesystem contract.
+
+```text
+staged_tree=42ff6c97a7f2317004bfb50386a0e9aa86a92731
+staged_archive_sha256=c30a53edc90eae2d4a677006bce912af7c3506784c9e443de1a6f7e3f7bb06df
+activator_sha256=9fd0da43e2af3824cc1b699a954543bccc9dc12f3e26a62dcd98e67637c19b79
+verifier_sha256=d551c39d2965256b392a1862f1c5406a1736409e33cfba5daf091da38798fecc
+management_tests_sha256=153bdbb8ba114c6e84ed3bde1bf3a0fc3f1288b756fa86338305ae8b8d75ce6f
+local_tests=158
+remote_tests=158
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+```
+
+A full exact-package retained-copy rehearsal installed a fresh isolated empty boundary, simulated the systemd state machine, and ran the activator over the protected 12-result copy. The reasoning digest was identical before, inside, and after activation. Exactly 12 ready files and zero delivered files passed independent producer validation. Both synthetic timers ended active, the protected copy remained unchanged, and no actual systemd, credential, or collector state changed.
+
+```text
+reasoning_packets=12
+reasoning_runs=13
+reasoning_results=12
+reasoning_failures=1
+reasoning_sha256=cfefe6c13bcee5e3096f642839a690cf8d277a4b41dbd5487bed437f6bdcd313
+outbox_ready=12
+outbox_delivered=0
+outbox_timer_enabled=yes
+reasoning_timer_restored=yes
+copy_source_unchanged=yes
+systemd_state_changed=no
+credentials_installed=no
+collector_transmission_invoked=no
+GX10_RESULT_OUTBOX_LOCAL_ACTIVATION_REHEARSAL=PASS
+```
+
+No private database/outbox path, result/packet/event/entity content, connection value, private runtime identity, credential, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish the activator checkpoint, and independently verify GitHub. Then execute only the exact protected local activation on GX10. Require exact reasoning digest preservation, ready count equal to then-current results, zero delivered, both outbox/reasoning timers active, all deterministic schedules healthy, every file collector-valid, no credential, and no transmission.

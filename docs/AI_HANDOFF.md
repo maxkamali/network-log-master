@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-Item 29 is complete. Item 30 is the single `NEXT`. Its repository/protected-copy and inactive-package rehearsal gates pass with 157 local/exact GX10-staged tests, exact-hash no-network runner/service, disabled timer, guarded installer, independent verifier, shared-lock ready/delivered state, exact installed-copy generation/replay, unchanged source, and forced-failure cleanup. The package is not installed on the working system, has no writer credential, and transmitted nothing. Read `docs/RESULT_OUTBOX.md`; next publish and install/verify only the inactive empty local boundary before any sender or credential gate.
+Item 29 is complete. Item 30 is the single `NEXT`. Its repository/protected-copy/package rehearsal and corrected working-system inactive-install gates pass with 157 tests, exact-hash no-network runner/service, shared-lock ready/delivered state, guarded installer/independent verifier, exact copy generation/replay, forced-failure cleanup, and zero-target cleanup after the initial public-default-path refusal. Production has exact installed artifacts, 14 current results, zero ready/delivered files, a disabled timer, and a never-invoked service. No writer credential exists and nothing was transmitted. Read `docs/RESULT_OUTBOX.md`; next prove protected local-only activation before any sender/credential gate.
 
 The active automatic application chains are:
 

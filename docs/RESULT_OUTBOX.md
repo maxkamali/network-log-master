@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 repository, protected-copy, and inactive-package rehearsal gates pass. The version-1 producer and managed package passed 157 GX10 tests locally and from an exact GX10-staged tree. The package is not installed on the working system, has no result-writer credential, and cannot transmit to the collector.
+Execution-order item 30 repository, protected-copy, inactive-package rehearsal, and corrected working-system inactive-install gates pass. The version-1 producer and managed package passed 157 GX10 tests locally and from exact GX10-staged trees. Exact artifacts/configuration and empty ready/delivered directories are installed; the service has never run, the timer is disabled/inactive, no result-writer credential exists, and the boundary cannot transmit to the collector.
 
 ## Boundary
 
@@ -45,4 +45,6 @@ The managed package contains an exact-hash runner, an independently disableable 
 
 An exact GX10-staged private-copy rehearsal installed into an isolated root without touching systemd, generated all 12 copy results through the installed runner, reused 11 ready plus one delivered without recreation, preserved the database hash, and removed every managed artifact after a forced post-install verification failure.
 
-Next publish this package checkpoint, then install and independently verify only the inactive empty boundary on the working GX10. Do not run the service or copy files to the collector during that gate. Writer-key installation and live transfer remain later explicit gates. The later sender and collector gate must still close the upload-success/local-acknowledgment crash window before live replay safety can pass.
+The corrected working-system install derived the protected database/root without printing them, installed exact bytes, and independently verified 14 current successful results with zero ready/delivered files. The new timer is disabled, the service is inactive and never invoked, effective private networking/Unix-only/write scope passes, all three preexisting schedules remain healthy, and no credential or transmission exists.
+
+Next design and prove protected activation of only the local no-network producer: require a fresh state checkpoint, exactly one bounded initial cycle, one ready file per then-current successful result, unchanged SQLite state, collector-gate validation of every file, then independent timer-only cadence evidence. Writer-key installation and live transfer remain later explicit gates. The later sender and collector gate must still close the upload-success/local-acknowledgment crash window before live replay safety can pass.

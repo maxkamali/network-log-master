@@ -10634,3 +10634,57 @@ No private database/outbox path, result/packet/event/entity content, connection 
 ### Next action
 
 Run the full public gate, publish the portability correction, and independently verify GitHub. Then retry the exact corrected inactive install. Require zero ready/delivered files, disabled/inactive units, exact installed bytes/configuration/private ownership, healthy preexisting schedules, unchanged reasoning aggregates, no credential, and no collector transmission.
+
+## 2026-08-24 04:34 PDT - Item 30 corrected inactive working-system install passed
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The production-path portability correction was published and independently matched on GitHub at:
+
+`9aaf2efd29f3caa640ef89cd29254e35200ecbaa` — `Derive result outbox production paths`
+
+The exact corrected staged installer derived the protected database/root through the already-installed managed-reasoning configuration without printing either path. It installed the producer, exact-hash runner, service, timer, private configuration/drop-in, and empty ready/delivered directories. Its independent verifier required exact repository/installed bytes, root/private ownership and modes, database integrity/result invariants, private runtime binding, exact empty directory state, disabled timer, inactive service, and zero restarts.
+
+```text
+reasoning_results_at_install=14
+outbox_ready=0
+outbox_delivered=0
+outbox_timer_enabled=no
+outbox_service_active=no
+credentials_installed=no
+GX10_RESULT_OUTBOX_INACTIVE_INSTALL=PASS
+GX10_MANAGED_RESULT_OUTBOX_VERIFY=PASS
+```
+
+A first follow-up managed-reasoning verifier invocation used its public clean-rebuild default database and stopped on the private configuration mismatch; it made no change. The corrected aggregate-only postcheck supplied the installed private database through the same protected configuration and passed both existing managed-reasoning and correlation verifiers. All three preexisting timers remained active/enabled, their services were nonfailed with zero restarts, and both deterministic lags were zero.
+
+The outbox unit's effective properties independently showed private networking, Unix-socket-only address families, exact private write scope, disabled/inactive state, zero restarts, and an empty start timestamp proving the service had never executed. Ready and delivered remained empty. No SSH/SFTP key, sender, collector value, or transmission operation exists.
+
+```text
+recent_max_id=977532
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_pending=3
+reasoning_runs=15
+reasoning_started=0
+reasoning_succeeded=14
+reasoning_failures=1
+reasoning_results=14
+outbox_ready=0
+outbox_delivered=0
+outbox_timer_enabled=no
+outbox_service_invoked=no
+outbox_private_network=yes
+outbox_address_families=AF_UNIX
+preexisting_schedules_healthy=yes
+credentials_installed=no
+collector_transmission_invoked=no
+GX10_RESULT_OUTBOX_INACTIVE_POSTCHECK=PASS
+```
+
+No private database/outbox path, result/packet/event/entity content, connection value, private runtime identity, credential, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish this inactive-install checkpoint, and independently verify GitHub. Then design and prove protected local-only activation: create a fresh state checkpoint, run exactly one bounded service cycle while the timer remains disabled, require one collector-valid ready file per then-current successful result and an unchanged SQLite state, and enable the timer only after independent verification. Do not install writer credentials or transmit to the collector.

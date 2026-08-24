@@ -503,5 +503,6 @@ Consequence:
 - ready and delivered are protected sibling states under one shared lock; an exact delivered file suppresses recreation, duplicate state fails closed, exact existing files are no-ops, divergence fails before new publication, and only strictly validated ready-state producer partials are recoverable
 - publication is lock-protected, same-directory atomic, file/directory `fsync`-backed, size-bounded, and postvalidated
 - the repository/exact GX10 stage and protected-copy gates pass with 151 tests, 12-for-12 result generation, one simulated delivered transition, and exact 11-ready/one-delivered replay
-- no producer artifact, service, timer, writer credential, or sender is installed by this decision
+- the separately managed package adds an exact-hash runner, private-network/Unix-only oneshot, disabled timer, guarded empty installer, independent verifier, and complete failure cleanup; its isolated exact-tree rehearsal passes with 157 tests
+- no producer artifact, service, timer, writer credential, or sender is installed on the working system by this decision
 - a later sender must define durable acknowledgment semantics before it may remove or retransmit a local ready file

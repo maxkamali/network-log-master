@@ -1,0 +1,290 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import grp
+import importlib.util
+import json
+import os
+from pathlib import Path
+import pwd
+import re
+import sqlite3
+import stat
+import subprocess
+import sys
+
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+GX10_DIR = SCRIPT_DIR.parent
+LIBEXEC_DIR = Path('/usr/local/libexec/network-log-gx10')
+CONFIG_DIR = Path('/etc/network-log-gx10')
+SYSTEMD_DIR = Path('/etc/systemd/system')
+DEFAULT_DATABASE = Path('/var/lib/network-log-gx10/state/events.sqlite3')
+OUTBOX_ROOT = Path('/var/lib/network-log-gx10/result-outbox')
+READY_DIR = OUTBOX_ROOT / 'ready'
+DELIVERED_DIR = OUTBOX_ROOT / 'delivered'
+CONFIG_PATH = CONFIG_DIR / 'result-outbox.json'
+SERVICE = 'network-log-gx10-result-outbox.service'
+TIMER = 'network-log-gx10-result-outbox.timer'
+REASONING_SERVICE = 'network-log-gx10-reasoning.service'
+DROPIN_PATH = SYSTEMD_DIR / f'{SERVICE}.d' / '10-runtime.conf'
+SAFE_NAME_RE = re.compile(r'^[A-Za-z0-9_.@-]+$')
+ARTIFACTS = (
+    (
+        GX10_DIR / 'sbin' / 'build-result-outbox.py',
+        LIBEXEC_DIR / 'build-result-outbox.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'run-result-outbox.py',
+        LIBEXEC_DIR / 'run-result-outbox.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'systemd' / SERVICE,
+        SYSTEMD_DIR / SERVICE,
+        0o644,
+    ),
+    (
+        GX10_DIR / 'systemd' / TIMER,
+        SYSTEMD_DIR / TIMER,
+        0o644,
+    ),
+)
+REQUIRED_TABLES = {
+    'reasoning_packets',
+    'reasoning_model_versions',
+    'reasoning_prompt_versions',
+    'reasoning_runs',
+    'reasoning_results',
+}
+
+
+def systemctl_value(unit, property_name):
+    return subprocess.run(
+        ['systemctl', 'show', unit, f'--property={property_name}', '--value'],
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ).stdout.strip()
+
+
+def service_identity():
+    user = systemctl_value(REASONING_SERVICE, 'User')
+    group = systemctl_value(REASONING_SERVICE, 'Group')
+    if (
+        SAFE_NAME_RE.fullmatch(user) is None
+        or SAFE_NAME_RE.fullmatch(group) is None
+    ):
+        raise ValueError('managed result outbox identity differs')
+    return user, group, pwd.getpwnam(user).pw_uid, grp.getgrnam(group).gr_gid
+
+
+def validate_file(path, mode, *, source=None, uid=0, gid=0):
+    path = Path(path)
+    if path.is_symlink() or not path.is_file():
+        raise ValueError(
+            'managed result outbox artifact is not a regular file'
+        )
+    details = path.stat()
+    if (
+        details.st_nlink != 1
+        or details.st_uid != uid
+        or details.st_gid != gid
+        or stat.S_IMODE(details.st_mode) != mode
+    ):
+        raise ValueError('managed result outbox artifact metadata differs')
+    if source is not None and Path(source).read_bytes() != path.read_bytes():
+        raise ValueError('managed result outbox installed source differs')
+
+
+def validate_directory(path, uid, gid, mode=0o700):
+    path = Path(path)
+    if path.is_symlink() or not path.is_dir():
+        raise ValueError('managed result outbox directory differs')
+    details = path.stat()
+    if (
+        details.st_uid != uid
+        or details.st_gid != gid
+        or stat.S_IMODE(details.st_mode) != mode
+    ):
+        raise ValueError('managed result outbox directory metadata differs')
+
+
+def validate_database(path):
+    path = Path(path)
+    if path.is_symlink() or not path.is_file():
+        raise ValueError('managed result outbox database differs')
+    connection = sqlite3.connect(f'{path.as_uri()}?mode=ro', uri=True)
+    try:
+        if connection.execute('PRAGMA quick_check').fetchone()[0] != 'ok':
+            raise ValueError('managed result outbox quick_check failed')
+        if connection.execute('PRAGMA foreign_key_check').fetchone() is not None:
+            raise ValueError('managed result outbox foreign_key_check failed')
+        tables = {
+            row[0]
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )
+        }
+        if not REQUIRED_TABLES <= tables:
+            raise ValueError('managed result outbox schema differs')
+        counts = connection.execute(
+            '''
+            SELECT
+              (SELECT COUNT(*) FROM reasoning_results),
+              (SELECT COUNT(*) FROM reasoning_runs WHERE status='SUCCEEDED'),
+              (SELECT COUNT(*) FROM reasoning_runs WHERE status='STARTED')
+            '''
+        ).fetchone()
+        if counts[0] != counts[1] or counts[2]:
+            raise ValueError('managed result outbox reasoning state differs')
+        return {'results': counts[0], 'started': counts[2]}
+    finally:
+        connection.close()
+
+
+def load_producer():
+    path = LIBEXEC_DIR / 'build-result-outbox.py'
+    specification = importlib.util.spec_from_file_location(
+        'verified_installed_result_outbox', path
+    )
+    if specification is None or specification.loader is None:
+        raise ValueError('managed result outbox producer cannot be loaded')
+    module = importlib.util.module_from_spec(specification)
+    specification.loader.exec_module(module)
+    return module
+
+
+def validate_private_runtime(database, root, ready, delivered):
+    user, group, uid, gid = service_identity()
+    validate_file(CONFIG_PATH, 0o640, uid=0, gid=gid)
+    config = json.loads(CONFIG_PATH.read_text(encoding='utf-8'))
+    if config != {
+        'database_path': str(Path(database)),
+        'delivered_path': str(Path(delivered)),
+        'ready_path': str(Path(ready)),
+    }:
+        raise ValueError('managed result outbox configuration differs')
+    validate_file(DROPIN_PATH, 0o644)
+    lines = DROPIN_PATH.read_text(encoding='utf-8').splitlines()
+    if lines != [
+        '[Service]',
+        f'User={user}',
+        f'Group={group}',
+        'ReadWritePaths=',
+        f'ReadWritePaths={root}',
+    ]:
+        raise ValueError('managed result outbox drop-in differs')
+    validate_directory(root, uid, gid)
+    validate_directory(ready, uid, gid)
+    validate_directory(delivered, uid, gid)
+    allowed = {'ready', 'delivered'}
+    lock = Path(root) / '.result-outbox.lock'
+    if lock.exists() or lock.is_symlink():
+        validate_file(lock, 0o600, uid=uid, gid=gid)
+        allowed.add(lock.name)
+    if {path.name for path in Path(root).iterdir()} != allowed:
+        raise ValueError('managed result outbox root entries differ')
+    database_details = Path(database).stat()
+    if database_details.st_uid != uid or database_details.st_gid != gid:
+        raise ValueError('managed result outbox database identity differs')
+    return uid, gid
+
+
+def validate_units(active):
+    for unit in (SERVICE, TIMER):
+        if systemctl_value(unit, 'LoadState') != 'loaded':
+            raise ValueError('managed result outbox unit is not loaded')
+        if Path(systemctl_value(unit, 'FragmentPath')) != SYSTEMD_DIR / unit:
+            raise ValueError('managed result outbox fragment path differs')
+    if systemctl_value(SERVICE, 'DropInPaths') != str(DROPIN_PATH):
+        raise ValueError('managed result outbox drop-in state differs')
+    if systemctl_value(TIMER, 'DropInPaths'):
+        raise ValueError('managed result outbox timer drop-in differs')
+    if systemctl_value(SERVICE, 'UnitFileState') != 'static':
+        raise ValueError('managed result outbox service enablement differs')
+    expected = 'enabled' if active else 'disabled'
+    if systemctl_value(TIMER, 'UnitFileState') != expected:
+        raise ValueError('managed result outbox timer enablement differs')
+    timer_state = systemctl_value(TIMER, 'ActiveState')
+    service_state = systemctl_value(SERVICE, 'ActiveState')
+    if active:
+        if timer_state != 'active' or service_state == 'failed':
+            raise ValueError('managed result outbox active state differs')
+        if systemctl_value(SERVICE, 'Result') != 'success':
+            raise ValueError('managed result outbox service result differs')
+    elif timer_state != 'inactive' or service_state != 'inactive':
+        raise ValueError('managed result outbox inactive state differs')
+    if systemctl_value(SERVICE, 'NRestarts') != '0':
+        raise ValueError('managed result outbox restart count differs')
+
+
+def verify(database, root, ready, delivered, *, active):
+    for source, target, mode in ARTIFACTS:
+        validate_file(target, mode, source=source)
+    state = validate_database(database)
+    validate_private_runtime(database, root, ready, delivered)
+    validate_units(active)
+    producer = load_producer()
+    records = producer.load_records(database)
+    if any(
+        producer.PARTIAL_RE.fullmatch(path.name)
+        for path in Path(ready).iterdir()
+    ):
+        raise ValueError('managed result outbox has a stale partial')
+    ready_names, delivered_names = producer.preflight(
+        ready, delivered, records
+    )
+    if not active and (ready_names or delivered_names):
+        raise ValueError('inactive managed result outbox is not empty')
+    if len(ready_names) + len(delivered_names) > state['results']:
+        raise ValueError('managed result outbox file count differs')
+    return {
+        'results': state['results'],
+        'ready': len(ready_names),
+        'delivered': len(delivered_names),
+    }
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument('--installed', action='store_true')
+    mode.add_argument('--active', action='store_true')
+    parser.add_argument('--database', type=Path, default=DEFAULT_DATABASE)
+    parser.add_argument('--outbox-root', type=Path, default=OUTBOX_ROOT)
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    try:
+        if os.geteuid() != 0:
+            raise ValueError('run the managed result outbox verifier as root')
+        root = args.outbox_root
+        state = verify(
+            args.database,
+            root,
+            root / 'ready',
+            root / 'delivered',
+            active=args.active,
+        )
+        print(
+            'MANAGED_RESULT_OUTBOX_VERIFY schema=1 '
+            f'results={state["results"]} ready={state["ready"]} '
+            f'delivered={state["delivered"]} '
+            f'active={"yes" if args.active else "no"}'
+        )
+        print('GX10_MANAGED_RESULT_OUTBOX_VERIFY=PASS')
+        return 0
+    except (OSError, sqlite3.Error, ValueError) as exc:
+        print(f'ERROR: {exc}', file=sys.stderr)
+        print('GX10_MANAGED_RESULT_OUTBOX_VERIFY=FAIL', file=sys.stderr)
+        return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())

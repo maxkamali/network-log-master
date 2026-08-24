@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 repository and protected-copy gates pass. The version-1 producer is present at `components/gx10/sbin/build-result-outbox.py` and passed 151 GX10 tests locally and from an exact GX10-staged tree. It is not installed on the working system, has no service or timer, has no result-writer credential, and cannot transmit to the collector.
+Execution-order item 30 repository, protected-copy, and inactive-package rehearsal gates pass. The version-1 producer and managed package passed 157 GX10 tests locally and from an exact GX10-staged tree. The package is not installed on the working system, has no result-writer credential, and cannot transmit to the collector.
 
 ## Boundary
 
@@ -41,4 +41,8 @@ The initial exact staged repository tree passed 149 tests and created/reused 11-
 
 ## Next gate
 
-Do not copy these protected files to the collector. The next item-30 sub-section is an inactive GX10 installation/managed-producer package that preserves this proven ready/delivered state machine and shared lock. Writer-key installation and any live collector transfer remain later explicit gates. The later sender and collector gate must still close the upload-success/local-acknowledgment crash window before live replay safety can pass.
+The managed package contains an exact-hash runner, an independently disableable oneshot/timer, a guarded inactive installer, and an independent verifier. Its service has `PrivateNetwork=yes`, Unix-socket-only address families, no capabilities, and write scope only to the outbox root. The installer derives the already-proven reasoning service identity, validates the read-only database/result invariant, installs empty mode-`0700` ready/delivered directories, leaves the timer disabled/service inactive, and installs no credential.
+
+An exact GX10-staged private-copy rehearsal installed into an isolated root without touching systemd, generated all 12 copy results through the installed runner, reused 11 ready plus one delivered without recreation, preserved the database hash, and removed every managed artifact after a forced post-install verification failure.
+
+Next publish this package checkpoint, then install and independently verify only the inactive empty boundary on the working GX10. Do not run the service or copy files to the collector during that gate. Writer-key installation and live transfer remain later explicit gates. The later sender and collector gate must still close the upload-success/local-acknowledgment crash window before live replay safety can pass.

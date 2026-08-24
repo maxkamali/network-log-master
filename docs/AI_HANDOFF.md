@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-Item 29 is complete. Item 30 is the single `NEXT`, and its repository/protected-copy outbox gates now pass: 151 local and exact GX10-staged tests, one canonical collector-compatible JSONL file per successful run, complete result/provenance retention, failure exclusion, crash recovery, and shared-lock ready/delivered delivery state. A fresh copy had 12 packets, 13 terminal runs, 12 results, and one preserved failure; all 12 files were created, one was moved to delivered, and replay reused 11 ready plus one delivered without recreation. Copy bytes/reasoning state were unchanged and every live schedule stayed healthy. The producer is not installed, has no schedule or writer credential, and transmitted nothing. Read `docs/RESULT_OUTBOX.md`; next build and prove an inactive managed installation before any sender or credential gate.
+Item 29 is complete. Item 30 is the single `NEXT`. Its repository/protected-copy and inactive-package rehearsal gates pass with 157 local/exact GX10-staged tests, exact-hash no-network runner/service, disabled timer, guarded installer, independent verifier, shared-lock ready/delivered state, exact installed-copy generation/replay, unchanged source, and forced-failure cleanup. The package is not installed on the working system, has no writer credential, and transmitted nothing. Read `docs/RESULT_OUTBOX.md`; next publish and install/verify only the inactive empty local boundary before any sender or credential gate.
 
 The active automatic application chains are:
 

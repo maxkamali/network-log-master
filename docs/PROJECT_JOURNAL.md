@@ -7738,3 +7738,62 @@ The design forbids deleting or rewriting raw, shadow, handoff, or GX10 state. A 
 ### Next action
 
 Obtain explicit production-cutover authorization. Only after that approval may the project build and stage the separate exact-hash handoff package, run the live preflight, select the future floor, stop GX10 at the boundary, and switch the read-only bind view. If approval is unavailable, continue only repository, test, documentation, and read-only work.
+
+## 2026-08-23 22:00 PDT - Item 23 read-only cutover-readiness resnapshot
+
+### Status
+
+Execution-order item 23 remains the single `NEXT` item.
+
+Explicit production-cutover authorization has been requested and has not yet been recorded. No handoff artifact was installed, no timer or service state was changed, and no bind mount, configuration, spool, database, or application file was modified.
+
+The validated item-22 checkpoint was published and independently matched on GitHub at:
+
+`5f1b261fd847173d0fc13e3a21202c519b86f839` — `Design forward-only normalizer handoff`
+
+### Collector readiness
+
+Read-only checks established:
+
+- Vector, ClickHouse, Grafana, and the normalizer shadow timer active/enabled
+- zero restarts and successful last results for the application services and shadow oneshot
+- GX10 SFTP bind still sourced from the raw backlog with `ro,nosuid,nodev,noexec`
+- `/etc/fstab` and Vector configuration retained their recorded SHA-256 values
+- protected handoff plan, handoff root, and handoff launcher absent from the live collector
+- no premature handoff staging or activation state
+
+The complete active shadow verifier then passed over the growing live tree:
+
+```text
+platform_entries=184
+completed_files=12001
+normalized_records=1109388
+normalizer_shadow_mode=active
+NORMALIZER_SHADOW_RUNTIME_VERIFY=PASS
+```
+
+### GX10 readiness
+
+The live GX10 artifact filenames and unit names remain intentionally identity-bearing and differ from the sanitized public reconstruction names. An initial lookup by public reconstructed names therefore found no live files/units. This was not runtime drift. The check was corrected to resolve artifacts only through the five already recorded SHA-256 identities without printing live names or paths.
+
+Corrected read-only evidence:
+
+- fetch executable hash matches: `1`
+- ingest executable hash matches: `1`
+- deterministic enrichment executable hash matches: `1`
+- pipeline service-unit hash matches: `1`
+- pipeline timer-unit hash matches: `1`
+- pipeline timer active/enabled
+- pipeline oneshot inactive after success with zero restarts
+- source-file status: `10373 processed`, zero other states
+- current source-file total: `10373`
+- current recent-event total: `940884`
+- incoming queue files: `0`
+- last remote scan in the current UTC hour
+- maximum remote path current through the latest settled minute at the audit instant
+
+The database was discovered from the captured ingest source's existing absolute constants, opened read-only, and queried only for schema identity, aggregate counts/status, and cursors. No event row, message, private path, credential, connection value, or identity-bearing live filename was printed or persisted.
+
+### Authorization boundary
+
+Both systems are technically ready for the later bounded preflight. The only current blocker is the explicit operator authorization required by item 23. Until it is recorded, work remains limited to repository preparation, testing, documentation, and read-only validation.

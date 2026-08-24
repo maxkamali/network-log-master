@@ -76,7 +76,7 @@ Collector-side shadow integration implementation is now complete in the reposito
 - synthetic cutover/retry/rollback proof with no historical exposure or duplicate GX10 identities
 - 94 full normalizer/worker tests passing and 11 collector-package tests passing
 
-The shadow package is deployed and active on the collector under its isolated timer. Bounded catch-up and steady-state evidence covers 11,983 completed files and 1,107,749 normalized records with exact cardinality, 36,241 parser enrichments, zero parser errors, zero incomplete rows, and zero pending work after every reviewed steady-state cycle. The live Vector, ClickHouse, raw backlog, and GX10 handoff remain unchanged.
+The shadow package is deployed and active on the collector under its isolated timer. Bounded catch-up and steady-state evidence covers 11,983 completed files and 1,107,749 normalized records with exact cardinality, 36,241 parser enrichments, zero parser errors, zero incomplete rows, and zero pending work after every reviewed steady-state cycle. A later read-only item-23 readiness resnapshot passed over 12,001 completed files and 1,109,388 records. The live Vector, ClickHouse, raw backlog, and GX10 handoff remain unchanged.
 
 ## Collector rebuild milestone
 

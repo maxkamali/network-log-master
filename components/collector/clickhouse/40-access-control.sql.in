@@ -34,6 +34,9 @@ TO grafana_reader;
 GRANT SELECT ON observability.ai_updates
 TO grafana_reader;
 
+GRANT SELECT ON observability.ai_result_devices
+TO grafana_reader;
+
 GRANT SELECT ON observability.grafana_logs
 TO grafana_reader;
 

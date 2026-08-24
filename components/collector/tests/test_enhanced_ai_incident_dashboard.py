@@ -92,16 +92,20 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         panel = self.elements["panel-7"]
         sql = query(panel)["spec"]["rawSql"]
         self.assertEqual(panel["spec"]["title"], "Latest AI Assessment per Incident")
-        self.assertIn("argMax(severity, tuple(timestamp, run_id))", sql)
         self.assertIn(
-            "argMax(device, tuple(timestamp, run_id)) AS \"Device\"",
+            "argMax(updates.severity, tuple(updates.timestamp, updates.run_id))",
+            sql,
+        )
+        self.assertIn("LEFT ANY JOIN observability.ai_result_devices", sql)
+        self.assertIn(
+            "if(updates.device != '', updates.device, devices.device)",
             sql,
         )
         self.assertIn(
-            "arrayStringConcat(argMax(tags, tuple(timestamp, run_id)), ',')",
+            "arrayStringConcat(argMax(updates.tags, tuple(updates.timestamp, updates.run_id)), ',')",
             sql,
         )
-        self.assertIn("GROUP BY incident_id", sql)
+        self.assertIn("GROUP BY updates.incident_id", sql)
         self.assertIn('ORDER BY "Time" DESC', sql)
         self.assertIn("LIMIT 100", sql)
         self.assertNotIn("body", sql)
@@ -144,9 +148,10 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
             "device",
         ):
             self.assertIn(field, sql)
-        self.assertIn("ORDER BY timestamp DESC", sql)
+        self.assertIn("ORDER BY updates.timestamp DESC", sql)
         self.assertIn("LIMIT 200", sql)
-        self.assertIn("arrayStringConcat(tags, ',')", sql)
+        self.assertIn("arrayStringConcat(updates.tags, ',')", sql)
+        self.assertIn("LEFT ANY JOIN observability.ai_result_devices", sql)
         self.assertEqual(
             panel["spec"]["vizConfig"]["spec"]["options"]["frozenColumns"],
             {"left": 2},

@@ -12049,3 +12049,34 @@ No Device-projection source, ClickHouse schema/data, installed GX10 artifact, ac
 ### Next action
 
 Run the public safety gates, publish and independently verify the exact candidate, then use protected predecessor copies and exact hash checks to upgrade the bounded source/projection chain. Backfill all 139 existing rows from a mode-private mapping without printing identities, verify zero missing devices, update only the enhanced dashboard, run all exact/query/health checks, and reconcile closure documentation.
+
+## 2026-08-24 16:42 PDT - Item 33 direct Device path live; durable legacy fallback candidate opened
+
+### Status
+
+Item 33 remains the single `NEXT` item. Device-projection checkpoint `fe5147e1daf74a83e76d7f0e1028692e5b14d857` was published and independently matched GitHub `main`.
+
+The collector result gate upgrade required its exact predecessor hash, retained a root-only rollback copy, atomically installed the candidate, and restored its timer active. An additive ClickHouse `device String` column was created after the first unsupported default-expression attempt failed before schema change. The native implicit empty String default then passed exact type verification.
+
+GX10 reasoning, result-outbox, and result-sender timers were boundedly paused. Exact predecessor hashes were required for the producer, producer wrapper, sender, and sender wrapper; all four root-only rollback copies were retained; and all four candidate hashes were installed atomically. A manual no-network outbox cycle reused every existing device-less file byte-for-byte, proving backward compatibility. All three timers were restored active.
+
+After explicit operator authorization, a private canonical mapping transferred directly over the existing encrypted host paths without displaying identities. Natural reasoning had advanced the mapping from 139 to 144 rows. The exact published builder validated it and generated a mode-`0600` synchronous mutation. The first pass updated all 143 rows then present in ClickHouse with zero missing. The distinct enhanced dashboard was replaced from the exact checkpoint; all six resources reread exact and all fifteen queries passed with 144 detail rows.
+
+An aggregate-only postcheck then caught one blank Device: an immutable legacy outbox file had arrived after the first mutation. A second idempotent pass overlapped 143 mapped rows, while natural delivery advanced ClickHouse to 145 total and still one blank. This proves a one-time mutation is insufficient while pre-upgrade legacy files remain queued. Rewriting those immutable files would violate their exact outbox/replay identity.
+
+The corrected local design adds `observability.ai_result_devices`, a small 12-month run-to-device lookup readable only through the existing read-only Grafana account. Both enhanced event queries prefer the direct `ai_updates.device` field and fall back to the lookup only for immutable legacy records. Newly generated results continue carrying Device directly. The clean-machine schema, grants, verifier, dashboard SQL, and regression assertions include this boundary.
+
+Local validation:
+
+```text
+collector_tests=50
+installer_and_verifier_syntax=PASS
+dashboard_read_only_boundary=PASS
+original_dashboard_unchanged=yes
+```
+
+No legacy outbox byte, accepted-file ledger identity, deterministic incident state, model/prompt, original dashboard, or existing result value was rewritten. The private mapping and mutation files remain mode-private only until the durable lookup is populated and verified.
+
+### Next action
+
+Run public gates, publish and independently verify the exact fallback checkpoint, create/grant/populate the private lookup from the authorized mapping, update only the enhanced dashboard, prove every displayed row resolves a nonempty Device while all six resources and fifteen queries remain exact/successful, then remove private stages and reconcile closure documentation.

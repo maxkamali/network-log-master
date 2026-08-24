@@ -408,6 +408,7 @@ objects = {
 expected = {
     "syslog": "MergeTree",
     "ai_updates": "MergeTree",
+    "ai_result_devices": "MergeTree",
     "grafana_logs": "View",
 }
 
@@ -429,6 +430,7 @@ for name, engine in expected.items():
 for name in [
     "syslog",
     "ai_updates",
+    "ai_result_devices",
 ]:
     query = objects[name]["create_table_query"]
 
@@ -526,6 +528,11 @@ expected = {
         "body": "String",
         "tags": "Array(String)",
         "raw_json": "String",
+    },
+    "ai_result_devices": {
+        "run_id": "String",
+        "device": "String",
+        "mapped_at": "DateTime64(3, 'UTC')",
     },
     "grafana_logs": {
         "timestamp": "DateTime64(9, 'UTC')",
@@ -728,6 +735,7 @@ vector = {
 }
 
 expected_grafana = {
+    "GRANT SELECT ON observability.ai_result_devices TO grafana_reader",
     "GRANT SELECT ON observability.ai_updates TO grafana_reader",
     "GRANT SELECT ON observability.grafana_logs TO grafana_reader",
     "GRANT SELECT ON observability.syslog TO grafana_reader",

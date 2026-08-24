@@ -11052,3 +11052,44 @@ No private connection value, result/packet/event/entity content, credential, key
 ### Next action
 
 Run the full public gate, publish this sender-core checkpoint, and independently verify GitHub. Then add the exact-hash managed runner, hardened but inactive network-capable service/timer, strict private-configuration contract, nonactivating installer, independent verifier, and failure cleanup. Rehearse them only against protected copies/injected transport before installing any live sender artifact or credential.
+
+## 2026-08-24 05:16 PDT - Item 30 inactive sender package passed repository/staged gates
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The sender-core checkpoint was published and independently matched on GitHub at:
+
+`0623dde8557b300b9bd54cb26a6c8582f8efb7e0` — `Add deterministic result sender core`
+
+The repository now adds an exact-hash managed runner, strict private JSON configuration parser, hardened network-capable oneshot, disabled nonpersistent timer, dynamically derived least-write drop-in, nonactivating installer, independent staged verifier, and postinstall cleanup. The installer places only public code/unit/drop-in bytes and explicitly creates no sender configuration, result-writer identity, writer known-hosts file, or enabled schedule.
+
+The service deliberately permits only Unix/IPv4/IPv6 networking but retains no capabilities, no privilege gain, a strict read-only system, protected home/process/kernel/control/namespace state, bounded resources, and a 45-second service limit. Its derived drop-in exposes only the actual local outbox as writable, future private config/key/known-hosts as read-only, and the reasoning database as inaccessible. `ConditionPathExists` prevents an unconfigured invocation.
+
+Eight new management tests cover exact hash binding, strict separate-writer config layout, exact runner forwarding, network/hardening contract, nonactivating/no-private-input installer behavior, derived write/read/inaccessible paths, postverify cleanup, and public example sanitation. Together with the 11 core tests, the full local GX10 suite passes 178 tests plus the filesystem contract.
+
+The first full-tree temporary GX10 run omitted the collector gate file that `test_result_outbox.py` uses as a cross-component validation dependency. Exactly those 11 outbox tests reported missing-fixture errors; the other 167 tests and filesystem contract passed. The exact current collector gate was added to the temporary tree without changing any candidate byte, after which all 178 tests passed. This was a staging-inventory defect, not a sender/package failure.
+
+```text
+local_gx10_tests=178
+gx10_staged_gx10_tests=178
+local_result_sender_core_tests=11
+local_result_sender_management_tests=8
+sender_package_archive_sha256=51829ebadd9171a9d9ff0c111bb372606904cccda16703d3c142f527e92a1d79
+managed_runner_sha256=7ff26eb739bee6c968b8ea72336786c3342154010ea598a4e611c21cfdef65f3
+inactive_installer_sha256=1a6104f565bdd23d35744bae1c9efbdc3c5707f7bd911131f6608c57b16871a7
+staged_verifier_sha256=12283f5d81db49491585bf6d05ba7fccf386aba1390060aee23aff9936dc7da8
+sender_service_sha256=95cf2cb2594e157decf90374538cc7009bb0698fa22db9542f0458de28fb9fe6
+sender_timer_sha256=8a3af28ae25a355a7a65eeec2ece9cb86c5a2a8072c6a60931944d5f6a9152b2
+sender_installed=no
+sender_config_installed=no
+writer_credential_installed=no
+collector_result_transmission_invoked=no
+GX10_RESULT_SENDER_MANAGED_PACKAGE=PASS
+GX10_RESULT_SENDER_EXACT_STAGED_PACKAGE=PASS
+```
+
+No private connection value, result/packet/event/entity content, credential, key material, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish this inactive-package checkpoint, and independently verify GitHub. Then require exact published/staged hashes and healthy active outbox/reasoning/correlation/pipeline schedules, run only the guarded inactive sender installer, independently verify the sender timer disabled/service inactive/private inputs absent, and publish that checkpoint before provisioning any writer input or transmitting.

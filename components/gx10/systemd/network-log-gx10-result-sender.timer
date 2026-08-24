@@ -1,0 +1,11 @@
+[Unit]
+Description=Schedule network log GX10 write-only result sender
+
+[Timer]
+OnBootSec=7min
+OnUnitInactiveSec=1min
+AccuracySec=5s
+Unit=network-log-gx10-result-sender.service
+
+[Install]
+WantedBy=timers.target

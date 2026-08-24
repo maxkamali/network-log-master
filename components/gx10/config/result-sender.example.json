@@ -1,0 +1,10 @@
+{
+  "delivered_path": "/var/lib/network-log-gx10/result-outbox/delivered",
+  "identity_path": "/var/lib/network-log-gx10/.ssh/result-writer.key",
+  "known_hosts_path": "/var/lib/network-log-gx10/.ssh/result-writer-known_hosts",
+  "ready_path": "/var/lib/network-log-gx10/result-outbox/ready",
+  "schema_version": 1,
+  "sftp_host": "collector.example.invalid",
+  "sftp_port": 2222,
+  "sftp_user": "result-writer"
+}

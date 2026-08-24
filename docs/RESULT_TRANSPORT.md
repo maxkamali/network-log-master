@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 remains in progress. The collector-side durable acceptance ledger passes its repository/staged/live bootstrap gates and is active with exact predecessor rollback retained. The deterministic sender core passes 11 focused local tests and the same 11 tests from exact GX10-staged bytes. It is not installed; every transport in those tests was injected, and no writer credential or result transmission exists.
+Execution-order item 30 remains in progress. The collector-side durable acceptance ledger is active with exact predecessor rollback retained. The sender core and inactive managed package pass 178 local tests plus the filesystem contract and the same 178 tests from exact GX10-staged bytes. The package is not installed; every sender transport test was injected, and no private config, writer credential, or result transmission exists.
 
 ## Replay problem
 
@@ -65,6 +65,20 @@ Transport failure leaves ready unchanged. After transport success, the sender re
 
 Eleven local and eleven exact GX10-staged tests cover strict command construction, exact-byte/name movement, one-file bound, oldest-first ordering, no-op, transport failure isolation, post-transport interruption/retry, duplicate state, divergent content, private-file metadata, shared-lock contention, and delivered-state validation. All transports are injected test doubles; the core has never contacted the collector.
 
+## Inactive managed package
+
+The managed package adds:
+
+- an exact-hash runner that accepts only one strict root-owned/group-readable JSON configuration and passes only parsed values to the sender core
+- a `ConditionPathExists` oneshot with network availability, 45-second total service bound, no capabilities, no privilege gain, protected system, home, kernel, and control state, restricted process view/namespaces/SUID, and only Unix/IPv4/IPv6 address families
+- a dynamic systemd drop-in derived from the already-installed outbox service/config that grants write access only to the actual outbox, read-only access only to future sender config/private inputs, and makes the reasoning database inaccessible
+- a nonpersistent one-minute timer that the installer explicitly leaves disabled/inactive
+- a nonactivating installer that requires the active outbox boundary, exact empty sender target state, separate absent result-writer identity/known-hosts/config, and exact sources before installing only public code/units/drop-in
+- an independent staged verifier that rederives identity/paths and requires exact installed bytes, drop-in, unit states, active outbox, absent private inputs, zero sender restarts, and fixed SFTP executable metadata
+- complete created-artifact cleanup and systemd reload after any postinstall verification failure
+
+The public example contains only documentation-domain values and reserved writer filenames. It is never installed. The result-writer key is structurally required to be separate from the existing spool-reader key.
+
 ## Passed repository/copy gates
 
 The 11 focused tests prove:
@@ -87,8 +101,8 @@ After GitHub independently matched the published candidate, the guarded upgrader
 
 ## Remaining gates
 
-1. Add an exact-hash managed runner, hardened network-capable oneshot/timer, private-configuration contract, nonactivating installer, and independent staged verifier.
-2. Prove inactive install/failure cleanup and protected-copy success/failure/retry behavior without a populated production config, credential, or network call.
-3. Install the package inactive, then provision the write-only key/config separately and verify while still disabled.
+1. Publish and independently verify the inactive managed-package checkpoint.
+2. Guardedly install only public sender code/units/drop-in on GX10 and independently require timer disabled, service inactive, config/key/known-hosts absent, active no-network outbox, and healthy preexisting schedules.
+3. Build private writer inputs from the operator-authorized existing access boundary, install them separately while the sender remains disabled, and verify strict host/key/config state without transmitting.
 4. Transmit a bounded first file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
 5. Prove an exact replay creates no second ClickHouse row and a controlled malformed/divergent file remains isolated.

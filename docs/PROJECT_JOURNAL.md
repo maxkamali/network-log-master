@@ -10141,3 +10141,51 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Publish and independently verify this immutable-provenance correction. Stage and retest only its exact bytes on GX10. On a fresh protected copy, explicitly isolate the previously failed packet within the new prompt revision without exposing content, then require exactly one successful revised-version run/result through the strengthened schema and unchanged validator before any production artifact upgrade.
+
+## 2026-08-24 03:41 PDT - Item 29 local-runtime schema support bounded before production
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The immutable-provenance correction was published and independently matched on GitHub at:
+
+`50644549fb82bc4f69da5a33f6d2cab79c584482` — `Version reasoning schema compatibility provenance`
+
+Its exact archive was staged under a new root-only GX10 boundary, normalized to Git modes before execution, and passed all 140 tests plus the filesystem contract on GX10.
+
+On a fresh protected copy, 11 explicit copy-only terminal diagnostic reservations isolated the exact packet that had failed in production as the only eligible packet for prompt revision `incident-assessment-v2-r2`. The real local model was invoked exactly once. The runtime accepted the schema but the unchanged caller again classified the response as `action_text`; a second independently created protected copy reproduced the same classification. The revised-version run was safely terminal, no result/content was stored, deterministic truth was unchanged, and production remained disabled and unchanged.
+
+This proves the local structured-output runtime does not enforce the JSON Schema `not/enum` expression. Validation remains strict. The next candidate, immutable prompt revision `incident-assessment-v2-r3`, retains that negative enum and adds `minLength=25` for action text. Twenty-five is longer than every risk label and remains below all calibrated meaningful action examples. The focused test now asserts both facts. All four compatibility targets still accept only the exact production predecessors.
+
+```text
+published_provenance_commit=50644549fb82bc4f69da5a33f6d2cab79c584482
+remote_tests=140
+r2_copy_model_invocations=1
+r2_copy_same_packet=yes
+r2_copy_only_seeded_runs=11
+r2_copy_outcome=invalid
+r2_validation_class=action_text
+r2_second_copy_outcome=invalid
+r2_deterministic_truth_unchanged=yes
+production_packets=12
+production_old_version_pending=6
+production_runs=6
+production_succeeded=5
+production_failures=1
+production_results=5
+production_reasoning_enabled=no
+r3_prompt_version=incident-assessment-v2-r3
+r3_runtime_config_sha256=8a55aeb708a05fafd3eb1d4df206714339deb344588f218f00ecbee5fdd93cd9
+r3_output_schema_sha256=13083841c44253b326f1294b930acae435bfdddb458b47c31a9fd385b181abd0
+r3_local_caller_sha256=dac1e176108452c77ea4eb2f7195dd8eb8223576ab8cbdb2cb95a2acbb8fcbe8
+r3_managed_runner_sha256=9b70fade2b79e75f1b41ea57c1bd4a6728331cb73a3d02f1b37c7abae02551b8
+r3_managed_installer_sha256=06ee615ec577f752f5b443e3d28ea241dd6efe45a3378b4e88126c568d88f698
+r3_local_migrator_sha256=d477ce16df5835a5406e8d02bce8fbe36a94049477ed4c09f158ccd2ac2780ee
+gx10_tests=140
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, connection value, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify the portable `r3` candidate. Stage and retest only that exact commit. Then repeat the isolated same-packet protected-copy gate and require one valid revised-version result before any inactive production upgrade.

@@ -337,6 +337,10 @@ class LocalReasoningTests(unittest.TestCase):
         self.assertEqual(
             set(action_text['not']['enum']), self.caller.ACTION_RISKS
         )
+        self.assertGreater(
+            action_text['minLength'],
+            max(map(len, self.caller.ACTION_RISKS)),
+        )
 
     def test_action_required_cannot_claim_zero_confidence(self):
         bad = self.output(confidence=0)

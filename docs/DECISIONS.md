@@ -450,7 +450,7 @@ Consequence:
 - a run may transition once to success or a bounded terminal failure status
 - model/prompt registrations and successful canonical results are append-only
 - packet/incident IDs, schema, enumerations, types, counts, lengths, and digests are independently validated
-- after a protected-copy reproduction proved the model could place a risk label in the action-text field, the generation schema was strengthened to exclude exact risk labels there; the caller's independent rejection rule remains unchanged, and the changed schema is registered as immutable prompt revision `incident-assessment-v2-r2` rather than reusing the original provenance ID
+- after protected-copy reproduction proved the model could place a risk label in the action-text field, immutable prompt revision `r2` retained a negative enum but proved the local runtime does not enforce `not/enum`; revision `incident-assessment-v2-r3` therefore also requires action text longer than every risk label, while the caller's independent rejection rule remains unchanged
 - the caller is fixed to loopback HTTP, refuses redirects, applies request/response/time bounds, and stores no invalid model content
 - repository, migration, synthetic local-model, protected-copy, and guarded empty/unscheduled-install gates passed independently
 - item 29 owns managed invocation and retains its one reviewed terminal invalid-output run as immutable evidence; collector result return remains out of scope

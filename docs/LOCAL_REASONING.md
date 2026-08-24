@@ -40,12 +40,12 @@ Original item-28 candidate SHA-256 values:
 - output schema: `1ec4e28d0d18320c7469d4f1bb26a5c766515ff008c5803d24ce214ded69928a`
 - migration guard: `16f75e1138308e4bfa5c5fc3cbdb0337e4bfe4b34dbb73ce062d40577f1a79e7`
 
-Item 29 reproduced the failed production packet only on protected copies and classified one generated action whose text exactly equaled a risk label. The compatibility candidate strengthens the generation schema with a negative enum for those labels; the existing caller validation remains unchanged. The first candidate copy gate correctly rejected the changed schema under the existing immutable prompt-version ID before reserving or invoking the model. The corrected boundary therefore registers prompt revision `incident-assessment-v2-r2` with its own creation timestamp, keeps the original system-prompt bytes, and starts a clean exact-version backlog while retaining every original run/result. Its coordinated candidate hashes are:
+Item 29 reproduced the failed production packet only on protected copies and classified one generated action whose text exactly equaled a risk label. The existing caller validation remains unchanged. A first candidate copy gate correctly rejected the changed schema under the existing immutable prompt-version ID before reserving or invoking the model. Prompt revision `r2` then retained a negative enum for those labels, but two protected-copy attempts proved the local runtime accepts without enforcing `not/enum`; the same packet again failed `action_text`. Candidate `incident-assessment-v2-r3` keeps that constraint and adds a portable 25-character action minimum, longer than every risk label. It has its own creation timestamp, keeps the original system-prompt bytes, and starts a clean exact-version backlog while retaining every original run/result. Its coordinated candidate hashes are:
 
-- runtime configuration: `db2122a46e01c32d52aef8516280039477acbf86ae367ae8e6afe533773aa8f4`
-- caller: `0aabe2a84e254d9f9c0286d21774c1bfab8cd3a94577dc84a429fc0226bc95c6`
-- output schema: `d2917c40b867aa801934579e0779f001dc8e71953aaf3ddaa2134d0736f25a51`
-- migration guard: `f81fd0a2bd2ceea47e9eca05e33c8addd1e150de8d05106d1ff00bc30e97bde9`
+- runtime configuration: `8a55aeb708a05fafd3eb1d4df206714339deb344588f218f00ecbee5fdd93cd9`
+- caller: `dac1e176108452c77ea4eb2f7195dd8eb8223576ab8cbdb2cb95a2acbb8fcbe8`
+- output schema: `13083841c44253b326f1294b930acae435bfdddb458b47c31a9fd385b181abd0`
+- migration guard: `d477ce16df5835a5406e8d02bce8fbe36a94049477ed4c09f158ccd2ac2780ee`
 
 These compatibility bytes are not yet installed. The production timer remains disabled and the original terminal failure remains immutable evidence.
 

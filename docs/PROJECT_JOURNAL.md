@@ -7856,3 +7856,50 @@ The independent verifier checks installed hashes, exact inventory, modes/ownersh
 ### Next action
 
 Publish and independently verify this pre-cutover repository checkpoint. Then select a sufficiently future private floor, stage the package without activation, and re-run both systems' live preflight before pausing GX10.
+
+## 2026-08-23 22:59 PDT - Handoff staged, GX10 paused, and unit portability correction bounded
+
+### Status
+
+Execution-order item 23 remains `NEXT` and in progress.
+
+The live GX10 bind view remains on the raw backlog. Vector, ClickHouse, Grafana, and raw/shadow capture remain active. The handoff publisher timer remains disabled/inactive and has never run.
+
+### Authorized staging result
+
+The exact package at public checkpoint `e296633a2cc3eef7eccacf5e41e0361bee17901f` was transferred through the configured collector SSH path into a root-only staging directory. The transfer archive SHA-256 matched on both sides. A private `0600` plan selected the inclusive forward floor without publishing connection or identity values.
+
+The guarded installer re-ran the complete active shadow verifier before installing:
+
+```text
+platform_entries=184
+completed_files=12064
+normalized_records=1115518
+normalizer_shadow_mode=active
+NORMALIZER_SHADOW_RUNTIME_VERIFY=PASS
+```
+
+It then created the empty protected handoff root/ACL, installed the private plan and five manifest-pinned artifacts, initialized an empty plan-bound handoff ledger, left the timer disabled/inactive, and passed both the core empty-tree verifier and independent staged verifier.
+
+### Unsupported unit condition caught before activation
+
+The collector's `systemd-analyze verify` emitted a warning that `ConditionPathIsRegularFile` is not supported by its systemd version and would be ignored. The strict application verifier still enforces a regular nonsymlink protected plan, but an ignored unit precondition is not accepted.
+
+Because the handoff timer was still disabled/inactive and the raw bind remained active, this was a staging-only defect with no data-path impact. Activation stopped. The repository unit now uses the portable `ConditionPathExists` directive while retaining the strict application-level type/mode/owner/group/contents validation. The handoff manifest was updated to the corrected service-unit SHA-256 and the 14-test collector package gate plus public sanitation gate pass.
+
+### GX10 boundary pause
+
+GX10 was paused before the selected floor could become settled. Exact recorded-hash resolution located the identity-bearing live service/timer without persisting their private names. Pre-pause database and queue evidence was:
+
+- source files: `10437`
+- recent events: `947064`
+- source status: all processed
+- at/after-floor conflicts: `0`
+- incoming files: `0`
+- maximum remote path: before the selected floor
+
+The pipeline timer is now disabled/inactive and its oneshot is inactive. No database row or local spool file was changed by the pause.
+
+### Next action
+
+Publish the portable-condition correction. With the timer still disabled, replace only the two staged exact-hash artifacts affected by the correction—the handoff service unit and its handoff-only installed manifest—using old-hash preconditions and protected rollback copies. Re-run `systemd-analyze`, daemon reload, and the independent staged verifier before any publisher activation.

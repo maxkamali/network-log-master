@@ -173,6 +173,7 @@ class NormalizerShadowPackageTests(unittest.TestCase):
             "Type=oneshot",
             "User=network-log-normalizer",
             "After=network-log-normalizer-shadow.service",
+            "ConditionPathExists=/etc/network-log-normalizer/handoff-plan.json",
             "PrivateNetwork=yes",
             "NoNewPrivileges=yes",
             "CapabilityBoundingSet=",

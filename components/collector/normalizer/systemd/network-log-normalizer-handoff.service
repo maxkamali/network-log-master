@@ -5,7 +5,7 @@ ConditionPathIsDirectory=/var/spool/network-log-normalizer-shadow
 ConditionPathIsDirectory=/var/spool/network-log-normalizer-handoff
 ConditionPathIsReadWrite=/var/lib/network-log-normalizer
 ConditionPathIsReadWrite=/var/spool/network-log-normalizer-handoff
-ConditionPathIsRegularFile=/etc/network-log-normalizer/handoff-plan.json
+ConditionPathExists=/etc/network-log-normalizer/handoff-plan.json
 
 [Service]
 Type=oneshot

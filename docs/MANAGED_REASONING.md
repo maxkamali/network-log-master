@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Two natural cadences each completed exactly one successful inference, but each also built four new packets; pending backlog grew from three to six to nine. This failed the stability gate, and the reasoning timer was disabled with all append-only state preserved. A 138-test bounded-backlog candidate now defers packet construction whenever any selected-version packet is pending and requires the one allowed inference attempt to reduce pending count by exactly one. Fetch/ingest, deterministic correlation, and Ollama remain healthy while the correction awaits publication and protected-copy rehearsal.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Two natural cadences each completed exactly one successful inference, but each also built four new packets; pending backlog grew from three to six to nine. This failed the stability gate, and the reasoning timer was disabled with all append-only state preserved. The published 138-test bounded-backlog candidate defers packet construction whenever any selected-version packet is pending and requires the one allowed inference attempt to reduce pending count by exactly one. It passed a protected current-production-state-copy real-model drain with deterministic truth unchanged. Fetch/ingest, deterministic correlation, and Ollama remain healthy while the correction awaits exact inactive installation.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -95,7 +95,7 @@ Twenty-three focused tests currently prove:
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `138` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, and protected initial production activation have passed. The first two natural cadences passed per-cycle inference safety but failed bounded-backlog stability. The correction must be published, rehearsed against a protected current-state copy, installed while disabled, and pass new production cadence gates. Collector result return is outside item 29.
+The full GX10 suite currently passes `138` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, and the bounded-backlog correction's current-state-copy rehearsal have passed. The first two natural cadences passed per-cycle inference safety but failed bounded-backlog stability. The corrected runner must be installed while disabled and pass new production drain cadences. Collector result return is outside item 29.
 
 ## Protected current-state-copy evidence
 
@@ -205,6 +205,40 @@ Because packet arrival exceeded bounded inference throughput in two consecutive 
 The correction defers the deterministic builder whenever any selected-version packet is pending. The cycle still validates the exact builder bytes, but it spends its single model reservation on existing backlog and fails unless packet count stays fixed and pending falls by exactly one. Only pending-zero cycles may build current latest-state packets, coalescing all intervening incident changes into the next deterministic packet per qualifying incident rather than admitting another set during every drain cycle.
 
 The installer permits an atomic runner replacement only when the installed predecessor has exact SHA-256 `f79ed272a8638449bc6a98aefa1758e711a69645950c284869d96e03704432ca` and exact root ownership/mode. Any later install failure restores the captured exact predecessor. Existing packets/runs/results are not rewritten.
+
+Only exact artifacts from published commit `03ac9a1ac37881b8dfb6c6d24313105e71ae6ae4` were staged on GX10. All 138 tests and the filesystem contract passed there after exact Git-mode normalization. A fresh caught-up protected copy of disabled production state then ran one real-model cycle through the corrected wrapper:
+
+```text
+snapshot_recent_max_id=968602
+snapshot_projection_lag=0
+snapshot_incident_lag=0
+copy_packets_before=12
+copy_packets_after=12
+copy_pending_before=9
+copy_pending_after=8
+copy_runs_before=3
+copy_runs_after=4
+copy_results_before=3
+copy_results_after=4
+copy_builder_deferred=yes
+copy_model_invocations=1
+copy_failures=0
+copy_started=0
+copy_deterministic_truth_unchanged=yes
+copy_state_sha256=e89219c90be5e8e19fefcec3488a0606ffe6f7caa265635b060be2b2f11d2f93
+protected_base_bytes=1956794368
+protected_base_sha256=61374f13609eef5c225fc6467e17800e46c6dd59061d5efeefa7b314fadf04e7
+protected_base_mode=0600
+working_packets=12
+working_pending=9
+working_runs=3
+working_results=3
+working_reasoning_timer_enabled=no
+working_production_inference_invoked=no
+GX10_MANAGED_REASONING_BACKLOG_COPY_REHEARSAL=PASS
+```
+
+The protected copy paths and all packet/result content remain private. Production was not invoked or changed.
 
 ## Exact candidate artifacts
 

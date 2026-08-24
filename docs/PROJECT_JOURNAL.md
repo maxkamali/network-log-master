@@ -9844,3 +9844,53 @@ PUBLIC_REPOSITORY_VALIDATION=PASS
 ### Next action
 
 Publish and independently verify this candidate. Stage only that exact checkpoint, create a fresh protected current-production-state copy while reasoning remains disabled, and prove one real-model cycle leaves packet count fixed at 12 while advancing runs/results from three to four and pending from nine to eight. Verify deterministic truth isolation before any working-system upgrade.
+
+## 2026-08-24 03:05 PDT - Item 29 bounded-backlog protected-copy drain passed
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The bounded-backlog candidate was published and independently matched on GitHub at:
+
+`03ac9a1ac37881b8dfb6c6d24313105e71ae6ae4` — `Bound managed reasoning backlog admission`
+
+Only the exact archive from that checkpoint was staged on GX10. After exact Git-mode normalization, all 138 component tests and the filesystem contract passed on the target.
+
+Reasoning remained disabled and inactive. A fresh caught-up root-only mode-`0600` SQLite online backup captured the current append-only reasoning state: 12 packets, nine pending, and three successful runs/results. A clone then ran exactly one real-model cycle through the corrected wrapper.
+
+The wrapper explicitly deferred the builder, kept packet count fixed at 12, completed one successful inference/result, and reduced pending from nine to eight. The independent verifier passed. Incident/evidence/transition/cursor truth retained the exact pre-cycle digest. The production database remained at 12 packets, nine pending, and three runs/results, and no production inference ran.
+
+```text
+snapshot_recent_max_id=968602
+snapshot_projection_lag=0
+snapshot_incident_lag=0
+copy_packets_before=12
+copy_packets_after=12
+copy_pending_before=9
+copy_pending_after=8
+copy_runs_before=3
+copy_runs_after=4
+copy_results_before=3
+copy_results_after=4
+copy_builder_deferred=yes
+copy_model_invocations=1
+copy_failures=0
+copy_started=0
+copy_deterministic_truth_unchanged=yes
+copy_state_sha256=e89219c90be5e8e19fefcec3488a0606ffe6f7caa265635b060be2b2f11d2f93
+protected_base_bytes=1956794368
+protected_base_sha256=61374f13609eef5c225fc6467e17800e46c6dd59061d5efeefa7b314fadf04e7
+protected_base_mode=0600
+working_packets=12
+working_pending=9
+working_runs=3
+working_results=3
+working_reasoning_timer_enabled=no
+working_production_inference_invoked=no
+GX10_MANAGED_REASONING_BACKLOG_COPY_REHEARSAL=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, or connection value was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this protected-copy checkpoint. Then use only the exact staged installer/runner to atomically replace the exact predecessor runner while reasoning remains disabled. Reverify the unchanged 12/9/3/3 state before any resume.

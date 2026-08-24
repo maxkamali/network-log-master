@@ -25,6 +25,7 @@ OUTBOX_ROOT = Path('/var/lib/network-log-gx10/result-outbox')
 READY_DIR = OUTBOX_ROOT / 'ready'
 DELIVERED_DIR = OUTBOX_ROOT / 'delivered'
 CONFIG_PATH = CONFIG_DIR / 'result-outbox.json'
+MANAGED_CONFIG_PATH = CONFIG_DIR / 'managed-reasoning.json'
 SERVICE = 'network-log-gx10-result-outbox.service'
 TIMER = 'network-log-gx10-result-outbox.timer'
 REASONING_SERVICE = 'network-log-gx10-reasoning.service'
@@ -80,6 +81,25 @@ def service_identity():
     ):
         raise ValueError('managed result outbox identity differs')
     return user, group, pwd.getpwnam(user).pw_uid, grp.getgrnam(group).gr_gid
+
+
+def load_managed_database(path=MANAGED_CONFIG_PATH):
+    path = Path(path)
+    if path.is_symlink() or not path.is_file() or path.stat().st_size > 4096:
+        raise ValueError('managed reasoning configuration differs')
+    try:
+        data = json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError('managed reasoning configuration differs') from exc
+    if not isinstance(data, dict) or set(data) != {'database_path'}:
+        raise ValueError('managed reasoning configuration differs')
+    value = data['database_path']
+    if not isinstance(value, str) or not value.startswith('/'):
+        raise ValueError('managed reasoning database path differs')
+    database = Path(value)
+    if '..' in database.parts:
+        raise ValueError('managed reasoning database path differs')
+    return database
 
 
 def validate_file(path, mode, *, source=None, uid=0, gid=0):
@@ -254,8 +274,8 @@ def parse_args():
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument('--installed', action='store_true')
     mode.add_argument('--active', action='store_true')
-    parser.add_argument('--database', type=Path, default=DEFAULT_DATABASE)
-    parser.add_argument('--outbox-root', type=Path, default=OUTBOX_ROOT)
+    parser.add_argument('--database', type=Path)
+    parser.add_argument('--outbox-root', type=Path)
     return parser.parse_args()
 
 
@@ -264,9 +284,10 @@ def main():
     try:
         if os.geteuid() != 0:
             raise ValueError('run the managed result outbox verifier as root')
-        root = args.outbox_root
+        database = args.database or load_managed_database()
+        root = args.outbox_root or database.parent / 'result-outbox'
         state = verify(
-            args.database,
+            database,
             root,
             root / 'ready',
             root / 'delivered',

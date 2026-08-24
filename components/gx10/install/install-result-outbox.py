@@ -22,6 +22,7 @@ CONFIG_DIR = Path('/etc/network-log-gx10')
 SYSTEMD_DIR = Path('/etc/systemd/system')
 DEFAULT_DATABASE = Path('/var/lib/network-log-gx10/state/events.sqlite3')
 DEFAULT_OUTBOX_ROOT = Path('/var/lib/network-log-gx10/result-outbox')
+MANAGED_CONFIG_PATH = CONFIG_DIR / 'managed-reasoning.json'
 SERVICE = 'network-log-gx10-result-outbox.service'
 TIMER = 'network-log-gx10-result-outbox.timer'
 REASONING_SERVICE = 'network-log-gx10-reasoning.service'
@@ -144,6 +145,25 @@ def service_identity():
     ):
         raise InstallError('result outbox runtime identity differs')
     return user, group, pwd.getpwnam(user).pw_uid, grp.getgrnam(group).gr_gid
+
+
+def load_managed_database(path=MANAGED_CONFIG_PATH):
+    path = Path(path)
+    if path.is_symlink() or not path.is_file() or path.stat().st_size > 4096:
+        raise InstallError('managed reasoning configuration differs')
+    try:
+        data = json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise InstallError('managed reasoning configuration differs') from exc
+    if not isinstance(data, dict) or set(data) != {'database_path'}:
+        raise InstallError('managed reasoning configuration differs')
+    value = data['database_path']
+    if not isinstance(value, str) or not value.startswith('/'):
+        raise InstallError('managed reasoning database path differs')
+    database = Path(value)
+    if '..' in database.parts:
+        raise InstallError('managed reasoning database path differs')
+    return database
 
 
 def fsync_directory(path):
@@ -288,10 +308,8 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Install the inactive managed GX10 result outbox'
     )
-    parser.add_argument('--database', type=Path, default=DEFAULT_DATABASE)
-    parser.add_argument(
-        '--outbox-root', type=Path, default=DEFAULT_OUTBOX_ROOT
-    )
+    parser.add_argument('--database', type=Path)
+    parser.add_argument('--outbox-root', type=Path)
     parser.add_argument(
         '--confirm-install-inactive-result-outbox', action='store_true'
     )
@@ -305,7 +323,9 @@ def main():
             raise InstallError('run the result outbox installer as root')
         if not args.confirm_install_inactive_result_outbox:
             raise InstallError('inactive result outbox confirmation is absent')
-        state = install(args.database, args.outbox_root)
+        database = args.database or load_managed_database()
+        outbox_root = args.outbox_root or database.parent / 'result-outbox'
+        state = install(database, outbox_root)
         print(
             'RESULT_OUTBOX_INSTALL schema=1 '
             f'results={state["results"]} ready=0 delivered=0 '

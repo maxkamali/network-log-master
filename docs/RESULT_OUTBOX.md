@@ -41,7 +41,7 @@ The initial exact staged repository tree passed 149 tests and created/reused 11-
 
 ## Next gate
 
-The managed package contains an exact-hash runner, an independently disableable oneshot/timer, a guarded inactive installer, and an independent verifier. Its service has `PrivateNetwork=yes`, Unix-socket-only address families, no capabilities, and write scope only to the outbox root. The installer derives the already-proven reasoning service identity, validates the read-only database/result invariant, installs empty mode-`0700` ready/delivered directories, leaves the timer disabled/service inactive, and installs no credential.
+The managed package contains an exact-hash runner, an independently disableable oneshot/timer, a guarded inactive installer, and an independent verifier. Its service has `PrivateNetwork=yes`, Unix-socket-only address families, no capabilities, and write scope only to the outbox root. The installer derives the already-proven reasoning service identity and private database path from the installed managed-reasoning boundary, validates the read-only database/result invariant, places empty mode-`0700` ready/delivered directories beneath that validated database parent, leaves the timer disabled/service inactive, and installs no credential.
 
 An exact GX10-staged private-copy rehearsal installed into an isolated root without touching systemd, generated all 12 copy results through the installed runner, reused 11 ready plus one delivered without recreation, preserved the database hash, and removed every managed artifact after a forced post-install verification failure.
 

@@ -10593,3 +10593,44 @@ No result/packet/event/entity content, connection value, private runtime identit
 ### Next action
 
 Run the full public gate, publish this inactive-package checkpoint, and independently verify GitHub. Then install and independently verify only the exact empty inactive managed boundary on GX10. Do not invoke its service, enable its timer, install a writer credential, or transmit to the collector during that gate.
+
+## 2026-08-24 04:32 PDT - Item 30 inactive install portability correction passed
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The inactive-package checkpoint was published and independently matched on GitHub at:
+
+`d4ae418e9b365240e7836b5957c0ff6911634d31` — `Package inactive managed result outbox`
+
+The first working-system inactive-install attempt stopped before package preflight because it selected the public clean-rebuild default database/root, whose leading directory is absent on this historical installation. The installer reported failure and its cleanup path left zero created targets. Both new units remained `not-found`. No service/timer/database/outbox/credential/transport state changed.
+
+Read-only diagnosis confirmed the public default database and outbox parent are absent while the established libexec/config/systemd parents are present. The corrected installer and independent verifier now read the exact already-installed root-only managed-reasoning configuration, validate its single absolute database path without printing it, and default the outbox root beneath that database's validated parent. Explicit CLI overrides remain available for clean rebuild/testing.
+
+The correction passed all 157 local tests, all 157 tests plus the filesystem contract from a new exact GX10-staged tree, and a fresh isolated successful/failure-path install rehearsal with unchanged copy digest and zero actual systemd/credential/transport changes.
+
+```text
+corrected_tree=0a5b50dfd34978460653c5af2645f8e307a78f2d
+corrected_archive_sha256=1afdb24de2be892767b5004a47a79f13606a49dcf738baa9ad2db6201596a61f
+corrected_installer_sha256=61f2a28f3615145c87fb28e79013b133888fa3890aaef642a5c7604e5ecb5e0f
+corrected_verifier_sha256=e5bebd71600ea057bbcd0313aead77c4ecfba8d077bfe798e7727772f5491103
+failed_attempt_created_targets=0
+failed_attempt_service_load=not-found
+failed_attempt_timer_load=not-found
+local_tests=157
+remote_tests=157
+copy_results=12
+copy_sha256=8699bab3bcad39cff6304576364bee18506debfe49d0d4ed01ba5e1aa8a01327
+outbox_sha256=f4da77f1f1f968570ce8adb38c70e8c62874825dbd451846661d6e60ad8c362f
+copy_source_unchanged=yes
+failure_cleanup=yes
+systemd_state_changed=no
+credentials_installed=no
+collector_transmission_invoked=no
+GX10_RESULT_OUTBOX_INACTIVE_REHEARSAL=PASS
+```
+
+No private database/outbox path, result/packet/event/entity content, connection value, private runtime identity, credential, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish the portability correction, and independently verify GitHub. Then retry the exact corrected inactive install. Require zero ready/delivered files, disabled/inactive units, exact installed bytes/configuration/private ownership, healthy preexisting schedules, unchanged reasoning aggregates, no credential, and no collector transmission.

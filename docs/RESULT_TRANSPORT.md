@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 remains in progress. The collector-side durable acceptance ledger and cross-owner publication correction are active with exact predecessor rollback retained. GX10 has its dedicated writer identity, pin, and canonical configuration while the sender timer remains disabled. First transport/acceptance/ClickHouse provenance passed. One later exact upload of the immutable delivered bytes/name changed no local outbox state; after natural settling, the collector quarantined it specifically as already accepted, retained its single ledger/ready identity, and ClickHouse retained exactly one matching row. Divergent isolation remains the next gate before recurring sender activation is considered.
+Execution-order item 30 remains in progress. The collector-side durable acceptance ledger and cross-owner publication correction are active with exact predecessor rollback retained. GX10 has its dedicated writer identity, pin, and canonical configuration while the sender timer remains disabled. First transport/acceptance/ClickHouse provenance, exact replay isolation, and same-name divergent-content isolation all pass. The collector retains one distinct quarantine pair for each replay class, one immutable ledger/ready identity, and exactly one matching ClickHouse row. Recurring sender activation is now the remaining separately guarded gate.
 
 ## Replay problem
 
@@ -114,6 +114,8 @@ After explicit authorization, the existing read-only ClickHouse account was supp
 
 After the first-live closure was published, a bounded helper imported and hash-validated the exact installed sender core/configuration, derived and dropped to the installed private service identity, locked the shared outbox, and uploaded the sole delivered file once under its unchanged basename. It did not rename, rewrite, or recreate local state. The normal collector cadence first left the young file waiting, then quarantined the settled file with the exact already-accepted reason. Incoming returned to zero; ready and the immutable ledger remained one; one replay payload/reason pair was isolated; and the matching ClickHouse row count remained exactly one. Both hosts' complete configured-inactive postchecks passed afterward.
 
+After exact-replay closure was published, the same installed-identity/core/configuration validation and shared lock protected a one-time divergent probe. Initial lock contention with the normal producer failed before derivative creation or transport. The retry created a protected temporary same-name record, changed only one bounded collector-valid display field, validated the resulting canonical bytes, uploaded once, revalidated the unchanged original delivered file, and synchronously removed all temporary storage. The natural collector cadence quarantined it specifically as a durable-acceptance conflict. Incoming returned to zero; rejected evidence now contains exactly one exact-replay pair and one conflict pair; ledger/ready remain one; and ClickHouse still contains exactly one matching row. Complete postchecks passed on both hosts with the sender timer disabled.
+
 ## Passed repository/copy gates
 
 The 11 focused tests prove:
@@ -139,4 +141,5 @@ After GitHub independently matched the published candidate, the guarded upgrader
 1. `DONE` — publish and independently verify the configured-inactive production checkpoint and bounded plan.
 2. `DONE` — transmit exactly one file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
 3. `DONE` — prove an exact replay creates no second acceptance or ClickHouse row and is quarantined distinctly.
-4. `NEXT` — prove a controlled same-name divergent file remains isolated; then decide whether to enable the recurring sender timer.
+4. `DONE` — prove a controlled same-name divergent file remains isolated with a distinct conflict reason and no new acceptance or ClickHouse row.
+5. `NEXT` — publish isolation closure, then make and execute the separately guarded recurring-sender activation decision.

@@ -11527,3 +11527,49 @@ No credential, private filename/digest/run identity, connection value, result/pr
 ### Next action
 
 Publish and independently verify this exact-replay closure. Then create one protected temporary same-name derivative of the delivered record, change only a bounded collector-valid presentation field so its bytes/digest diverge without changing its deterministic filename, upload it once through the same writer boundary, and delete the temporary derivative. Require conflict quarantine, unchanged one-row ledger/ready/ClickHouse identity, and healthy full postchecks before considering recurring sender activation.
+
+## 2026-08-24 09:42 PDT - Item 30 divergent live result isolation passed
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The exact live replay checkpoint was published and independently matched on GitHub at:
+
+`d95ec840bfe341258f78a50f029e05f023103e95` — `Record exact live replay isolation`
+
+The pre-probe collector baseline was zero incoming, one ready, one immutable ledger row, and one already-proven exact-replay payload/reason pair. It had zero conflict/other reasons and healthy gate/Vector/ClickHouse state. The first GX10 probe attempt encountered the normal producer's shared outbox lock and failed before derivative creation, SFTP, or any state change, independently proving the concurrency boundary in production.
+
+The clean retry derived and dropped to the installed sender service identity, loaded the exact installed runner/core/configuration, acquired the shared lock, and selected the sole delivered record. In a mode-protected temporary sibling directory it changed only one bounded display field, canonicalized the one-record JSONL, revalidated it through the installed sender contract under the unchanged deterministic basename, and proved its digest differed from the original. It uploaded once through the fixed writer credential, revalidated the untouched original delivered bytes, synchronously removed the derivative/directory, and proved zero temporary remnants.
+
+The normal collector cadence quarantined exactly one new payload/reason pair as `filename conflicts with durable acceptance`. The original exact-replay pair remained independently classified. Incoming returned to zero; ready and the immutable ledger remained one with exact evidence parity; no other rejection appeared. The authorized no-echo read-only ClickHouse proof again found exactly one byte/size/projection/provenance-equivalent row, so the conflict produced no database row.
+
+Full postchecks passed on both hosts. GX10 then had 68 successful reasoning results, 67 ready, one delivered, zero `STARTED`, one preserved historical failure, zero projection/incident lag, and a disabled/inactive sender timer/service. The original pipeline, correlation, reasoning, and outbox schedules remained healthy. Collector writer authorization, SSH syntax, gate timer/restarts, Vector, and ClickHouse remained healthy.
+
+```text
+initial_lock_contention=fail-safe-before-probe
+divergent_probe_uploads=1
+gx10_original_changes=0
+gx10_probe_temp_remainders=0
+collector_incoming=0
+collector_ready=1
+collector_ledger_rows=1
+collector_rejected_payloads=2
+collector_rejected_reasons=2
+collector_exact_replay_reasons=1
+collector_conflict_reasons=1
+collector_other_reasons=0
+clickhouse_exact_raw_matches=1
+sender_timer=disabled,inactive
+projection_lag=0
+incident_lag=0
+GX10_DIVERGENT_PROBE_UPLOAD=PASS
+COLLECTOR_DIVERGENT_ISOLATION=PASS
+CLICKHOUSE_DIVERGENT_NO_INSERT=PASS
+GX10_CONFIGURED_INACTIVE_FULL_POSTCHECK=PASS
+COLLECTOR_CONFIGURED_WRITER_FULL_POSTCHECK=PASS
+```
+
+No credential, private filename/digest/run identity, connection value, original result/provenance content, private service identity, or derivative content was printed or committed. No original file, ledger row, database row, schedule, or service configuration was changed. The only retained new evidence is the expected conflict quarantine pair.
+
+### Next action
+
+Publish and independently verify this divergent-isolation closure. Then define the exact activation/rollback gate for the already-installed recurring sender timer, verify current backlog and both-host health against that gate, activate only the sender timer, and require bounded natural delivery plus collector acceptance/ingestion and continued replay protection before marking item 30 complete.

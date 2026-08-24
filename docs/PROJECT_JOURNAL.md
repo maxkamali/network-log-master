@@ -8290,3 +8290,35 @@ Tests prove immediate opening, repeated-degradation promotion, supporting eviden
 ### Next action
 
 Publish and independently verify this intermediate item-25 checkpoint. Then use only its published exact artifacts for a protected private copy of the working GX10 database: apply the migration, run canonical projection, run incident processing, verify replay no-op and all schema/identity/evidence/transition/context invariants, and remove only the temporary rehearsal copy after success. Do not migrate or schedule the working database merely because copy rehearsal passes; record a separate activation decision and gate.
+
+## 2026-08-24 00:14 PDT - Item-25 live-copy schema validator corrected before migration
+
+### Status
+
+Execution-order item 25 remains the single `NEXT` item and is in progress.
+
+The published candidate at `936b0be737db6c1fa59c7e9f46ebfbda954f0e95` was staged under a root-only temporary rehearsal boundary on GX10. An online SQLite backup copy of the working database was created. The migration guard then failed closed before creating its protected migration backup, installing the candidate engine, or adding incident schema.
+
+The working database was opened read-only and was not changed. The temporary rehearsal copy still had no incident tables when the failure was inspected.
+
+### Cause and correction
+
+The copy contained exactly the expected `18` recovered base schema objects, with no missing or extra tables/indexes and zero SQLite user/application version markers. Raw `sqlite_master.sql` hashes differed for all 18 objects because the live database retained different whitespace formatting from the reconstructed initializer. After removing only SQL whitespace and case differences, all 18 type/name/DDL comparisons matched.
+
+This is a representation-only validator defect, not live schema drift. The guard now:
+
+- canonicalizes only DDL whitespace and case for schema comparison
+- still requires exact object types, names, statements, constraints, indexes, and triggers
+- separately requires the exact complete functional suppression corpus
+- separately requires zero SQLite `user_version` and `application_id`
+- continues to reject extra/missing objects, semantic DDL drift, divergent artifacts, scheduler references, or unsafe parents
+
+A new synthetic test proves suppression-state drift is refused before backup or installation. The migration test subset now passes `5/5`; the complete GX10 suite contains `62` tests.
+
+Corrected migration-guard SHA-256:
+
+`659b02f22a40e04c04d41afe3a3827674f22b3ca0fc4db757106ea4055779fac`
+
+### Next action
+
+Run the full package/public validation, publish and independently verify this narrow validator correction, replace only the temporary staged guard with those published bytes, then restart the protected copy rehearsal from a fresh database copy. The working database remains outside the rehearsal mutation boundary.

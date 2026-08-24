@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import os
 from pathlib import Path
+import re
 import sqlite3
 import stat
 import sys
@@ -89,12 +90,19 @@ def require_protected_parent(path: Path, label: str) -> None:
 
 
 def schema_inventory(connection: sqlite3.Connection) -> list[tuple]:
-    return connection.execute(
+    return [
+        (
+            kind,
+            name,
+            re.sub(r"\s+", "", sql or "").casefold(),
+        )
+        for kind, name, sql in connection.execute(
         "SELECT type, name, sql FROM sqlite_master "
         "WHERE name NOT LIKE 'sqlite_%' "
         "AND type IN ('table', 'index', 'trigger') "
         "ORDER BY type, name"
-    ).fetchall()
+        )
+    ]
 
 
 def expected_inventory(migrated: bool) -> list[tuple]:
@@ -122,6 +130,23 @@ def validate_database(
     if schema_inventory(connection) != expected_inventory(migrated):
         state = "migrated" if migrated else "base"
         raise MigrationError(f"database does not match exact {state} schema")
+    expected = sqlite3.connect(":memory:")
+    try:
+        expected.executescript(BASE_SCHEMA.read_text(encoding="utf-8"))
+        expected_suppression = expected.execute(
+            "SELECT * FROM suppression_rules ORDER BY id"
+        ).fetchall()
+    finally:
+        expected.close()
+    actual_suppression = connection.execute(
+        "SELECT * FROM suppression_rules ORDER BY id"
+    ).fetchall()
+    if actual_suppression != expected_suppression:
+        raise MigrationError("suppression corpus differs")
+    if connection.execute("PRAGMA user_version").fetchone()[0] != 0:
+        raise MigrationError("unexpected SQLite user_version")
+    if connection.execute("PRAGMA application_id").fetchone()[0] != 0:
+        raise MigrationError("unexpected SQLite application_id")
 
 
 def validate_candidates() -> None:

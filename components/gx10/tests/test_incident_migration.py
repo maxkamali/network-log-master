@@ -133,6 +133,25 @@ class IncidentMigrationTests(unittest.TestCase):
         self.assertFalse(self.target.exists())
         self.assertFalse(self.backup.exists())
 
+    def test_suppression_drift_is_refused_before_backup(self):
+        connection = sqlite3.connect(self.database)
+        connection.execute(
+            'UPDATE suppression_rules SET enabled = 0 WHERE id = 1'
+        )
+        connection.commit()
+        connection.close()
+        with self.assertRaisesRegex(
+            GUARD.MigrationError,
+            'suppression corpus differs',
+        ):
+            GUARD.apply_migration(
+                self.database,
+                self.target,
+                self.backup,
+            )
+        self.assertFalse(self.target.exists())
+        self.assertFalse(self.backup.exists())
+
     def test_rollback_refuses_cursor_or_incident_state(self):
         GUARD.apply_migration(self.database, self.target, self.backup)
         connection = sqlite3.connect(self.database)

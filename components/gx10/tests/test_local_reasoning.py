@@ -316,6 +316,15 @@ class LocalReasoningTests(unittest.TestCase):
             [('INVALID_OUTPUT',)],
         )
 
+    def test_output_schema_prevents_risk_labels_as_action_text(self):
+        schema = json.loads(OUTPUT_SCHEMA.read_text(encoding='utf-8'))
+        action_text = schema['properties']['recommended_actions']['items'][
+            'properties'
+        ]['action']
+        self.assertEqual(
+            set(action_text['not']['enum']), self.caller.ACTION_RISKS
+        )
+
     def test_action_required_cannot_claim_zero_confidence(self):
         bad = self.output(confidence=0)
         self.assertEqual(self.invoke(lambda _: self.response(bad)), 1)

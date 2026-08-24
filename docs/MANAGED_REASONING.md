@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. The published 138-test backlog correction passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. The second corrected natural cadence also kept packets fixed at 12 and reduced pending 7→6, but its single model response failed strict output validation. The caller stored one terminal `INVALID_OUTPUT` run and no result or invalid content. Reasoning was disabled with zero `STARTED` rows or restarts. Production now preserves 12 packets, six pending, six runs, five successful results, and one explicit safe failure while private-copy diagnosis proceeds.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. The published backlog correction passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. The second corrected natural cadence also kept packets fixed at 12 and reduced pending 7→6, but its single model response failed strict output validation. The caller stored one terminal `INVALID_OUTPUT` run and no result or invalid content. Reasoning was disabled with zero `STARTED` rows or restarts. Protected-copy replay of the same packet reproduced the failure; a second copy-only diagnostic classified one action whose text exactly equaled a risk label. Production remains unchanged at 12 packets, six pending, six runs, five successful results, and one explicit safe failure. A 140-test generation-schema compatibility candidate is awaiting exact remote staging and protected-copy replay.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -64,10 +64,10 @@ An acquired cycle lock makes every preexisting `STARTED` reservation an unreconc
 - the validated application database, runtime identity, and exact installed item-27/item-28 dependency bytes
 - loaded correlation and Ollama dependencies
 - safe absolute database and unit names
-- absent or exact managed runner/service/timer/configuration/drop-in targets; the timer may also be the exact published inactive boot-relative predecessor, and the runner may be the exact published pre-backlog-correction version, for atomic upgrade only
+- absent or exact managed runner/service/timer/configuration/drop-in targets; the timer may also be the exact published inactive boot-relative predecessor, the runner may be the exact pre-backlog-correction version, and the output schema/caller/runner may be their exact pre-compatibility versions, for atomic upgrade only
 - inactive and disabled managed reasoning units
 
-It installs only the managed runner, service/timer, private database-path configuration, and runtime-identity/ordering/write-scope drop-in. It runs `systemd-analyze verify` and reloads systemd but does not build packets, call Ollama, or enable the timer.
+It installs the managed runner, service/timer, private database-path configuration, runtime-identity/ordering/write-scope drop-in, and only the coordinated output-schema/caller compatibility bytes when their exact predecessors are present. It runs `systemd-analyze verify` and reloads systemd but does not build packets, call Ollama, or enable the timer.
 
 `components/gx10/install/activate-managed-reasoning.py` is a separate confirmation gate. It verifies the complete installed/inactive boundary, creates and validates a new root-only mode-`0600` SQLite online backup, runs exactly one initial bounded service cycle while the timer is disabled, verifies the post-cycle state, and only then enables the timer. Any error disables/stops only managed reasoning and retains its append-only state plus protected backup.
 
@@ -75,7 +75,7 @@ It installs only the managed runner, service/timer, private database-path config
 
 ## Candidate validation
 
-Twenty-three focused tests currently prove:
+Twenty-four focused item-29 tests currently prove:
 
 - strict private database configuration
 - exact dependency hashes and file metadata
@@ -90,12 +90,13 @@ Twenty-three focused tests currently prove:
 - atomic exact-file reuse and divergence refusal
 - exact-old-hash timer upgrade and divergent-old refusal
 - exact-old-hash runner upgrade and divergent-old refusal
+- exact and narrow schema/caller/runner compatibility-upgrade targets
 - protected-backup-first activation order
 - activation failure isolation and bounded-cycle enforcement
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `138` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, bounded-backlog current-state-copy rehearsal, exact inactive runner upgrade, protected corrected resume, and one corrected natural drain cadence have passed. The next cadence exercised terminal invalid-output isolation and was disabled for diagnosis; no validation rule is being weakened. Collector result return is outside item 29.
+The full GX10 suite currently passes `140` tests, including the item-28 generation-schema compatibility assertion. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, bounded-backlog current-state-copy rehearsal, exact inactive runner upgrade, protected corrected resume, and one corrected natural drain cadence have passed. The next cadence exercised terminal invalid-output isolation and was disabled. Protected-copy diagnosis reproduced and classified the compatibility defect without exposing content. No validation rule is weakened. Collector result return is outside item 29.
 
 ## Protected current-state-copy evidence
 
@@ -200,6 +201,12 @@ The first corrected natural cadence was timer-driven and kept packet count fixed
 
 The second corrected natural cadence again deferred construction and kept packets fixed while consuming exactly one pending reservation, but the model response failed the unchanged strict output contract. The caller stored only one terminal `INVALID_OUTPUT` run; no result or invalid model content was stored. The service exited nonzero as designed, and the rollout monitor disabled the reasoning timer before another cadence. A post-disable diagnosis proved pending six, five successes/results, one terminal failure, zero `STARTED` rows/restarts, and deterministic zero lag.
 
+## Invalid-output compatibility diagnosis
+
+A fresh protected current-state copy removed only the copied terminal diagnostic reservation behind a copy-local no-delete-trigger override, recreated that trigger immediately, and replayed the exact same packet through the unchanged caller at temperature zero. It failed identically. A second independent protected-copy replay classified the response without printing packet or output content: four actions were generated, and one action's text exactly equaled a member of the action-risk enum.
+
+The correction does not relax the caller or rewrite the production failure. The output generation schema now excludes the three risk labels from the action-text field while retaining their separate required `risk` field. The caller continues to reject label-only action text independently. Exact-old-hash installation is limited to the coordinated output schema, caller, and managed runner; the service must remain disabled and any divergent predecessor is refused. Production remained unchanged and disabled throughout diagnosis.
+
 ## Natural-cadence backlog failure and safe disable
 
 The first natural cadence reached event ID `967397`, created four new packets, completed exactly one additional successful run/result, and left six pending. The second reached event ID `967860`, again created four packets and completed exactly one run/result, leaving nine pending. Both cadences retained zero deterministic lag, failures, `STARTED` reservations, or restarts, and all independent timers were healthy.
@@ -300,11 +307,13 @@ The protected backup path and all packet/result content remain private.
 
 ## Exact candidate artifacts
 
-- managed runner SHA-256: `c0c095661a7042be57230fb8fc856c03f5fe191ab604e4e246138f28156a3bee`
-- installer SHA-256: `f1f1cbc1dbe079c6e0ee8a1b67b54abd3d677199fbff43e5b633e5b8e8aec5e8`
+- output schema SHA-256: `d2917c40b867aa801934579e0779f001dc8e71953aaf3ddaa2134d0736f25a51`
+- local caller SHA-256: `31c90b4ef759df097c0c018b6a70adb82a7c1b6939bbd3bd10704f2be70a5f9d`
+- managed runner SHA-256: `1b4fa5150149cc3556f3ddfec2ed85f1b4c6e61e15fef1989bc0b0a5e39e25fa`
+- installer SHA-256: `4eebf64ef2a9fca3b5b2aa97a737d7f262ba857728badced963bf9a5e5b355e3`
 - activator SHA-256: `04d16e1c3eac68cc04a533bba7571ba5534a2f07af8da566a2f9c725d50b43d3`
 - verifier SHA-256: `b80d3de36cdeac1ea268c9c12a1edfe1dce83e248e57eefff99872ec11622708`
 - service SHA-256: `3559ed6a5bdfc98de3544bc6bf7f69cf6459a9cb50083cd96db632a27e52e64a`
 - timer SHA-256: `c284e9d8cbb71775dc6b67b7451bb024d689b4ec27b89de987443a6ff77cad34`
 
-These hashes describe the bounded-backlog candidate. The activator, verifier, service, and corrected timer are byte-identical to the activation candidate; only the runner and installer changed. The exact corrected runner and timer are installed inactive on the working system.
+These hashes describe the generation-schema compatibility candidate. The activator, verifier, service, and corrected timer are byte-identical to the activation candidate. The currently installed output schema, caller, and bounded-backlog runner remain their exact published predecessors while reasoning is disabled; the compatibility bytes are not yet installed.

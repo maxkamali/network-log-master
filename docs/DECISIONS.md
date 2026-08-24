@@ -406,7 +406,7 @@ Consequence:
 
 ## ADR-022 - Reasoning wakes and packets are deterministic append-only facts
 
-**Status:** Accepted and implemented unscheduled
+**Status:** Accepted and implemented; compatibility correction pending
 
 LLM wake selection and compact incident-packet construction are owned by a deterministic versioned builder over incident/evidence/transition state. The builder records immutable packet facts before any inference caller exists.
 
@@ -450,9 +450,10 @@ Consequence:
 - a run may transition once to success or a bounded terminal failure status
 - model/prompt registrations and successful canonical results are append-only
 - packet/incident IDs, schema, enumerations, types, counts, lengths, and digests are independently validated
+- after a protected-copy reproduction proved the model could place a risk label in the action-text field, the generation schema was strengthened to exclude exact risk labels there; the caller's independent rejection rule remains unchanged
 - the caller is fixed to loopback HTTP, refuses redirects, applies request/response/time bounds, and stores no invalid model content
 - repository, migration, synthetic local-model, protected-copy, and guarded empty/unscheduled-install gates passed independently
-- the working system retains zero packet/model/prompt/run/result rows, zero caller scheduler references, and no production inference; managed invocation remains a separate gate and collector result return remains out of scope
+- item 29 owns managed invocation and retains its one reviewed terminal invalid-output run as immutable evidence; collector result return remains out of scope
 
 ## ADR-024 - Managed reasoning is separately scheduled, bounded, and fail-closed
 
@@ -476,5 +477,6 @@ Consequence:
 - packet construction is deferred whenever selected-version backlog exists; that drain cycle must keep packet count fixed and reduce pending count by exactly one reservation before construction can resume at pending zero
 - the service can write only beside the validated database and can connect only to IPv4 loopback plus Unix sockets
 - the timer's first scheduled cycle is relative to enablement, not host boot; an exact published inactive predecessor may be atomically upgraded, while any divergent target is refused
+- compatibility upgrades are permitted only for the exact predecessor output schema, caller, and managed runner while the units are disabled; divergent files are refused and later failure rolls back changed artifacts
 - inactive installation, protected-copy rehearsal, protected initial production cycle, timer enablement, and multi-cadence evidence remain separate gates
 - collector result return remains outside item 29

@@ -10054,3 +10054,47 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify this terminal-safe-failure checkpoint. On a fresh protected copy only, remove the terminal diagnostic reservation under an explicitly local-only trigger override and rerun the same selected packet through the unchanged caller/validator. If it succeeds, treat production failure as reviewed stochastic evidence and resume without rewriting it. If it fails consistently, keep reasoning disabled and correct prompt/model compatibility before any resume.
+
+## 2026-08-24 03:28 PDT - Item 29 persistent invalid-output cause isolated and compatibility candidate validated
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The terminal-safe-failure checkpoint was published and independently matched on GitHub at:
+
+`314fb31bf8e6d0e08b650331de86caac7772248c` — `Record managed reasoning invalid output isolation`
+
+Production reasoning remained disabled and unchanged. A fresh caught-up protected copy removed only the copied terminal diagnostic run behind a temporary copy-local trigger override, recreated the trigger immediately, and replayed the exact same packet through the unchanged caller at temperature zero. The response again failed strict action-text validation. Deterministic truth was unchanged and production was not retried.
+
+A second protected-copy-only replay classified the response without printing packet or output content. The model generated four actions; one action's text exactly equaled one of the three action-risk labels. This proved a persistent generation-schema compatibility defect rather than a transient transport failure. The strict caller rule remains correct.
+
+The candidate output schema now excludes exact risk labels from the action-text field while retaining the separate required risk field. Caller validation is not weakened. The installer permits only exact-old-hash atomic replacement of the coordinated output schema, local caller, and managed runner while reasoning is disabled; any divergent predecessor is refused and a later caught failure restores changed artifacts.
+
+```text
+protected_same_packet_retry=invalid
+protected_validation_class=action_text
+diagnostic_action_count=4
+diagnostic_action_text_category=action_text_equals_risk_label
+production_packets=12
+production_pending=6
+production_runs=6
+production_succeeded=5
+production_failures=1
+production_results=5
+production_started=0
+managed_reasoning_timer_enabled=no
+managed_reasoning_timer_active=no
+output_schema_sha256=d2917c40b867aa801934579e0779f001dc8e71953aaf3ddaa2134d0736f25a51
+local_caller_sha256=31c90b4ef759df097c0c018b6a70adb82a7c1b6939bbd3bd10704f2be70a5f9d
+managed_runner_sha256=1b4fa5150149cc3556f3ddfec2ed85f1b4c6e61e15fef1989bc0b0a5e39e25fa
+managed_installer_sha256=4eebf64ef2a9fca3b5b2aa97a737d7f262ba857728badced963bf9a5e5b355e3
+local_migrator_sha256=a776e5869f006c584e42b76301fd7e98ff761c43e6e0682b173b84dba78188dc
+gx10_tests=140
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+PUBLIC_REPOSITORY_VALIDATION=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, connection value, or invalid model output was printed or committed.
+
+### Next action
+
+Publish and independently verify the 140-test compatibility candidate, stage its exact bytes on GX10, and rerun the full remote suite. Then replay the same failed packet only on a fresh protected current-state copy through the strengthened generation schema and unchanged caller validator. Do not install or resume production unless that protected-copy replay succeeds.

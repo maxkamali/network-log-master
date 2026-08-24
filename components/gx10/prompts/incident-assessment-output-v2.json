@@ -63,6 +63,13 @@
           "action": {
             "maxLength": 500,
             "minLength": 8,
+            "not": {
+              "enum": [
+                "read_only",
+                "reversible",
+                "change_requires_approval"
+              ]
+            },
             "type": "string"
           },
           "priority": {

@@ -31,6 +31,16 @@ SAFE_NAME_RE = re.compile(r'^[A-Za-z0-9_.@-]+$')
 SAFE_PATH_RE = re.compile(r'^/[A-Za-z0-9_./@+-]+$')
 ARTIFACTS = (
     (
+        GX10_DIR / 'prompts' / 'incident-assessment-output-v2.json',
+        CONFIG_DIR / 'incident-assessment-output-v2.json',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'run-local-reasoning.py',
+        LIBEXEC_DIR / 'run-local-reasoning.py',
+        0o755,
+    ),
+    (
         GX10_DIR / 'sbin' / 'run-managed-reasoning.py',
         LIBEXEC_DIR / 'run-managed-reasoning.py',
         0o755,
@@ -53,11 +63,6 @@ DEPENDENCIES = (
         0o755,
     ),
     (
-        GX10_DIR / 'sbin' / 'run-local-reasoning.py',
-        LIBEXEC_DIR / 'run-local-reasoning.py',
-        0o755,
-    ),
-    (
         GX10_DIR / 'config' / 'reasoning-runtime-v2.json',
         CONFIG_DIR / 'reasoning-runtime-v2.json',
         0o644,
@@ -65,11 +70,6 @@ DEPENDENCIES = (
     (
         GX10_DIR / 'prompts' / 'incident-assessment-v2.txt',
         CONFIG_DIR / 'incident-assessment-v2.txt',
-        0o644,
-    ),
-    (
-        GX10_DIR / 'prompts' / 'incident-assessment-output-v2.json',
-        CONFIG_DIR / 'incident-assessment-output-v2.json',
         0o644,
     ),
 )
@@ -96,9 +96,17 @@ PREVIOUS_TIMER_BYTES = (
     '\n[Install]\n'
     'WantedBy=timers.target\n'
 ).encode()
-PREVIOUS_RUNNER_SHA256 = (
-    'f79ed272a8638449bc6a98aefa1758e711a69645950c284869d96e03704432ca'
-)
+PREVIOUS_ARTIFACT_SHA256 = {
+    CONFIG_DIR / 'incident-assessment-output-v2.json': (
+        '1ec4e28d0d18320c7469d4f1bb26a5c766515ff008c5803d24ce214ded69928a'
+    ),
+    LIBEXEC_DIR / 'run-local-reasoning.py': (
+        'e9b894afa16fd5f138cfeec299be58328fd02454db2b53c3e395809e04d58cd0'
+    ),
+    LIBEXEC_DIR / 'run-managed-reasoning.py': (
+        'c0c095661a7042be57230fb8fc856c03f5fe191ab604e4e246138f28156a3bee'
+    ),
+}
 
 
 class InstallError(ValueError):
@@ -438,11 +446,11 @@ def apply_install(
         ensure_directory(DROPIN_DIR, 0, 0, 0o755, created_directories)
         for source, target, mode in ARTIFACTS:
             source_bytes = source.read_bytes()
-            if target == LIBEXEC_DIR / 'run-managed-reasoning.py':
+            if target in PREVIOUS_ARTIFACT_SHA256:
                 action, previous = install_or_upgrade_sha256(
                     target,
                     source_bytes,
-                    PREVIOUS_RUNNER_SHA256,
+                    PREVIOUS_ARTIFACT_SHA256[target],
                     mode,
                 )
                 if action == 'created':

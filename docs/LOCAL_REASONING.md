@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 28 is complete. The published calibrated schema, caller, prompt/configuration artifacts, and output schema are installed on the working GX10 system under a protected pre-inference backup, but remain empty and unscheduled. Production contains zero reasoning packets, model versions, prompt versions, runs, and results; no production packet was built or inferred. Synthetic inference and one sanitized production-derived packet inference ran only against isolated temporary databases; no raw/source content reached the model path.
+Execution-order item 28 is complete. Its published calibrated schema, caller, prompt/configuration artifacts, and output schema were first installed empty and unscheduled on the working GX10 system under a protected pre-inference backup. Item 29 later activated bounded managed invocation. After five successful production results, one response failed the unchanged strict action-text validator and was stored only as terminal `INVALID_OUTPUT`; no invalid content became a result. Managed reasoning is disabled while an item-29 compatibility correction is gated.
 
 The installed caller consumes only immutable item-27 packets. It cannot change incidents, evidence, transitions, packets, collector state, or Grafana state.
 
@@ -31,7 +31,7 @@ Exact repository artifacts:
 - output schema: `components/gx10/prompts/incident-assessment-output-v2.json`
 - migration guard: `components/gx10/install/migrate-local-reasoning.py`
 
-Candidate SHA-256 values:
+Original item-28 candidate SHA-256 values:
 
 - inference schema: `6365f99eb834c0561a1246757a4404bbbc7ec831fe910325eff8dcfd92113a90`
 - caller: `e9b894afa16fd5f138cfeec299be58328fd02454db2b53c3e395809e04d58cd0`
@@ -39,6 +39,14 @@ Candidate SHA-256 values:
 - system prompt: `c24a1e4a5af021ea66475cdb77c792b19f023caf93f344f64be4dedf1ebb634c`
 - output schema: `1ec4e28d0d18320c7469d4f1bb26a5c766515ff008c5803d24ce214ded69928a`
 - migration guard: `16f75e1138308e4bfa5c5fc3cbdb0337e4bfe4b34dbb73ce062d40577f1a79e7`
+
+Item 29 reproduced the failed production packet only on protected copies and classified one generated action whose text exactly equaled a risk label. The compatibility candidate strengthens the generation schema with a negative enum for those labels; the existing caller validation remains unchanged. Its coordinated candidate hashes are:
+
+- caller: `31c90b4ef759df097c0c018b6a70adb82a7c1b6939bbd3bd10704f2be70a5f9d`
+- output schema: `d2917c40b867aa801934579e0779f001dc8e71953aaf3ddaa2134d0736f25a51`
+- migration guard: `a776e5869f006c584e42b76301fd7e98ff761c43e6e0682b173b84dba78188dc`
+
+These compatibility bytes are not yet installed. The production timer remains disabled and the original terminal failure remains immutable evidence.
 
 ## Durable state and idempotency
 
@@ -159,4 +167,4 @@ GX10_ITEM28_INSTALLED_POSTCHECK=PASS
 
 The original fetch/ingest and correlation timers remain independent of this boundary.
 
-The separate managed invocation candidate, gates, telemetry, and failure behavior are defined in `docs/MANAGED_REASONING.md`. It is not installed on the working system and has not invoked a production packet.
+The separate managed invocation gates, telemetry, current production state, and compatibility correction are defined in `docs/MANAGED_REASONING.md`.

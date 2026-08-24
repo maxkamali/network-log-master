@@ -25,7 +25,7 @@ ARTIFACTS = (
     (
         'caller',
         GX10_DIR / 'sbin' / 'run-local-reasoning.py',
-        'e9b894afa16fd5f138cfeec299be58328fd02454db2b53c3e395809e04d58cd0',
+        '31c90b4ef759df097c0c018b6a70adb82a7c1b6939bbd3bd10704f2be70a5f9d',
         0o755,
     ),
     (
@@ -43,7 +43,7 @@ ARTIFACTS = (
     (
         'output schema',
         GX10_DIR / 'prompts' / 'incident-assessment-output-v2.json',
-        '1ec4e28d0d18320c7469d4f1bb26a5c766515ff008c5803d24ce214ded69928a',
+        'd2917c40b867aa801934579e0779f001dc8e71953aaf3ddaa2134d0736f25a51',
         0o644,
     ),
 )

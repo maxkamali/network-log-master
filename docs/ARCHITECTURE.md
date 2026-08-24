@@ -78,7 +78,7 @@ collector write-only result transport
   -> Grafana
 ```
 
-Ollama is installed, active, enabled, and loopback-only with six complete model manifests. No application-specific caller was found during rediscovery; the reconstructed strict caller is now active only through the separately managed item-29 boundary. The versioned result-outbox producer and inactive no-network managed package pass repository, protected-copy, exact-stage, isolated-install/run, failure-cleanup, and corrected working-system inactive-install gates. Exact artifacts and empty states are installed with a never-invoked disabled timer. The collector return path stays disconnected until protected local activation and later credential/live-return gates pass.
+Ollama is installed, active, enabled, and loopback-only with six complete model manifests. No application-specific caller was found during rediscovery; the reconstructed strict caller is now active only through the separately managed item-29 boundary. The versioned no-network result-outbox boundary is installed; first activation retained 15 exact ready files and safely disabled on a corrected independent-verifier ownership defect. No credential or collector transport exists. The collector return path stays disconnected until protected local resume and later credential/live-return gates pass.
 
 ## Target data path
 

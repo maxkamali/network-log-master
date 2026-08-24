@@ -504,7 +504,7 @@ Consequence:
 - publication is lock-protected, same-directory atomic, file/directory `fsync`-backed, size-bounded, and postvalidated
 - the repository/exact GX10 stage and protected-copy gates pass with 151 tests, 12-for-12 result generation, one simulated delivered transition, and exact 11-ready/one-delivered replay
 - the separately managed package adds an exact-hash runner, private-network/Unix-only oneshot, disabled timer, guarded empty installer, independent verifier, and complete failure cleanup; its isolated exact-tree rehearsal passes with 157 tests
-- exact producer/runner/service/timer/configuration plus empty ready/delivered directories are installed after corrected inactive verification; the service has never run and the timer remains disabled
+- exact producer/runner/service/timer/configuration plus ready/delivered directories are installed; first activation retained 15 exact ready files and the timer remains disabled pending corrected service-ownership verification/resume
 - no writer credential or sender is installed, and the boundary has not connected or transmitted to the collector
 - local activation must pause only managed reasoning, bind all five reasoning tables to one before/after digest, run exactly one producer cycle while the outbox timer is disabled, enable that timer only after cardinality verification, and restore reasoning on every path
 - a later sender must define durable acknowledgment semantics before it may remove or retransmit a local ready file

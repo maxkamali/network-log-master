@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-Item 29 is complete. Item 30 is the single `NEXT`. Repository/protected-copy/package/corrected inactive-install gates pass, and the protected activator passes 158 local/exact GX10-staged tests plus a retained-copy 12-for-12 reasoning-digest/timer-restore rehearsal. Production still has empty ready/delivered states, a disabled timer, a never-invoked service, no writer credential, and no transmission. Read `docs/RESULT_OUTBOX.md`; next publish and run only the exact protected local activation before any sender/credential gate.
+Item 29 is complete. Item 30 is the single `NEXT`. First protected local activation created 15 exact ready files, then safely stopped on a verifier UID assumption; outbox stayed disabled, reasoning was restored, and nothing transmitted. The corrected service-ownership verifier and populated-disabled resume path pass 159 local/remote tests plus a second full retained-copy rehearsal. No credential exists. Read `docs/RESULT_OUTBOX.md`; next publish and resume exact protected local activation before any sender gate.
 
 The active automatic application chains are:
 

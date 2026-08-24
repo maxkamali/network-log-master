@@ -10748,3 +10748,51 @@ No private database/outbox path, result/packet/event/entity content, connection 
 ### Next action
 
 Run the full public gate, publish the activator checkpoint, and independently verify GitHub. Then execute only the exact protected local activation on GX10. Require exact reasoning digest preservation, ready count equal to then-current results, zero delivered, both outbox/reasoning timers active, all deterministic schedules healthy, every file collector-valid, no credential, and no transmission.
+
+## 2026-08-24 04:42 PDT - Item 30 activation verifier ownership correction passed
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The protected activation checkpoint was published and independently matched on GitHub at:
+
+`9efbc50de459efef9cbe344e08b5d11b77dd392c` — `Add protected local outbox activation`
+
+The first working-system activation paused/restored managed reasoning and successfully ran the no-network outbox service, creating exactly 15 ready files for 15 then-current results. The root-run independent verifier then stopped because it reused the producer's runtime-owner check and therefore expected service-owned mode-`0640` files to be owned by root. The activator failure path disabled the outbox timer, restored reasoning active/enabled, preserved the exact derived files, and transmitted nothing.
+
+```text
+reasoning_results=15
+reasoning_started=0
+outbox_ready=15
+outbox_delivered=0
+outbox_timer=inactive/disabled
+reasoning_timer=active/enabled
+collector_transmission_invoked=no
+GX10_RESULT_OUTBOX_FAILED_ACTIVATION_POSTCHECK=PASS
+```
+
+The independent verifier now inventories ready/delivered files against the already-derived service UID/GID while retaining exact bytes, mode, link, filename, database-record, and duplicate-state checks. The activator accepts an exact populated-but-disabled state with zero delivered and reruns the service idempotently, filling only any successful results added before resume. No file is deleted or rewritten.
+
+One focused service-ownership test brings the suite to 159. A new exact tree passed all 159 tests plus the filesystem contract on GX10. A second full retained-copy activation rehearsal on a different protected copy again passed 12-for-12 creation, exact reasoning digest, timer enablement/restoration, and zero actual systemd/credential/transport change.
+
+```text
+corrected_tree=a1722f61fa6c85703dd9e5f0bd73b434d32a8d96
+corrected_archive_sha256=9fe2a1a2a888db31721418e5b990f27d6d3200d973454ba9a7f83fcad6c239d5
+corrected_activator_sha256=a88a296aebed191055f503555e9d5c01e188b818e7d3e1f4790b252aa0eaf95f
+corrected_verifier_sha256=ddfbab97f68ccf385aef0b9ce3e5c0d0ef82be9c2050408f6f40830a2ea616a7
+corrected_management_tests_sha256=cc1b677cf3b9b6ae9b64856e32fb589b8a6b79e383f1b2eedd1bc7500d877376
+local_tests=159
+remote_tests=159
+outbox_ready_copy=12
+outbox_delivered_copy=0
+reasoning_copy_unchanged=yes
+systemd_state_changed=no
+credentials_installed=no
+collector_transmission_invoked=no
+GX10_RESULT_OUTBOX_LOCAL_ACTIVATION_REHEARSAL=PASS
+```
+
+No private database/outbox path, result/packet/event/entity content, connection value, private runtime identity, credential, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish the ownership/resume correction, and independently verify GitHub. Then resume exact protected local activation from the retained populated-disabled state. Require one ready file per current successful result, zero delivered, exact reasoning digest, outbox/reasoning timers active, healthy deterministic schedules, no credential, and no transmission.

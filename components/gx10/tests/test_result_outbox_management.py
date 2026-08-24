@@ -47,6 +47,9 @@ class ResultOutboxManagementTests(unittest.TestCase):
         cls.activator = load_module(
             'managed_outbox_activator_test', ACTIVATOR_PATH
         )
+        cls.producer = load_module(
+            'managed_outbox_producer_test', PRODUCER_PATH
+        )
 
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
@@ -198,6 +201,32 @@ class ResultOutboxManagementTests(unittest.TestCase):
         self.assertEqual(first['results'], 1)
         self.assertEqual(first['failures'], 1)
         self.assertRegex(first['digest'], r'^[0-9a-f]{64}$')
+
+    def test_verifier_inventory_uses_service_file_identity(self):
+        ready = self.root / 'ready'
+        ready.mkdir()
+        name = 'ai-result-v1-' + 'a' * 32 + '.jsonl'
+        data = b'{"title":"synthetic"}\n'
+        path = ready / name
+        path.write_bytes(data)
+        path.chmod(0o640)
+        records = {name: data}
+        names = self.verifier.inventory(
+            ready,
+            records,
+            self.producer,
+            os.geteuid(),
+            os.getegid(),
+        )
+        self.assertEqual(names, {name})
+        with self.assertRaisesRegex(ValueError, 'file differs'):
+            self.verifier.inventory(
+                ready,
+                records,
+                self.producer,
+                os.geteuid() + 1,
+                os.getegid(),
+            )
 
     def test_install_sources_and_public_units_have_expected_modes(self):
         for source, _, mode in self.installer.ARTIFACTS:

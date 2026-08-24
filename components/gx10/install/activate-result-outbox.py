@@ -137,10 +137,15 @@ def activate():
     ready = root / 'ready'
     delivered = root / 'delivered'
     initial = verifier.verify(
-        database, root, ready, delivered, active=False
+        database,
+        root,
+        ready,
+        delivered,
+        active=False,
+        allow_populated_inactive=True,
     )
-    if initial['ready'] or initial['delivered']:
-        raise ActivationError('activation initial outbox is not empty')
+    if initial['delivered'] or initial['ready'] > initial['results']:
+        raise ActivationError('activation initial outbox state differs')
     if (
         systemctl_value(REASONING_TIMER, 'ActiveState') != 'active'
         or systemctl_value(REASONING_TIMER, 'UnitFileState') != 'enabled'

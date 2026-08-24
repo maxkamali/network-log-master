@@ -242,6 +242,31 @@ def validate_units(active):
         raise ValueError('managed result outbox restart count differs')
 
 
+def inventory(directory, records, producer, uid, gid):
+    names = set()
+    for path in sorted(Path(directory).iterdir(), key=lambda item: item.name):
+        if producer.PARTIAL_RE.fullmatch(path.name):
+            raise ValueError('managed result outbox has a stale partial')
+        if (
+            producer.FINAL_RE.fullmatch(path.name) is None
+            or path.name not in records
+            or path.is_symlink()
+            or not path.is_file()
+        ):
+            raise ValueError('managed result outbox entry differs')
+        details = path.stat()
+        if (
+            details.st_nlink != 1
+            or details.st_uid != uid
+            or details.st_gid != gid
+            or stat.S_IMODE(details.st_mode) != 0o640
+            or path.read_bytes() != records[path.name]
+        ):
+            raise ValueError('managed result outbox file differs')
+        names.add(path.name)
+    return names
+
+
 def verify(
     database,
     root,
@@ -254,18 +279,14 @@ def verify(
     for source, target, mode in ARTIFACTS:
         validate_file(target, mode, source=source)
     state = validate_database(database)
-    validate_private_runtime(database, root, ready, delivered)
+    uid, gid = validate_private_runtime(database, root, ready, delivered)
     validate_units(active)
     producer = load_producer()
     records = producer.load_records(database)
-    if any(
-        producer.PARTIAL_RE.fullmatch(path.name)
-        for path in Path(ready).iterdir()
-    ):
-        raise ValueError('managed result outbox has a stale partial')
-    ready_names, delivered_names = producer.preflight(
-        ready, delivered, records
-    )
+    ready_names = inventory(ready, records, producer, uid, gid)
+    delivered_names = inventory(delivered, records, producer, uid, gid)
+    if ready_names & delivered_names:
+        raise ValueError('managed result outbox state is duplicated')
     if (
         not active
         and not allow_populated_inactive

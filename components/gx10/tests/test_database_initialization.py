@@ -126,7 +126,7 @@ class DatabaseInitializationTests(unittest.TestCase):
                 os.getgid(),
             )
 
-    def test_captured_schema_migrators_are_noops(self):
+    def test_ingest_migrator_and_projection_validator_preserve_schema(self):
         with self.connect() as connection:
             before = connection.execute(
                 "SELECT type, name, sql FROM sqlite_master "
@@ -135,7 +135,9 @@ class DatabaseInitializationTests(unittest.TestCase):
             ).fetchall()
 
             load_application('ingest').ensure_schema(connection)
-            load_application('enrichment').ensure_schema(connection)
+            load_application('projection').validate_database_contract(
+                connection
+            )
 
             after = connection.execute(
                 "SELECT type, name, sql FROM sqlite_master "

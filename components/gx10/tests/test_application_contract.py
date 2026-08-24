@@ -12,7 +12,7 @@ SBIN_DIR = GX10_DIR / 'sbin'
 APPLICATIONS = {
     'fetch': SBIN_DIR / 'fetch-spool.py',
     'ingest': SBIN_DIR / 'ingest-spool.py',
-    'enrichment': SBIN_DIR / 'enrich-events.py',
+    'projection': SBIN_DIR / 'enrich-events.py',
 }
 PUBLIC_ABSOLUTE_PREFIXES = (
     '/etc/network-log-gx10/',
@@ -111,40 +111,62 @@ class ApplicationContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             ingest.parse_epoch_ms('2026-08-23T12:00:00')
 
-    def test_enrichment_synthetic_classification_contract(self):
-        enrichment = load_application('enrichment')
-
-        repeat = enrichment.classify(
-            '',
-            'last message repeated 3 times',
-            '',
-            'router-a.example.invalid',
+    def test_normalized_projection_uses_canonical_fields_and_local_policy(self):
+        projection = load_application('projection')
+        event = {
+            'schema_version': 1,
+            'timestamp': '2026-08-24T06:12:00+00:00',
+            'ingest_timestamp': '2026-08-24T06:12:01+00:00',
+            'device_timestamp': None,
+            'hostname': 'router-a.example.invalid',
+            'source_ip': '192.0.2.10',
+            'source_port': 514,
+            'facility': 'local7',
+            'severity': 'info',
+            'appname': 'syslog',
+            'message': '%ICMPV6-3-ND_LOG: synthetic',
+            'raw_message': '%ICMPV6-3-ND_LOG: synthetic',
+            'parse_status': 'parsed',
+            'vendor': 'cisco',
+            'os_family': 'nxos',
+            'event_code': 'ICMPV6-3-ND_LOG',
+            'event_family': 'icmpv6',
+            'protocol': 'icmpv6',
+            'signal_type': 'observation',
+            'entity_type': 'unknown',
+            'entity_key': '',
+            'state': '',
+            'repeat_count': 1,
+            'attention_eligible': True,
+            'suppression_rule_id': None,
+            'attributes': {'normalization_path': 'generic'},
+        }
+        self.assertIs(
+            projection.validate_normalized_event(event),
+            event,
         )
-        self.assertEqual(repeat['family'], 'syslog_repeat')
-        self.assertEqual(repeat['repeat_count'], 3)
-
-        bgp = enrichment.classify(
-            'BGP-5-ADJCHANGE',
-            '%BGP-5-ADJCHANGE: peer 192.0.2.10 '
-            '(VRF default AS 64512) old state Idle event Established '
-            'new state Established',
-            '',
-            'router-a.example.invalid',
+        values = projection.project_normalized_event(
+            event,
+            [(1, 'event_code_exact', 'ICMPV6-3-ND_LOG', None)],
+            '2026-08-24T06:13:00+00:00',
         )
-        self.assertEqual(bgp['family'], 'bgp')
-        self.assertEqual(bgp['vendor_hint'], 'arista_eos')
-        self.assertEqual(bgp['state'], 'up')
-        self.assertEqual(bgp['signal_type'], 'recovery')
+        self.assertEqual(values['event_code'], event['event_code'])
+        self.assertEqual(values['family'], event['event_family'])
+        self.assertEqual(values['vendor_hint'], event['vendor'])
+        self.assertEqual(values['protocol'], event['protocol'])
+        self.assertIsNone(values['entity_type'])
+        self.assertIsNone(values['entity_key'])
+        self.assertEqual(values['attention_eligible'], 0)
+        self.assertEqual(values['suppression_rule_id'], 1)
+        self.assertEqual(values['classification_version'], 4)
 
-        ospf = enrichment.classify(
-            'OSPF-5-NBR_RETRANSMISSIONS',
-            '%OSPF-5-NBR_RETRANSMISSIONS: ospf-1 [42] Nbr 192.0.2.20',
-            '',
-            'router-b.example.invalid',
+        self.assertIsNone(
+            projection.validate_normalized_event({'message': 'raw'})
         )
-        self.assertEqual(ospf['protocol'], 'ospf')
-        self.assertEqual(ospf['state'], 'retransmissions')
-        self.assertEqual(ospf['signal_type'], 'degradation')
+        malformed = dict(event)
+        malformed['source_port'] = True
+        with self.assertRaises(projection.ProjectionError):
+            projection.validate_normalized_event(malformed)
 
 
 if __name__ == '__main__':

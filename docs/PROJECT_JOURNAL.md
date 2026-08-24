@@ -8031,3 +8031,119 @@ The final collector health snapshot retained:
 ### Next action
 
 Publish and independently verify this item-23 completion checkpoint. Then continue item 24 by reviewing the bounded normalized-handoff stability evidence and designing the deliberate retirement of transitional GX10 vendor parsing. Do not silently delete the historical enrichment table or conflate its current unscheduled state with the future deterministic incident engine.
+
+## 2026-08-23 23:48 PDT - Canonical GX10 projection retirement candidate validated
+
+### Status
+
+Execution-order item 24 remains the single `NEXT` item and is in progress.
+
+No live GX10 application or database state was changed in this subsection. One root-only on-server SQLite rehearsal copy was created through the online backup API, validated, and removed after success. The original database was opened read-only for baseline/postcheck and retained zero projection rows and no projection cursor.
+
+### Read-only authority audit
+
+At the first audit instant, all `2159` at/after-floor GX10 events had:
+
+- the exact 26-key normalized schema-version-1 contract
+- valid core normalized field types
+- `106` collector parser-enriched rows and `2053` generic capture-first rows
+- zero existing `event_enrichment` rows
+- zero canonical `attention_eligible=false` rows
+
+The historical enrichment table retained `24207` classification-version-3 rows. The exact recorded legacy enrichment executable had zero systemd-unit references.
+
+A read-only in-memory comparison showed why duplicate reparsing must not remain authoritative:
+
+- event code: `2159 / 2159` matches
+- event family: `2107 / 2159` matches
+- protocol: `1924 / 2159` matches
+- entity type: `106 / 2159` matches, primarily because canonical generic `unknown` differs from legacy null representation
+- entity key: `1874 / 2159` matches
+- state: `2110 / 2159` matches
+- signal type: `1875 / 2159` matches
+- repeat count: `2139 / 2159` matches
+
+The legacy stage would also apply the two existing GX10-local suppression rules to `1490` rows at that instant. Retirement therefore cannot simply discard local attention policy.
+
+### Selected replacement
+
+The compatibility-path `enrich-events.py` is now a canonical projector rather than a vendor/message parser. Candidate SHA-256:
+
+`f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079`
+
+The projector:
+
+- accepts only exact normalized schema version 1
+- treats canonical event/entity/protocol/state/signal/repeat/attribute fields as authoritative
+- performs no vendor or message classification
+- overlays only the existing enabled GX10-local suppression rules
+- preserves classification-version-3 history and writes version 4
+- scans append-only events through a transactional durable cursor in bounded batches
+- projects each cursor batch and its cursor update in one `BEGIN IMMEDIATE` transaction
+- is idempotent on repeat execution
+- fails closed on malformed normalized input, invalid suppression policy, invalid cursor, schema drift, or a newer existing projection version
+- remains absent from the automatic `timer -> fetch -> ingest` service
+
+The same source can use the public rebuild `runtime_config` default or an explicit protected database path on the legacy reference installation, which has no public runtime-config module.
+
+### Synthetic and live-copy proof
+
+Synthetic tests prove:
+
+- raw/pre-normalized records are skipped without creating replacement enrichment
+- canonical generic and parser-enriched fields project exactly
+- local exact suppression remains effective
+- historical version-3 rows remain unchanged
+- a second run is a no-op
+- newly appended normalized rows advance from the durable cursor
+- malformed normalized data rolls back both projection rows and cursor
+- a newer projection version blocks replacement and cursor advancement
+- guarded live replacement refuses divergent hashes or scheduler references
+- failed post-replacement verification restores the exact legacy bytes
+- rollback restores legacy bytes without deleting the protected backup
+
+The on-server copy rehearsal then reported:
+
+```text
+NORMALIZED_PROJECTION scanned=949845 projected=2781 suppressed=1984 version=4
+GX10_NORMALIZED_PROJECTION=PASS
+NORMALIZED_PROJECTION scanned=0 projected=0 suppressed=0 version=4
+GX10_NORMALIZED_PROJECTION=PASS
+historical_v3_rows_preserved=24207
+canonical_v4_rows_projected=2781
+canonical_rows_exactly_compared=2781
+local_policy_suppressed=1984
+second_run_projected=0
+live_database_projection_rows=0
+live_database_projection_cursor=0
+GX10_NORMALIZED_PROJECTION_LIVE_COPY_REHEARSAL=PASS
+```
+
+No event content, device identity, live application name/path, database path, or suppression pattern was printed or persisted in the public repository.
+
+### Guarded live replacement boundary
+
+`install/retire-transitional-enrichment.py` requires:
+
+- root plus exact explicit confirmation
+- operator-supplied target and protected backup paths
+- exact old live SHA-256 `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+- exact repository candidate SHA-256
+- root-owned, single-link `0755` target
+- zero systemd/cron references to the target
+- absent backup under a root-only parent
+
+It creates an exclusive root-only rollback copy, synchronizes it, atomically replaces the target while preserving ownership/mode, synchronizes the target directory, and automatically restores legacy bytes if the postcheck fails. Verification and nondestructive rollback modes are separate. The guard does not run the projector or write the GX10 database.
+
+### Validation
+
+- GX10 suite: `49 passed`
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
+- root sanitation tests: `5 passed`
+- current-tree/history/link/ref sanitation: `PASS`
+- `git diff --check`: `PASS`
+
+### Next action
+
+Publish and independently verify this candidate checkpoint. Then use only the published exact artifacts to replace the unscheduled live transitional executable under its exact old hash, retain the protected rollback copy, prove the old hash absent/new hash unique with zero scheduler references, and revalidate the still-unchanged automatic fetch/ingest path and database.

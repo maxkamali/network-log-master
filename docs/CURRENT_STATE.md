@@ -259,7 +259,7 @@ The completed public package provides:
 
 - synthetic operator-input template and neutral runtime identity/path contract
 - guarded filesystem/SSH-material bootstrap and protected runtime configuration
-- all three public-safe applications with 27/27 function AST parity
+- captured fetch/ingest applications, historical enrichment provenance, and the item-24 canonical normalized-field projector
 - deterministic SQLite initialization matching all recovered DDL/index/foreign-key and suppression contracts
 - captured service/timer preserving fetch-then-ingest order, cadence, and hardening
 - exact pinned application packages and fail-closed platform verification
@@ -267,7 +267,7 @@ The completed public package provides:
 - reference-like/nonempty-state preactivation refusal
 - dual-confirmation activation with full blob hashing and failure rollback
 - complete clean-machine runbook and two-server integration runbook
-- 42 passing GX10 tests
+- 49 passing GX10 tests
 - `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
@@ -276,6 +276,7 @@ The known application hashes remain:
 - fetch: `662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
 - ingest: `6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
 - deterministic enrichment: `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+- canonical projection candidate: `f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079`
 - pipeline service unit: `0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
 - pipeline timer unit: `5371995539846d4cca6014a70548e95c942e9f601d0736b06f4bda61c1ccc0f5`
 
@@ -295,7 +296,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration design, repository shadow/handoff implementation, authorized deployments, bounded live evidence review, and forward-only file-identity production cutover are complete. The next action is a deliberate post-cutover stability and transitional-parser retirement gate before incident-engine implementation.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration design, repository shadow/handoff implementation, authorized deployments, bounded live evidence review, and forward-only file-identity production cutover are complete. Item 24's multi-cadence stability review, canonical-projection candidate, tests, guarded replacement/rollback, and live-copy rehearsal pass. The next action is the published exact-hash replacement of the unscheduled live transitional executable before incident-engine implementation.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 

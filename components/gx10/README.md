@@ -24,14 +24,14 @@ Current state:
 
 - secure backlog fetch and durable ingest are operational
 - replay/idempotency protections exist in the ingest path
-- transitional deterministic enrichment exists and is useful as a migration parity reference
+- normalized schema-version-1 projection is implemented as the deliberate replacement for transitional vendor/message reparsing
 - the proven automatic chain is `timer -> fetch -> ingest`
-- deterministic enrichment has no discovered automatic invocation mechanism
+- canonical projection remains deliberately absent from the automatic invocation chain
 - Ollama is active with six complete model manifests, but no application-specific observability-pipeline caller was discovered
 - secure collector-side AI-result return transport is proven, but no GX10 result producer was discovered
 - the long-lived deterministic incident engine and production LLM orchestration remain future build phases
 
-Transitional enrichment should be retired only after collector-side normalization and replay parity are proven.
+The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
 Live-system rediscovery is complete. The authoritative reconstruction checkpoint, captured contracts, preserved absences, and next implementation order are in `REBUILD_STATUS.md`.
 
@@ -60,7 +60,7 @@ The three live custom applications are captured under `sbin/` with deployment va
 
 - `fetch-spool.py`
 - `ingest-spool.py`
-- `enrich-events.py`
+- `enrich-events.py` — compatibility filename now containing the canonical normalized-field projector
 
 `sbin/runtime_config.py` loads the protected runtime configuration rendered by `install/render-runtime-config.py`. See `sbin/PROVENANCE.md` for live hashes and the function-level parity proof.
 
@@ -72,7 +72,7 @@ Validate operator configuration inputs without writing files with:
 
     GX10_SFTP_HOST=collector.example.invalid GX10_SFTP_PORT=2222 GX10_SFTP_USER=spool-reader components/gx10/install/render-runtime-config.py --check
 
-The deterministic-enrichment source is captured for faithful reconstruction and parity. It remains intentionally absent from the proven automatic `timer -> fetch -> ingest` chain.
+The original deterministic-enrichment source/hash remains recorded for provenance and rollback. The active repository file is now a canonical projector that performs no vendor/message classification, retains local suppression policy, and remains intentionally absent from the proven automatic `timer -> fetch -> ingest` chain.
 
 ## SQLite initialization
 
@@ -97,7 +97,7 @@ The automatic chain remains exactly:
 
 `timer -> fetch -> ingest`
 
-`install/install-applications.py` installs the four application files and two units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting the timer.
+`install/install-applications.py` installs the four application files and two units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting the timer. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database.
 
 See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boundary.
 
@@ -126,7 +126,7 @@ Successful activation enables exactly:
 - `ollama.service`
 - `network-log-gx10.timer`
 
-The pipeline service remains static and deterministic enrichment remains unscheduled. Starting the timer authorizes the proven automatic `fetch -> ingest` behavior, so run activation only after the operator has reviewed the final clean-machine runbook and confirmed the transport endpoint.
+The pipeline service remains static and canonical projection remains unscheduled. Starting the timer authorizes only the proven automatic `fetch -> ingest` behavior, so run activation only after the operator has reviewed the final clean-machine runbook and confirmed the transport endpoint.
 
 Do not run the activation script against the working reference system.
 

@@ -8,7 +8,7 @@ Public clean-machine reconstruction and operator documentation are `DONE` under 
 
 Clean-machine GX10 validation is `WAIVED BY OPERATOR` because no disposable Ubuntu 24.04 arm64 GX10-class target is available. It remains empirically unverified.
 
-The later collector-normalizer production integration completed its forward-only GX10 handoff cutover on 2026-08-24. The unchanged fetch/ingest pipeline processed the first four normalized handoff files with exact collector-ledger SHA-256 and record-count parity, zero failed/queued rows, and zero duplicate event identities before its timer resumed. Transitional deterministic enrichment remains installed and intentionally unscheduled pending the separate post-cutover stability/retirement gate.
+The later collector-normalizer production integration completed its forward-only GX10 handoff cutover on 2026-08-24. The unchanged fetch/ingest pipeline reached exact collector-ledger parity across the reviewed multi-cadence window. The repository now contains the validated item-24 replacement for transitional vendor/message reparsing: an unscheduled canonical schema-version-1 projector with local suppression-policy overlay and guarded exact-hash live replacement/rollback. Live replacement remains the next step at this checkpoint.
 
 This document is the component recovery authority for the active GX10 milestone. `docs/CURRENT_STATE.md` remains the authority for project-wide execution order and the single `NEXT` item.
 
@@ -21,16 +21,16 @@ Completed:
 - guarded clean-machine filesystem/SSH-material bootstrap
 - structural and public-safety validator
 - `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
-- public-safe fetch, ingest, and deterministic-enrichment application sources
+- public-safe fetch/ingest sources plus the canonical normalized-field projector
 - protected runtime configuration loader and fail-closed renderer
 - 27/27 live-to-public function AST parity
 - deterministic SQLite initializer matching all 5 recovered table DDL hashes, 13 indexes, and 3 foreign keys
 - exact two-pattern functional suppression seed with neutral nonfunctional metadata
-- captured ingest/enrichment schema migrators proven no-op against the initialized schema
+- captured ingest schema migrator and canonical projection schema validator proven non-mutating against the initialized schema
 - 18 synthetic configuration/application/database tests passing
 - complete sanitized service/timer capture preserving fetch-then-ingest order, cadence, and all live hardening directives
 - clean-machine application/unit installer with no-overwrite, ownership/mode preflight, systemd verification, and no automatic activation
-- deterministic enrichment remains intentionally unscheduled
+- canonical projection remains intentionally unscheduled
 - exact pinned application-package installer and fail-closed platform verifier
 - exact operator-supplied Ollama binary installer with no automatic activation
 - guarded offline model-store importer with source/target content hashing, no overwrite, and resumable exact reuse
@@ -40,10 +40,10 @@ Completed:
 - complete preactivation verifier with reference-like/nonempty-state refusal
 - exact installed-source, configuration, SQLite, filesystem, systemd, and effective-limit verification
 - dual-confirmation activator with full offline blob hashing, ordered enablement, and failure rollback
-- only Ollama and the fetch/ingest timer are activated; deterministic enrichment remains unscheduled
+- only Ollama and the fetch/ingest timer are activated; canonical projection remains unscheduled
 - complete clean-machine operator runbook
 - final structural, syntax, generated/private-artifact, IPv4/public-safety, unit-test, and filesystem-contract audit
-- 42 synthetic tests passing
+- 49 synthetic tests passing
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.
@@ -126,6 +126,7 @@ Known provenance:
 - fetch: `662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
 - ingest: `6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
 - deterministic enrichment: `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+- canonical projection candidate: `f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079`
 - service unit: `0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
 - timer unit: `5371995539846d4cca6014a70548e95c942e9f601d0736b06f4bda61c1ccc0f5`
 
@@ -173,9 +174,9 @@ No surviving base-schema/bootstrap initializer was found in the bounded search, 
 
 Reconstruction must create the captured effective schema directly. It must not invent historical migration provenance and present it as discovered behavior.
 
-## Deterministic enrichment contract
+## Historical deterministic enrichment and canonical projection
 
-The current deterministic classifier is version 3. Its source behavior, schema writes, vendor/event classification, repeat handling, and complete two-rule active suppression corpus are captured in items 12G and 12H.
+The captured deterministic classifier is version 3. Its source behavior, schema writes, vendor/event classification, repeat handling, and complete two-rule active suppression corpus are captured in items 12G and 12H.
 
 The executable exists, but rediscovery found:
 
@@ -184,7 +185,9 @@ The executable exists, but rediscovery found:
 - no cron reference
 - no retained direct invocation evidence in bounded shell history
 
-Reconstruction must preserve this distinction. Automatically scheduling enrichment would be a deliberate implementation change, not faithful reconstruction of the proven automatic chain.
+The normalized production handoff made reparsing those same vendor messages a duplicate and potentially divergent authority. The item-24 replacement therefore projects exact normalized event fields as classification version 4, retains the two local enabled suppression rules, preserves all version-3 history, and advances through an atomic cursor. It remains unscheduled; automatically adding it to the pipeline would be a separate implementation change.
+
+An on-server copy rehearsal scanned `949845` stored events, projected `2781` exact canonical rows, preserved `24207` historical version-3 rows, applied local suppression to `1984` rows, and projected zero rows on the second run. The live database was unchanged.
 
 ## Ollama and result-return boundary
 
@@ -217,7 +220,7 @@ Reconstruction requirements include:
 Do not silently change these findings during reconstruction:
 
 - automatic application behavior is `timer -> fetch -> ingest`
-- deterministic enrichment is present but not proven automatically scheduled
+- the captured enrichment was unscheduled; its canonical projector replacement also remains unscheduled
 - Ollama/model infrastructure is present without an identified observability-pipeline caller
 - the collector result-return boundary is present without an identified GX10 producer
 - missing historical bootstrap/install provenance is reconstructed from effective contracts, not invented as recovered history

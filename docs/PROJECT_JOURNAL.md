@@ -11651,3 +11651,60 @@ No credential, private identifier/path/value, result/provenance content, or conn
 ### Next action
 
 Publish and independently verify this item-30 completion checkpoint. Then execute item 31: allow currently settling natural deliveries to complete, verify the active delivered/accepted/in-flight conservation boundary, prove every durably accepted ready result has exactly one complete ClickHouse row, rerun both-host and repository/GitHub/documentation audits, and publish the final end-to-end target closure without deleting replay, conflict, or rollback evidence.
+
+## 2026-08-24 09:58 PDT - Item 31 final end-to-end production and repository closure passed
+
+### Status
+
+Execution-order item 31 is complete. The project has no remaining `NEXT` item. The item-30 recurring activation checkpoint was published and independently matched on GitHub at:
+
+`e7c76f45155cb8a11d580c242ce082ae13f284b1` — `Activate recurring result return`
+
+The final active GX10 snapshot passed the exact published active verifier. Reasoning held 70 successful results, two preserved terminal failures, zero `STARTED`, and 13 pending packets. The outbox held 60 ready plus 10 delivered for all 70 results. The sender timer was enabled/active, the oneshot was idle with zero restarts, and projection/incident cursors were both at the current event watermark with zero lag.
+
+The simultaneous collector snapshot held eight ready files bound one-for-one to eight immutable acceptance rows plus two settling incoming files. This exactly conserved all 10 delivered GX10 identities: `10 delivered = 8 accepted + 2 in flight`. The two intentional test classes remained exactly one replay payload/reason pair and one conflict payload/reason pair, with zero other reasons. Collector gate timer, writer authorization, SSH syntax, Vector, and ClickHouse all passed.
+
+The authorized no-echo read-only aggregate query proved all eight accepted ready records have exactly one ClickHouse row each. Every row matched exact raw bytes/digest, byte length, thin scalar/array projections, and the complete versioned top-level/provenance shape. The table contained nine rows total: the eight accepted result-return records plus the one preexisting non-target baseline. There was no duplicate accepted row.
+
+Repository validation used the required Python 3.13/pytest environment for the normalizer and collector integration suites. Earlier broad invocations under the VM's old system Python lacked the package path/pytest and produced collection/import errors only; corrected invocations passed. Final results were:
+
+The public validator initially retained its pre-closure invariant requiring exactly one numbered `NEXT` and correctly rejected the newly explicit completed state. The invariant now permits zero only when `CURRENT_STATE.md` contains both the explicit end-to-end `COMPLETE` disposition and the no-remaining-`NEXT` declaration; every in-progress state still requires exactly one numbered `NEXT`, and a contradictory complete-plus-`NEXT` state fails. Four direct regressions bring the validator suite to nine tests, after which current-tree/history/link/ref validation passed again.
+
+```text
+gx10_tests=186
+collector_tests=30
+collector_shadow_package_tests=14
+collector_result_gate_package_tests=11
+normalizer_tests=94
+public_repository_validator_tests=9
+public_current_tree=PASS
+public_history=PASS
+public_links=PASS
+public_ref_topology=PASS
+gx10_results=70
+gx10_ready=60
+gx10_delivered=10
+collector_ready=8
+collector_ledger_rows=8
+collector_incoming_settling=2
+collector_exact_replay_reasons=1
+collector_conflict_reasons=1
+collector_other_reasons=0
+clickhouse_total_rows=9
+clickhouse_accepted_exact_rows=8
+sender_timer=enabled,active
+sender_restarts=0
+projection_lag=0
+incident_lag=0
+END_TO_END_RESULT_CONSERVATION=PASS
+CLICKHOUSE_ALL_ACCEPTED_PROVENANCE=PASS
+FINAL_PRODUCTION_REPOSITORY_CLOSURE=PASS
+```
+
+Current-state documentation was scanned for stale inactive/no-credential/no-transport claims and reconciled where they represented present status; retained earlier gate evidence was explicitly qualified as historical checkpoint state. `docs/CURRENT_STATE.md` now records items 1–31 complete and no remaining `NEXT`. Disposable clean-host execution remains waived and empirically unverified exactly as previously accepted; this closure does not relabel it as passed.
+
+No credential, private identifier/path/value, connection value, result/provenance content, or private service identity was printed or committed. No production mutation occurred during item 31. No ready, delivered, incoming, rejected, ledger, ClickHouse, protected backup, or rollback evidence was deleted or rewritten.
+
+### Closure action
+
+Publish and independently verify this final closure checkpoint. After publication, ordinary operational monitoring may continue, but any new feature or production behavior change must explicitly reopen execution order in `docs/CURRENT_STATE.md`.

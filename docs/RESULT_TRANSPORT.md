@@ -91,11 +91,13 @@ Eight management tests cover config-last installation, failure cleanup, partial-
 
 The matching collector authorizer is independently guarded. It accepts exactly one root-owned public Ed25519 input, refuses key duplication, preserves the complete predecessor `authorized_keys` bytes in a root-only mode-`0600` backup, atomically appends only the new line, and runs `sshd -t` without reloading or restarting SSH. Any failure after publication restores the exact predecessor and removes attempt-created backup state. An exact already-authorized key is idempotently reusable and, when the protected backup exists, must equal the exact backup plus that single line. Five synthetic append/reuse/duplicate/private-input/rollback tests pass locally and from exact bytes staged on the collector runtime.
 
-## Configured-inactive production state
+## Configured-inactive production checkpoint
 
-The dedicated authorization and all GX10 private inputs are installed and independently verified. Exact idempotent configuration reuse passed. Temporary key inputs were removed after the installed GX10 identity matched the collector authorization. The sender timer remains disabled; exactly one bounded manual service cycle invoked SFTP and moved one ready file to delivered. The active outbox and all prior deterministic schedules remain healthy; the collector result gate, Vector, ClickHouse, SSH configuration, authorization metadata, and exact predecessor-backup relation pass.
+At this checkpoint, the dedicated authorization and all GX10 private inputs were installed and independently verified. Exact idempotent configuration reuse passed. Temporary key inputs were removed after the installed GX10 identity matched the collector authorization. The sender timer remained disabled; exactly one bounded manual service cycle invoked SFTP and moved one ready file to delivered. The active outbox and all prior deterministic schedules remained healthy; the collector result gate, Vector, ClickHouse, SSH configuration, authorization metadata, and exact predecessor-backup relation passed.
 
 ## Bounded first-live and replay plan
+
+This plan was executed successfully before recurring activation:
 
 1. Keep the sender timer disabled. Capture the oldest ready filename, exact digest, and relevant ClickHouse/collector-ledger baseline privately without printing content or identifiers.
 2. Start exactly one sender service cycle manually. Require success, zero restarts, exactly one ready-to-delivered transition, unchanged bytes/name, and no second send.
@@ -146,4 +148,4 @@ After GitHub independently matched the published candidate, the guarded upgrader
 4. `DONE` — prove a controlled same-name divergent file remains isolated with a distinct conflict reason and no new acceptance or ClickHouse row.
 5. `DONE` — explicit active-schedule verification passes 186 local and exact GX10-staged tests; only the recurring timer was enabled; three natural deliveries, first natural collector acceptance/ClickHouse ingestion, zero sender restarts, unchanged replay evidence, and healthy preexisting schedules passed.
 
-The final project gate is now the separate production closure audit recorded as item 31 in `docs/CURRENT_STATE.md`.
+The separate item-31 production/repository closure audit also passes: active delivered/accepted/in-flight cardinality conserved exactly, every accepted result had one complete ClickHouse row, both hosts and all repository suites/sanitation passed, and rollback/quarantine evidence remained preserved.

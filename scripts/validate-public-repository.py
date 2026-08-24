@@ -156,8 +156,16 @@ def validate_markdown_links(files):
 
 def validate_execution_authority():
     text = CURRENT_STATE.read_text(encoding='utf-8')
-    if len(NEXT_RE.findall(text)) != 1:
-        raise ValueError('docs/CURRENT_STATE.md must contain exactly one numbered NEXT')
+    next_count = len(NEXT_RE.findall(text))
+    completed = (
+        'End-to-end working-system target: `COMPLETE`' in text
+        and 'There is no remaining `NEXT` item.' in text
+    )
+    if (completed and next_count != 0) or (not completed and next_count != 1):
+        raise ValueError(
+            'docs/CURRENT_STATE.md must contain exactly one numbered NEXT while '
+            'work remains, or explicit end-to-end COMPLETE state with none'
+        )
 
 
 def history_paths():

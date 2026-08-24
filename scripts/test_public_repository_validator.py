@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import importlib.util
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 VALIDATOR_PATH = SCRIPT_DIR / 'validate-public-repository.py'
@@ -14,6 +16,13 @@ SPEC.loader.exec_module(VALIDATOR)
 
 
 class PublicRepositoryValidatorTests(unittest.TestCase):
+    def execution_authority(self, text):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'CURRENT_STATE.md'
+            path.write_text(text, encoding='utf-8')
+            with mock.patch.object(VALIDATOR, 'CURRENT_STATE', path):
+                VALIDATOR.validate_execution_authority()
+
     def test_documentation_addresses_and_package_version_are_allowed(self):
         VALIDATOR.validate_text(
             Path('synthetic'),
@@ -57,6 +66,27 @@ class PublicRepositoryValidatorTests(unittest.TestCase):
         ):
             with self.subTest(path=path):
                 self.assertTrue(VALIDATOR.sensitive_path(path))
+
+    def test_execution_authority_accepts_one_next_while_in_progress(self):
+        self.execution_authority('1. `NEXT` — bounded work\n')
+
+    def test_execution_authority_accepts_explicit_complete_state_without_next(self):
+        self.execution_authority(
+            'End-to-end working-system target: `COMPLETE`\n'
+            'There is no remaining `NEXT` item.\n'
+        )
+
+    def test_execution_authority_refuses_implicit_zero_next_state(self):
+        with self.assertRaisesRegex(ValueError, 'while work remains'):
+            self.execution_authority('1. `DONE` — incomplete authority\n')
+
+    def test_execution_authority_refuses_complete_state_with_numbered_next(self):
+        with self.assertRaisesRegex(ValueError, 'end-to-end COMPLETE'):
+            self.execution_authority(
+                'End-to-end working-system target: `COMPLETE`\n'
+                'There is no remaining `NEXT` item.\n'
+                '2. `NEXT` — contradictory work\n'
+            )
 
 
 if __name__ == '__main__':

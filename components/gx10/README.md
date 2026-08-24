@@ -71,9 +71,9 @@ The three rediscovered live custom applications and deliberate post-rediscovery 
 - `run-local-reasoning.py` — exact model/prompt/run binding and strict loopback structured inference; installed but not scheduled
 - `build-result-outbox.py` — installed read-only versioned successful-result projection to one canonical local JSONL file per run
 - `run-result-outbox.py` — installed exact-hash managed producer runner with no transport capability
-- `send-result-outbox.py` — repository/copy-only deterministic single-file write-only transport core; all tests inject transport and no credential is installed
-- `run-result-sender.py` — installed exact-hash managed sender runner held inactive
-- `install/install-result-sender.py` and `verify-result-sender.py` — guarded inactive installation/verification; the production install passes with no populated config or credential
+- `send-result-outbox.py` — deterministic single-file write-only transport core; synthetic tests inject transport, while separately gated production uses a dedicated writer identity
+- `run-result-sender.py` — installed exact-hash managed sender runner behind its independently disableable active timer
+- `install/install-result-sender.py` and `verify-result-sender.py` — guarded inactive installation plus explicit configured inactive/active verification
 - `run-managed-reasoning.py` — exact-hash packet/inference wrapper with one-inference-per-cycle locking, pending-backlog builder deferral, and aggregate health; exact portable revision `r3` is active after protected upgrade/resume and three natural cadences
 
 `sbin/runtime_config.py` loads the protected runtime configuration rendered by `install/render-runtime-config.py`. See `sbin/PROVENANCE.md` for live hashes and the function-level parity proof.

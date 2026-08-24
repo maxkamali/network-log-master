@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 local producer activation passes after the service-ownership/resume correction. The version-1 boundary passes 159 tests locally and from exact GX10-staged trees. Production has 15 collector-valid ready files for 15 successful results, zero delivered, an active no-network timer, healthy preexisting schedules at zero lag, no result-writer credential, and no collector transmission.
+The version-1 local producer boundary and its active no-network schedule pass. Item 30 later completed the separate transport boundary: the full GX10 suite reached 186 local/exact-stage tests, the recurring sender was activated only after first-live and replay/conflict proof, and natural results now move from ready to delivered while the collector ledger and ClickHouse preserve exact provenance. The producer itself remains network-isolated and independent of the sender.
 
 ## Boundary
 
@@ -39,7 +39,7 @@ Version 1 emits one record per file, so the collector's 100-record-per-file ceil
 
 The initial exact staged repository tree passed 149 tests and created/reused 11-for-11 collector-valid files from a protected copy. The delivery-state revision passed all 151 tests locally and from a new exact GX10-staged tree. A fresh root-only mode-`0600` online backup then contained 12 packets, 13 terminal runs, 12 successful results, and one preserved failure. The producer created exactly 12 ready files. One was atomically moved to delivered to simulate a future durable acknowledgment. A second run created zero files, reused all 12, reported 11 ready plus one delivered, and did not recreate the delivered file. Every file still passed the unchanged collector gate and the combined content digest was state-location independent. The copy byte/hash and reasoning aggregates remained unchanged, all live schedules remained healthy, and no collector transmission occurred.
 
-## Next gate
+## Managed activation evidence
 
 The managed package contains an exact-hash runner, an independently disableable oneshot/timer, a guarded inactive installer, and an independent verifier. Its service has `PrivateNetwork=yes`, Unix-socket-only address families, no capabilities, and write scope only to the outbox root. The installer derives the already-proven reasoning service identity and private database path from the installed managed-reasoning boundary, validates the read-only database/result invariant, places empty mode-`0700` ready/delivered directories beneath that validated database parent, leaves the timer disabled/service inactive, and installs no credential.
 
@@ -57,4 +57,4 @@ Three consecutive natural outbox timer cadences passed at approximately 64–65-
 
 Managed reasoning then naturally advanced from 15 to 16 results. The outbox timer started immediately afterward, created exactly one file, reused the prior 15, wrote only 2378 bytes, and retained zero delivered/recovered/restarts. The prior 15-file digest remained `65a2b2399018840fe96a3d56291e60ea994e60d12fb8a7fc7ff011bafb2ece9c`; all 16 files passed the collector gate and the new aggregate digest is `71955d542f80240fc18b27a481ae65b74f98fa04b7e005e2d9a3e5b646d641be`.
 
-The local-producer milestone is complete. The collector-side durable acceptance ledger is active and closes the upload-success/local-acknowledgment crash window. The sender core/package passes 178 local and 178 exact GX10-staged tests and is installed in its independently verified inert state. No private sender config, writer credential, or transmission exists. Continue with the separately guarded configured-inactive boundary described in `docs/RESULT_TRANSPORT.md`.
+The local-producer milestone is complete. The collector-side durable acceptance ledger closes the upload-success/local-acknowledgment crash window. The later sender boundary passes 186 local and exact correctly laid-out GX10-staged tests, configured-inactive verification, first-live exact raw/provenance proof, distinct replay/conflict isolation, active verification, and natural recurring delivery/collector acceptance/ClickHouse ingestion. Current transport status and rollback behavior are authoritative in `docs/RESULT_TRANSPORT.md`.

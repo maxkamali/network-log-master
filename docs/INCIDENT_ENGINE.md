@@ -2,7 +2,7 @@
 
 ## Status and authority boundary
 
-The version-1 incident engine is a validated repository candidate under execution-order item 25. It is not yet scheduled or active on the working GX10 system.
+The version-1 incident engine is a validated repository candidate under execution-order item 25. Its private working-database-copy and independent deterministic rebuild gates pass. It is not yet installed, scheduled, or active on the working GX10 system.
 
 The engine consumes only classification-version-4 rows created by the canonical normalized-field projector. It does not parse raw messages, infer identity with an LLM, call Ollama, or emit AI results. Canonical normalized records remain observation authority; deterministic SQLite state remains incident identity and lifecycle authority.
 

@@ -8349,3 +8349,78 @@ The working database, active projection artifact, and automatic pipeline remain 
 ### Next action
 
 Publish and independently verify this narrower functional-contract correction. Then discard only the second failed temporary copy, stage the new published guard, and rerun the full private copy rehearsal from a new online SQLite backup.
+
+## 2026-08-24 00:19 PDT - Item-25 private live-copy and deterministic rebuild gates passed
+
+### Status
+
+Execution-order item 25 remains the single `NEXT` item and is in progress.
+
+The functional-contract correction was published and independently verified on GitHub at:
+
+`fa54c659bee8af9e24213cd1bc3145a1ebca252b` — `Honor functional suppression migration contract`
+
+Only exact artifacts from that checkpoint were staged under a root-only temporary rehearsal boundary. The working GX10 database was opened read-only to create an online SQLite backup copy. No working application, database schema, projection row, incident state, unit, or schedule changed.
+
+### Migration and first deterministic build
+
+The guard successfully:
+
+- validated the exact canonicalized 18-object base schema and functional suppression corpus
+- created a root-only validated pre-migration backup
+- added the three incident tables, five indexes, and four append-only triggers on the copy
+- installed the exact unscheduled incident engine under a zero-scheduler-reference target
+- verified the complete migrated state
+
+The first full copy execution produced:
+
+```text
+NORMALIZED_PROJECTION scanned=952789 projected=5725 suppressed=4272 version=4
+GX10_NORMALIZED_PROJECTION=PASS
+INCIDENT_ENGINE scanned=5725 created=17 transitions=341 incidents=17 active=3 evidence=311 watermark_ms=1787555517496 version=1
+GX10_INCIDENT_ENGINE=PASS
+```
+
+Historical classification-version-3 evidence remained exactly `24207` rows.
+
+### Idempotency, replay, and independent determinism
+
+A normal projector rerun scanned/projected zero rows. A normal incident-engine rerun scanned zero rows and changed no incident state.
+
+The incident cursor was then removed on the rehearsal copy. The engine rescanned all `5725` canonical version-4 rows but created zero incidents, appended zero evidence/transitions, and reproduced the exact same state. Unique evidence event identity therefore independently protects replay even without the cursor.
+
+Independent invariants passed for:
+
+- SQLite quick/foreign-key checks
+- unique active correlation identity
+- no orphan or noncanonical evidence
+- exact evidence occurrence/repeat aggregates
+- current status matching final append-only transition
+- engine context recomputation and append sequence checks
+
+State totals were:
+
+- incidents: `17`
+- active: `3`
+- evidence: `311`
+- transitions: `341`
+- deterministic state SHA-256: `91e0ba1f8968dbf34480334126aeefc4ab5115861a37d4659e77c48b4cacdfa4`
+
+A second database was then rebuilt independently from the protected pre-migration copy. Its migration, full projection, and full incident run produced the same counters and exact state SHA-256. Its second projector and engine runs were both no-ops.
+
+Markers:
+
+```text
+GX10_INCIDENT_ENGINE_MIGRATION=PASS
+GX10_INCIDENT_ENGINE_LIVE_COPY_REHEARSAL=PASS
+independent_rebuild_exact=yes
+GX10_INCIDENT_ENGINE_DETERMINISM_REHEARSAL=PASS
+```
+
+The first evidence-hashing helper attempted to serialize a `sqlite3.Row` directly after successful migration/projection/engine execution and raised a local type error. It was corrected to hash tuple values; this did not alter candidate code or the working database.
+
+Final working-database read-only postcheck retained zero version-4 projection rows, zero incident tables/state/cursors, and unchanged historical version-3 rows.
+
+### Next action
+
+Publish and independently verify this copy-rehearsal checkpoint. Under the operator's active production authorization, pause only the proven fetch/ingest schedule, apply the published guard to install the incident schema and exact engine artifact without invoking either projector or engine, prove empty incident state and zero scheduler references, resume the existing timer, and verify at least one ordinary fetch/ingest cadence. Retain a protected pre-migration SQLite backup and use empty-state rollback on any failed postcheck.

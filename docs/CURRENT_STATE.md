@@ -38,7 +38,7 @@ The working observability path currently provides:
 
 Current rediscovery has not identified a GX10 application producer that writes to the collector result-return boundary, nor an application-specific observability-pipeline caller of Ollama.
 
-The deterministic incident correlator now has an unscheduled repository candidate and clean-install schema contract. Private database-copy rehearsal and any working-system migration or invocation remain incomplete; production local-LLM orchestration is not yet implemented.
+The deterministic incident correlator now has an unscheduled repository candidate, clean-install schema contract, and passing private working-database-copy rehearsal with independent deterministic rebuild and replay proof. Working-system schema/artifact migration and any invocation remain incomplete; production local-LLM orchestration is not yet implemented.
 
 ## Normalizer milestone
 
@@ -298,7 +298,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration, forward-only production cutover, multi-cadence stability review, and deliberate transitional-parser retirement are complete. The deterministic incident-engine candidate and guarded schema/install boundary are implemented locally; private database-copy rehearsal is the next action. The LLM remains outside identity and lifecycle authority.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration, forward-only production cutover, multi-cadence stability review, and deliberate transitional-parser retirement are complete. The deterministic incident-engine candidate, guarded schema/install boundary, and private database-copy/determinism rehearsal are complete. The next action is the authorized unscheduled working-system migration; projection and incident invocation remain separate gates. The LLM remains outside identity and lifecycle authority.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -328,7 +328,7 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 22. `DONE` — designed and synthetically rehearsed a forward-only file-identity-safe GX10 handoff and rollback using one immutable inclusive floor, verified normalized copies under original transport names, a separate durable ledger, and unchanged GX10 idempotency keys; the live handoff was not changed.
 23. `DONE` — staged the validated exact-hash handoff package, corrected a systemd portability condition before activation, selected and protected an immutable inclusive floor, paused GX10 with zero conflicting identities, switched only its read-only bind view, proved exact collector/GX10 hash and cardinality parity, resumed all schedules, and retained the exact raw-view rollback boundary.
 24. `DONE` — reviewed the multi-cadence normalized-handoff stability window, proved exact schema-v1 authority and legacy field divergence, built/rehearsed a replay-safe canonical projector with local suppression overlay, and atomically replaced the unscheduled live transitional parser under exact hash with protected rollback while leaving the database and automatic fetch/ingest chain unchanged.
-25. `NEXT` — complete private database-copy rehearsal and the activation decision for the implemented deterministic GX10 incident candidate over canonical normalized observations. Stable incident identity, lifecycle transitions, append-only evidence, repeat/burst accounting, rolling compact context, replay/idempotency, clean-install integration, and guarded empty-state migration/rollback are implemented locally; the working system remains unchanged and the LLM has no truth authority.
+25. `NEXT` — apply and verify the authorized unscheduled working-system schema/artifact migration for the deterministic GX10 incident candidate. Stable incident identity, lifecycle transitions, append-only evidence, repeat/burst accounting, rolling compact context, replay/idempotency, clean-install integration, guarded empty-state migration/rollback, private live-copy execution, independent deterministic rebuild, and cursor-reset replay are validated; live projection/incident invocation remains a separate later gate and the LLM has no truth authority.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

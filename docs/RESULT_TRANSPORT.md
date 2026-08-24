@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 remains in progress. The collector-side durable acceptance ledger is active with exact predecessor rollback retained. The sender core/package passes 178 local and 178 exact GX10-staged tests. The exact package is installed on GX10 in its independently verified inert state: timer disabled, service inactive, configuration/identity/writer-known-hosts absent, and no transmission. Every sender transport test remains injected.
+Execution-order item 30 remains in progress. The collector-side durable acceptance ledger and cross-owner publication correction are active with exact predecessor rollback retained. GX10 has its dedicated writer identity, pin, and canonical configuration while the sender timer remains disabled. One bounded manual transport moved one file to delivered, created one immutable acceptance row and ready file with exact private name/digest parity, and produced exactly one byte-equivalent ClickHouse `raw_json` row with matching projected fields and complete versioned provenance. Exact replay and divergent isolation remain the next gate before recurring sender activation is considered.
 
 ## Replay problem
 
@@ -93,7 +93,7 @@ The matching collector authorizer is independently guarded. It accepts exactly o
 
 ## Configured-inactive production state
 
-The dedicated authorization and all GX10 private inputs are installed and independently verified. Exact idempotent configuration reuse passed. Temporary key inputs were removed after the installed GX10 identity matched the collector authorization. The sender timer/service remain disabled/inactive and have never invoked SFTP. The active outbox and all prior deterministic schedules remain healthy; the collector result gate, Vector, ClickHouse, SSH configuration, authorization metadata, and exact predecessor-backup relation pass.
+The dedicated authorization and all GX10 private inputs are installed and independently verified. Exact idempotent configuration reuse passed. Temporary key inputs were removed after the installed GX10 identity matched the collector authorization. The sender timer remains disabled; exactly one bounded manual service cycle invoked SFTP and moved one ready file to delivered. The active outbox and all prior deterministic schedules remain healthy; the collector result gate, Vector, ClickHouse, SSH configuration, authorization metadata, and exact predecessor-backup relation pass.
 
 ## Bounded first-live and replay plan
 
@@ -108,7 +108,9 @@ The first manual sender cycle completed transport and local delivery exactly as 
 
 The corrected gate copies validated bytes into a gate-owned, fsynced ready-directory partial, revalidates both source and copy against the original evidence, uses a same-owner no-overwrite hard link only as the atomic publication step, persists ready, removes incoming, then removes the marker. A crash leaves a recognizable two-link ready/marker state; recovery accepts only that exact inode relation and exact incoming bytes before completing cleanup. Eleven local and eleven collector-runtime tests pass, including first acceptance with a deliberately different ready inode and interruption recovery.
 
-The exact correction was installed under a new root-only predecessor backup while the gate timer was stopped and the settled incoming file remained unchanged. One explicit gate cycle accepted it, created exactly one immutable ledger row and one ready file, and restored the enabled/active timer. Private comparison proves GX10 delivered, ledger, and collector ready names/digests are identical. Sender/outbox/correlation/reasoning/original-pipeline and collector gate/Vector/ClickHouse service health all pass; direct ClickHouse row/provenance selection awaits explicit authorization to use the existing local read-only datasource credential.
+The exact correction was installed under a new root-only predecessor backup while the gate timer was stopped and the settled incoming file remained unchanged. One explicit gate cycle accepted it, created exactly one immutable ledger row and one ready file, and restored the enabled/active timer. Private comparison proves GX10 delivered, ledger, and collector ready names/digests are identical. Sender/outbox/correlation/reasoning/original-pipeline and collector gate/Vector/ClickHouse service health all pass.
+
+After explicit authorization, the existing read-only ClickHouse account was supplied through a no-echo terminal directly to a collector-local verifier and retained only in process memory. The query returned exactly one row whose server-computed digest over `raw_json` plus its newline matched the accepted ready bytes. That same row matched the exact byte length and every thin projected scalar/array column checked against its own raw JSON. Local canonical validation required the complete version-1 top-level result contract and exact complete provenance-key shape. No credential, private identifier, hash, result content, or provenance value was printed or stored by the verifier.
 
 ## Passed repository/copy gates
 
@@ -132,6 +134,6 @@ After GitHub independently matched the published candidate, the guarded upgrader
 
 ## Remaining gates
 
-1. Publish and independently verify the configured-inactive production checkpoint and bounded plan.
-2. Transmit exactly one file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
-3. Prove an exact replay creates no second ClickHouse row and a controlled divergent file remains isolated; then decide whether to enable the recurring sender timer.
+1. `DONE` — publish and independently verify the configured-inactive production checkpoint and bounded plan.
+2. `DONE` — transmit exactly one file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
+3. `NEXT` — prove an exact replay creates no second ClickHouse row and a controlled divergent file remains isolated; then decide whether to enable the recurring sender timer.

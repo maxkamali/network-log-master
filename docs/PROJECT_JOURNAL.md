@@ -11452,3 +11452,35 @@ No result content, private filename/digest, key, credential, connection value, o
 ### Next action
 
 After explicit operator approval, read the existing root-protected Grafana-reader credential only in collector memory and run bounded read-only ClickHouse queries for the privately bound run ID. Require exactly one row and exact `raw_json` byte/digest/provenance equivalence, then publish first-live closure before exact replay.
+
+## 2026-08-24 09:25 PDT - Item 30 first live ClickHouse row and provenance proof passed
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The repository and GitHub `main` were clean and matched the published first-acceptance checkpoint:
+
+`49d97c7` — `Record first durable result acceptance`
+
+The operator explicitly authorized use of the collector's existing root-protected Grafana-reader credential solely for read-only ClickHouse row and provenance verification. The credential was supplied through a no-echo terminal directly to a collector-local verifier, retained only in process memory, and neither printed nor copied to a file. No default ClickHouse or Grafana administrator credential was used.
+
+The verifier privately selected the sole accepted ready JSONL file, revalidated stable regular-file metadata, one newline-terminated canonical record, the exact version-1 top-level contract, and the complete required provenance-key shape. A bounded aggregate query used the read-only `grafana_reader` account and matched a server-computed SHA-256 over `raw_json` plus the removed JSONL newline against the exact accepted file bytes.
+
+Exactly one ClickHouse row matched the accepted bytes. That same row matched the exact source byte length and every checked projected field against its own raw JSON: incident/run/model/type/status/severity, occurrence count, title/body, and tags. Because the complete stored `raw_json` is byte-equivalent to the canonical accepted record, its nested result and full versioned provenance are preserved exactly rather than inferred from thin projections.
+
+```text
+clickhouse_exact_raw_matches=1
+clickhouse_projection_matches=1
+clickhouse_exact_size_matches=1
+accepted_ready_records=1
+collector_ledger_rows=1
+sender_timer=disabled
+credential_storage=process-memory-only
+CLICKHOUSE_FIRST_LIVE_PROVENANCE=PASS
+FIRST_LIVE_RESULT_RETURN=PASS
+```
+
+No credential, private filename/digest/run identity, connection value, result content, or provenance value was printed or committed. ClickHouse, Grafana, Vector, collector spool/ledger, GX10 outbox, and service schedules were not mutated by this verification. No replay or divergent test has begun.
+
+### Next action
+
+Publish and independently verify this first-live closure. Then upload the exact delivered bytes/name once through the same fixed writer credential without altering local delivered state. Require exact-replay quarantine, unchanged one-row ledger/ready/ClickHouse identity, and healthy schedules before beginning the separately bounded divergent-content isolation test.

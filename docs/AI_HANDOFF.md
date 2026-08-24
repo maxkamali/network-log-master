@@ -96,7 +96,7 @@ Published artifacts include:
 - exact Ollama binary and offline six-model-store installation/verification
 - guarded preactivation and dual-confirmation activation
 - complete clean-machine runbook
-- `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 94 tests
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 104 tests
 
 Detailed state is in `components/gx10/REBUILD_STATUS.md`. Disposable Ubuntu 24.04 arm64 GX10-class clean-host execution was unavailable and waived by the operator; it remains empirically unverified.
 
@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-The final repository rebuild milestone is published. On 2026-08-23, the operator explicitly waived unavailable disposable clean-two-server execution and accepted the residual risk without labeling that execution passed. Collector-side production-normalizer integration, shadow catch-up, forward-only production handoff, multi-cadence stability review, transitional GX10 parser retirement, deterministic incident-engine item 25, managed production-correlation item 26, and deterministic wake/packet item 27 are complete. The protected rollback evidence remains retained. The reasoning schema/builder are installed empty and unscheduled. Item 28 is the versioned model/prompt/run and structured-output execution boundary; begin repository/copy-only and do not silently schedule inference or add result production.
+The final repository rebuild milestone is published. On 2026-08-23, the operator explicitly waived unavailable disposable clean-two-server execution and accepted the residual risk without labeling that execution passed. Collector-side production-normalizer integration, shadow catch-up, forward-only production handoff, multi-cadence stability review, transitional GX10 parser retirement, deterministic incident-engine item 25, managed production-correlation item 26, and deterministic wake/packet item 27 are complete. The protected rollback evidence remains retained. The reasoning schema/builder are installed empty and unscheduled. Item 28 has a repository-only exact model/prompt/run and strict structured-output candidate with 104 GX10 tests; publish it, then perform migration, synthetic local-model, and protected-copy gates. Do not silently install/schedule production inference or add collector result production.
 
 The active automatic application chains are:
 

@@ -17,6 +17,7 @@ LIBEXEC_DIR = Path('/usr/local/libexec/network-log-gx10')
 SYSTEMD_DIR = Path('/etc/systemd/system')
 DATABASE_PATH = Path('/var/lib/network-log-gx10/state/events.sqlite3')
 RUNTIME_CONFIG_PATH = Path('/etc/network-log-gx10/runtime.json')
+REASONING_CONFIG_DIR = Path('/etc/network-log-gx10')
 
 ARTIFACTS = (
     (GX10_DIR / 'sbin' / 'fetch-spool.py', LIBEXEC_DIR / 'fetch-spool.py', 0o755),
@@ -29,7 +30,27 @@ ARTIFACTS = (
         LIBEXEC_DIR / 'build-reasoning-packets.py',
         0o755,
     ),
+    (
+        GX10_DIR / 'sbin' / 'run-local-reasoning.py',
+        LIBEXEC_DIR / 'run-local-reasoning.py',
+        0o755,
+    ),
     (GX10_DIR / 'sbin' / 'runtime_config.py', LIBEXEC_DIR / 'runtime_config.py', 0o644),
+    (
+        GX10_DIR / 'config' / 'reasoning-runtime-v1.json',
+        REASONING_CONFIG_DIR / 'reasoning-runtime-v1.json',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'prompts' / 'incident-assessment-v1.txt',
+        REASONING_CONFIG_DIR / 'incident-assessment-v1.txt',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'prompts' / 'incident-assessment-output-v1.json',
+        REASONING_CONFIG_DIR / 'incident-assessment-output-v1.json',
+        0o644,
+    ),
     (
         GX10_DIR / 'systemd' / 'network-log-gx10.service',
         SYSTEMD_DIR / 'network-log-gx10.service',

@@ -51,18 +51,18 @@ class DatabaseInitializationTests(unittest.TestCase):
                 "AND type IN ('table', 'index', 'trigger') "
                 "ORDER BY type, name"
             ).fetchall()
-            self.assertEqual(len(objects), 35)
+            self.assertEqual(len(objects), 50)
             self.assertEqual(
                 sum(1 for kind, _, _ in objects if kind == 'table'),
-                9,
+                13,
             )
             self.assertEqual(
                 sum(1 for kind, _, _ in objects if kind == 'index'),
-                20,
+                23,
             )
             self.assertEqual(
                 sum(1 for kind, _, _ in objects if kind == 'trigger'),
-                6,
+                14,
             )
 
             tables = {
@@ -87,6 +87,8 @@ class DatabaseInitializationTests(unittest.TestCase):
                 'incident_evidence',
                 'incident_transitions',
                 'reasoning_packets',
+                'reasoning_runs',
+                'reasoning_results',
             ):
                 for row in connection.execute(f'PRAGMA foreign_key_list({table})'):
                     relationships.add((table, row[3], row[2], row[4]))
@@ -108,6 +110,27 @@ class DatabaseInitializationTests(unittest.TestCase):
                     ('incident_transitions', 'incident_id', 'incidents', 'incident_id'),
                     ('reasoning_packets', 'as_of_event_id', 'recent_events', 'id'),
                     ('reasoning_packets', 'incident_id', 'incidents', 'incident_id'),
+                    ('reasoning_runs', 'packet_id', 'reasoning_packets', 'packet_id'),
+                    (
+                        'reasoning_runs',
+                        'model_version',
+                        'reasoning_model_versions',
+                        'model_version',
+                    ),
+                    (
+                        'reasoning_runs',
+                        'prompt_version',
+                        'reasoning_prompt_versions',
+                        'prompt_version',
+                    ),
+                    ('reasoning_results', 'run_id', 'reasoning_runs', 'run_id'),
+                    (
+                        'reasoning_results',
+                        'packet_id',
+                        'reasoning_packets',
+                        'packet_id',
+                    ),
+                    ('reasoning_results', 'incident_id', 'incidents', 'incident_id'),
                 },
             )
 
@@ -140,6 +163,10 @@ class DatabaseInitializationTests(unittest.TestCase):
                 'incident_evidence',
                 'incident_transitions',
                 'reasoning_packets',
+                'reasoning_model_versions',
+                'reasoning_prompt_versions',
+                'reasoning_runs',
+                'reasoning_results',
             ):
                 self.assertEqual(
                     connection.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0],

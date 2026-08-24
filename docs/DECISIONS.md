@@ -428,3 +428,27 @@ Consequence:
 - initially resolved incidents are skipped; candidates require an independently qualifying critical or OSPF condition
 - each packet is canonical JSON, SHA-256 bound, maximum 32 KiB, and contains bounded fact slices without raw messages or source paths
 - protected copy/migration gates passed; the exact schema/builder are installed with zero packets/invocations/scheduler references, while inference and result production remain absent
+
+## ADR-023 - Local reasoning runs are version-bound, crash-safe, and nonauthoritative
+
+**Status:** Accepted as repository candidate
+
+Each local-model invocation is bound to one immutable reasoning packet, exact captured model manifest/config, exact prompt/output-schema hashes, and an attempt number. A durable run reservation is committed before contacting loopback Ollama; only strict structured output may become an append-only result.
+
+Why:
+
+- retries and crashes must not silently duplicate inference
+- model and prompt changes must not rewrite or obscure the provenance of prior interpretation
+- model output is untrusted and must not mutate deterministic incident or packet truth
+- unavailable inference must leave an explicit safe no-result state
+- the local runtime must not become a general outbound-network client
+
+Consequence:
+
+- version-1 selects the smallest captured local model as a bounded starting point, with empirical quality validation still required
+- one deterministic `STARTED` reservation blocks duplicate calls; interruption requires later explicit reconciliation rather than automatic takeover
+- a run may transition once to success or a bounded terminal failure status
+- model/prompt registrations and successful canonical results are append-only
+- packet/incident IDs, schema, enumerations, types, counts, lengths, and digests are independently validated
+- the caller is fixed to loopback HTTP, refuses redirects, applies request/response/time bounds, and stores no invalid model content
+- repository, migration, synthetic local-model, protected-copy, unscheduled-install, and managed-invocation gates remain separate; collector result return is out of scope

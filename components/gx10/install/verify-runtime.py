@@ -33,6 +33,7 @@ GX10_DIR = SCRIPT_DIR.parent
 SCHEMA_PATH = GX10_DIR / 'sql' / 'initialize.sql'
 INCIDENT_SCHEMA_PATH = GX10_DIR / 'sql' / 'incident-v1.sql'
 REASONING_SCHEMA_PATH = GX10_DIR / 'sql' / 'reasoning-v1.sql'
+INFERENCE_SCHEMA_PATH = GX10_DIR / 'sql' / 'inference-v1.sql'
 HOST_RE = re.compile(r'^[A-Za-z0-9.-]+$')
 USER_RE = re.compile(r'^[A-Za-z0-9._-]+$')
 
@@ -47,7 +48,27 @@ ARTIFACTS = (
         LIBEXEC_DIR / 'build-reasoning-packets.py',
         0o755,
     ),
+    (
+        GX10_DIR / 'sbin' / 'run-local-reasoning.py',
+        LIBEXEC_DIR / 'run-local-reasoning.py',
+        0o755,
+    ),
     (GX10_DIR / 'sbin' / 'runtime_config.py', LIBEXEC_DIR / 'runtime_config.py', 0o644),
+    (
+        GX10_DIR / 'config' / 'reasoning-runtime-v1.json',
+        CONFIG_DIR / 'reasoning-runtime-v1.json',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'prompts' / 'incident-assessment-v1.txt',
+        CONFIG_DIR / 'incident-assessment-v1.txt',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'prompts' / 'incident-assessment-output-v1.json',
+        CONFIG_DIR / 'incident-assessment-output-v1.json',
+        0o644,
+    ),
     (
         GX10_DIR / 'systemd' / 'network-log-gx10.service',
         SYSTEMD_DIR / 'network-log-gx10.service',
@@ -150,6 +171,7 @@ def expected_database_contract(
     schema_path=SCHEMA_PATH,
     incident_schema_path=INCIDENT_SCHEMA_PATH,
     reasoning_schema_path=REASONING_SCHEMA_PATH,
+    inference_schema_path=INFERENCE_SCHEMA_PATH,
 ):
     schema_path = Path(schema_path)
     if schema_path.is_symlink() or not schema_path.is_file():
@@ -160,6 +182,9 @@ def expected_database_contract(
     reasoning_schema_path = Path(reasoning_schema_path)
     if reasoning_schema_path.is_symlink() or not reasoning_schema_path.is_file():
         raise ValueError('reasoning schema source is not a real file')
+    inference_schema_path = Path(inference_schema_path)
+    if inference_schema_path.is_symlink() or not inference_schema_path.is_file():
+        raise ValueError('inference schema source is not a real file')
     connection = sqlite3.connect(':memory:')
     try:
         connection.executescript(schema_path.read_text(encoding='utf-8'))
@@ -168,6 +193,9 @@ def expected_database_contract(
         )
         connection.executescript(
             reasoning_schema_path.read_text(encoding='utf-8')
+        )
+        connection.executescript(
+            inference_schema_path.read_text(encoding='utf-8')
         )
         return (
             schema_inventory(connection),
@@ -185,11 +213,13 @@ def validate_database(
     schema_path=SCHEMA_PATH,
     incident_schema_path=INCIDENT_SCHEMA_PATH,
     reasoning_schema_path=REASONING_SCHEMA_PATH,
+    inference_schema_path=INFERENCE_SCHEMA_PATH,
 ):
     expected_schema, expected_suppression = expected_database_contract(
         schema_path,
         incident_schema_path,
         reasoning_schema_path,
+        inference_schema_path,
     )
     connection = database_connection(path)
     try:
@@ -216,6 +246,10 @@ def validate_database(
                 'incident_evidence',
                 'incident_transitions',
                 'reasoning_packets',
+                'reasoning_model_versions',
+                'reasoning_prompt_versions',
+                'reasoning_runs',
+                'reasoning_results',
             ):
                 if connection.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0]:
                     raise ValueError('clean activation refuses nonempty application state')

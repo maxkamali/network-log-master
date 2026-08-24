@@ -114,9 +114,9 @@ The correlation timer uses a one-minute inactive interval. Its runner verifies e
 
 Activation verifies the disabled installation, runs the initial backfill before timer enablement, and then requires active zero-lag verification. Any failure disables only correlation while preserving its replay-safe database state. The independent verifier checks unit/source/config integrity, SQLite integrity/foreign keys, cursor lags, duplicate active identities, evidence aggregates, service result, and timer state.
 
-Historical version-3 enrichment remains in SQLite. Ollama is installed separately, active/enabled, and loopback-only, but no application-specific network-observability caller has yet been implemented.
+Historical version-3 enrichment remains in SQLite. Ollama is installed separately, active/enabled, and loopback-only. An application-specific item-28 caller now exists only as a repository candidate; it has no installed working-system artifact, service, timer, run, or result.
 
-The item-27 reasoning-packet schema and builder are installed but empty and unscheduled. Operators must not invoke it ad hoc against the working database. Packet construction, model/prompt/run tracking, inference, and result production require their own managed gates; disabling correlation or a future reasoning schedule must preserve append-only packet truth.
+The item-27 reasoning-packet schema and builder are installed but empty and unscheduled. Operators must not invoke it ad hoc against the working database. The repository-only item-28 caller fixes loopback transport, reserves one durable run before inference, validates strict bounded output, and makes unavailability a terminal no-result state. It must not be copied or invoked ad hoc; migration, local-model, protected-copy, unscheduled-install, and managed-invocation gates remain. Disabling correlation or any future reasoning schedule must preserve append-only packet and result truth.
 
 ## AI result return boundary
 

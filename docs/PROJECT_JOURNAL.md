@@ -9160,3 +9160,76 @@ No packet was built on the working database. No inference API, model, prompt, re
 ### Next action
 
 Publish and independently verify this item-27 completion checkpoint. Then begin item 28 repository/copy-only: version the local model, prompt, run identity, and strictly structured output over immutable reasoning packets, with deterministic idempotency and safe inference-unavailable behavior. Do not schedule production inference or add collector result return until separate gates pass.
+
+## 2026-08-24 01:33 PDT - Item 28 versioned local-reasoning repository candidate built
+
+### Status
+
+Execution-order item 28 remains the single `NEXT` item and is in progress. This subsection changed only repository artifacts, temporary synthetic databases, tests, and documentation.
+
+Item 27 completion was published and independently matched on GitHub at:
+
+`ae07f8f492c5a8e95d086b9af0847607296b492a` — `Complete deterministic reasoning packet milestone`
+
+After that durable checkpoint, the exact item-27 root rehearsal copy, user staging copy, and named helper files were removed. The protected pre-reasoning recovery backup remains retained, the installed packet builder still matches its published hash, and both production timers remained active.
+
+### Candidate boundary
+
+The item-28 candidate adds:
+
+- immutable exact model/options registration
+- immutable exact prompt/output-schema registration
+- a deterministic run reservation committed before inference
+- one guarded `STARTED` to terminal transition
+- append-only canonical structured results
+- a fixed loopback-only Ollama request with redirects refused
+- explicit no-result terminal states for unavailable, timeout, transport, invalid-response, and invalid-output outcomes
+
+An interrupted `STARTED` run blocks automatic duplicate inference. Version 1 deliberately provides no stale-run takeover or automatic retry. The caller selects at most one highest-priority pending packet and cannot write deterministic incident, evidence, transition, or packet truth.
+
+The initial model version binds the exact captured `qwen3:8b` manifest and config digest. It is the smallest captured local model and is selected as a bounded starting candidate, not as a quality conclusion. Its exact manifest plus active/enabled loopback-only Ollama state were revalidated without calling the API or running inference.
+
+The prompt treats packet content as untrusted data. The output must contain an exact bounded schema with matching packet/incident IDs, fixed disposition/severity/action-risk enumerations, independent type/count/length validation, maximum 16-KiB canonical JSON, and no additional fields.
+
+Candidate SHA-256 values:
+
+- inference schema: `777ee4d63e1e8bcdfaaad973843d02145c45537eecd3b36e51e4a343b002ed61`
+- local-reasoning caller: `9fa6a9ae51b8b1c9eeb2d908def6e09f6a7135526d49469ffefffda5e147bf38`
+- runtime version configuration: `8d4846c6cd2dbde9ee8bc3a7b81d8e0a2f99185f84d476adadfeb273b4121d13`
+- system prompt: `8c1fc9ab16bf819ad7884a7c45f65468e0091f7251dba1f285ab4c0859b78262`
+- output schema: `b712ad9d76bdc39a023f04cdd9c680703964ae3feab3cddfb09b152a01cf9e06`
+
+### Synthetic validation
+
+Ten focused tests prove:
+
+- exact model/options/prompt/schema request construction
+- successful strict-output validation and canonical result hashing
+- immediate no-op without a duplicate inference call
+- safe terminal unavailability with unchanged incident truth
+- wrong identity and additional output fields refused without storing model content
+- interrupted reservation blocks automatic duplicate inference
+- highest-priority pending packet selection
+- forbidden raw/source packet content failure before reservation even with a matching digest
+- append-only version/result rows and terminal run immutability
+- prompt hash failure before database mutation
+- non-loopback endpoint refusal
+
+Validation:
+
+```text
+104 tests passed
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+PUBLIC_REPOSITORY_CURRENT_TREE=PASS
+PUBLIC_REPOSITORY_HISTORY=PASS
+PUBLIC_REPOSITORY_LINKS=PASS
+PUBLIC_REPOSITORY_REF_TOPOLOGY=PASS
+PUBLIC_REPOSITORY_VALIDATION=PASS
+```
+
+No working-system schema/artifact/run/result, production packet, Ollama API call, inference, service, timer, collector result, or Grafana state changed.
+
+### Next action
+
+Publish and independently verify this candidate. Then add an exact-schema/exact-artifact guarded existing-system migration and pass synthetic local-model plus protected-production-state-copy gates before any unscheduled installation or production-packet inference.

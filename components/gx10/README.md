@@ -32,6 +32,7 @@ Current state:
 - secure collector-side AI-result return transport is proven, but no GX10 result producer was discovered
 - production packet invocation, local-LLM inference, and result production remain future gated phases
 - the deterministic wake-policy/compact-packet schema and exact builder are installed unscheduled under protected backup with zero packet rows, invocations, or scheduler references
+- a repository-only versioned local-reasoning caller/schema/prompt candidate passes synthetic idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; it is not installed or scheduled on the working system
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -65,6 +66,7 @@ The three rediscovered live custom applications and deliberate post-rediscovery 
 - `enrich-events.py` — compatibility filename now containing the canonical normalized-field projector
 - `incident-engine.py` — deterministic incident identity, evidence, lifecycle, repeat, and rolling-context engine
 - `build-reasoning-packets.py` — deterministic wake selection and bounded append-only packet construction; no inference
+- `run-local-reasoning.py` — repository-only exact model/prompt/run binding and strict loopback structured inference; not scheduled
 
 `sbin/runtime_config.py` loads the protected runtime configuration rendered by `install/render-runtime-config.py`. See `sbin/PROVENANCE.md` for live hashes and the function-level parity proof.
 
@@ -87,7 +89,7 @@ The original deterministic-enrichment source/hash remains recorded for provenanc
 - 3 foreign keys
 - the two enabled exact-match suppression patterns from item 12H
 
-`sql/incident-v1.sql` adds the deliberate incident extension: three incident tables, five explicit indexes, and four append-only triggers. `sql/reasoning-v1.sql` adds the repository-only item-27 packet table, two indexes, and two append-only triggers. `install/initialize-database.py` creates the base plus both extensions atomically, refuses any existing database, validates integrity/schema/corpus before publication, and installs mode `0640` for the dedicated runtime identity.
+`sql/incident-v1.sql` adds the deliberate incident extension: three incident tables, five explicit indexes, and four append-only triggers. `sql/reasoning-v1.sql` adds the item-27 packet table, two indexes, and two append-only triggers. `sql/inference-v1.sql` adds the repository-only item-28 model/prompt/run/result boundary with guarded terminal run transitions and append-only results. `install/initialize-database.py` creates the base plus all three extensions atomically, refuses any existing database, validates integrity/schema/corpus before publication, and installs mode `0640` for the dedicated runtime identity.
 
 The historical suppression-rule names and reasons were not exposed during rediscovery and no initializer survived. The public rebuild therefore uses neutral names/reasons while preserving functional IDs, evaluation order, types, patterns, and enabled state.
 
@@ -105,7 +107,7 @@ The separately managed offline chain is:
 
 `correlation timer -> canonical projection -> deterministic incident engine`
 
-`install/install-applications.py` installs the seven application files and four pipeline/correlation units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting the correlation timer. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database. `install/migrate-incident-engine.py` provides the guarded existing-database incident extension and engine installation. `install/migrate-reasoning-packets.py` separately requires the exact base-plus-incident schema/artifact hashes, creates a protected pre-reasoning backup, installs the reasoning extension/builder unscheduled, and permits rollback only while no packet exists. `install/install-correlation.py`, `activate-correlation.py`, and `verify-correlation.py` implement the separate managed-invocation gate documented in `docs/MANAGED_CORRELATION.md`.
+`install/install-applications.py` installs the application/configuration files and four pipeline/correlation units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting correlation or local reasoning. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database. `install/migrate-incident-engine.py` provides the guarded existing-database incident extension and engine installation. `install/migrate-reasoning-packets.py` separately requires the exact base-plus-incident schema/artifact hashes, creates a protected pre-reasoning backup, installs the reasoning extension/builder unscheduled, and permits rollback only while no packet exists. The item-28 existing-system migration remains a later guarded gate. `install/install-correlation.py`, `activate-correlation.py`, and `verify-correlation.py` implement the separate managed-invocation gate documented in `docs/MANAGED_CORRELATION.md`.
 
 See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boundary.
 
@@ -119,7 +121,7 @@ See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boun
 
 The large model blobs are intentionally not stored in Git. `install/install-model-store.py` imports an independently obtained exact offline model store with full source/target blob hashing, no overwrite, resumable exact-file reuse, and blobs-before-manifests publication. `install/verify-ollama.py --offline` verifies the exact six-manifest inventory, manifest references and hashes, config digests, declared bytes, and every referenced blob size without calling the Ollama API. The normal mode additionally requires the service active/enabled and exactly one loopback TCP listener.
 
-No reconstruction artifact creates an application-specific Ollama caller. The active deterministic schedules remain independent of Ollama.
+The item-28 repository candidate adds an application-specific caller, but no unit or timer invokes it and it is not installed on the working system. The active deterministic schedules remain independent of Ollama.
 
 ## Guarded activation and runtime verification
 

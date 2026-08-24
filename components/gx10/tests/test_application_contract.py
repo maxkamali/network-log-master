@@ -16,6 +16,7 @@ APPLICATIONS = {
     'incident': SBIN_DIR / 'incident-engine.py',
     'correlation': SBIN_DIR / 'run-correlation.py',
     'reasoning_packets': SBIN_DIR / 'build-reasoning-packets.py',
+    'local_reasoning': SBIN_DIR / 'run-local-reasoning.py',
 }
 PUBLIC_ABSOLUTE_PREFIXES = (
     '/etc/network-log-gx10/',
@@ -67,7 +68,12 @@ class ApplicationContractTests(unittest.TestCase):
         for name, path in APPLICATIONS.items():
             with self.subTest(application=name):
                 text = path.read_text(encoding='utf-8')
-                self.assertIsNone(IPV4_RE.search(text))
+                addresses = [match.group(0) for match in IPV4_RE.finditer(text)]
+                if name == 'local_reasoning':
+                    self.assertTrue(addresses)
+                    self.assertEqual(set(addresses), {'127.0.0.1'})
+                else:
+                    self.assertEqual(addresses, [])
                 tree = ast.parse(text)
                 absolute = {
                     node.value
@@ -80,6 +86,10 @@ class ApplicationContractTests(unittest.TestCase):
                     self.assertTrue(
                         value == '/'
                         or value == '/spool/%Y/%m/%d/%H'
+                        or (
+                            name == 'local_reasoning'
+                            and value == '/api/chat'
+                        )
                         or value.startswith(PUBLIC_ABSOLUTE_PREFIXES),
                         value,
                     )

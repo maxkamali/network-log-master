@@ -13,7 +13,7 @@ Read and verify in this order before changing implementation:
 5. `docs/DECISIONS.md` — review durable architecture decisions that constrain implementation choices.
 6. `docs/DATA_CONTRACTS.md`, `docs/OPERATIONS.md`, and `docs/TWO_SERVER_REBUILD.md` — confirm data, operational, and cross-host rebuild contracts.
 7. `docs/ACCEPTANCE.md` — confirm what passed and which unavailable disposable-host executions were waived with residual risk.
-8. Component-specific documentation for the active task. For the current production-normalizer work, read `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`, `docs/NORMALIZER_HANDOFF.md`, and `components/collector/normalizer/README.md`.
+8. Component-specific documentation for the active task. For current local reasoning work, read `docs/REASONING_PACKETS.md`, `docs/LOCAL_REASONING.md`, and `components/gx10/README.md`.
 9. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
 
 Do not infer a new execution order from the journal. `docs/CURRENT_STATE.md` is the execution authority.

@@ -37,6 +37,9 @@ class RuntimeActivationTests(unittest.TestCase):
             connection.executescript(
                 (GX10_DIR / 'sql' / 'reasoning-v1.sql').read_text(encoding='utf-8')
             )
+            connection.executescript(
+                (GX10_DIR / 'sql' / 'inference-v1.sql').read_text(encoding='utf-8')
+            )
         finally:
             connection.close()
 

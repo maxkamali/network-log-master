@@ -125,8 +125,8 @@ Status: `IN PROGRESS`
 2. `DONE` — added independent watermark/backlog, integrity, incident-aggregate, restart, and timer-health verification for the managed correlation boundary
 3. `DONE` — implemented deterministic LLM wake policy and completed protected-copy plus guarded unscheduled working-system installation gates
 4. `DONE` — implemented compact, versioned, append-only incident packets and deterministic replay/threshold/lifecycle/tamper gates
-5. `NEXT` — track model/prompt/run versions in a durable idempotent local execution boundary
-6. require structured model output
+5. `IN PROGRESS` — a repository candidate tracks exact model/prompt/run versions behind durable crash-safe reservation and idempotency; migration and execution gates remain
+6. `IN PROGRESS` — the candidate requires independently validated strict structured model output; real-model quality gates remain
 7. keep deterministic facts separate from model interpretation
 8. preserve safe failure behavior when inference is unavailable
 

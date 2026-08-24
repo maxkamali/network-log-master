@@ -15,6 +15,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 SCHEMA_PATH = SCRIPT_DIR.parent / 'sql' / 'initialize.sql'
 INCIDENT_SCHEMA_PATH = SCRIPT_DIR.parent / 'sql' / 'incident-v1.sql'
 REASONING_SCHEMA_PATH = SCRIPT_DIR.parent / 'sql' / 'reasoning-v1.sql'
+INFERENCE_SCHEMA_PATH = SCRIPT_DIR.parent / 'sql' / 'inference-v1.sql'
 
 
 def validate_parent(path):
@@ -72,6 +73,7 @@ def initialize_database(
     gid,
     incident_schema_path=INCIDENT_SCHEMA_PATH,
     reasoning_schema_path=REASONING_SCHEMA_PATH,
+    inference_schema_path=INFERENCE_SCHEMA_PATH,
 ):
     path = Path(path)
     schema_path = Path(schema_path)
@@ -79,10 +81,12 @@ def initialize_database(
         raise ValueError('clean-machine initializer refuses an existing database')
     incident_schema_path = Path(incident_schema_path)
     reasoning_schema_path = Path(reasoning_schema_path)
+    inference_schema_path = Path(inference_schema_path)
     schema_paths = (
         schema_path,
         incident_schema_path,
         reasoning_schema_path,
+        inference_schema_path,
     )
     for source in schema_paths:
         if not source.is_file() or source.is_symlink():

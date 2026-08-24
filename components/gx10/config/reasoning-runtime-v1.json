@@ -1,0 +1,15 @@
+{
+  "config_version": 1,
+  "model_config_digest": "sha256:05a61d37b08453e59290add468e3bb2f688e23a01e967fecb0e2fa41218cea76",
+  "model_manifest_sha256": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41",
+  "model_reference": "qwen3:8b",
+  "model_version": "ollama-qwen3-8b-500a1f06-v1",
+  "prompt_version": "incident-assessment-v1",
+  "provider": "ollama",
+  "request_options": {
+    "num_ctx": 8192,
+    "num_predict": 1024,
+    "seed": 27,
+    "temperature": 0
+  }
+}

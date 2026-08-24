@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 26 has a published repository candidate and passing private working-database-copy rehearsal. It is not installed or active on the working GX10 system at this checkpoint. The existing automatic chain remains exactly `timer -> fetch -> ingest`.
+Execution-order item 26 has a published repository candidate, passing private working-database-copy rehearsal, and a verified inactive working-system installation. The correlation timer remains disabled and neither stage has run against the working database at this checkpoint. The existing automatic chain remains exactly `timer -> fetch -> ingest`.
 
 The candidate manages only two deterministic stages in this exact order:
 

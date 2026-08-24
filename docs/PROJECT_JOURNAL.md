@@ -8713,3 +8713,59 @@ The GX10 suite now contains `79` tests.
 ### Next action
 
 Run the full package/public gate, publish and independently verify this portability correction, replace only the staged installer with those published bytes, and retry the inactive install. Backfill and timer activation remain prohibited until inactive verification passes.
+
+## 2026-08-24 00:42 PDT - Managed correlation installed and verified inactive
+
+### Status
+
+Execution-order item 26 remains the single `NEXT` item and is in progress.
+
+The standard-parent correction was published and independently verified on GitHub at:
+
+`6e58460cf92e0f6a18682dbaf73a5ac6f128f00a` — `Handle absent standard libexec parent`
+
+Only published exact artifacts were staged for the working-system operation.
+
+### Guarded inactive installation
+
+The existing-system installer resolved the working database, runtime identity/group, and existing pipeline unit without printing their private values. It then:
+
+- validated database owner/group/mode and the existing loaded pipeline unit
+- created the missing standard root-owned mode-`0755` libexec parent and protected application/config/drop-in directories
+- installed exact canonical projector, incident engine, managed runner, correlation service, and correlation timer files without overwriting divergence
+- rendered a root-owned, runtime-group-readable mode-`0640` private database-path file
+- rendered one root-owned mode-`0644` drop-in containing only private runtime user/group and a reset/replacement of the pipeline ordering dependency
+- ran `systemd-analyze verify`
+- reloaded systemd
+- refused activation as part of installation
+
+Markers:
+
+```text
+gx10_managed_correlation=installed
+GX10_MANAGED_CORRELATION_INSTALL=PASS
+```
+
+### Independent inactive verification
+
+The published verifier proved exact installed-source equality and metadata, exact fragment/drop-in boundaries, private config equality to the already resolved database, matching database/service identity, incident schema integrity, inactive service, disabled/inactive timer, and unchanged database state.
+
+```text
+MANAGED_CORRELATION_VERIFY recent_max_id=955351 projection_cursor=0 projection_lag=955351 canonical_rows=0 incident_cursor=0 incident_lag=0 incidents=0 active=0 evidence=0 transitions=0
+GX10_MANAGED_CORRELATION_INSTALLED_VERIFY=PASS
+database_state_unchanged=yes
+canonical_v4_rows=0
+incident_rows=0
+projection_cursor_rows=0
+incident_cursor_rows=0
+correlation_service_inactive=yes
+correlation_timer_disabled_inactive=yes
+existing_pipeline_unchanged=yes
+GX10_MANAGED_CORRELATION_INACTIVE_INSTALL=PASS
+```
+
+Projection lag equals the highest stored event ID because no production projection has yet been invoked; the separately installed incident cursor correctly has zero lag over zero canonical rows.
+
+### Next action
+
+Publish and independently verify this inactive-install checkpoint. Then use the explicit activator to reverify installed state, run exactly one timer-disabled initial managed backfill, verify service success/state, enable only the correlation timer, and require active zero-lag verification. On any failure, disable correlation while preserving deterministic state and the existing fetch/ingest timer.

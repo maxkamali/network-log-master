@@ -12080,3 +12080,25 @@ No legacy outbox byte, accepted-file ledger identity, deterministic incident sta
 ### Next action
 
 Run public gates, publish and independently verify the exact fallback checkpoint, create/grant/populate the private lookup from the authorized mapping, update only the enhanced dashboard, prove every displayed row resolves a nonempty Device while all six resources and fifteen queries remain exact/successful, then remove private stages and reconcile closure documentation.
+
+## 2026-08-24 16:47 PDT - Item 33 lookup live; one unrecoverable legacy identity made explicit
+
+### Status
+
+Item 33 remains in progress. Lookup checkpoint `69f0b095e7592fad890eaef6f6368b8da9c46a27` was published and independently matched GitHub `main`. The exact public schema created an empty 12-month `observability.ai_result_devices` table, granted only `SELECT` to `grafana_reader`, and populated 145 unique nonempty private mappings from a refreshed authorized GX10 export. No mapping value was printed or committed.
+
+Only the distinct enhanced dashboard was replaced. All six resource specifications reread exact and all fifteen queries passed, including 145 detail rows and 73 latest-per-incident rows.
+
+The final aggregate found ClickHouse had advanced to 146 unique result runs while GX10's current append-only result database contained 145. The unmatched ClickHouse row has neither a projected Device nor a `device` key in its immutable raw JSON. It therefore cannot be authoritatively reconstructed from the current deterministic GX10 state or the result payload. Guessing from model prose or nearby syslog time would be unsafe.
+
+The final local presentation correction uses a three-way Device expression in both enhanced tables:
+
+1. direct device projected by the upgraded producer for new records
+2. private run-to-device lookup for immutable legacy records
+3. explicit `unavailable - legacy record` for the single unmatched historical row
+
+This guarantees no blank Device cell while preserving the distinction between recovered identity and unavailable historical provenance. It does not invent a device or rewrite the orphan record.
+
+### Next action
+
+Pass the focused/full/public gates, publish the explicit-legacy presentation correction, update only the enhanced resource, require all six resources and fifteen queries to pass, prove 146 displayed rows resolve either an authoritative Device or the single explicit legacy label, remove every private stage, reconcile operator/runbook/current-state documentation, and publish closure.

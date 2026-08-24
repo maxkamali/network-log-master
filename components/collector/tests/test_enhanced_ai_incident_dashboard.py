@@ -98,7 +98,7 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         )
         self.assertIn("LEFT ANY JOIN observability.ai_result_devices", sql)
         self.assertIn(
-            "if(updates.device != '', updates.device, devices.device)",
+            "multiIf(length(updates.device) > 0, updates.device, length(devices.device) > 0, devices.device, 'unavailable - legacy record')",
             sql,
         )
         self.assertIn(
@@ -152,6 +152,7 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         self.assertIn("LIMIT 200", sql)
         self.assertIn("arrayStringConcat(updates.tags, ',')", sql)
         self.assertIn("LEFT ANY JOIN observability.ai_result_devices", sql)
+        self.assertIn("'unavailable - legacy record'", sql)
         self.assertEqual(
             panel["spec"]["vizConfig"]["spec"]["options"]["frozenColumns"],
             {"left": 2},

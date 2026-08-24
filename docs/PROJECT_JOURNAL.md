@@ -12007,3 +12007,45 @@ No returned values, event content, or credential was printed. The mode-private t
 ### Next action
 
 Publish the complete two-query quote correction after local/public gates, replace only the enhanced resource, and require all fifteen queries plus six-resource exact verification to pass before closure.
+
+## 2026-08-24 16:23 PDT - Item 33 live dashboard passed; authoritative Device projection candidate opened
+
+### Status
+
+Item 33 remains the single `NEXT` item. Final query-correction checkpoint `fe387b211ccdd72d96c8915d8d1e5a189a458ada` was published and independently matched GitHub `main`. Only the distinct enhanced resource was replaced. All six dashboard specifications reread exact, the original remained unchanged, and all fifteen original/enhanced queries passed through the configured read-only datasource. The enhanced latest-per-incident and detail tables returned 70 and 139 bounded rows respectively. Vector, ClickHouse, Grafana, and the Grafana API remained healthy, and all private stages were removed after proving no temporary credential remained.
+
+Operator review then identified an operationally material omission: neither AI table exposed the affected device. Repository trace proved this was not merely hidden presentation data. Result outbox version 1 projected incident/run/model/status/severity/times/text/tags/provenance, but omitted the deterministic incident entity's device; `observability.ai_updates` consequently had no device column. Guessing from model text or time-correlating unrelated syslog rows would not be authoritative.
+
+A bounded read-only GX10 aggregate joined successful results to their deterministic incidents without printing identities. All 139 successful existing results have a nonempty device derivable from the second segment of their versioned entity key:
+
+```text
+successful_results=139
+device_derivable=139
+missing=0
+```
+
+The local candidate now:
+
+- adds a required nonempty bounded device projection to newly built result records
+- accepts exact legacy device-less version-1 ready/delivered bytes without rewriting them
+- updates the sender and collector gate to accept both the exact legacy shape and the backward-compatible device-bearing shape
+- adds `device String DEFAULT ''` to the clean ClickHouse contract
+- adds a guarded private-mapping-to-synchronous-mutation builder for historical backfill
+- adds and freezes a Device column in both enhanced event tables
+- retains the original dashboard byte-exact and changes no model/prompt/deterministic incident behavior
+
+Local validation passed:
+
+```text
+gx10_tests=192
+collector_tests=50
+gx10_filesystem_contract=PASS
+collector_installer_and_verifier_syntax=PASS
+diff_check=PASS
+```
+
+No Device-projection source, ClickHouse schema/data, installed GX10 artifact, active schedule, or live dashboard changed during candidate construction.
+
+### Next action
+
+Run the public safety gates, publish and independently verify the exact candidate, then use protected predecessor copies and exact hash checks to upgrade the bounded source/projection chain. Backfill all 139 existing rows from a mode-private mapping without printing identities, verify zero missing devices, update only the enhanced dashboard, run all exact/query/health checks, and reconcile closure documentation.

@@ -40,6 +40,7 @@ EXPECTED_RECORD_KEYS = {
     'title',
     'type',
 }
+DEVICE_RECORD_KEYS = EXPECTED_RECORD_KEYS | {'device'}
 
 
 class SenderError(ValueError):
@@ -129,7 +130,10 @@ def validate_record(name, data):
         raise SenderError('result sender file JSON differs') from exc
     if (
         not isinstance(record, dict)
-        or set(record) != EXPECTED_RECORD_KEYS
+        or frozenset(record) not in {
+            frozenset(EXPECTED_RECORD_KEYS),
+            frozenset(DEVICE_RECORD_KEYS),
+        }
         or (canonical_json(record) + '\n').encode('utf-8') != data
         or record.get('producer_schema') != 'network-log-ai-result'
         or record.get('producer_version') != 1
@@ -153,6 +157,12 @@ def validate_record(name, data):
         or len(record['tags']) > 64
     ):
         raise SenderError('result sender record differs')
+    if 'device' in record and (
+        not isinstance(record['device'], str)
+        or not record['device'].strip()
+        or len(record['device']) > 256
+    ):
+        raise SenderError('result sender device projection differs')
     return record
 
 

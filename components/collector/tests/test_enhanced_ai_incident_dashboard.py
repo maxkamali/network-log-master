@@ -94,6 +94,10 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         self.assertEqual(panel["spec"]["title"], "Latest AI Assessment per Incident")
         self.assertIn("argMax(severity, tuple(timestamp, run_id))", sql)
         self.assertIn(
+            "argMax(device, tuple(timestamp, run_id)) AS \"Device\"",
+            sql,
+        )
+        self.assertIn(
             "arrayStringConcat(argMax(tags, tuple(timestamp, run_id)), ',')",
             sql,
         )
@@ -110,9 +114,10 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         defaults = panel["spec"]["vizConfig"]["spec"]["fieldConfig"]["defaults"]
         self.assertEqual(options["cellHeight"], "md")
         self.assertTrue(options["enablePagination"])
-        self.assertEqual(options["frozenColumns"], {"left": 1})
+        self.assertEqual(options["frozenColumns"], {"left": 2})
         self.assertTrue(defaults["custom"]["filterable"])
         self.assertEqual(property_value(panel, "Time", "unit"), "dateTimeFromNow")
+        self.assertEqual(property_value(panel, "Device", "custom.width"), 190)
         self.assertEqual(
             property_value(panel, "Tags", "custom.cellOptions"),
             {"type": "pill"},
@@ -136,11 +141,17 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
             "run_id",
             "occurrence_count",
             "tags",
+            "device",
         ):
             self.assertIn(field, sql)
         self.assertIn("ORDER BY timestamp DESC", sql)
         self.assertIn("LIMIT 200", sql)
         self.assertIn("arrayStringConcat(tags, ',')", sql)
+        self.assertEqual(
+            panel["spec"]["vizConfig"]["spec"]["options"]["frozenColumns"],
+            {"left": 2},
+        )
+        self.assertEqual(property_value(panel, "Device", "custom.width"), 190)
         self.assertTrue(
             property_value(panel, "Explanation", "custom.wrapText")
         )

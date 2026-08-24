@@ -3,6 +3,7 @@ CREATE TABLE observability.ai_updates
     `timestamp` DateTime64(3, 'UTC'),
     `incident_id` String DEFAULT '',
     `run_id` String DEFAULT '',
+    `device` String DEFAULT '',
     `model` LowCardinality(String) DEFAULT '',
     `type` LowCardinality(String) DEFAULT '',
     `status` LowCardinality(String) DEFAULT '',

@@ -79,6 +79,7 @@ def validate_record(obj):
 
     optional_strings = {
         "incident_id": 256,
+        "device": 256,
         "run_id": 128,
         "model": 256,
         "severity": 64,
@@ -95,6 +96,9 @@ def validate_record(obj):
 
             if len(value) > maximum:
                 return f"{field} exceeds {maximum} characters"
+
+    if "device" in obj and not obj["device"].strip():
+        return "device must not be empty"
 
     for field in ("first_seen", "last_seen"):
         if field in obj and obj[field] is not None:

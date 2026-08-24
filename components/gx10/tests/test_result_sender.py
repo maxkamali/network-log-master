@@ -48,8 +48,14 @@ class ResultSenderTests(unittest.TestCase):
         self.known_hosts.chmod(0o600)
         self.transport_calls = []
 
-    def record(self, run_id, timestamp='2026-08-24T08:10:00Z'):
-        return {
+    def record(
+        self,
+        run_id,
+        timestamp='2026-08-24T08:10:00Z',
+        *,
+        include_device=True,
+    ):
+        value = {
             'body': 'Synthetic result summary.',
             'first_seen': '2026-08-24T08:00:00Z',
             'incident_id': 'inc-v1-synthetic',
@@ -68,6 +74,9 @@ class ResultSenderTests(unittest.TestCase):
             'title': 'Synthetic result',
             'type': 'incident_assessment',
         }
+        if include_device:
+            value['device'] = 'router.example.invalid'
+        return value
 
     def add_ready(self, run_id, timestamp='2026-08-24T08:10:00Z'):
         name = SENDER.output_name(run_id)
@@ -126,6 +135,21 @@ class ResultSenderTests(unittest.TestCase):
             self.assertIn(option, command)
         self.assertEqual(batch, f'put {path.resolve()} {path.name}\n')
         self.assertEqual(timeout, 30)
+
+    def test_legacy_record_without_device_remains_sendable(self):
+        run_id = 'run-v1-synthetic-legacy'
+        name = SENDER.output_name(run_id)
+        data = (
+            canonical_json(self.record(run_id, include_device=False)) + '\n'
+        ).encode('utf-8')
+        path = self.ready / name
+        path.write_bytes(data)
+        path.chmod(0o640)
+
+        result = self.send()
+
+        self.assertEqual(result['sent'], 1)
+        self.assertEqual((self.delivered / name).read_bytes(), data)
 
     def test_each_cycle_sends_exactly_one_file(self):
         paths = [self.add_ready(f'run-v1-synthetic-{value}')[0] for value in range(3)]

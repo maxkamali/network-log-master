@@ -514,6 +514,7 @@ expected = {
         "timestamp": "DateTime64(3, 'UTC')",
         "incident_id": "String",
         "run_id": "String",
+        "device": "String",
         "model": "LowCardinality(String)",
         "type": "LowCardinality(String)",
         "status": "LowCardinality(String)",

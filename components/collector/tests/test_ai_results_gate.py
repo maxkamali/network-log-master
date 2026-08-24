@@ -97,6 +97,21 @@ class AIResultsGateTests(unittest.TestCase):
         self.assertEqual(rows[0][0], source.name)
         self.assertEqual(rows[0][2:], (len(expected), 1))
 
+    def test_device_projection_is_bounded_when_present(self):
+        value = json.loads(record())
+        value["device"] = "router.example.invalid"
+        self.assertIsNone(GATE.validate_record(value))
+        value["device"] = ""
+        self.assertEqual(
+            GATE.validate_record(value),
+            "device must not be empty",
+        )
+        value["device"] = "x" * 257
+        self.assertEqual(
+            GATE.validate_record(value),
+            "device exceeds 256 characters",
+        )
+
     def test_exact_replay_is_rejected_after_ready_file_is_removed(self):
         source = self.write_incoming()
         payload = source.read_bytes()

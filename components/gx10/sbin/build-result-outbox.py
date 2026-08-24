@@ -159,6 +159,17 @@ def validate_packet(packet, row):
     return incident
 
 
+def incident_device(incident):
+    entity_key = incident.get('entity_key')
+    validate_string(entity_key, 4096, 'reasoning packet entity key')
+    parts = entity_key.split('|')
+    if len(parts) < 2:
+        raise OutboxError('reasoning packet device projection differs')
+    device = parts[1].strip()
+    validate_string(device, 256, 'reasoning packet device')
+    return device
+
+
 def output_name(run_id):
     validate_string(run_id, 128, 'reasoning run ID')
     return f'ai-result-v1-{sha256_text(run_id)[:32]}.jsonl'
@@ -181,6 +192,7 @@ def map_row(row):
     packet = parse_canonical_object(row['packet_json'], 'reasoning packet')
     validate_result(result, row)
     incident = validate_packet(packet, row)
+    device = incident_device(incident)
     for field, maximum in (
         ('model_version', 256),
         ('provider', 64),
@@ -217,6 +229,7 @@ def map_row(row):
     )
     record = {
         'body': result['summary'],
+        'device': device,
         'first_seen': incident['first_seen'],
         'incident_id': row['incident_id'],
         'last_seen': incident['last_seen'],
@@ -252,9 +265,12 @@ def map_row(row):
         'type': RESULT_TYPE,
     }
     data = (canonical_json(record) + '\n').encode('utf-8')
+    legacy_record = dict(record)
+    del legacy_record['device']
+    legacy_data = (canonical_json(legacy_record) + '\n').encode('utf-8')
     if not data or len(data) > MAX_FILE_BYTES:
         raise OutboxError('AI result file size differs')
-    return output_name(row['run_id']), data
+    return output_name(row['run_id']), (data, legacy_data)
 
 
 def load_records(database):
@@ -352,7 +368,7 @@ def validate_directory(path):
         raise OutboxError('result outbox directory metadata differs')
 
 
-def validate_file(path, data):
+def validate_file(path, variants):
     path = Path(path)
     if path.is_symlink() or not path.is_file():
         raise OutboxError('result outbox target is not a regular file')
@@ -361,7 +377,7 @@ def validate_file(path, data):
         details.st_nlink != 1
         or details.st_uid != os.geteuid()
         or stat.S_IMODE(details.st_mode) != 0o640
-        or path.read_bytes() != data
+        or path.read_bytes() not in variants
     ):
         raise OutboxError('result outbox target differs')
 
@@ -443,11 +459,12 @@ def preflight(ready, delivered, records):
     return ready_names, delivered_names
 
 
-def publish(directory, name, data):
+def publish(directory, name, variants):
     target = Path(directory) / name
     if target.exists() or target.is_symlink():
-        validate_file(target, data)
+        validate_file(target, variants)
         return False
+    data = variants[0]
     temporary = Path(directory) / (
         f'.{name}.tmp-{os.getpid()}-{time.time_ns()}'
     )
@@ -469,7 +486,7 @@ def publish(directory, name, data):
         os.chmod(temporary, 0o640)
         os.replace(temporary, target)
         fsync_directory(directory)
-        validate_file(target, data)
+        validate_file(target, variants)
         return True
     finally:
         if temporary.exists():
@@ -504,12 +521,12 @@ def build(database, ready, delivered):
         reused = len(ready_names) + len(delivered_names)
         created = 0
         written_bytes = 0
-        for name, data in sorted(records.items()):
+        for name, variants in sorted(records.items()):
             if name in ready_names or name in delivered_names:
                 continue
-            if publish(ready, name, data):
+            if publish(ready, name, variants):
                 created += 1
-                written_bytes += len(data)
+                written_bytes += len(variants[0])
         if created + reused != len(records):
             raise OutboxError('result outbox publication count differs')
         return {

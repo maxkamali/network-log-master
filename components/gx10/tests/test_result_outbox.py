@@ -132,6 +132,7 @@ class ResultOutboxTests(unittest.TestCase):
                 'created_at': '2026-08-24T08:05:00+00:00',
                 'incident': {
                     'entity_type': 'interface',
+                    'entity_key': 'INTERFACE|router.example.invalid|Ethernet1',
                     'first_seen': '2026-08-24T08:00:00+00:00',
                     'incident_id': self.incident_id,
                     'last_seen': '2026-08-24T08:05:00+00:00',
@@ -265,6 +266,7 @@ class ResultOutboxTests(unittest.TestCase):
             record['provenance']['run_completed_at'], record['timestamp']
         )
         self.assertEqual(record['occurrence_count'], 3)
+        self.assertEqual(record['device'], 'router.example.invalid')
         self.assertNotIn(self.packet_id, path.name)
         second = self.producer.build(
             self.database, self.ready, self.delivered
@@ -272,6 +274,24 @@ class ResultOutboxTests(unittest.TestCase):
         self.assertEqual(second['created'], 0)
         self.assertEqual(second['reused'], 1)
         self.assertEqual(path.read_bytes(), raw)
+
+    def test_legacy_record_without_device_is_reused(self):
+        self.invoke_success(self.packet_id)
+        self.producer.build(self.database, self.ready, self.delivered)
+        path = self.final_files()[0]
+        legacy = json.loads(path.read_text(encoding='utf-8'))
+        del legacy['device']
+        legacy_data = (canonical_json(legacy) + '\n').encode('utf-8')
+        path.write_bytes(legacy_data)
+        path.chmod(0o640)
+
+        state = self.producer.build(
+            self.database, self.ready, self.delivered
+        )
+
+        self.assertEqual(state['created'], 0)
+        self.assertEqual(state['reused'], 1)
+        self.assertEqual(path.read_bytes(), legacy_data)
 
     def test_terminal_failure_is_not_exported(self):
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):

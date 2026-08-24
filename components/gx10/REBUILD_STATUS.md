@@ -244,9 +244,7 @@ Ollama is installed, active, enabled, and loopback-only on TCP/11434. Its binary
 
 Rediscovery found no application-specific network-observability caller of Ollama.
 
-The collector provides a validated write-only AI-result return boundary, but rediscovery found no GX10 producer executable, wrapper, service, or retained transfer command.
-
-The rebuild must reproduce installed infrastructure and proven application behavior without inventing production LLM orchestration or a result producer.
+The collector provides a validated write-only AI-result return boundary, but rediscovery found no historical GX10 producer executable, wrapper, service, or retained transfer command. Items 28–30 later added a new, explicitly designed local reasoning/result-outbox/write-only sender boundary. It is active only after separate deterministic, protected-copy, configured-inactive, first-live, replay/conflict, exact-stage, and natural acceptance/ingestion gates; it is not represented as rediscovered behavior.
 
 The public package now installs the exact captured Ollama executable from an operator-supplied file, creates the service/model-storage boundary, and verifies the complete captured model inventory. Model blobs are deliberately external to Git and must be populated before activation. Neither installation nor offline verification calls the Ollama API, pulls a model, or runs inference.
 

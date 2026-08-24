@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 remains in progress. The collector-side durable acceptance ledger and cross-owner publication correction are active with exact predecessor rollback retained. GX10 has its dedicated writer identity, pin, and canonical configuration while the sender timer remains disabled. First transport/acceptance/ClickHouse provenance, exact replay isolation, and same-name divergent-content isolation all pass. The collector retains one distinct quarantine pair for each replay class, one immutable ledger/ready identity, and exactly one matching ClickHouse row. Recurring sender activation is now the remaining separately guarded gate.
+Execution-order item 30 is complete. The collector-side durable acceptance ledger and cross-owner publication correction are active with exact predecessor rollback retained. GX10 has its dedicated writer identity, pin, canonical configuration, and enabled/active recurring timer. First transport/acceptance/ClickHouse provenance, exact replay isolation, same-name divergent-content isolation, 186-test exact GX10 staging, explicit active-state verification, and natural delivery/acceptance/ingestion all pass. The collector retains one distinct quarantine pair for each replay class; new accepted identities remain append-only and each proven accepted raw record has exactly one complete ClickHouse row.
 
 ## Replay problem
 
@@ -116,6 +116,8 @@ After the first-live closure was published, a bounded helper imported and hash-v
 
 After exact-replay closure was published, the same installed-identity/core/configuration validation and shared lock protected a one-time divergent probe. Initial lock contention with the normal producer failed before derivative creation or transport. The retry created a protected temporary same-name record, changed only one bounded collector-valid display field, validated the resulting canonical bytes, uploaded once, revalidated the unchanged original delivered file, and synchronously removed all temporary storage. The natural collector cadence quarantined it specifically as a durable-acceptance conflict. Incoming returned to zero; rejected evidence now contains exactly one exact-replay pair and one conflict pair; ledger/ready remain one; and ClickHouse still contains exactly one matching row. Complete postchecks passed on both hosts with the sender timer disabled.
 
+The public verifier then gained an explicit active configured-state mode and passed 186 tests locally. An initial GX10 stage omitted the repository-relative collector sibling and failed only the 11 cross-boundary imports; no production state was touched. The corrected exact published repository layout passed all 186 tests on GX10. Exact inactive full preflight passed before `systemctl enable --now` changed only the sender timer. Immediate active verification passed and the first natural cycle moved one file. Two more natural cycles followed, for delivered `1 -> 4` with the active producer/outbox remaining internally consistent. The first natural result then settled, created the second immutable ledger/ready identity, and was proven as the second exact complete ClickHouse row; the next two natural files remained normally in flight at the activation checkpoint. Sender restarts remained zero and every preexisting schedule/service passed.
+
 ## Passed repository/copy gates
 
 The 11 focused tests prove:
@@ -142,4 +144,6 @@ After GitHub independently matched the published candidate, the guarded upgrader
 2. `DONE` — transmit exactly one file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
 3. `DONE` — prove an exact replay creates no second acceptance or ClickHouse row and is quarantined distinctly.
 4. `DONE` — prove a controlled same-name divergent file remains isolated with a distinct conflict reason and no new acceptance or ClickHouse row.
-5. `IN PROGRESS` — the explicit active-schedule verifier mode passes 186 local GX10 tests. Publish/stage exact bytes, then activate only the timer with disable-on-failure and bounded natural delivery/collector ingestion proof.
+5. `DONE` — explicit active-schedule verification passes 186 local and exact GX10-staged tests; only the recurring timer was enabled; three natural deliveries, first natural collector acceptance/ClickHouse ingestion, zero sender restarts, unchanged replay evidence, and healthy preexisting schedules passed.
+
+The final project gate is now the separate production closure audit recorded as item 31 in `docs/CURRENT_STATE.md`.

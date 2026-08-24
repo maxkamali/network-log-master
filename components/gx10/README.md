@@ -30,11 +30,11 @@ Current state:
 - the original automatic chain remains `timer -> fetch -> ingest`; the correlation chain is independently scheduled and disableable
 - Ollama is active with six complete model manifests, but no application-specific observability-pipeline caller was discovered
 - secure collector-side AI-result return transport is proven; no historical GX10 result producer was discovered
-- production packet construction and bounded local-LLM inference are active behind the separately disableable item-29 gate; the item-30 no-network result outbox is active, while the sender core is repository/copy-only with no installed schedule, writer credential, or collector transmission
+- production packet construction and bounded local-LLM inference are active behind the separately disableable item-29 gate; item 30's local result outbox and separately disableable recurring write-only sender are active after first-live, replay/conflict, exact-stage, and natural acceptance/ingestion gates
 - the deterministic wake-policy/compact-packet schema and exact builder are active only through the managed reasoning boundary
 - the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; the original exact artifacts were installed empty under protected backup before item-29 activation
 - item 29 is complete after backlog deferral, one safely diagnosed terminal invalid output, exact portable prompt revision `r3`, protected-copy replay, four-artifact upgrade, protected resume, and three natural fixed-packet drain cadences
-- item 30 local producer is complete after protected activation, three natural exact-no-op cadences, and natural 15→16 result/file catch-up with unchanged prior digest and 16 collector-valid files; transport replay-safety design is next, with no credential/transmission yet
+- item 30 is complete after protected local-producer activation, durable collector acceptance-ledger deployment, configured-inactive writer installation, first-live ClickHouse provenance, exact replay and divergent conflict isolation, 186 local/exact-stage tests, active-state verification, timer-only activation, and natural collector acceptance/ingestion
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -131,7 +131,7 @@ The large model blobs are intentionally not stored in Git. `install/install-mode
 
 The item-28 application-specific caller and supporting schema/configuration/prompt artifacts were installed empty and unscheduled under protected backup. Item 29 later invoked the boundary through its separately managed schedule; deterministic schedules remain independent of Ollama.
 
-The item-29 service/timer/private binding and exact `r3` bytes are installed and active after three natural-cadence gates. The original invalid-output run remains immutable evidence. Item 30's no-network local outbox is active after protected-copy/package/install/failure-resume gates, exact reasoning-digest preservation, and continued natural catch-up to 20 current ready files. The sender core/package passes 178 local and 178 exact GX10-staged tests and is installed inert with timer disabled, service inactive, and private inputs absent. No result-writer credential, delivered state, or collector transmission exists. See `docs/MANAGED_REASONING.md`, `docs/RESULT_OUTBOX.md`, and `docs/RESULT_TRANSPORT.md`.
+The item-29 service/timer/private binding and exact `r3` bytes are installed and active after natural-cadence gates; preserved terminal failures remain immutable evidence. Item 30's local outbox and write-only sender are active after protected-copy/package/install/failure-resume gates, exact reasoning-digest preservation, dedicated private writer configuration, 186 local/exact GX10-staged tests, first-live/raw-provenance proof, exact replay and divergent conflict isolation, and timer-only activation with natural durable acceptance/ClickHouse ingestion. The sender remains independently disableable and sends at most one file per oneshot. See `docs/MANAGED_REASONING.md`, `docs/RESULT_OUTBOX.md`, and `docs/RESULT_TRANSPORT.md`.
 
 ## Guarded activation and runtime verification
 

@@ -11600,3 +11600,54 @@ No live artifact, credential, private value, outbox file, schedule, service, col
 ### Next action
 
 Publish and independently verify this active-verifier candidate. Stage the exact published GX10 component tree on GX10, pass all 186 tests there, and run the exact inactive configured verifier before activation. Then enable/start only the sender timer. On any verification/service failure, disable/stop only that timer and preserve outbox/collector evidence for replay. Require at least one natural ready-to-delivered transition, collector durable acceptance, ClickHouse ingestion, zero sender restarts, and healthy preexisting schedules before item-30 closure.
+
+## 2026-08-24 09:52 PDT - Item 30 recurring production result sender activated and passed
+
+### Status
+
+Execution-order item 30 is complete. Item 31 becomes the single `NEXT` item for the final production closure audit. The explicit active-verifier checkpoint was published and independently matched on GitHub at:
+
+`d9d0ae6c4f6f5e0d7e87d9336f7f90f925ceda14` — `Verify active result sender state`
+
+The exact published GX10 component tree was staged first without its expected repository-relative collector sibling. All runnable tests passed, while exactly 11 outbox cross-boundary tests failed before execution because the collector gate import path was absent. This was a staging-layout defect only; no live target, service, schedule, credential, or outbox state changed. A fresh stage preserved the exact `components/gx10` plus `components/collector` hierarchy, and all 186 tests passed on GX10.
+
+The exact staged inactive full verifier then passed at 69 results, 68 ready, one delivered, zero projection/incident lag, zero `STARTED`, and a disabled/inactive sender timer/service. Collector preflight was zero incoming, one ready/ledger row, exactly one exact-replay and one conflict quarantine pair, zero other reasons, and healthy gate/Vector/ClickHouse/SSH/writer authorization.
+
+Only `network-log-gx10-result-sender.timer` was enabled/started. Immediate explicit active verification passed and the first natural service cycle moved ready `68 -> 67` and delivered `1 -> 2`. Two more natural cycles subsequently reached 65 ready and four delivered. The sender timer remained enabled/active, its oneshot returned idle with zero restarts, and the outbox continued to match all 69 successful results. No manual sender service start was used after activation.
+
+The first natural file settled through the unchanged collector timer and increased ready/ledger `1 -> 2`; the next two natural files remained in the expected settling window. Exact replay/conflict evidence remained one pair each with zero other reasons. A generalized read-only verifier validated every ready file against the immutable ledger and queried ClickHouse through the no-echo read-only credential path. Both accepted records had exactly one byte-equivalent raw row, projected-field parity, exact size, and complete versioned provenance; total AI-update rows increased only by the one newly accepted result.
+
+Final full postchecks passed with the original pipeline, projection/incident, reasoning, local outbox, collector gate, Vector, and ClickHouse all healthy. Projection and incident lag remained zero. The reasoning state was 69 successes/results, two preserved terminal failures, zero `STARTED`, and 14 pending packets.
+
+```text
+local_gx10_tests=186
+correct_layout_gx10_staged_tests=186
+sender_timer=enabled,active
+sender_service=inactive,restarts-0
+natural_deliveries=3
+outbox_results=69
+outbox_ready=65
+outbox_delivered=4
+collector_ready=2
+collector_ledger_rows=2
+collector_incoming_settling=2
+collector_exact_replay_reasons=1
+collector_conflict_reasons=1
+collector_other_reasons=0
+clickhouse_accepted=2
+clickhouse_exact_raw_matches=2
+clickhouse_projection_matches=2
+clickhouse_exact_size_matches=2
+projection_lag=0
+incident_lag=0
+GX10_RESULT_SENDER_ACTIVE_FULL_POSTCHECK=PASS
+COLLECTOR_ACTIVE_STATE=PASS
+CLICKHOUSE_ACTIVE_RESULTS_PROVENANCE=PASS
+RESULT_RETURN_RECURRING_ACTIVATION=PASS
+```
+
+No credential, private identifier/path/value, result/provenance content, or connection value was printed or committed. No quarantine, rollback, delivered, ready, ledger, or database evidence was deleted or rewritten. The only production configuration change was enabling/starting the already-installed sender timer.
+
+### Next action
+
+Publish and independently verify this item-30 completion checkpoint. Then execute item 31: allow currently settling natural deliveries to complete, verify the active delivered/accepted/in-flight conservation boundary, prove every durably accepted ready result has exactly one complete ClickHouse row, rerun both-host and repository/GitHub/documentation audits, and publish the final end-to-end target closure without deleting replay, conflict, or rollback evidence.

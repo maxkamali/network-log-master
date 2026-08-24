@@ -281,3 +281,27 @@ Consequence:
 - future work may proceed to production-normalizer integration design
 - no installer may be run against a working reference system merely to replace the missing disposable-host evidence
 - if suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded
+
+## ADR-017 - Production normalization begins at a durable shadow boundary
+
+**Status:** Accepted
+
+The collector-side Python normalizer will first run as a separate unprivileged durable-file shadow worker over settled `/var/spool/vector-ai` files. It will not be inserted inline between Vector and the existing ClickHouse or backlog sinks.
+
+Why:
+
+- raw capture and ClickHouse delivery must survive normalizer failure
+- the current compressed backlog is durable, replayable, and already operationally proven
+- file hashes and exact line counts provide independently auditable completeness and idempotency
+- private platform inventory can remain in a local protected file rather than entering Vector configuration or the public repository
+- a separate shadow root permits comparison and rollback before the GX10 handoff changes
+- a best-effort socket loop would add weaker delivery semantics and more coupling than the existing file boundary
+
+Consequence:
+
+- shadow operation cannot change the current Vector sinks or GX10 backlog view
+- every completed source file has an atomic normalized output plus durable source/output/inventory/version evidence
+- the runtime account has read-only source access and no network, ClickHouse, SSH-key, Ollama, or AI-result credentials
+- promotion changes only the verified GX10 handoff view and requires a separately reviewed file-identity/idempotency plan
+- live shadow deployment and cutover remain explicit approval gates
+- transitional GX10 parsing is retired only after normalized handoff stability is proven

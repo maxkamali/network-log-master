@@ -7355,3 +7355,48 @@ The rebuild/documentation milestone is accepted with residual risk. Execution-or
 `18. NEXT — design collector-side production-normalizer integration, including explicit input/output boundaries, private platform-inventory injection, shadow observability, failure isolation, and rollback behavior.`
 
 Publish this decision checkpoint before materially implementing item 18.
+
+## 2026-08-23 17:19 PDT - Production normalizer integration design completed
+
+### Status
+
+Execution-order item 18 is `DONE`.
+
+Execution-order item 19 is now the single `NEXT` item.
+
+### Design decision
+
+Added `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` and ADR-017.
+
+The normalizer will first run on the collector as a separate unprivileged durable-file shadow worker over settled `/var/spool/vector-ai` files. It will write atomic normalized files to a separate shadow root and record source, output, inventory, version, record-count, and classification evidence in a SQLite ledger.
+
+Vector's existing raw ClickHouse and backlog sinks remain unchanged. The current GX10 read-only handoff remains on the raw backlog throughout shadow operation.
+
+The design rejects an inline or best-effort socket dependency because normalizer failure must not block capture and because the existing durable file boundary supports stronger replay, hash, cardinality, and idempotency evidence.
+
+### Defined boundaries
+
+The completed design specifies:
+
+- private source-IP platform inventory validation and permissions
+- exact source-file pattern, regular-file containment, settle, integrity, and unchanged-postcheck gates
+- one-input-line/one-output-line deterministic normalization
+- atomic output publication without unexpected overwrite
+- durable per-source ledger and mutation refusal
+- dedicated no-network/no-credential runtime identity
+- public-safe shadow counters and backlog-age evidence
+- promotion gates that do not invent a duration or event threshold before live rates are observed
+- GX10 handoff-only promotion and rollback boundaries
+- explicit file-identity/idempotency risk that must be solved before cutover
+
+### Validation and safety
+
+The design was reconciled against the captured Vector raw/backlog configuration, normalizer schema/API, platform-trust ADR, data contracts, and operations rules.
+
+The public repository gate and documentation link validation pass.
+
+No live collector/GX10 configuration, file, process, service, or data was changed or read for this design. No installer or application pipeline was executed.
+
+### Next action
+
+Implement item 19 entirely in the repository: the worker, private-inventory validator, ledger, package/service artifacts, synthetic tests, and independent verifier. Do not deploy it to the live collector during item 19.

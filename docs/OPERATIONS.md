@@ -64,6 +64,12 @@ Operational behavior includes:
 
 The fetch path is designed so interruption can be retried without corrupting or deleting source data.
 
+## Collector-side normalizer shadow boundary
+
+The approved production-integration design adds a separate collector-local worker after the durable raw backlog boundary. It reads only settled `/var/spool/vector-ai` files, injects trusted hints from a private operator inventory, and writes atomic normalized output beneath `/var/spool/network-log-normalizer-shadow` with a SQLite file ledger.
+
+The worker is not inline with Vector. Failure cannot block the existing raw ClickHouse sink or raw GX10 backlog. It has no network or ClickHouse credentials and cannot modify source files. The complete design, acceptance metrics, promotion boundary, and rollback rules are in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
+
 ## GX10 local ingest
 
 Fetched JSONL records are ingested into a local SQLite working database. The captured applications enable foreign-key enforcement where needed and use a 5-second busy timeout; they do not explicitly set WAL mode.
@@ -140,9 +146,9 @@ The runtime installer uses short-lived authorization tokens for required bootstr
 
 The runtime installer is intended for a clean collector. Do not execute it against the working reference collector.
 
-The complete collector runbook is `components/collector/README.md`. Clean-machine execution is deferred pending a disposable Debian 13 amd64 target.
+The complete collector runbook is `components/collector/README.md`. Clean-machine execution was unavailable and is waived for project sequencing with residual risk retained.
 
-The GX10 rebuild package separates guarded installation, offline model import, preactivation verification, dual-confirmation activation, and active runtime verification. Its complete runbook is `components/gx10/CLEAN_MACHINE_RUNBOOK.md`. Clean-machine execution is deferred pending a disposable Ubuntu 24.04 arm64 GX10-class target.
+The GX10 rebuild package separates guarded installation, offline model import, preactivation verification, dual-confirmation activation, and active runtime verification. Its complete runbook is `components/gx10/CLEAN_MACHINE_RUNBOOK.md`. Clean-machine execution was unavailable and is waived for project sequencing with residual risk retained.
 
 `docs/TWO_SERVER_REBUILD.md` coordinates the required collector-first order, independent transport-key roles, cross-server inputs, activation point, and acceptance evidence.
 

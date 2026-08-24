@@ -91,7 +91,7 @@ collector capture
   -> ClickHouse/Grafana
 ```
 
-The collector-side normalizer has passed selected replay/parity but has not been cut into the production collector path. The GX10 incident engine, wake policy, Ollama caller, and result producer are future implementation, not reconstructed current behavior.
+The collector-side normalizer has passed selected replay/parity but has not been cut into the production collector path. Its approved first integration is a separate durable-file shadow worker reading settled collector backlog files without changing Vector's raw sinks. The GX10 incident engine, wake policy, Ollama caller, and result producer are future implementation, not reconstructed current behavior.
 
 ## Capture-first contract
 
@@ -167,4 +167,4 @@ Transitional logic is retired deliberately rather than rewritten in place withou
 
 Before adding new architecture to a component, first capture enough of the currently functional implementation that a clean machine can reproduce it from this repository plus operator-supplied environment values. This prevents modernization work from destroying the only known working implementation history.
 
-Both component reconstruction packages and operator runbooks now satisfy the repository-only portion of that rule. Full clean-host execution remains deferred until disposable collector and GX10 targets are available. `docs/TWO_SERVER_REBUILD.md` defines the cross-system order and acceptance evidence.
+Both component reconstruction packages and operator runbooks now satisfy the repository-only portion of that rule. Full clean-host execution remains empirically unverified and was explicitly waived by the operator for project sequencing because disposable targets are unavailable. `docs/TWO_SERVER_REBUILD.md` defines the cross-system order and acceptance evidence.

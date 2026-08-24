@@ -120,6 +120,7 @@ Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 4
 - [`docs/CLICKHOUSE.md`](docs/CLICKHOUSE.md) - durable table and sink contracts.
 - [`docs/GRAFANA.md`](docs/GRAFANA.md) - datasource, dashboard restore, drilldown, and NOC-view behavior.
 - [`docs/NORMALIZER_MIGRATION.md`](docs/NORMALIZER_MIGRATION.md) - controlled collector-side normalization migration.
+- [`docs/NORMALIZER_PRODUCTION_INTEGRATION.md`](docs/NORMALIZER_PRODUCTION_INTEGRATION.md) - shadow-first collector integration, observability, promotion, and rollback design.
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) - architecture decision log and rationale.
 - [`docs/PUBLICATION_CHECKLIST.md`](docs/PUBLICATION_CHECKLIST.md) - required public-release gates.
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) - broader milestone sequence.

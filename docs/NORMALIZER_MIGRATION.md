@@ -139,8 +139,10 @@ Sanitized repeated replay is deterministic and the full normalizer suite passes 
 
 This milestone does not authorize production cutover.
 
-## Current project priority
+## Production integration design status
 
-Production normalizer integration is intentionally deferred while the project first captures enough of the currently functional collector and GX10 implementation to satisfy the clean two-server rebuild acceptance criterion.
+The production integration design is complete in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
 
-Collector and GX10 rebuild milestones are now closed. Production integration/rollback design may advance only after the final repository acceptance gate and only when `docs/CURRENT_STATE.md` marks it `NEXT`; this migration document is not the execution queue.
+The selected architecture is a collector-local durable-file shadow worker that reads settled source backlog files without modifying them and writes atomic normalized shadow files with a durable idempotency ledger. Vector's current raw ClickHouse and GX10 backlog outputs remain unchanged during shadow operation.
+
+The next repository phase implements and validates that shadow worker without deploying it. `docs/CURRENT_STATE.md` remains the execution authority; this migration document is not the execution queue.

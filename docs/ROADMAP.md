@@ -97,9 +97,9 @@ Status: `IN PROGRESS`
 
 After the current system is reconstructable:
 
-1. `NEXT` — design collector-side normalizer production integration
-2. `QUEUED` — establish explicit rollback behavior
-3. `QUEUED` — run shadow/parallel validation where practical
+1. `DONE` — design collector-side normalizer production integration
+2. `NEXT` — implement the repository-side durable shadow worker, validation, packaging, and rollback safeguards
+3. `QUEUED` — run an explicitly authorized shadow/parallel validation period
 4. `QUEUED` — promote only after replay and production validation remain clean
 5. `QUEUED` — retire transitional GX10 vendor parsing deliberately
 

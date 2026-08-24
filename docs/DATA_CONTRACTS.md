@@ -77,6 +77,8 @@ Defaults are intentionally capture-first:
 
 The public collector-side normalizer implements this contract and has passed selected replay/parity. It is not yet wired into the production collector path. Current collector backlog records are the captured Vector JSON event representation described below.
 
+The approved integration design in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` first writes schema-version-1 events to a separate shadow spool. Each eligible raw backlog line maps to exactly one normalized line; file-level source/output hashes, inventory hash, versions, counts, and summary classifications are retained in a durable ledger. Shadow output does not replace the current backlog until a separately authorized promotion gate passes.
+
 ## Parser contract
 
 Vendor/event parsers return enrichment only. They may set fields such as vendor, OS family, protocol, signal type, entity identity, state, and structured attributes.

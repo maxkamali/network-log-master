@@ -279,7 +279,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, and final public milestone publication are complete. The unavailable disposable-host gate was explicitly waived by the operator with residual risk retained. The next technical action is collector-side production-normalizer integration design.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, and collector-side production-normalizer integration design are complete. The next technical action is repository implementation of the durable shadow worker and its verifier; no live deployment is authorized by this state transition.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -302,7 +302,8 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 15. `DONE` — final current-tree/reachable-history sanitation, component tests, collector synthetic validation, Git/ref/link checks, private-identifier audit, and read-only two-server revalidation passed; disposable-host execution remains deferred.
 16. `DONE` — published the final public rebuild milestone with complete repository/reference-read-only evidence and explicit clean-host deferrals.
 17. `WAIVED BY OPERATOR` — disposable collector, GX10, and two-server execution was unavailable; the operator accepted the residual risk and authorized advancement without representing this gate as passed.
-18. `NEXT` — design collector-side production-normalizer integration, including explicit input/output boundaries, private platform-inventory injection, shadow observability, failure isolation, and rollback behavior.
+18. `DONE` — designed collector-side production-normalizer integration with durable input/output boundaries, private platform-inventory injection, shadow observability, failure isolation, promotion gates, and rollback behavior.
+19. `NEXT` — implement and validate the repository-side durable normalizer shadow worker, private-inventory validator, idempotency ledger, packaging, and independent verifier without deploying to the live collector.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

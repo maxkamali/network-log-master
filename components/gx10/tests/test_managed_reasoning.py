@@ -91,7 +91,7 @@ class ManagedReasoningTests(unittest.TestCase):
         self.runner.PROMPT_SHA256 = digest(self.prompt)
         self.runner.OUTPUT_SCHEMA_SHA256 = digest(self.output_schema)
 
-    def run_runner(self):
+    def run_runner(self, **arguments):
         with redirect_stdout(io.StringIO()) as stdout, redirect_stderr(
             io.StringIO()
         ) as stderr:
@@ -103,6 +103,7 @@ class ManagedReasoningTests(unittest.TestCase):
                 self.prompt,
                 self.output_schema,
                 self.lock,
+                **arguments,
             )
         return result, stdout.getvalue(), stderr.getvalue()
 
@@ -237,6 +238,29 @@ class ManagedReasoningTests(unittest.TestCase):
             )
         )
         self.assertIsNone(self.runner.load_database_path(config))
+
+    def test_private_rehearsal_transport_is_forwarded(self):
+        marker = self.root / 'transport-marker'
+        self.caller.write_text(
+            '#!/usr/bin/env python3\n'
+            'def run(database, *, transport, **kwargs):\n'
+            "    if transport('request') != b'controlled':\n"
+            '        return 1\n'
+            '    return 0\n'
+        )
+        self.caller.chmod(0o755)
+        self.refresh_hashes()
+
+        def controlled_transport(request):
+            marker.write_text(request)
+            return b'controlled'
+
+        result, output, error = self.run_runner(
+            reasoning_transport=controlled_transport
+        )
+        self.assertEqual(result, 0, error)
+        self.assertEqual(marker.read_text(), 'request')
+        self.assertIn('GX10_MANAGED_REASONING=PASS', output)
 
 
 if __name__ == '__main__':

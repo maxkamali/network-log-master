@@ -9518,3 +9518,23 @@ PUBLIC_REPOSITORY_VALIDATION=PASS
 ### Next action
 
 Publish and independently verify this exact candidate. Then stage only that checkpoint against a protected current-production-state copy and prove no-op, one-success, one-safe-failure, one interrupted `STARTED`, failure isolation, bounded advancement, and independent verifier behavior before any working-system installation.
+
+## 2026-08-24 02:23 PDT - Item 29 private-copy rehearsal seam added before staging
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The initial repository candidate was published and independently matched on GitHub at:
+
+`76b3c7a134339a0b39bd6ed82600c4469f215b00` — `Build managed local reasoning candidate`
+
+Before protected-copy staging, review found that the managed wrapper needed an explicit injection-only transport argument to exercise safe-failure and interruption behavior through the wrapper itself without altering exact caller bytes or contacting a different endpoint. The production CLI passes no such argument and remains fixed to the exact item-28 loopback caller. One additional focused test proves forwarding of the private rehearsal transport.
+
+Corrected managed-runner SHA-256:
+
+`f79ed272a8638449bc6a98aefa1758e711a69645950c284869d96e03704432ca`
+
+Validation now covers `20` focused item-29 tests within `135` passing GX10 tests. No working-system artifact/state or production inference changed.
+
+### Next action
+
+Run the full public gate, publish and independently verify the correction, and use only that exact checkpoint for protected current-state-copy rehearsal.

@@ -74,7 +74,7 @@ It installs only the managed runner, service/timer, private database-path config
 
 ## Candidate validation
 
-Nineteen focused tests currently prove:
+Twenty focused tests currently prove:
 
 - strict private database configuration
 - exact dependency hashes and file metadata
@@ -89,12 +89,13 @@ Nineteen focused tests currently prove:
 - protected-backup-first activation order
 - activation failure isolation and bounded-cycle enforcement
 - separately disableable, hardened, loopback-only service/timer policy
+- explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `134` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, initial production activation, and multiple scheduled-cadence evidence remain separate gates. Collector result return is outside item 29.
+The full GX10 suite currently passes `135` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, initial production activation, and multiple scheduled-cadence evidence remain separate gates. Collector result return is outside item 29.
 
 ## Exact candidate artifacts
 
-- managed runner SHA-256: `54e81a5204336d7ec6d79ac5372a3a1ba5bff0e4828706e1237faa0a997e03e1`
+- managed runner SHA-256: `f79ed272a8638449bc6a98aefa1758e711a69645950c284869d96e03704432ca`
 - installer SHA-256: `75654a09471dc5ecb99672dc16c326af65fbbe83ed44963010da9e9532535fd0`
 - activator SHA-256: `04d16e1c3eac68cc04a533bba7571ba5534a2f07af8da566a2f9c725d50b43d3`
 - verifier SHA-256: `b80d3de36cdeac1ea268c9c12a1edfe1dce83e248e57eefff99872ec11622708`

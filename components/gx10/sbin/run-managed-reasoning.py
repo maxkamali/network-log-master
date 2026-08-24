@@ -291,6 +291,8 @@ def main(
     prompt_path=PROMPT_PATH,
     output_schema_path=OUTPUT_SCHEMA_PATH,
     lock_path=None,
+    *,
+    reasoning_transport=None,
 ) -> int:
     selected_database = (
         Path(database_path)
@@ -356,12 +358,17 @@ def main(
             )
         runs_before = after_packets['runs']
         results_before = after_packets['results']
+        caller_arguments = {
+            'config_path': runtime_config_path,
+            'prompt_path': prompt_path,
+            'output_schema_path': output_schema_path,
+        }
+        if reasoning_transport is not None:
+            caller_arguments['transport'] = reasoning_transport
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
             reasoning_result = caller.run(
                 selected_database,
-                config_path=runtime_config_path,
-                prompt_path=prompt_path,
-                output_schema_path=output_schema_path,
+                **caller_arguments,
             )
         final = snapshot(selected_database)
         new_runs = final['runs'] - runs_before

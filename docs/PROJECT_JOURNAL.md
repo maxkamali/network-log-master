@@ -11896,3 +11896,46 @@ The no-echo administrator credential was held only in an automatically removed m
 ### Closure action
 
 Run the final public-repository/link/history/ref gates, publish this item-32 completion checkpoint, and independently verify GitHub `main`. Future feature or production behavior work must explicitly reopen execution order in `docs/CURRENT_STATE.md`.
+
+## 2026-08-24 14:57 PDT - Gemma retained after repeatable Nemotron comparison
+
+### Request and boundary
+
+The operator requested a direct `gemma4:latest` versus `nemotron-3.5-lightning:30b` comparison and authorized replacement only if Nemotron was hands-down better. No execution-order item was reopened because the comparison was isolated and its evidence did not justify a production change.
+
+The exact six-model inventory and active loopback-only Ollama runtime were reverified. The managed correlation, reasoning, result-outbox, and result-sender timers remained active. The initial apparent inactive reasoning result was traced to querying a shortened, nonexistent unit name; the exact installed `network-log-gx10-reasoning.timer` was loaded, enabled, active, and waiting.
+
+A reusable evaluator used only 13 public-safe synthetic reasoning packets. It did not open the production database, reserve a reasoning run, append a result, touch the outbox, contact the collector, or alter any timer. Both models received the same production prompt, JSON Schema, temperature `0`, seed `27`, 8192-token context, 1024-token output ceiling, no-thinking setting, and packet-derived tag allowlist.
+
+The cases covered critical and noncritical urgency, BGP/interface/OSPF incidents, recovery, resolution, relapse, meaningful and candidate updates, contradictory lifecycle facts, prompt-like untrusted packet content, and resolved state with a separate critical wake. Automated scoring reproduced the active caller's strict structure, identity, confidence, action-risk, tag-provenance, result-size, and deterministic severity checks. Expected disposition/severity came directly from the published prompt.
+
+### Repeatable result
+
+Two complete passes produced the same quality scores and the same per-case contract-error classes:
+
+```text
+                                    Gemma   Nemotron
+strict_contract_passes              12/13    6/13
+expected_disposition_matches        11/13   10/13
+acceptable_severity_matches         12/13    7/13
+ideal_severity_matches               9/13    4/13
+prompt_injection_resisted           13/13   13/13
+```
+
+Nemotron's strengths were conservative likely-cause generation and faster resident execution. On the fully resident repeat pass its mean total case time was approximately `4.83` seconds against Gemma's `5.32` seconds. Its initial cold case was much slower: approximately `16.27` seconds total with `9.56` seconds of model load, versus Gemma's `6.55` seconds total and `0.37` seconds of model load.
+
+Nemotron's repeated regressions were disqualifying:
+
+- six noncritical cases were inflated to critical severity without `critical_condition`
+- five ordinary read-only tasks received a non-read-only risk label
+- one change-related action received a non-approval label
+- contradictory state and candidate degradation were escalated to action-required
+- resolved state with a separate critical wake was treated as resolved-no-action
+
+Gemma missed the expected disposition for the contradictory and resolved-plus-critical cases, and the latter also failed deterministic severity alignment. Those gaps remain explicit future calibration debt. Gemma nonetheless retained twice Nemotron's strict-contract acceptance, substantially better urgency alignment, and the safer production behavior.
+
+### Disposition
+
+Nemotron was not hands-down better and was not promoted. Exact `gemma4:latest` manifest `c6eb396dbd5992bbe3f5cdb947e8bbc0ee413d7c17e2beaae69f5d569cf982eb` remains selected. No model, model version, prompt, schema, caller, systemd unit, database row, result file, collector object, dashboard, or production schedule changed.
+
+The synthetic evaluator is retained at `components/gx10/tests/evaluate_reasoning_models.py`. Future model changes require a separately versioned compatibility/production gate and must improve the baseline without contract, severity, grounding, or injection-resistance regression.

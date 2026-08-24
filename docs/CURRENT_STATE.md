@@ -24,6 +24,8 @@ End-to-end working-system target: `COMPLETE` after the item-31 production/reposi
 
 Post-closure AI-results Grafana dashboard feature: `DONE` under item 32.
 
+Post-closure local-model comparison: `DONE`. Two identical 13-case synthetic passes retained exact `gemma4:latest`; `nemotron-3.5-lightning:30b` was faster after warm-up but had material strict-contract and noncritical-severity regressions. No production model or runtime state changed.
+
 The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
 ## Platform state

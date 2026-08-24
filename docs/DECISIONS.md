@@ -567,3 +567,24 @@ Consequence:
 - partial or divergent private state is refused; postinstall verification failure removes only newly created inputs; exact existing state is reusable
 - configured verification requires exact private metadata/values/pin plus the unchanged disabled/inactive package and active outbox, and neither configuration nor verification invokes SFTP
 - collector authorization appends only the matching public Ed25519 key after preserving exact predecessor bytes in a root-only backup; duplicate/divergent state is refused, SSH configuration is validated without restart, and a later failure restores the predecessor exactly
+
+## ADR-028 - Gemma remains selected after repeatable Nemotron comparison
+
+**Status:** Accepted; no production change
+
+The exact selected `gemma4:latest` version remains the local incident-assessment model after two identical 13-case comparisons with the already-captured `nemotron-3.5-lightning:30b` candidate.
+
+Why:
+
+- a model replacement must improve operator-facing quality without weakening the active strict-output, urgency, provenance, or prompt-injection boundary
+- both candidates can be compared locally with the exact production prompt/schema/options and public-safe packets, without opening production state
+- Nemotron was faster when resident and more conservative about likely causes, but these advantages do not compensate for unsafe severity inflation or output rejection
+- two complete passes reproduced the same quality scores and contract-error classes
+
+Consequence:
+
+- Gemma retains 12/13 strict-contract passes, 12/13 acceptable-severity matches, 11/13 disposition matches, and 13/13 prompt-injection resistance on the expanded set
+- Nemotron's 6/13 strict-contract passes and 7/13 acceptable-severity matches disqualify it; it inflated six noncritical cases to critical and repeatedly mislabeled action risk
+- known Gemma misses on contradictory and resolved-plus-critical packets remain explicit calibration debt rather than being hidden by a weaker replacement
+- the evaluator is retained for future candidates, but production model/version changes still require a separate versioned compatibility, state-copy, activation, and rollback gate
+- no production model, prompt, caller, schedule, database, result, collector, or dashboard state changed

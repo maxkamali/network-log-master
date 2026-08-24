@@ -20,6 +20,28 @@ The calibrated candidate uses the second-smallest model in the captured six-mani
 
 The smallest captured model (`qwen3:8b`) passed structural output but failed calibration: one early result under-escalated a critical OSPF case, and stricter attempts safely rejected meaningless or non-packet-derived output. Validation was not weakened. The next bounded candidate, `gemma4:latest`, passed all three synthetic OSPF/interface/BGP cases with strict severity, confidence, action-risk, tag-provenance, canonical-result, and no-op gates. Its exact manifest and active loopback runtime were revalidated. Protected-copy inference passed before the empty unscheduled working-system installation; production invocation remains a separate gate.
 
+## Post-closure Gemma/Nemotron comparison
+
+On 2026-08-24, the operator requested a direct comparison with the already-captured exact `nemotron-3.5-lightning:30b` model. A repository evaluator ran two identical passes over 13 public-safe synthetic packets without opening the production database or writing application state. The set covered critical OSPF, BGP open, interface down/flap, OSPF retransmission, recovery, resolution, meaningful update, relapse, contradictory lifecycle state, untrusted prompt-like packet content, a resolved packet with a separate critical wake, and candidate degradation.
+
+Both models received the exact production prompt, JSON Schema, deterministic request options, and packet-derived tag allowlist. Automated scoring used the production caller's identity, structure, confidence, action-risk, tag-provenance, size, and deterministic critical-severity rules. Disposition and severity were scored against expectations derived directly from the published prompt. Full synthetic output was then reviewed separately for grounding and action quality.
+
+Both passes reproduced the same quality result:
+
+| Measure, per 13 cases | `gemma4:latest` | `nemotron-3.5-lightning:30b` |
+|---|---:|---:|
+| strict production-contract passes | 12 | 6 |
+| expected disposition matches | 11 | 10 |
+| acceptable severity matches | 12 | 7 |
+| ideal severity matches | 9 | 4 |
+| prompt-injection resistance | 13 | 13 |
+
+Nemotron's positive findings were more conservative likely-cause generation and faster resident execution on the repeat pass: mean elapsed time was approximately `4.83` seconds versus Gemma's `5.32` seconds. Its cold first case was substantially slower because its model load took approximately `9.56` seconds.
+
+The quality regressions were disqualifying. In each pass Nemotron emitted critical severity without a `critical_condition` for six noncritical packets, mislabeled read-only actions in five packets, mislabeled one change-related action, chose action-required for the contradictory and candidate-degradation cases, and treated the resolved-plus-critical case as resolved-no-action. These are not presentation preferences: six outputs would have been rejected by the active strict validator and the severity inflation would degrade operator trust. Gemma's two disposition misses and one strict failure remain visible evaluation debt, but it retained the materially safer contract and urgency behavior.
+
+Production therefore remains bound to exact `gemma4:latest` manifest `c6eb396dbd5992bbe3f5cdb947e8bbc0ee413d7c17e2beaae69f5d569cf982eb`. No model, prompt, configuration, caller, schedule, database, result, or collector state changed. The reusable evaluator is `components/gx10/tests/evaluate_reasoning_models.py`; future candidates must beat this baseline without a contract, severity, grounding, or prompt-injection regression before a separately versioned production upgrade is considered.
+
 Request options are versioned and deterministic: temperature `0`, seed `27`, context `8192`, and maximum prediction `1024` tokens. The caller sets `stream=false`, disables thinking output, and sends a JSON Schema response format.
 
 Exact repository artifacts:

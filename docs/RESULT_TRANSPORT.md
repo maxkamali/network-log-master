@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 remains in progress. The collector-side durable acceptance ledger and cross-owner publication correction are active with exact predecessor rollback retained. GX10 has its dedicated writer identity, pin, and canonical configuration while the sender timer remains disabled. One bounded manual transport moved one file to delivered, created one immutable acceptance row and ready file with exact private name/digest parity, and produced exactly one byte-equivalent ClickHouse `raw_json` row with matching projected fields and complete versioned provenance. Exact replay and divergent isolation remain the next gate before recurring sender activation is considered.
+Execution-order item 30 remains in progress. The collector-side durable acceptance ledger and cross-owner publication correction are active with exact predecessor rollback retained. GX10 has its dedicated writer identity, pin, and canonical configuration while the sender timer remains disabled. First transport/acceptance/ClickHouse provenance passed. One later exact upload of the immutable delivered bytes/name changed no local outbox state; after natural settling, the collector quarantined it specifically as already accepted, retained its single ledger/ready identity, and ClickHouse retained exactly one matching row. Divergent isolation remains the next gate before recurring sender activation is considered.
 
 ## Replay problem
 
@@ -112,6 +112,8 @@ The exact correction was installed under a new root-only predecessor backup whil
 
 After explicit authorization, the existing read-only ClickHouse account was supplied through a no-echo terminal directly to a collector-local verifier and retained only in process memory. The query returned exactly one row whose server-computed digest over `raw_json` plus its newline matched the accepted ready bytes. That same row matched the exact byte length and every thin projected scalar/array column checked against its own raw JSON. Local canonical validation required the complete version-1 top-level result contract and exact complete provenance-key shape. No credential, private identifier, hash, result content, or provenance value was printed or stored by the verifier.
 
+After the first-live closure was published, a bounded helper imported and hash-validated the exact installed sender core/configuration, derived and dropped to the installed private service identity, locked the shared outbox, and uploaded the sole delivered file once under its unchanged basename. It did not rename, rewrite, or recreate local state. The normal collector cadence first left the young file waiting, then quarantined the settled file with the exact already-accepted reason. Incoming returned to zero; ready and the immutable ledger remained one; one replay payload/reason pair was isolated; and the matching ClickHouse row count remained exactly one. Both hosts' complete configured-inactive postchecks passed afterward.
+
 ## Passed repository/copy gates
 
 The 11 focused tests prove:
@@ -136,4 +138,5 @@ After GitHub independently matched the published candidate, the guarded upgrader
 
 1. `DONE` — publish and independently verify the configured-inactive production checkpoint and bounded plan.
 2. `DONE` — transmit exactly one file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
-3. `NEXT` — prove an exact replay creates no second ClickHouse row and a controlled divergent file remains isolated; then decide whether to enable the recurring sender timer.
+3. `DONE` — prove an exact replay creates no second acceptance or ClickHouse row and is quarantined distinctly.
+4. `NEXT` — prove a controlled same-name divergent file remains isolated; then decide whether to enable the recurring sender timer.

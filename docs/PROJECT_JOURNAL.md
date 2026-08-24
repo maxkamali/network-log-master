@@ -11484,3 +11484,46 @@ No credential, private filename/digest/run identity, connection value, result co
 ### Next action
 
 Publish and independently verify this first-live closure. Then upload the exact delivered bytes/name once through the same fixed writer credential without altering local delivered state. Require exact-replay quarantine, unchanged one-row ledger/ready/ClickHouse identity, and healthy schedules before beginning the separately bounded divergent-content isolation test.
+
+## 2026-08-24 09:34 PDT - Item 30 exact live replay isolation passed
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The first-live ClickHouse/provenance closure was published and independently matched on GitHub at:
+
+`17a27b83b0fba66dcb81cfd0e0d1a338c1baf7de` — `Close first live result proof`
+
+The collector baseline retained zero incoming, one ready file, one immutable acceptance row, zero rejected payload/reason files, an enabled/active gate timer, and active Vector/ClickHouse. GX10's sender timer/service were separately confirmed disabled/inactive.
+
+A bounded root wrapper derived the installed sender service identity from systemd without printing it, dropped privileges to that exact account, loaded the installed managed runner and exact-hash sender core, validated the canonical configuration/private inputs/outbox, acquired the shared lock, and selected the sole delivered record. It uploaded those unchanged bytes under the unchanged basename through the same fixed SFTP command contract. The wrapper then revalidated the delivered file and complete ready/delivered name sets and proved zero local state changes.
+
+The normal collector timer—not a forced service start—handled the replay. Its first cadence correctly left the file waiting inside the 90-second settle boundary. The next cadence quarantined exactly one payload with exactly one reason classified as `exact filename/content already accepted`. Incoming returned to zero. Ready and the immutable ledger remained one with exact filename/digest/size/record-count parity; no conflict or other rejection reason appeared.
+
+The authorized no-echo read-only ClickHouse proof was then repeated. The accepted-byte digest, exact size, projection parity, and complete provenance contract still matched exactly one row, proving the replay inserted no duplicate. Full postchecks passed on both hosts. At that point GX10 had 67 successful reasoning results, 66 ready, one delivered, zero `STARTED`, one preserved historical failure, and zero projection/incident lag. The sender remained configured but disabled/inactive; the original pipeline and reasoning schedules remained healthy. Collector authorization/SSH/gate/Vector/ClickHouse checks passed.
+
+```text
+exact_replay_uploads=1
+gx10_local_state_changes=0
+collector_incoming=0
+collector_ready=1
+collector_ledger_rows=1
+collector_rejected_payloads=1
+collector_rejected_reasons=1
+collector_exact_replay_reasons=1
+collector_conflict_reasons=0
+clickhouse_exact_raw_matches=1
+sender_timer=disabled,inactive
+projection_lag=0
+incident_lag=0
+GX10_EXACT_REPLAY_UPLOAD=PASS
+COLLECTOR_EXACT_REPLAY_ISOLATION=PASS
+CLICKHOUSE_EXACT_REPLAY_NO_DUPLICATE=PASS
+GX10_CONFIGURED_INACTIVE_FULL_POSTCHECK=PASS
+COLLECTOR_CONFIGURED_WRITER_FULL_POSTCHECK=PASS
+```
+
+No credential, private filename/digest/run identity, connection value, result/provenance content, or service identity was printed or committed. No existing file, ledger row, database row, schedule, or service configuration was changed. The replay added only its expected quarantined payload/reason evidence. No divergent-content test has begun.
+
+### Next action
+
+Publish and independently verify this exact-replay closure. Then create one protected temporary same-name derivative of the delivered record, change only a bounded collector-valid presentation field so its bytes/digest diverge without changing its deterministic filename, upload it once through the same writer boundary, and delete the temporary derivative. Require conflict quarantine, unchanged one-row ledger/ready/ClickHouse identity, and healthy full postchecks before considering recurring sender activation.

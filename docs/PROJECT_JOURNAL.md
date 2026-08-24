@@ -11939,3 +11939,39 @@ Gemma missed the expected disposition for the contradictory and resolved-plus-cr
 Nemotron was not hands-down better and was not promoted. Exact `gemma4:latest` manifest `c6eb396dbd5992bbe3f5cdb947e8bbc0ee413d7c17e2beaae69f5d569cf982eb` remains selected. No model, model version, prompt, schema, caller, systemd unit, database row, result file, collector object, dashboard, or production schedule changed.
 
 The synthetic evaluator is retained at `components/gx10/tests/evaluate_reasoning_models.py`. Future model changes require a separately versioned compatibility/production gate and must improve the baseline without contract, severity, grounding, or injection-resistance regression.
+
+## 2026-08-24 15:37 PDT - Item 33 enhanced AI dashboard copy candidate passed locally
+
+### Status
+
+Execution-order item 33 is now the single `NEXT` item and is in progress. The operator requested a new dashboard that preserves the existing AI dashboard as an immediate rollback option while implementing a more readable event presentation.
+
+The candidate adds `ai-incident-analysis-enhanced.json` as a distinct sixth Grafana resource titled `AI Incident Analysis - Enhanced`. The original `ai-incident-analysis.json` remains byte-exact at SHA-256 `794719f7cf112babb37c716df16959e631b0f63b81bbe9e503d243ffb36b83e5`; no replace path is planned or authorized.
+
+The enhanced copy preserves the original six summary queries and adds an eighth panel. Its operator-focused event section contains:
+
+- one latest assessment per incident, selected deterministically with `argMax(..., tuple(timestamp, run_id))`
+- separate full newest-first assessment history retaining explanation, model, incident ID, and run ID
+- relative-time display, medium-height rows, pagination, first-column freezing, wrapped titles/explanations, and per-column filters
+- severity and AI-disposition color mappings
+- pill rendering for comma-separated tags
+- explicit wording that AI assessment is nonauthoritative and not deterministic lifecycle state
+
+Every panel remains a bounded read-only query of `observability.ai_updates`, applies both dashboard time macros, excludes `raw_json`, and contains no write operation. The redacted query verifier now accepts repeated dashboard arguments so clean-machine validation can execute both AI resources. Restore and exact-verification tools now require six captures; the installer requires and queries both AI dashboards.
+
+Local validation:
+
+```text
+collector_tests=46
+enhanced_dashboard_tests=8
+original_dashboard_sha256=794719f7cf112babb37c716df16959e631b0f63b81bbe9e503d243ffb36b83e5
+dashboard_json_parse=PASS
+installer_shell_syntax=PASS
+staged_live_change=none
+```
+
+No Grafana API request, ClickHouse mutation, dashboard creation/replacement, datasource change, service operation, credential read, or production state change has occurred for item 33.
+
+### Next action
+
+Run the public repository gates, publish and independently verify the candidate checkpoint, then stage only those exact published public artifacts on the collector. Perform create-only `dryRun=All`; if it passes and all existing resources remain exact, create the distinct enhanced resource without `--replace`, verify all six resources, execute all eight enhanced queries plus the original seven through Grafana's read-only datasource, and reconcile closure documentation.

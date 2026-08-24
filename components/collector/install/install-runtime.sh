@@ -294,6 +294,7 @@ for path in \
     "$GRAFANA_DIR/scripts/verify-dashboards.py" \
     "$GRAFANA_DIR/scripts/verify-ai-dashboard-queries.py" \
     "$GRAFANA_DIR/dashboards/ai-incident-analysis.json" \
+    "$GRAFANA_DIR/dashboards/ai-incident-analysis-enhanced.json" \
     "$GRAFANA_DIR/dashboards/device-logs.json" \
     "$GRAFANA_DIR/dashboards/logs-dash.json" \
     "$GRAFANA_DIR/dashboards/noc-view.json" \
@@ -1042,6 +1043,7 @@ echo "=== VERIFY AI DASHBOARD QUERIES ==="
 python3 -B \
     "$GRAFANA_DIR/scripts/verify-ai-dashboard-queries.py" \
     --dashboard "$GRAFANA_DIR/dashboards/ai-incident-analysis.json" \
+    --dashboard "$GRAFANA_DIR/dashboards/ai-incident-analysis-enhanced.json" \
     --base-url "https://127.0.0.1:443" \
     --username admin \
     --password-file "$GRAFANA_ADMIN_PASSWORD_FILE" \

@@ -1,0 +1,1390 @@
+{
+  "kind": "Dashboard",
+  "apiVersion": "dashboard.grafana.app/v2",
+  "metadata": {
+    "name": "ai-incident-analysis-enhanced",
+    "namespace": "default"
+  },
+  "spec": {
+    "annotations": [
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana",
+            "version": "v0",
+            "datasource": {
+              "name": "-- Grafana --"
+            },
+            "spec": {}
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "builtIn": true
+        }
+      }
+    ],
+    "cursorSync": "Off",
+    "editable": true,
+    "elements": {
+      "panel-1": {
+        "kind": "Panel",
+        "spec": {
+          "id": 1,
+          "title": "AI Updates",
+          "description": "Validated GX10 reasoning results stored in ClickHouse during the selected time range.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-clickhouse-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "efvaztlrk8ow0a"
+                      },
+                      "spec": {
+                        "editorType": "sql",
+                        "format": 1,
+                        "meta": {
+                          "builderOptions": {
+                            "columns": [],
+                            "database": "observability",
+                            "filters": [],
+                            "limit": 200,
+                            "meta": {
+                              "otelEnabled": false
+                            },
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "ai_updates"
+                          }
+                        },
+                        "pluginVersion": "4.20.0",
+                        "queryType": "table",
+                        "rawSql": "SELECT count() AS ai_updates\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.1.1",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "fixed",
+                    "fixedColor": "blue"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "blue"
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-2": {
+        "kind": "Panel",
+        "spec": {
+          "id": 2,
+          "title": "Critical / High Assessments",
+          "description": "Results whose validated model severity is critical or high.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-clickhouse-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "efvaztlrk8ow0a"
+                      },
+                      "spec": {
+                        "editorType": "sql",
+                        "format": 1,
+                        "meta": {
+                          "builderOptions": {
+                            "columns": [],
+                            "database": "observability",
+                            "filters": [],
+                            "limit": 200,
+                            "meta": {
+                              "otelEnabled": false
+                            },
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "ai_updates"
+                          }
+                        },
+                        "pluginVersion": "4.20.0",
+                        "queryType": "table",
+                        "rawSql": "SELECT count() AS critical_or_high\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\n  AND severity IN ('critical', 'high')"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.1.1",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "fixed",
+                    "fixedColor": "red"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "red"
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-3": {
+        "kind": "Panel",
+        "spec": {
+          "id": 3,
+          "title": "Unique Incidents",
+          "description": "Distinct deterministic incident identities represented by AI results.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-clickhouse-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "efvaztlrk8ow0a"
+                      },
+                      "spec": {
+                        "editorType": "sql",
+                        "format": 1,
+                        "meta": {
+                          "builderOptions": {
+                            "columns": [],
+                            "database": "observability",
+                            "filters": [],
+                            "limit": 200,
+                            "meta": {
+                              "otelEnabled": false
+                            },
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "ai_updates"
+                          }
+                        },
+                        "pluginVersion": "4.20.0",
+                        "queryType": "table",
+                        "rawSql": "SELECT uniqExact(incident_id) AS unique_incidents\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.1.1",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "fixed",
+                    "fixedColor": "purple"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "purple"
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-4": {
+        "kind": "Panel",
+        "spec": {
+          "id": 4,
+          "title": "AI Updates Over Time",
+          "description": "Validated result volume by hour. Use the dashboard time picker to zoom.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-clickhouse-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "efvaztlrk8ow0a"
+                      },
+                      "spec": {
+                        "editorType": "sql",
+                        "format": 2,
+                        "meta": {
+                          "builderOptions": {
+                            "columns": [],
+                            "database": "observability",
+                            "filters": [],
+                            "limit": 200,
+                            "meta": {
+                              "otelEnabled": false
+                            },
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "time_series",
+                            "table": "ai_updates"
+                          }
+                        },
+                        "pluginVersion": "4.20.0",
+                        "queryType": "time_series",
+                        "rawSql": "SELECT\n    toStartOfInterval(timestamp, INTERVAL 1 HOUR) AS time,\n    count() AS ai_updates\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nGROUP BY time\nORDER BY time"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.1",
+            "spec": {
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "enableFacetedFilter": false,
+                  "overflow": "ellipsis",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "fillOpacity": 25,
+                    "gradientMode": "none",
+                    "lineInterpolation": "linear",
+                    "lineWidth": 2,
+                    "pointSize": 5,
+                    "showPoints": "auto",
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-5": {
+        "kind": "Panel",
+        "spec": {
+          "id": 5,
+          "title": "Severity",
+          "description": "Distribution of validated AI-result severity.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-clickhouse-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "efvaztlrk8ow0a"
+                      },
+                      "spec": {
+                        "editorType": "sql",
+                        "format": 1,
+                        "meta": {
+                          "builderOptions": {
+                            "columns": [],
+                            "database": "observability",
+                            "filters": [],
+                            "limit": 200,
+                            "meta": {
+                              "otelEnabled": false
+                            },
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "ai_updates"
+                          }
+                        },
+                        "pluginVersion": "4.20.0",
+                        "queryType": "table",
+                        "rawSql": "SELECT\n    if(severity = '', 'unspecified', severity) AS severity,\n    count() AS ai_updates\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nGROUP BY severity\nORDER BY ai_updates DESC"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "piechart",
+            "version": "13.1.1",
+            "spec": {
+              "options": {
+                "displayLabels": [
+                  "name",
+                  "percent"
+                ],
+                "legend": {
+                  "displayMode": "list",
+                  "overflow": "ellipsis",
+                  "placement": "right",
+                  "showLegend": true,
+                  "values": [
+                    "percent",
+                    "value"
+                  ]
+                },
+                "pieType": "donut",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                },
+                "sort": "desc",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-6": {
+        "kind": "Panel",
+        "spec": {
+          "id": 6,
+          "title": "Disposition",
+          "description": "Distribution of nonauthoritative AI triage disposition.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-clickhouse-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "efvaztlrk8ow0a"
+                      },
+                      "spec": {
+                        "editorType": "sql",
+                        "format": 1,
+                        "meta": {
+                          "builderOptions": {
+                            "columns": [],
+                            "database": "observability",
+                            "filters": [],
+                            "limit": 200,
+                            "meta": {
+                              "otelEnabled": false
+                            },
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "ai_updates"
+                          }
+                        },
+                        "pluginVersion": "4.20.0",
+                        "queryType": "table",
+                        "rawSql": "SELECT\n    if(status = '', 'unspecified', status) AS status,\n    count() AS ai_updates\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nGROUP BY status\nORDER BY ai_updates DESC"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "piechart",
+            "version": "13.1.1",
+            "spec": {
+              "options": {
+                "displayLabels": [
+                  "name",
+                  "percent"
+                ],
+                "legend": {
+                  "displayMode": "list",
+                  "overflow": "ellipsis",
+                  "placement": "right",
+                  "showLegend": true,
+                  "values": [
+                    "percent",
+                    "value"
+                  ]
+                },
+                "pieType": "donut",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                },
+                "sort": "desc",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-7": {
+        "kind": "Panel",
+        "spec": {
+          "id": 7,
+          "title": "Latest AI Assessment per Incident",
+          "description": "One latest nonauthoritative AI assessment per deterministic incident in the selected range. This is not authoritative lifecycle state.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-clickhouse-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "efvaztlrk8ow0a"
+                      },
+                      "spec": {
+                        "editorType": "sql",
+                        "format": 1,
+                        "meta": {
+                          "builderOptions": {
+                            "columns": [],
+                            "database": "observability",
+                            "filters": [],
+                            "limit": 200,
+                            "meta": {
+                              "otelEnabled": false
+                            },
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "ai_updates"
+                          }
+                        },
+                        "pluginVersion": "4.20.0",
+                        "queryType": "table",
+                        "rawSql": "SELECT\n    max(timestamp) AS \"Time\",\n    argMax(severity, tuple(timestamp, run_id)) AS \"Severity\",\n    argMax(status, tuple(timestamp, run_id)) AS \"Assessment\",\n    argMax(title, tuple(timestamp, run_id)) AS \"Title\",\n    argMax(occurrence_count, tuple(timestamp, run_id)) AS \"Occurrences\",\n    arrayStringConcat(argMax(tags, tuple(timestamp, run_id)), \",\") AS \"Tags\",\n    incident_id AS \"Incident ID\"\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nGROUP BY incident_id\nORDER BY \"Time\" DESC\nLIMIT 100"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "table",
+            "version": "13.1.1",
+            "spec": {
+              "options": {
+                "cellHeight": "md",
+                "showHeader": true,
+                "enablePagination": true,
+                "frozenColumns": {
+                  "left": 1
+                },
+                "footer": {
+                  "countRows": false,
+                  "enablePagination": true,
+                  "fields": "",
+                  "reducer": [
+                    "sum"
+                  ],
+                  "show": false
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {
+                    "align": "left",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "filterable": true,
+                    "inspect": false,
+                    "minWidth": 70,
+                    "wrapHeaderText": true
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Time"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "dateTimeFromNow"
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 140
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Severity"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-background",
+                          "mode": "basic"
+                        }
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 105
+                      },
+                      {
+                        "id": "mappings",
+                        "value": [
+                          {
+                            "type": "value",
+                            "options": {
+                              "critical": {
+                                "color": "red",
+                                "index": 0,
+                                "text": "CRITICAL"
+                              },
+                              "high": {
+                                "color": "orange",
+                                "index": 1,
+                                "text": "HIGH"
+                              },
+                              "medium": {
+                                "color": "yellow",
+                                "index": 2,
+                                "text": "MEDIUM"
+                              },
+                              "low": {
+                                "color": "blue",
+                                "index": 3,
+                                "text": "LOW"
+                              },
+                              "informational": {
+                                "color": "green",
+                                "index": 4,
+                                "text": "INFO"
+                              },
+                              "": {
+                                "color": "gray",
+                                "index": 5,
+                                "text": "UNSPECIFIED"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Assessment"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-background",
+                          "mode": "basic"
+                        }
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 170
+                      },
+                      {
+                        "id": "mappings",
+                        "value": [
+                          {
+                            "type": "value",
+                            "options": {
+                              "action_required": {
+                                "color": "red",
+                                "index": 0,
+                                "text": "ACTION REQUIRED"
+                              },
+                              "monitor": {
+                                "color": "blue",
+                                "index": 1,
+                                "text": "MONITOR"
+                              },
+                              "resolved_no_action": {
+                                "color": "green",
+                                "index": 2,
+                                "text": "RESOLVED / NO ACTION"
+                              },
+                              "insufficient_evidence": {
+                                "color": "gray",
+                                "index": 3,
+                                "text": "INSUFFICIENT EVIDENCE"
+                              },
+                              "": {
+                                "color": "gray",
+                                "index": 4,
+                                "text": "UNSPECIFIED"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Title"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 420
+                      },
+                      {
+                        "id": "custom.wrapText",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Occurrences"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.align",
+                        "value": "center"
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 105
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Tags"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "pill"
+                        }
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 300
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Incident ID"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 220
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "panel-8": {
+        "kind": "Panel",
+        "spec": {
+          "id": 8,
+          "title": "Full Assessment Details",
+          "description": "Complete newest-first AI assessment history with explanations and provenance. Use the column filters for focused investigation.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-clickhouse-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "efvaztlrk8ow0a"
+                      },
+                      "spec": {
+                        "editorType": "sql",
+                        "format": 1,
+                        "meta": {
+                          "builderOptions": {
+                            "columns": [],
+                            "database": "observability",
+                            "filters": [],
+                            "limit": 200,
+                            "meta": {
+                              "otelEnabled": false
+                            },
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "ai_updates"
+                          }
+                        },
+                        "pluginVersion": "4.20.0",
+                        "queryType": "table",
+                        "rawSql": "SELECT\n    timestamp AS \"Time\",\n    severity AS \"Severity\",\n    status AS \"Assessment\",\n    title AS \"Title\",\n    body AS \"Explanation\",\n    occurrence_count AS \"Occurrences\",\n    arrayStringConcat(tags, \",\") AS \"Tags\",\n    model AS \"Model\",\n    incident_id AS \"Incident ID\",\n    run_id AS \"Run ID\"\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nORDER BY timestamp DESC\nLIMIT 200"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "table",
+            "version": "13.1.1",
+            "spec": {
+              "options": {
+                "cellHeight": "md",
+                "showHeader": true,
+                "enablePagination": true,
+                "frozenColumns": {
+                  "left": 1
+                },
+                "footer": {
+                  "countRows": false,
+                  "enablePagination": true,
+                  "fields": "",
+                  "reducer": [
+                    "sum"
+                  ],
+                  "show": false
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {
+                    "align": "left",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "filterable": true,
+                    "inspect": false,
+                    "minWidth": 70,
+                    "wrapHeaderText": true
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Time"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "dateTimeFromNow"
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 140
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Severity"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-background",
+                          "mode": "basic"
+                        }
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 105
+                      },
+                      {
+                        "id": "mappings",
+                        "value": [
+                          {
+                            "type": "value",
+                            "options": {
+                              "critical": {
+                                "color": "red",
+                                "index": 0,
+                                "text": "CRITICAL"
+                              },
+                              "high": {
+                                "color": "orange",
+                                "index": 1,
+                                "text": "HIGH"
+                              },
+                              "medium": {
+                                "color": "yellow",
+                                "index": 2,
+                                "text": "MEDIUM"
+                              },
+                              "low": {
+                                "color": "blue",
+                                "index": 3,
+                                "text": "LOW"
+                              },
+                              "informational": {
+                                "color": "green",
+                                "index": 4,
+                                "text": "INFO"
+                              },
+                              "": {
+                                "color": "gray",
+                                "index": 5,
+                                "text": "UNSPECIFIED"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Assessment"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-background",
+                          "mode": "basic"
+                        }
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 170
+                      },
+                      {
+                        "id": "mappings",
+                        "value": [
+                          {
+                            "type": "value",
+                            "options": {
+                              "action_required": {
+                                "color": "red",
+                                "index": 0,
+                                "text": "ACTION REQUIRED"
+                              },
+                              "monitor": {
+                                "color": "blue",
+                                "index": 1,
+                                "text": "MONITOR"
+                              },
+                              "resolved_no_action": {
+                                "color": "green",
+                                "index": 2,
+                                "text": "RESOLVED / NO ACTION"
+                              },
+                              "insufficient_evidence": {
+                                "color": "gray",
+                                "index": 3,
+                                "text": "INSUFFICIENT EVIDENCE"
+                              },
+                              "": {
+                                "color": "gray",
+                                "index": 4,
+                                "text": "UNSPECIFIED"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Title"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 300
+                      },
+                      {
+                        "id": "custom.wrapText",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Explanation"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 620
+                      },
+                      {
+                        "id": "custom.wrapText",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Occurrences"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.align",
+                        "value": "center"
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 105
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Tags"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "pill"
+                        }
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 280
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Model"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 170
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Incident ID"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 220
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Run ID"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 220
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 6,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-1"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 6,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-2"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 6,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-3"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 12,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-4"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 12,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-5"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 6,
+              "y": 6,
+              "width": 6,
+              "height": 12,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-6"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 18,
+              "width": 24,
+              "height": 16,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-7"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 34,
+              "width": 24,
+              "height": 22,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-8"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "links": [],
+    "liveNow": false,
+    "preload": false,
+    "tags": [
+      "ai",
+      "enhanced",
+      "incidents",
+      "network-observability",
+      "operator-view"
+    ],
+    "timeSettings": {
+      "timezone": "browser",
+      "from": "now-7d",
+      "to": "now",
+      "autoRefresh": "1m",
+      "autoRefreshIntervals": [
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h"
+      ],
+      "hideTimepicker": false,
+      "fiscalYearStartMonth": 0
+    },
+    "title": "AI Incident Analysis - Enhanced",
+    "variables": [],
+    "preferences": {
+      "layout": {
+        "kind": "GridLayout",
+        "spec": {
+          "items": []
+        }
+      }
+    },
+    "description": "Operator-focused copy of AI Incident Analysis. The original dashboard remains available unchanged for immediate rollback."
+  },
+  "status": {}
+}

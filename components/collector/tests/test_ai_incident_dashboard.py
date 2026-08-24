@@ -48,7 +48,7 @@ class AiIncidentDashboardTests(unittest.TestCase):
         })
         self.assertEqual(self.document["status"], {})
         self.assertEqual(self.spec["title"], "AI Incident Analysis")
-        self.assertEqual(len(tuple(DASHBOARD_DIR.glob("*.json"))), 5)
+        self.assertEqual(len(tuple(DASHBOARD_DIR.glob("*.json"))), 6)
 
     def test_panel_and_layout_contract(self):
         self.assertEqual(len(self.elements), 7)
@@ -147,6 +147,10 @@ class AiIncidentDashboardTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn(
             '"$GRAFANA_DIR/dashboards/ai-incident-analysis.json"',
+            installer,
+        )
+        self.assertIn(
+            '"$GRAFANA_DIR/dashboards/ai-incident-analysis-enhanced.json"',
             installer,
         )
         self.assertIn(

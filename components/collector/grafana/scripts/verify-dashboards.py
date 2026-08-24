@@ -17,7 +17,7 @@ from dashboard_api import (
 )
 
 
-EXPECTED_DASHBOARD_COUNT = 5
+EXPECTED_DASHBOARD_COUNT = 6
 
 
 def main() -> int:

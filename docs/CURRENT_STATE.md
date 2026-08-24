@@ -26,6 +26,8 @@ Post-closure AI-results Grafana dashboard feature: `DONE` under item 32.
 
 Post-closure local-model comparison: `DONE`. Two identical 13-case synthetic passes retained exact `gemma4:latest`; `nemotron-3.5-lightning:30b` was faster after warm-up but had material strict-contract and noncritical-severity regressions. No production model or runtime state changed.
 
+Post-closure enhanced AI dashboard copy: `IN PROGRESS` under item 33. The repository candidate is a distinct sixth resource and the original `AI Incident Analysis` capture remains byte-exact. Live creation is not complete until create-only dry-run, exact resource verification, and all enhanced queries pass.
+
 The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
 ## Platform state
@@ -345,8 +347,9 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 30. `DONE` — completed the separately gated GX10 result-return boundary: durable collector replay ledger and cross-owner publication; 186 local/exact-GX10-staged tests; configured-inactive private writer boundary; first live manual transport; exact ClickHouse raw/provenance proof; distinct exact-replay and same-name conflict isolation; explicit active-state verification; recurring timer activation; three natural deliveries; first natural collector acceptance and exact one-row ClickHouse ingestion; zero sender restarts and healthy zero-lag preexisting schedules.
 31. `DONE` — completed the final production/repository closure audit: exact active conservation at 10 delivered = eight durably accepted + two settling; all eight accepted results have exactly one byte/size/projection/provenance-equivalent ClickHouse row; exact-replay/conflict quarantine evidence remains one pair each; both hosts pass full active health with zero deterministic lag and zero sender restarts; 186 GX10, 30 collector, 14 shadow-package, 11 gate-package, 94 normalizer, and nine repository-validator tests pass; current-tree/history/link/ref sanitation and GitHub checkpoint parity pass; stale current-status documentation was reconciled without deleting rollback or evidence.
 32. `DONE` — built and published a new non-replacing `AI Incident Analysis` dashboard for `observability.ai_updates`; passed five-resource create-only dry-run, exact live resource verification, unchanged exact verification of all four preexisting dashboards, seven-for-seven live datasource queries with data, 38 Python-3.13 collector tests, clean-machine installer integration, documentation reconciliation, and unchanged Grafana/data-path health.
+33. `NEXT` — publish and independently verify the enhanced-dashboard repository candidate; create it as a distinct resource only after create-only dry-run; then prove the original dashboard remains exact, all six resources verify, all eight enhanced queries execute through the read-only datasource, documentation is reconciled, and no existing dashboard is replaced.
 
-The end-to-end target is complete. There is no remaining `NEXT` item. Future feature work must explicitly reopen execution order here before changing production behavior.
+The end-to-end target remains complete. Item 33 is isolated post-closure presentation work and is the single `NEXT`; it does not reopen the data pipeline, deterministic incident authority, or result transport.
 
 ## Scope constraints
 

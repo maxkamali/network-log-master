@@ -74,10 +74,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--dashboard",
+        action="append",
+        dest="dashboards",
         type=Path,
-        default=(
-            Path(__file__).resolve().parents[1]
-            / "dashboards/ai-incident-analysis.json"
+        help=(
+            "dashboard capture to verify; repeat for multiple AI dashboards"
         ),
     )
     parser.add_argument("--base-url", default="https://127.0.0.1:443")
@@ -89,11 +90,6 @@ def main() -> int:
     if args.days < 1 or args.days > 366:
         raise DashboardApiError("days must be between 1 and 366")
 
-    document = json.loads(args.dashboard.read_text(encoding="utf-8"))
-    elements = (document.get("spec") or {}).get("elements")
-    if not isinstance(elements, dict) or not elements:
-        raise DashboardApiError("dashboard has no panels")
-
     end_ms = int(time.time() * 1_000)
     start_ms = end_ms - args.days * 24 * 60 * 60 * 1_000
     api = DashboardApi(
@@ -102,20 +98,37 @@ def main() -> int:
         password=load_password(args.password_file),
     )
 
-    for panel_name in sorted(elements):
-        queries = elements[panel_name]["spec"]["data"]["spec"]["queries"]
-        if len(queries) != 1:
-            raise DashboardApiError(f"{panel_name}: expected one query")
-        ref_id, payload = query_payload(queries[0], start_ms, end_ms)
-        status, response = api.request("POST", "/api/ds/query", payload)
-        if status != 200:
-            raise DashboardApiError(f"{panel_name}: datasource status={status}")
-        frame_count, row_count = response_counts(response, ref_id)
-        print(
-            f"{panel_name} frames={frame_count} rows={row_count} query=PASS"
-        )
+    dashboards = args.dashboards or [
+        Path(__file__).resolve().parents[1]
+        / "dashboards/ai-incident-analysis.json"
+    ]
+    for dashboard in dashboards:
+        document = json.loads(dashboard.read_text(encoding="utf-8"))
+        elements = (document.get("spec") or {}).get("elements")
+        if not isinstance(elements, dict) or not elements:
+            raise DashboardApiError(f"{dashboard.name}: dashboard has no panels")
+        for panel_name in sorted(elements):
+            queries = elements[panel_name]["spec"]["data"]["spec"]["queries"]
+            if len(queries) != 1:
+                raise DashboardApiError(
+                    f"{dashboard.name}/{panel_name}: expected one query"
+                )
+            ref_id, payload = query_payload(queries[0], start_ms, end_ms)
+            status, response = api.request("POST", "/api/ds/query", payload)
+            if status != 200:
+                raise DashboardApiError(
+                    f"{dashboard.name}/{panel_name}: datasource status={status}"
+                )
+            frame_count, row_count = response_counts(response, ref_id)
+            print(
+                f"{dashboard.name}/{panel_name} frames={frame_count} "
+                f"rows={row_count} query=PASS"
+            )
 
-    print("GRAFANA_AI_DASHBOARD_QUERIES=PASS")
+    print(
+        "GRAFANA_AI_DASHBOARD_QUERIES=PASS "
+        f"dashboards={len(dashboards)}"
+    )
     return 0
 
 

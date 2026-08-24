@@ -9754,3 +9754,46 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify this activation checkpoint. Then observe multiple natural five-minute cadences, proving one-inference maximum, exact aggregate count progression, zero failures/`STARTED` rows/restarts, deterministic zero lag, and healthy independent timers before completing item 29.
+
+## 2026-08-24 02:58 PDT - Item 29 natural cadence backlog gate failed safely
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The protected initial-activation checkpoint was published and independently matched on GitHub at:
+
+`2529cdac40ee285da648756559c60e5934a30399` — `Record initial managed reasoning activation`
+
+No service was manually triggered during the scheduled observation window. The first natural cadence advanced from one to two successful runs/results, with zero failures, `STARTED` reservations, or restarts and exact deterministic catch-up. It also built four new packets, increasing total packets from four to eight and pending backlog from three to six.
+
+The second natural cadence again added exactly one successful run/result with no failure, interruption, restart, or deterministic lag. It also built four more packets, increasing total packets to 12 and pending backlog to nine. Packet arrival exceeded the deliberate one-inference-per-cycle service ceiling in two consecutive natural cadences, so the stability gate failed even though inference safety passed.
+
+Only the managed reasoning timer was disabled and stopped. No packet, model/prompt registration, run, or result was deleted or rewritten. Fetch/ingest and deterministic correlation remained active and reached zero lag.
+
+```text
+recent_max_id=967946
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_pending=9
+reasoning_model_versions=1
+reasoning_prompt_versions=1
+reasoning_runs=3
+reasoning_started=0
+reasoning_succeeded=3
+reasoning_failures=0
+reasoning_results=3
+managed_reasoning_timer_enabled=no
+managed_reasoning_timer_active=no
+managed_reasoning_service_active=no
+managed_reasoning_restarts=0
+pipeline_timer_active=yes
+correlation_timer_active=yes
+collector_result_return_enabled=no
+GX10_MANAGED_REASONING_BACKLOG_DISABLE=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, or connection value was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this failed-cadence/safe-disable checkpoint. Keep reasoning disabled while designing a bounded admission or coalescing correction that preserves all append-only state and prevents packet creation from outpacing one inference per cadence. Rehearse the correction on a protected production-state copy before any production resume.

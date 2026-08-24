@@ -33,7 +33,7 @@ Current state:
 - production packet invocation, local-LLM inference, and result production remain future gated phases
 - the deterministic wake-policy/compact-packet schema and exact builder are installed unscheduled under protected backup with zero packet rows, invocations, or scheduler references
 - the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; its exact artifacts are installed empty and unscheduled under protected backup with zero version/run/result rows and no production inference
-- the item-29 managed `packet build -> one inference` runner/service/timer passes synthetic plus protected current-state-copy real-success/safe-failure/interruption/retry-refusal/no-op/isolation gates; its protected initial production cycle completed one successful bounded result and enabled the corrected start-relative timer for multi-cadence review
+- the item-29 managed `packet build -> one inference` boundary passed per-cycle safety, but two natural cadences grew pending backlog by three each; its timer is disabled with append-only state preserved while bounded admission/coalescing is corrected
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 

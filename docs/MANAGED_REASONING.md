@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has a published repository candidate, passing synthetic tests, passing protected current-production-state-copy rehearsal, exact inactive working-system installation, and protected initial production activation. A final pre-activation review caught and corrected the initial boot-relative timer before any inference. The corrected start-relative timer was atomically applied only over the exact inactive predecessor. The activator then created a protected backup, completed exactly one bounded production cycle while the timer was disabled, passed aggregate verification, and enabled the timer. Multiple independent natural-cadence gates remain before item 29 can complete.
+Execution-order item 29 has a published repository candidate, passing synthetic tests, passing protected current-production-state-copy rehearsal, exact inactive working-system installation, and protected initial production activation. A final pre-activation review caught and corrected the initial boot-relative timer before any inference. The activator then created a protected backup, completed exactly one bounded production cycle while the timer was disabled, passed aggregate verification, and enabled the timer. Two natural cadences each completed exactly one successful inference, but each also built four new packets; pending backlog grew from three to six to nine. This failed the stability gate. The reasoning timer is disabled/inactive with all append-only state preserved while bounded-backlog policy is corrected. Fetch/ingest, deterministic correlation, and Ollama remain healthy.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -92,7 +92,7 @@ Twenty-one focused tests currently prove:
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `136` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, and protected initial production activation have passed. Multiple scheduled-cadence evidence remains the completion gate. Collector result return is outside item 29.
+The full GX10 suite currently passes `136` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, and protected initial production activation have passed. The first two natural cadences passed per-cycle inference safety but failed bounded-backlog stability. A corrected backlog policy plus new protected and production cadence gates are required. Collector result return is outside item 29.
 
 ## Protected current-state-copy evidence
 
@@ -191,7 +191,15 @@ collector_result_return_enabled=no
 GX10_MANAGED_REASONING_INITIAL_ACTIVATION=PASS
 ```
 
-The protected backup path and all packet/result content remain private. Multiple independent natural-cadence gates remain.
+The protected backup path and all packet/result content remain private.
+
+## Natural-cadence backlog failure and safe disable
+
+The first natural cadence reached event ID `967397`, created four new packets, completed exactly one additional successful run/result, and left six pending. The second reached event ID `967860`, again created four packets and completed exactly one run/result, leaving nine pending. Both cadences retained zero deterministic lag, failures, `STARTED` reservations, or restarts, and all independent timers were healthy.
+
+Because packet arrival exceeded bounded inference throughput in two consecutive natural cadences, item 29 did not pass stability. Only the managed reasoning timer was disabled and stopped. A later verifier at event ID `967946` proved 12 packets, nine pending, three successful runs/results, zero failures/`STARTED` rows/restarts, disabled/inactive reasoning units, zero deterministic lag, and healthy fetch/ingest plus correlation schedules. No state was deleted or rewritten.
+
+The next candidate must bound packet admission or coalesce pending work so automatic backlog cannot grow faster than the deliberate one-inference-per-cycle ceiling. It must preserve existing append-only packets/runs/results and pass protected-copy plus new multi-cadence production gates before reasoning is re-enabled.
 
 ## Exact candidate artifacts
 

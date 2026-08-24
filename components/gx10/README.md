@@ -30,7 +30,8 @@ Current state:
 - the original automatic chain remains `timer -> fetch -> ingest`; the correlation chain is independently scheduled and disableable
 - Ollama is active with six complete model manifests, but no application-specific observability-pipeline caller was discovered
 - secure collector-side AI-result return transport is proven, but no GX10 result producer was discovered
-- local-LLM wake selection, incident packets, inference, and result production remain future gated phases
+- production packet invocation, local-LLM inference, and result production remain future gated phases
+- a repository-only deterministic wake-policy/compact-packet candidate is implemented and tested but is not installed, invoked, or scheduled on the working system
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -57,12 +58,13 @@ Run the safe repository validation with:
 
 ## Captured application implementations
 
-The three rediscovered live custom applications and the new incident candidate are under `sbin/` with deployment values removed:
+The three rediscovered live custom applications and deliberate post-rediscovery deterministic candidates are under `sbin/` with deployment values removed:
 
 - `fetch-spool.py`
 - `ingest-spool.py`
 - `enrich-events.py` — compatibility filename now containing the canonical normalized-field projector
 - `incident-engine.py` — deterministic incident identity, evidence, lifecycle, repeat, and rolling-context engine
+- `build-reasoning-packets.py` — deterministic wake selection and bounded append-only packet construction; no inference
 
 `sbin/runtime_config.py` loads the protected runtime configuration rendered by `install/render-runtime-config.py`. See `sbin/PROVENANCE.md` for live hashes and the function-level parity proof.
 
@@ -85,7 +87,7 @@ The original deterministic-enrichment source/hash remains recorded for provenanc
 - 3 foreign keys
 - the two enabled exact-match suppression patterns from item 12H
 
-`sql/incident-v1.sql` adds the deliberate target-state extension: three incident tables, five explicit indexes, and four append-only triggers. `install/initialize-database.py` creates the base plus this extension atomically, refuses any existing database, validates integrity/schema/corpus before publication, and installs mode `0640` for the dedicated runtime identity.
+`sql/incident-v1.sql` adds the deliberate incident extension: three incident tables, five explicit indexes, and four append-only triggers. `sql/reasoning-v1.sql` adds the repository-only item-27 packet table, two indexes, and two append-only triggers. `install/initialize-database.py` creates the base plus both extensions atomically, refuses any existing database, validates integrity/schema/corpus before publication, and installs mode `0640` for the dedicated runtime identity.
 
 The historical suppression-rule names and reasons were not exposed during rediscovery and no initializer survived. The public rebuild therefore uses neutral names/reasons while preserving functional IDs, evaluation order, types, patterns, and enabled state.
 

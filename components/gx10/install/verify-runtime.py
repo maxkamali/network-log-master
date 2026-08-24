@@ -32,6 +32,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 GX10_DIR = SCRIPT_DIR.parent
 SCHEMA_PATH = GX10_DIR / 'sql' / 'initialize.sql'
 INCIDENT_SCHEMA_PATH = GX10_DIR / 'sql' / 'incident-v1.sql'
+REASONING_SCHEMA_PATH = GX10_DIR / 'sql' / 'reasoning-v1.sql'
 HOST_RE = re.compile(r'^[A-Za-z0-9.-]+$')
 USER_RE = re.compile(r'^[A-Za-z0-9._-]+$')
 
@@ -41,6 +42,11 @@ ARTIFACTS = (
     (GX10_DIR / 'sbin' / 'enrich-events.py', LIBEXEC_DIR / 'enrich-events.py', 0o755),
     (GX10_DIR / 'sbin' / 'incident-engine.py', LIBEXEC_DIR / 'incident-engine.py', 0o755),
     (GX10_DIR / 'sbin' / 'run-correlation.py', LIBEXEC_DIR / 'run-correlation.py', 0o755),
+    (
+        GX10_DIR / 'sbin' / 'build-reasoning-packets.py',
+        LIBEXEC_DIR / 'build-reasoning-packets.py',
+        0o755,
+    ),
     (GX10_DIR / 'sbin' / 'runtime_config.py', LIBEXEC_DIR / 'runtime_config.py', 0o644),
     (
         GX10_DIR / 'systemd' / 'network-log-gx10.service',
@@ -143,6 +149,7 @@ def schema_inventory(connection):
 def expected_database_contract(
     schema_path=SCHEMA_PATH,
     incident_schema_path=INCIDENT_SCHEMA_PATH,
+    reasoning_schema_path=REASONING_SCHEMA_PATH,
 ):
     schema_path = Path(schema_path)
     if schema_path.is_symlink() or not schema_path.is_file():
@@ -150,11 +157,17 @@ def expected_database_contract(
     incident_schema_path = Path(incident_schema_path)
     if incident_schema_path.is_symlink() or not incident_schema_path.is_file():
         raise ValueError('incident schema source is not a real file')
+    reasoning_schema_path = Path(reasoning_schema_path)
+    if reasoning_schema_path.is_symlink() or not reasoning_schema_path.is_file():
+        raise ValueError('reasoning schema source is not a real file')
     connection = sqlite3.connect(':memory:')
     try:
         connection.executescript(schema_path.read_text(encoding='utf-8'))
         connection.executescript(
             incident_schema_path.read_text(encoding='utf-8')
+        )
+        connection.executescript(
+            reasoning_schema_path.read_text(encoding='utf-8')
         )
         return (
             schema_inventory(connection),
@@ -171,10 +184,12 @@ def validate_database(
     require_empty=False,
     schema_path=SCHEMA_PATH,
     incident_schema_path=INCIDENT_SCHEMA_PATH,
+    reasoning_schema_path=REASONING_SCHEMA_PATH,
 ):
     expected_schema, expected_suppression = expected_database_contract(
         schema_path,
         incident_schema_path,
+        reasoning_schema_path,
     )
     connection = database_connection(path)
     try:
@@ -200,6 +215,7 @@ def validate_database(
                 'incidents',
                 'incident_evidence',
                 'incident_transitions',
+                'reasoning_packets',
             ):
                 if connection.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0]:
                     raise ValueError('clean activation refuses nonempty application state')

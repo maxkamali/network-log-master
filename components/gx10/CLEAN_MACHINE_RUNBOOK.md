@@ -10,6 +10,7 @@ It reproduces:
 - read-only SFTP backlog fetch
 - replay-safe local SQLite ingest
 - canonical normalized-field projection and deterministic incident processing behind a separate managed offline schedule
+- the inert deterministic wake-policy/compact-packet schema and builder without scheduling or inference
 - the exact reconstructed SQLite base, deterministic incident extension, and two functional suppression patterns
 - the original automatic `timer -> fetch -> ingest` chain
 - the captured Ollama executable, service, loopback listener, and six-model store
@@ -283,7 +284,7 @@ Verify active state after at least three independent correlation timer cadences:
         --active \
         --private-runtime
 
-Require zero projection lag, zero incident lag, successful service result, zero restarts, monotonic incident aggregates, and continued advancement of the original fetch/ingest timer. Do not enable or invoke any Ollama application caller in this phase.
+Require zero projection lag, zero incident lag, successful service result, zero restarts, monotonic incident aggregates, and continued advancement of the original fetch/ingest timer. Do not invoke the packet builder or enable any Ollama application caller in this phase.
 
 ## Failure and rerun rules
 
@@ -294,6 +295,7 @@ Require zero projection lag, zero incident lag, successful service result, zero 
 - Preactivation refuses a used database, spool content, SQLite sidecars, active units, enabled runtime units, unit drop-ins, or altered installed artifacts.
 - Do not use this runbook to repair or modify the working reference GX10.
 - Do not add an Ollama pipeline caller or a result-return producer as part of reconstruction. Those remain separate future implementation decisions.
+- The installed reasoning-packet builder remains inert until its own production-state-copy and managed-invocation gates pass.
 - The application installer places the item-26 correlation runner and unit files, but the base clean-runtime activator deliberately leaves the correlation timer disabled. Use Phase 9 and `docs/MANAGED_CORRELATION.md` only after the base runtime passes and operator authorization is explicit.
 
 ## Current validation status

@@ -43,7 +43,7 @@ class DatabaseInitializationTests(unittest.TestCase):
         connection.execute('PRAGMA foreign_keys=ON')
         return connection
 
-    def test_recovered_base_schema_is_preserved_with_incident_extension(self):
+    def test_recovered_base_schema_is_preserved_with_target_extensions(self):
         with self.connect() as connection:
             objects = connection.execute(
                 "SELECT type, name, sql FROM sqlite_master "
@@ -51,18 +51,18 @@ class DatabaseInitializationTests(unittest.TestCase):
                 "AND type IN ('table', 'index', 'trigger') "
                 "ORDER BY type, name"
             ).fetchall()
-            self.assertEqual(len(objects), 30)
+            self.assertEqual(len(objects), 35)
             self.assertEqual(
                 sum(1 for kind, _, _ in objects if kind == 'table'),
-                8,
+                9,
             )
             self.assertEqual(
                 sum(1 for kind, _, _ in objects if kind == 'index'),
-                18,
+                20,
             )
             self.assertEqual(
                 sum(1 for kind, _, _ in objects if kind == 'trigger'),
-                4,
+                6,
             )
 
             tables = {
@@ -86,6 +86,7 @@ class DatabaseInitializationTests(unittest.TestCase):
                 'incidents',
                 'incident_evidence',
                 'incident_transitions',
+                'reasoning_packets',
             ):
                 for row in connection.execute(f'PRAGMA foreign_key_list({table})'):
                     relationships.add((table, row[3], row[2], row[4]))
@@ -105,6 +106,8 @@ class DatabaseInitializationTests(unittest.TestCase):
                     ('incident_evidence', 'incident_id', 'incidents', 'incident_id'),
                     ('incident_transitions', 'event_id', 'recent_events', 'id'),
                     ('incident_transitions', 'incident_id', 'incidents', 'incident_id'),
+                    ('reasoning_packets', 'as_of_event_id', 'recent_events', 'id'),
+                    ('reasoning_packets', 'incident_id', 'incidents', 'incident_id'),
                 },
             )
 
@@ -136,6 +139,7 @@ class DatabaseInitializationTests(unittest.TestCase):
                 'incidents',
                 'incident_evidence',
                 'incident_transitions',
+                'reasoning_packets',
             ):
                 self.assertEqual(
                     connection.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0],

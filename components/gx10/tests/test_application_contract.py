@@ -15,6 +15,7 @@ APPLICATIONS = {
     'projection': SBIN_DIR / 'enrich-events.py',
     'incident': SBIN_DIR / 'incident-engine.py',
     'correlation': SBIN_DIR / 'run-correlation.py',
+    'reasoning_packets': SBIN_DIR / 'build-reasoning-packets.py',
 }
 PUBLIC_ABSOLUTE_PREFIXES = (
     '/etc/network-log-gx10/',

@@ -202,6 +202,6 @@ CANDIDATE -> OPEN -> RECOVERING -> RESOLVED
 
 Incident state retains append-only evidence/transitions, first/last seen times, occurrence and canonical repeat counters, entity identity, current state, and exact 60-minute/180-minute/24-hour rolling context summaries.
 
-The local LLM consumes an incident packet and returns analysis; it does not become the canonical incident database.
+The local LLM may later consume an incident packet and return analysis; it does not become the canonical incident database.
 
-The deterministic schema/engine contract is implemented, copy-rehearsed, independently reproduced, and active through the separately managed production correlation schedule. No production incident packet, Ollama caller, or result producer is currently claimed; those remain later gates.
+The deterministic schema/engine contract is implemented, copy-rehearsed, independently reproduced, and active through the separately managed production correlation schedule. A repository-only reasoning-packet extension defines append-only deterministic packet identity, wake reasons, priority, incident/evidence bases, canonical packet JSON, and digest; it is not installed on the working system. No production packet, Ollama caller, or result producer is currently claimed; those remain later gates.

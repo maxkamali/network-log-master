@@ -403,3 +403,28 @@ Consequence:
 - activation failure disables only correlation and preserves deterministic state for replay
 - Ollama, wake policy, result production, and collector result return remain out of scope
 - production activation completed after inactive installation, one zero-lag initial backfill, and three independent zero-lag scheduled cadences; the original fetch/ingest timer advanced throughout
+
+## ADR-022 - Reasoning wakes and packets are deterministic append-only facts
+
+**Status:** Accepted as repository candidate
+
+LLM wake selection and compact incident-packet construction are owned by a deterministic versioned builder over incident/evidence/transition state. The builder records immutable packet facts before any inference caller exists.
+
+Why:
+
+- the model must not decide when it is called or manufacture its own context
+- replay, retry, and incident-cursor reset must not duplicate reasoning work
+- urgent critical/open/flap/retransmission changes need explicit priority, while ordinary updates need deterministic rate limits
+- production incident state includes resolved history that must not create a first-deployment inference storm
+- prompts need compact bounded facts without raw-log or source-path exposure
+- later model/prompt/output changes must not rewrite why an earlier reasoning packet existed
+
+Consequence:
+
+- policy and packet versions are stored independently of any model/prompt version
+- packet IDs derive from incident ID plus exact evidence/transition sequence bases
+- the packet table and existing incident evidence/transitions are append-only
+- critical, lifecycle, interface-flap, OSPF-retransmission, and meaningful-update rules use fixed priorities and event-time cooldowns
+- initially resolved incidents are skipped; candidates require an independently qualifying critical or OSPF condition
+- each packet is canonical JSON, SHA-256 bound, maximum 32 KiB, and contains bounded fact slices without raw messages or source paths
+- no item-27 schema, artifact, packet, schedule, inference call, or result producer reaches the working system until separate copy/migration gates pass

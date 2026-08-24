@@ -269,7 +269,7 @@ The completed public package provides:
 - reference-like/nonempty-state preactivation refusal
 - dual-confirmation activation with full blob hashing and failure rollback
 - complete clean-machine runbook and two-server integration runbook
-- 80 passing GX10 tests
+- 88 passing GX10 tests
 - `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
@@ -333,7 +333,7 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 24. `DONE` — reviewed the multi-cadence normalized-handoff stability window, proved exact schema-v1 authority and legacy field divergence, built/rehearsed a replay-safe canonical projector with local suppression overlay, and atomically replaced the unscheduled live transitional parser under exact hash with protected rollback while leaving the database and automatic fetch/ingest chain unchanged.
 25. `DONE` — implemented and validated deterministic GX10 incident identity/lifecycle, append-only evidence/transitions, repeat/burst accounting, rolling compact context, replay/idempotency, clean-install integration, guarded migration/rollback, private live-copy execution, independent deterministic rebuild, cursor-reset replay, and the unscheduled working-system schema/artifact migration with protected backup and unchanged fetch/ingest operation.
 26. `DONE` — completed the fail-closed production backfill, exact private write-scope correction, timer activation, and three independent zero-lag scheduled cadences for the managed canonical-projection/incident boundary. The original fetch/ingest timer continued advancing, correlation restarts remained zero, and deterministic counts were monotonic.
-27. `NEXT` — design and implement a deterministic, replay-safe LLM wake policy and compact incident-packet contract over the now-active incident state. Keep packet selection/versioning outside the model, keep inference unscheduled until copy rehearsal and explicit activation gates pass, and do not add collector result production in this item.
+27. `NEXT` — complete guarded migration and production-state-copy gates for the repository-only deterministic wake-policy/compact-packet candidate. Its append-only versioned schema/builder and synthetic replay, priority, lifecycle, rate-limit, bounding, and tamper tests pass; no working-system artifact/schema/packet/schedule exists. Keep inference unscheduled and do not add collector result production in this item.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

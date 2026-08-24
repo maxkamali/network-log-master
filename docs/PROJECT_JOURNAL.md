@@ -8912,3 +8912,69 @@ Failure or disablement of correlation does not stop fetch/ingest. The protected 
 ### Next action
 
 Publish and independently verify this completion checkpoint. Then begin item 27 by specifying and implementing a deterministic, replay-safe LLM wake policy and compact incident-packet contract over the active incident state. Keep inference unscheduled and exclude collector result production until their own copy-rehearsal and activation gates.
+
+## 2026-08-24 01:09 PDT - Item 27 deterministic wake/packet repository candidate built
+
+### Status
+
+Execution-order item 27 remains the single `NEXT` item and is in progress. This subsection changed only public repository implementation, synthetic databases, tests, and documentation.
+
+The item-26 completion checkpoint was independently matched on GitHub at:
+
+`1537d1dd7c0d9106a99e60fcddb4b934a2e0732a` — `Complete managed correlation production activation`
+
+After that durable checkpoint, the root-only item-26 rehearsal directory, user staging directory, and named item-26 temporary helper files were removed. Both installed production timers remained active. The protected item-25 pre-migration backup and all installed production state remain retained.
+
+### Selected boundary
+
+The candidate adds one append-only `reasoning_packets` table, two indexes, and update/delete refusal triggers plus a deterministic builder. The packet store is a fact queue, not a model-owned task database.
+
+Wake reasons and priorities are fixed:
+
+1. critical condition
+2. incident reopen
+3. incident open
+4. interface flap
+5. OSPF/OSPFv3 retransmission degradation
+6. recovering transition
+7. resolved transition
+8. rate-limited meaningful update
+
+Cooldowns and update thresholds use evidence event-time and prior immutable packet bases. First execution skips already resolved incidents and does not wake ordinary candidates. Packet IDs bind policy/packet versions, incident ID, and exact evidence/transition sequence bases.
+
+Packets contain no raw message or source-file identity. They are canonical JSON with SHA-256, maximum `32768` bytes, at most 8 new evidence rows and 8 new transitions, explicit omitted counts, 2048-byte attribute inclusion, and digest substitution for larger attributes. Individual oversized text is similarly bounded by prefix/size/digest.
+
+### Synthetic validation
+
+Eight focused tests prove:
+
+- deterministic canonical open packet creation
+- full rerun and incident-cursor-reset no-op behavior
+- critical OSPF candidate priority and multiple-reason ordering
+- interface state-change/flap detection
+- recovery then resolution packet sequencing
+- no first-run backfill for historical resolved incidents
+- accumulation of below-threshold evidence into one later meaningful update
+- oversized-attribute digest substitution and whole-packet size bound
+- append-only trigger enforcement and stored-packet tamper refusal
+
+Validation:
+
+```text
+88 tests passed
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+```
+
+Candidate SHA-256 values:
+
+- reasoning schema: `bd46f4a51301c225e051aa6b5e27406ad06c651271d7c82fb3b67ac2b21def90`
+- reasoning packet builder: `259f26353714e7ff8adbf627a33dcae6025e933f24fc9f2600b06882c3e16e00`
+
+The clean-machine initializer/installer/verifier include the target candidate, but neither base activation nor correlation activation schedules it.
+
+No production database, artifact, service, timer, Ollama API, model, prompt, result file, collector boundary, or Grafana state changed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this candidate. Then add a guarded exact-schema/exact-artifact existing-system migration and rehearse migration plus deterministic packet behavior on protected production-state copies before considering any unscheduled working-system installation.

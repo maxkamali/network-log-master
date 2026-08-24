@@ -14,6 +14,7 @@ DATABASE_PATH = Path('/var/lib/network-log-gx10/state/events.sqlite3')
 SCRIPT_DIR = Path(__file__).resolve().parent
 SCHEMA_PATH = SCRIPT_DIR.parent / 'sql' / 'initialize.sql'
 INCIDENT_SCHEMA_PATH = SCRIPT_DIR.parent / 'sql' / 'incident-v1.sql'
+REASONING_SCHEMA_PATH = SCRIPT_DIR.parent / 'sql' / 'reasoning-v1.sql'
 
 
 def validate_parent(path):
@@ -70,13 +71,19 @@ def initialize_database(
     uid,
     gid,
     incident_schema_path=INCIDENT_SCHEMA_PATH,
+    reasoning_schema_path=REASONING_SCHEMA_PATH,
 ):
     path = Path(path)
     schema_path = Path(schema_path)
     if path.exists() or path.is_symlink():
         raise ValueError('clean-machine initializer refuses an existing database')
     incident_schema_path = Path(incident_schema_path)
-    schema_paths = (schema_path, incident_schema_path)
+    reasoning_schema_path = Path(reasoning_schema_path)
+    schema_paths = (
+        schema_path,
+        incident_schema_path,
+        reasoning_schema_path,
+    )
     for source in schema_paths:
         if not source.is_file() or source.is_symlink():
             raise ValueError('schema source is not a real file')

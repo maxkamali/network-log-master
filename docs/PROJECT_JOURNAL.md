@@ -9113,3 +9113,50 @@ No production event content, packet JSON, entity identity, database path, runtim
 ### Next action
 
 Publish and independently verify this rehearsal checkpoint. Then use only published exact artifacts to perform the guarded working-system schema/builder installation under a new protected backup, verify zero packet rows and zero scheduler references, and leave the builder unscheduled.
+
+## 2026-08-24 01:20 PDT - Item 27 completed with unscheduled working-system installation
+
+### Status
+
+Execution-order item 27 is `DONE`. Item 28 is the single `NEXT` item.
+
+The protected production-state-copy rehearsal was published and independently matched on GitHub at:
+
+`c3b4c34b97ecb399ee6f7f50d24131e4347cd373` — `Record reasoning packet copy rehearsal`
+
+Only the exact published schema, builder, and migration guard were staged. After both production oneshots had settled, the guarded procedure:
+
+- confirmed both existing timers active and enabled and correlation at zero lag
+- briefly stopped only those timers
+- created a new root-only protected recovery parent
+- made and independently validated an online backup of the exact base-plus-incident database
+- applied the reasoning schema and installed the exact builder
+- verified the new table empty, zero builder invocations, zero scheduler references, and unchanged incident aggregates during the pause
+- resumed both timers
+- ran one ordinary managed correlation catch-up and active verification
+
+### Working-system evidence
+
+```text
+MANAGED_CORRELATION_VERIFY recent_max_id=958719 projection_cursor=958719 projection_lag=0 canonical_rows=11557 incident_cursor=958719 incident_lag=0 incidents=31 active=4 evidence=645 transitions=702
+GX10_MANAGED_CORRELATION_ACTIVE_VERIFY=PASS
+reasoning_schema_objects_verified=yes
+reasoning_packets=0
+packet_builder_scheduler_references=0
+packet_builder_invocations=0
+protected_backup_bytes=1928859648
+protected_backup_sha256=c6f7760e3c4203eade6ffdc4d232d5af70e86b84d1ad3791210d5251289f8b34
+protected_backup_mode=0600
+pipeline_timer_resumed=yes
+correlation_timer_resumed=yes
+correlation_zero_lag_after_install=yes
+GX10_REASONING_PACKET_UNSCHEDULED_INSTALL=PASS
+```
+
+The protected backup path, production database/runtime identities, connection values, and event content remain private. The protected backup is retained.
+
+No packet was built on the working database. No inference API, model, prompt, result producer, or collector return path was added or invoked.
+
+### Next action
+
+Publish and independently verify this item-27 completion checkpoint. Then begin item 28 repository/copy-only: version the local model, prompt, run identity, and strictly structured output over immutable reasoning packets, with deterministic idempotency and safe inference-unavailable behavior. Do not schedule production inference or add collector result return until separate gates pass.

@@ -116,6 +116,8 @@ Activation verifies the disabled installation, runs the initial backfill before 
 
 Historical version-3 enrichment remains in SQLite. Ollama is installed separately, active/enabled, and loopback-only, but no application-specific network-observability caller has yet been implemented.
 
+The item-27 reasoning-packet schema and builder are installed but empty and unscheduled. Operators must not invoke it ad hoc against the working database. Packet construction, model/prompt/run tracking, inference, and result production require their own managed gates; disabling correlation or a future reasoning schedule must preserve append-only packet truth.
+
 ## AI result return boundary
 
 The collector exposes a separate write-only transport and applies a validation gate before durable ingestion of thin JSONL result files.

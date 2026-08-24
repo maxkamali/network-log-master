@@ -406,7 +406,7 @@ Consequence:
 
 ## ADR-022 - Reasoning wakes and packets are deterministic append-only facts
 
-**Status:** Accepted as repository candidate
+**Status:** Accepted and implemented unscheduled
 
 LLM wake selection and compact incident-packet construction are owned by a deterministic versioned builder over incident/evidence/transition state. The builder records immutable packet facts before any inference caller exists.
 
@@ -427,4 +427,4 @@ Consequence:
 - critical, lifecycle, interface-flap, OSPF-retransmission, and meaningful-update rules use fixed priorities and event-time cooldowns
 - initially resolved incidents are skipped; candidates require an independently qualifying critical or OSPF condition
 - each packet is canonical JSON, SHA-256 bound, maximum 32 KiB, and contains bounded fact slices without raw messages or source paths
-- no item-27 schema, artifact, packet, schedule, inference call, or result producer reaches the working system until separate copy/migration gates pass
+- protected copy/migration gates passed; the exact schema/builder are installed with zero packets/invocations/scheduler references, while inference and result production remain absent

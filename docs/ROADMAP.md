@@ -123,9 +123,9 @@ Status: `IN PROGRESS`
 
 1. `DONE` — packaged canonical projection and incident correlation behind a managed, observable, rollback-protected invocation boundary and activated it through backfill plus multi-cadence gates
 2. `DONE` — added independent watermark/backlog, integrity, incident-aggregate, restart, and timer-health verification for the managed correlation boundary
-3. `NEXT` — complete production-state-copy and guarded unscheduled-install gates for the implemented deterministic LLM wake policy
-4. `IN PROGRESS` — the repository candidate assembles compact, versioned, append-only incident packets; production-state-copy gates remain
-5. track model/prompt versions
+3. `DONE` — implemented deterministic LLM wake policy and completed protected-copy plus guarded unscheduled working-system installation gates
+4. `DONE` — implemented compact, versioned, append-only incident packets and deterministic replay/threshold/lifecycle/tamper gates
+5. `NEXT` — track model/prompt/run versions in a durable idempotent local execution boundary
 6. require structured model output
 7. keep deterministic facts separate from model interpretation
 8. preserve safe failure behavior when inference is unavailable

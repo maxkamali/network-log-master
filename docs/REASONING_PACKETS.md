@@ -2,7 +2,7 @@
 
 ## Status and authority boundary
 
-Execution-order item 27 has a published repository candidate, guarded existing-system migration, and passing protected production-state-copy rehearsal. No reasoning schema or packet-builder artifact is installed on the working GX10 system, no production packet exists, and no service or timer invokes the builder.
+Execution-order item 27 is complete. The exact reasoning schema and packet-builder artifact are installed on the working GX10 system under a new protected pre-reasoning backup. The packet table is empty, the builder has never run on the working database, and no service or timer invokes it.
 
 The candidate converts deterministic incident state into an append-only queue of compact reasoning packets. It does not call Ollama, select a model, define a prompt, accept model output, write to the collector, or alter incident identity/lifecycle truth.
 
@@ -75,13 +75,13 @@ Candidate SHA-256 values:
 
 The clean-machine initializer/installer/verifier include the candidate, but base and correlation activation still do not schedule it.
 
-## Remaining item-27 gates
+## Item-27 gates
 
 1. publish and independently verify this repository candidate
 2. `DONE` — add a guarded existing-system schema/artifact migration with protected backup and no scheduler reference
 3. `DONE` — rehearse schema migration, first packet build, no-op, new qualifying/nonqualifying evidence, lifecycle packets, tamper failure, and deterministic independent reproduction on protected production-state copies
-4. install schema/builder unscheduled only after exact published artifacts and copy gates pass
-5. do not schedule packet construction or inference until a later explicit managed-invocation gate
+4. `DONE` — install schema/builder unscheduled only after exact published artifacts and copy gates pass
+5. `DONE` — leave packet construction and inference unscheduled for a later explicit managed-invocation gate
 
 ## Protected production-state-copy evidence
 
@@ -101,5 +101,21 @@ The following gates passed:
 - empty-state migration rollback removed only reasoning schema/builder and retained its backup
 - all packets excluded forbidden raw/source keys and remained beneath 32 KiB
 - the working database/artifact paths and both production timers remained unchanged
+
+## Working-system unscheduled installation
+
+The guarded migration briefly quiesced only the original and correlation timers after their oneshots settled. It created and independently validated a root-only mode-`0600` pre-reasoning SQLite backup, applied the exact schema, installed the exact root-owned mode-`0755` builder, verified zero packet rows and zero scheduler references, then resumed both timers.
+
+One ordinary correlation catch-up after resumption reached event/cursor ID `958719` with zero projection and incident lag, `31` incidents, `645` evidence rows, `702` transitions, and zero service restarts. The reasoning table remained empty and the builder invocation count remained zero.
+
+Protected backup evidence:
+
+- size: `1928859648` bytes
+- SHA-256: `c6f7760e3c4203eade6ffdc4d232d5af70e86b84d1ad3791210d5251289f8b34`
+- mode: `0600`
+
+The protected backup path and production database/runtime identities remain private.
+
+Item 28 owns model/prompt/run versioning and structured inference output. It must consume immutable packet truth without modifying it and must begin repository/copy-only.
 
 Model selection, prompt versioning, structured output, inference failure handling, and collector result return remain separate later items.

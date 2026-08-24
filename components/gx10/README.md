@@ -31,7 +31,7 @@ Current state:
 - Ollama is active with six complete model manifests, but no application-specific observability-pipeline caller was discovered
 - secure collector-side AI-result return transport is proven, but no GX10 result producer was discovered
 - production packet invocation, local-LLM inference, and result production remain future gated phases
-- a repository-only deterministic wake-policy/compact-packet candidate is implemented and tested but is not installed, invoked, or scheduled on the working system
+- the deterministic wake-policy/compact-packet schema and exact builder are installed unscheduled under protected backup with zero packet rows, invocations, or scheduler references
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 

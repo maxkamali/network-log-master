@@ -9538,3 +9538,73 @@ Validation now covers `20` focused item-29 tests within `135` passing GX10 tests
 ### Next action
 
 Run the full public gate, publish and independently verify the correction, and use only that exact checkpoint for protected current-state-copy rehearsal.
+
+## 2026-08-24 02:30 PDT - Item 29 protected current-state-copy rehearsal passed
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. No item-29 artifact, unit, private configuration, schedule, packet, version row, run, result, or inference was created on the working system.
+
+The rehearsal-seam correction was published and independently matched on GitHub at:
+
+`ba9383f91ed1f5dcdff989eabe11627883b28488` — `Add managed reasoning rehearsal seam`
+
+Only exact component artifacts archived from that commit were staged under a root-only temporary boundary. After repository-mode normalization, all 135 tests passed again on GX10. The systemd unit parser accepted the exact service/timer directives; its isolated fake-root start transaction could not resolve the fake root's absent base `sysinit.target`, so actual unit installation remains guarded by the installer's post-copy `systemd-analyze verify` before daemon reload or activation.
+
+A mode-`0600` SQLite online backup captured a caught-up current production state while the original fetch/ingest and correlation timers remained active:
+
+```text
+snapshot_incidents=71
+snapshot_active=4
+snapshot_evidence=1114
+snapshot_transitions=1244
+```
+
+### Managed execution gates
+
+The exact runner built four sanitized packets in the success clone and completed one real loopback Gemma invocation with one canonical result. It left three pending packets and added exactly one run/result.
+
+A separate clone returned a controlled invalid response through the private rehearsal transport. The caller stored one terminal safe-failure run and no result. A third clone raised a controlled interruption after reservation, leaving exactly one `STARTED` row; the next wrapper cycle refused it before calling transport and changed no state.
+
+For the final no-op gate, a clone of the success state received reviewed synthetic terminal reservations for its three remaining pending packets. The exact wrapper then built zero packets, made zero transport calls, and changed no reasoning counts. The independent item-29 database verifier passed the success clone.
+
+Every clone retained the exact same incident/evidence/transition/cursor digest as the base copy:
+
+```text
+copy_packets=4
+copy_success_runs=1
+copy_success_results=1
+copy_pending_after_success=3
+copy_safe_failures=1
+copy_interrupted_started=1
+copy_interrupted_retry_invoked=0
+copy_noop_filled_pending=3
+copy_noop_invoked=0
+copy_independent_verifier=pass
+copy_deterministic_truth_unchanged=yes
+copy_state_sha256=0b8a0bc06a752350aa19ec77febab4c5547115aac3410c78d1f5b4e0581e40d3
+GX10_MANAGED_REASONING_COPY_REHEARSAL=PASS
+```
+
+The protected base copy is retained privately with:
+
+- bytes: `1947361280`
+- SHA-256: `b5583c0ece49dea857afde03b98112d901b88be24ce5b060e79dd5fd36856d85`
+- mode: `0600`
+
+### Working-system postcheck
+
+```text
+working_recent_max_id=965309
+working_projection_lag=0
+working_incident_lag=0
+working_reasoning_state=empty
+production_timers_active=yes
+production_inference_invoked=no
+```
+
+No packet/result content, event content, entity identity, database path, unit identity, or connection value was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this copy checkpoint. Then use only exact published artifacts for inactive working-system installation of the managed runner/service/timer/private configuration. Do not build a production packet or enable the reasoning timer until the separately protected initial-cycle activation gate.

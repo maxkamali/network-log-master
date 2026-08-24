@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has a repository candidate and passing synthetic tests. It is not installed or scheduled on the working system. Production remains at zero reasoning packets, model versions, prompt versions, runs, and results, and no production inference has run.
+Execution-order item 29 has a published repository candidate, passing synthetic tests, and passing protected current-production-state-copy rehearsal. It is not installed or scheduled on the working system. Production remains at zero reasoning packets, model versions, prompt versions, runs, and results, and no production inference has run.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -91,7 +91,47 @@ Twenty focused tests currently prove:
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `135` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, initial production activation, and multiple scheduled-cadence evidence remain separate gates. Collector result return is outside item 29.
+The full GX10 suite currently passes `135` tests. Protected current-production-state-copy rehearsal has passed; unscheduled working-system installation, initial production activation, and multiple scheduled-cadence evidence remain separate gates. Collector result return is outside item 29.
+
+## Protected current-state-copy evidence
+
+Only exact artifacts from published commit `ba9383f91ed1f5dcdff989eabe11627883b28488` were staged under a root-only boundary. The 135-test suite passed again on GX10. A SQLite online backup captured caught-up production deterministic state while both existing production timers remained active:
+
+```text
+snapshot_incidents=71
+snapshot_active=4
+snapshot_evidence=1114
+snapshot_transitions=1244
+```
+
+Four isolated clones exercised the complete managed boundary:
+
+- the exact runner built four sanitized packets and completed one real loopback Gemma inference with one canonical result
+- a controlled invalid response produced one explicit terminal safe failure and no result
+- a controlled interruption left one `STARTED` reservation; the next locked cycle refused it before transport and changed no state
+- a success clone with reviewed synthetic terminal reservations for its remaining backlog produced a true no-op with zero transport calls and unchanged counts
+
+The independent item-29 database verifier passed the success clone. Every clone preserved the same incident/evidence/transition/cursor digest as the base copy.
+
+```text
+copy_packets=4
+copy_success_runs=1
+copy_success_results=1
+copy_pending_after_success=3
+copy_safe_failures=1
+copy_interrupted_started=1
+copy_interrupted_retry_invoked=0
+copy_noop_filled_pending=3
+copy_noop_invoked=0
+copy_independent_verifier=pass
+copy_deterministic_truth_unchanged=yes
+copy_state_sha256=0b8a0bc06a752350aa19ec77febab4c5547115aac3410c78d1f5b4e0581e40d3
+GX10_MANAGED_REASONING_COPY_REHEARSAL=PASS
+```
+
+The protected base copy is mode `0600`, `1947361280` bytes, and SHA-256 `b5583c0ece49dea857afde03b98112d901b88be24ce5b060e79dd5fd36856d85`. Its path and all packet/result content remain private.
+
+The final working-system check reached recent event ID `965309` with zero projection and incident lag, zero packet/model/prompt/run/result rows, both production timers active, and no production inference.
 
 ## Exact candidate artifacts
 

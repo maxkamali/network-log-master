@@ -33,7 +33,7 @@ Current state:
 - production packet invocation, local-LLM inference, and result production remain future gated phases
 - the deterministic wake-policy/compact-packet schema and exact builder are installed unscheduled under protected backup with zero packet rows, invocations, or scheduler references
 - the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; its exact artifacts are installed empty and unscheduled under protected backup with zero version/run/result rows and no production inference
-- an item-29 managed `packet build -> one inference` runner/service/timer candidate passes synthetic locking, bounded-work, health, failure-isolation, installer, activator, verifier, and systemd gates; it is not installed or scheduled on the working system
+- an item-29 managed `packet build -> one inference` runner/service/timer candidate passes synthetic plus protected current-state-copy real-success/safe-failure/interruption/retry-refusal/no-op/isolation gates; it is not installed or scheduled on the working system
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -125,7 +125,7 @@ The large model blobs are intentionally not stored in Git. `install/install-mode
 
 The item-28 application-specific caller and supporting schema/configuration/prompt artifacts are installed empty and unscheduled under protected backup. No unit or timer invokes the caller, no production inference has run, and the active deterministic schedules remain independent of Ollama.
 
-The item-29 managed runner/service/timer exists only as a repository candidate. Its installer, activator, and verifier keep installation, protected backup plus initial bounded invocation, and timer enablement as distinct gates. See `docs/MANAGED_REASONING.md`.
+The item-29 managed runner/service/timer exists only as a published, protected-copy-validated repository candidate. Its installer, activator, and verifier keep inactive installation, protected backup plus initial bounded invocation, and timer enablement as distinct gates. See `docs/MANAGED_REASONING.md`.
 
 ## Guarded activation and runtime verification
 

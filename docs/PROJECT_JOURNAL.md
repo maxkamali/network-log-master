@@ -8147,3 +8147,90 @@ It creates an exclusive root-only rollback copy, synchronizes it, atomically rep
 ### Next action
 
 Publish and independently verify this candidate checkpoint. Then use only the published exact artifacts to replace the unscheduled live transitional executable under its exact old hash, retain the protected rollback copy, prove the old hash absent/new hash unique with zero scheduler references, and revalidate the still-unchanged automatic fetch/ingest path and database.
+
+## 2026-08-23 23:54 PDT - Transitional GX10 parser retired under exact rollback boundary
+
+### Status
+
+Execution-order item 24 is `DONE`. Item 25 is now the single `NEXT` item.
+
+The canonical projection/retirement candidate was published and independently verified on GitHub at:
+
+`1d473499b1a228ec4b1fde20e0264e6c5610a9c5` — `Build canonical GX10 projection retirement`
+
+Only those published candidate/guard bytes were staged for the live operation.
+
+### Live preconditions
+
+Recorded-hash resolution found exactly one active legacy executable without printing its identity-bearing name or path. Its preconditions were:
+
+- legacy SHA-256: `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
+- mode/ownership: single-link root-owned `0755`
+- systemd/cron references: `0`
+- pipeline service: inactive after success, zero restarts
+- pipeline timer: active/enabled
+- historical classification-version-3 rows: `24207`
+- classification-version-4 rows: `0`
+- projection cursor rows: `0`
+- nonprocessed source rows: `0`
+- duplicate event identities: `0`
+
+The published guard SHA-256 was `426285e2279729e97d80fbdf6f5091cb4f3eaa85bae800849b8d2a65eb5e3e06`; the published projection SHA-256 was `f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079`.
+
+### Guarded replacement
+
+A new root-only operator-evidence directory was created. The guard required the exact old/new hashes, zero scheduler references, exact target metadata, exact explicit confirmation, and an absent backup path under that protected parent.
+
+It then:
+
+1. created and synchronized an exclusive `0600 root:root` rollback copy
+2. atomically replaced only the resolved legacy target while preserving `0755 root:root`
+3. synchronized the target directory
+4. ran its independent retired-state verification
+5. retained automatic rollback-on-postcheck-failure until all outer health/database assertions passed
+
+No rollback was required. The completed evidence was:
+
+```text
+legacy_active_hash_matches=0
+canonical_projection_active_hash_matches=1
+scheduler_references=0
+historical_v3_rows=24207
+canonical_v4_rows=0
+projection_cursor_rows=0
+nonprocessed_source_rows=0
+duplicate_event_identities=0
+pipeline_timer_active_enabled=yes
+pipeline_service_restarts=0
+GX10_TRANSITIONAL_ENRICHMENT_LIVE_RETIREMENT=PASS
+```
+
+The live database remained unchanged because retirement did not invoke the unscheduled projector. Historical version-3 rows and both suppression rules remain intact. The proven automatic chain remains exactly `timer -> fetch -> ingest`.
+
+### Post-retirement cadence evidence
+
+Three subsequent observations passed. During the window:
+
+- source files advanced from `10472` to `10474`
+- recent events advanced from `950480` to `950657`
+- nonprocessed rows remained `0`
+- historical version-3 rows remained `24207`
+- version-4 rows and projection cursor remained `0`
+- the pipeline timer remained active/enabled
+- pipeline restarts remained `0`
+
+This proves ordinary ingestion continued independently of the retired unscheduled artifact.
+
+### Cleanup and retained recovery
+
+Removed only explicit agent-created temporary transfer/staging artifacts from the operator VM, collector, and GX10, plus the successful on-server rehearsal database copy. The temporary files are not retained. Durable recovery remains through:
+
+- published GitHub commits
+- live installed normalizer/handoff/projection artifacts
+- protected collector plan, ledgers, and raw-view rollback evidence
+- protected GX10 exact legacy-executable rollback copy
+- preserved raw, shadow, handoff, ClickHouse, GX10 history, and historical enrichment state
+
+### Next action
+
+Publish and independently verify this item-24 completion checkpoint. Then begin item 25 by defining the deterministic incident data model and replay/idempotency contracts over canonical normalized observations. Do not schedule projection, invoke Ollama, or create a result producer merely to lengthen the pipeline; each requires its own explicit design and validation gate.

@@ -90,13 +90,13 @@ GX10 live rediscovery and public reconstruction are complete.
 Published artifacts include:
 
 - exact runtime/filesystem and platform dependency contracts
-- captured fetch, ingest, and unscheduled deterministic enrichment
+- captured fetch/ingest, preserved historical enrichment provenance, and unscheduled canonical normalized-field projection
 - exact reconstructed SQLite state
 - captured service/timer and Ollama unit
 - exact Ollama binary and offline six-model-store installation/verification
 - guarded preactivation and dual-confirmation activation
 - complete clean-machine runbook
-- `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 42 tests
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 49 tests
 
 Detailed state is in `components/gx10/REBUILD_STATUS.md`. Disposable Ubuntu 24.04 arm64 GX10-class clean-host execution was unavailable and waived by the operator; it remains empirically unverified.
 
@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-The final repository rebuild milestone is published. On 2026-08-23, the operator explicitly waived unavailable disposable clean-two-server execution and accepted the residual risk without labeling that execution passed. Collector-side production-normalizer integration design, repository implementation, shadow deployment/catch-up, steady-state validation, and the forward-only production handoff are complete. On 2026-08-24 the protected immutable-floor cutover passed exact collector/GX10 file-hash and record-count parity, all schedules resumed, and the raw-view mount-only rollback was retained. Read `docs/CURRENT_STATE.md`, `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`, `docs/NORMALIZER_HANDOFF.md`, and `components/collector/normalizer/README.md` before continuing item 24's stability and transitional-parser retirement gate.
+The final repository rebuild milestone is published. On 2026-08-23, the operator explicitly waived unavailable disposable clean-two-server execution and accepted the residual risk without labeling that execution passed. Collector-side production-normalizer integration, shadow catch-up, forward-only production handoff, multi-cadence stability review, and transitional GX10 parser retirement are complete. The protected immutable-floor cutover passed exact collector/GX10 parity, all schedules resumed, and both the raw-view mount rollback and legacy-enrichment rollback remain protected. Item 25 is deterministic incident-engine design over canonical normalized observations.
 
 The proven automatic application chain is:
 
@@ -137,7 +137,7 @@ The proven automatic application chain is:
 
 Preserve these rediscovery boundaries:
 
-- deterministic enrichment exists but has no discovered automatic invocation
+- historical deterministic enrichment had no discovered automatic invocation; its canonical projector replacement also remains unscheduled
 - Ollama is active with six complete models but has no discovered application-specific observability-pipeline caller
 - the collector result-return boundary exists but has no discovered GX10 producer
 - the original SQLite/bootstrap initializer did not survive the bounded search; reconstruct from the captured effective schema

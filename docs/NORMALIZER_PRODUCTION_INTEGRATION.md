@@ -213,7 +213,7 @@ Before that switch:
 - current raw ClickHouse and raw backlog paths must remain unchanged
 - the exact mount/bind configuration and service ordering must have a reviewed rollback command sequence
 
-Transitional GX10 vendor enrichment is retired only after normalized handoff stability is proven. It is not silently deleted as part of the first switch.
+Transitional GX10 vendor/message reparsing was retired only after normalized handoff stability was proven. It was not silently deleted as part of the first switch; the unscheduled canonical projector preserves local suppression policy and historical enrichment evidence.
 
 ## Rollback
 
@@ -240,7 +240,7 @@ Because GX10 idempotency is keyed by source file and record number, cutover and 
 8. `DONE` — collected/reviewed complete historical catch-up and five normal-cadence steady-state cycles; corrected and live-proved active verifier concurrency handling
 9. `DONE` — designed and synthetically rehearsed the forward-only, file-identity-safe GX10 handoff switch and rollback without changing the live handoff
 10. `DONE` — staged the validated exact-hash handoff package, completed the documented immutable-floor bind-only cutover, proved collector/GX10 hash and cardinality parity, resumed schedules, and retained the exact raw-view rollback boundary
-11. `NEXT` — review a bounded multi-cadence normalized-handoff stability window, then deliberately retire transitional GX10 vendor parsing under a separate replay-safe gate
+11. `DONE` — reviewed the bounded multi-cadence normalized-handoff window and replaced transitional GX10 vendor/message reparsing with an unscheduled canonical-field projector under exact hashes and protected rollback while preserving local suppression policy and historical rows
 
 ## Non-goals
 

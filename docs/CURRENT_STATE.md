@@ -32,7 +32,7 @@ The working observability path currently provides:
 - compressed raw file backlog creation and preserved collector-local history
 - restricted read-only retrieval of verified normalized handoff files by GX10
 - GX10 local durable ingest with replay/idempotency protection
-- transitional deterministic enrichment implementation on GX10
+- unscheduled canonical normalized-field projection on GX10, with historical version-3 enrichment preserved
 - collector-side write-only AI-result return boundary and validation/ingestion path
 - local Ollama runtime on GX10
 
@@ -251,6 +251,8 @@ The corrected item-12N analyzer resolved command values through helper-function 
 
 The final live closure audit passed. It found exactly one match for each known application/service/timer hash, preserved the timer/service contract, reconfirmed zero systemd/cron enrichment references, verified external dependencies, and passed unchanged postcheck hashes.
 
+After the normalized handoff stability gate passed, item 24 retired the unscheduled live transitional vendor/message reparser under its exact captured hash. The active replacement is the canonical schema-version-1 projector at SHA-256 `f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079`. It has zero scheduler references and was not run against the live database. All `24207` historical version-3 enrichment rows remain; version-4 rows and the projection cursor remain absent until a later explicit invocation/scheduling decision.
+
 Detailed reconstruction authority is now in:
 
 `components/gx10/REBUILD_STATUS.md`
@@ -296,7 +298,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration design, repository shadow/handoff implementation, authorized deployments, bounded live evidence review, and forward-only file-identity production cutover are complete. Item 24's multi-cadence stability review, canonical-projection candidate, tests, guarded replacement/rollback, and live-copy rehearsal pass. The next action is the published exact-hash replacement of the unscheduled live transitional executable before incident-engine implementation.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration, forward-only production cutover, multi-cadence stability review, and deliberate transitional-parser retirement are complete. The next action is deterministic incident-engine design over canonical normalized records; the LLM remains outside identity and lifecycle authority.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -325,7 +327,8 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 21. `DONE` — completed historical catch-up, five normal-cadence steady-state cycles, active-concurrency verifier correction/proof, full cardinality/output verification, source immutability checks, service isolation checks, and unchanged raw-handoff/GX10 artifact validation.
 22. `DONE` — designed and synthetically rehearsed a forward-only file-identity-safe GX10 handoff and rollback using one immutable inclusive floor, verified normalized copies under original transport names, a separate durable ledger, and unchanged GX10 idempotency keys; the live handoff was not changed.
 23. `DONE` — staged the validated exact-hash handoff package, corrected a systemd portability condition before activation, selected and protected an immutable inclusive floor, paused GX10 with zero conflicting identities, switched only its read-only bind view, proved exact collector/GX10 hash and cardinality parity, resumed all schedules, and retained the exact raw-view rollback boundary.
-24. `NEXT` — collect and review a bounded multi-cadence normalized-handoff stability window, then deliberately retire transitional GX10 vendor parsing only after proving that normalized fields remain authoritative and replay-safe.
+24. `DONE` — reviewed the multi-cadence normalized-handoff stability window, proved exact schema-v1 authority and legacy field divergence, built/rehearsed a replay-safe canonical projector with local suppression overlay, and atomically replaced the unscheduled live transitional parser under exact hash with protected rollback while leaving the database and automatic fetch/ingest chain unchanged.
+25. `NEXT` — design the deterministic GX10 incident engine over canonical normalized observations, including stable incident identity, lifecycle transitions, append-only evidence, repeat/burst accounting, rolling compact context, and replay/idempotency gates without assigning truth to the LLM.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

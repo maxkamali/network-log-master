@@ -102,7 +102,7 @@ network-log-gx10.timer
 
 The timer uses a two-minute boot delay, a one-minute inactive interval, and five-second accuracy. The oneshot service is non-root and retains the captured filesystem and kernel hardening.
 
-`enrich-events.py` is installed for current-state parity but has no discovered systemd, cron, or other automatic invocation. Ollama is installed separately, active/enabled, and loopback-only, but no application-specific network-observability caller was discovered.
+The compatibility-path `enrich-events.py` now projects authoritative normalized schema fields and local suppression policy; it performs no vendor/message classification and has no systemd, cron, or other automatic invocation. Historical version-3 enrichment remains in SQLite. Ollama is installed separately, active/enabled, and loopback-only, but no application-specific network-observability caller was discovered.
 
 ## AI result return boundary
 

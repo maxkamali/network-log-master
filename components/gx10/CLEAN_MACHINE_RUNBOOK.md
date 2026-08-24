@@ -223,7 +223,7 @@ Expected final marker:
 
 The activator repeats the platform and preactivation checks, hashes the complete installed model store, enables Ollama, verifies its loopback-only listener, then enables the fetch/ingest timer. If a post-preflight step fails, it stops a potentially triggered pipeline service and disables/stops the units it changed.
 
-It never enables deterministic enrichment.
+It never enables canonical normalized-field projection.
 
 ## Phase 8: post-activation verification
 

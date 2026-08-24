@@ -143,7 +143,7 @@ The reconstructed database contains exactly:
 
 The exact DDL is `components/gx10/sql/initialize.sql`. The database is replaceable working state rather than the authoritative raw archive.
 
-Current automatic writes are limited to fetch/ingest state and `recent_events`. `event_enrichment` is populated only when the separate deterministic-enrichment executable is explicitly invoked; no automatic invocation was discovered.
+Current automatic writes are limited to fetch/ingest state and `recent_events`. `event_enrichment` keeps historical classification-version-3 rows. The separate unscheduled projector can add version-4 rows only from exact normalized schema-version-1 fields plus the existing local suppression rules; it performs no vendor/message reparsing and was not invoked against the live database during retirement.
 
 ## AI result contract
 

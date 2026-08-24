@@ -145,4 +145,4 @@ The production integration design and forward-only handoff activation are comple
 
 The selected architecture is a collector-local durable-file worker that reads settled source backlog files without modifying them and writes atomic normalized shadow files with a durable idempotency ledger. Vector's raw ClickHouse and backlog outputs remain unchanged. Verified at/after-floor normalized files are now copied into a separate handoff view under their original GX10 transport identities.
 
-The next gate collects bounded post-cutover stability evidence before deliberately retiring transitional GX10 vendor parsing. `docs/CURRENT_STATE.md` remains the execution authority; this migration document is not the execution queue.
+The bounded post-cutover stability and deliberate transitional GX10 parser-retirement gates are complete. `docs/CURRENT_STATE.md` now advances to deterministic incident-engine work; this migration document is not the execution queue.

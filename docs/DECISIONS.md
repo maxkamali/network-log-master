@@ -304,7 +304,7 @@ Consequence:
 - the runtime account has read-only source access and no network, ClickHouse, SSH-key, Ollama, or AI-result credentials
 - promotion changes only the verified GX10 handoff view and requires a separately reviewed file-identity/idempotency plan
 - live shadow deployment and cutover remain explicit approval gates
-- transitional GX10 parsing is retired only after normalized handoff stability is proven
+- transitional GX10 parsing was retired only after normalized handoff stability was proven
 
 ## ADR-018 - GX10 normalized promotion uses a forward-only identity-preserving handoff view
 
@@ -329,3 +329,27 @@ Consequence:
 - successfully ingested at/after-floor files remain idempotent after raw-view rollback because their GX10 remote identities do not change
 - production staging, timer activation, bind switching, and rollback execution require a separate explicit operator authorization and the preflight in `docs/NORMALIZER_HANDOFF.md`
 - item 22 remained repository-only; the separately authorized item-23 production activation completed on 2026-08-24 with exact collector/GX10 parity and a retained raw-view rollback boundary
+
+## ADR-019 - Post-handoff GX10 enrichment projects canonical fields instead of reparsing messages
+
+**Status:** Accepted and implemented
+
+After the normalized handoff stability gate, GX10 no longer keeps a second vendor/message parser as an active executable authority. The compatibility-path enrichment artifact is an unscheduled projector from exact normalized schema version 1 into the existing `event_enrichment` working table.
+
+Why:
+
+- all reviewed post-floor events have the exact canonical normalized schema
+- a read-only audit proved that legacy reparsing diverges from canonical family, protocol, entity, state, signal, and repeat fields
+- retaining two parsers would make downstream incident behavior depend on which representation was consulted
+- the existing GX10-local suppression rules are policy rather than vendor parsing and must survive retirement
+- historical version-3 enrichment rows remain useful migration evidence and must not be deleted or rewritten
+
+Consequence:
+
+- canonical normalized fields are authoritative for new projection rows
+- the projector performs no vendor or message classification
+- enabled local suppression rules are overlaid deterministically in existing rule order
+- new projected rows use classification version 4; historical version-3 rows remain unchanged
+- a transactional cursor makes projection append-only, bounded, resumable, and idempotent
+- projection remains absent from the proven automatic `timer -> fetch -> ingest` chain until a later explicit scheduling decision
+- the live retirement used exact old/new hashes, zero-scheduler-reference preconditions, atomic replacement, a root-only rollback copy, and an unchanged-database postcheck

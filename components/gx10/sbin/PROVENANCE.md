@@ -29,7 +29,7 @@ The source capture did not execute any application, open the production database
 
 After the verified normalized handoff became authoritative on 2026-08-24, item 24 deliberately replaced the repository's transitional vendor/message reparser at the compatibility filename `enrich-events.py` with a schema-version-1 canonical projector.
 
-Repository projection candidate SHA-256:
+Repository and active live projection SHA-256:
 
 `f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079`
 
@@ -50,3 +50,5 @@ The projector:
 - remains absent from the automatic `timer -> fetch -> ingest` chain
 
 The candidate was rehearsed twice against an on-server SQLite backup: the first run scanned `949845` events and projected `2781` canonical rows while preserving `24207` historical version-3 rows; the second projected zero rows. All projected fields matched an independent re-read, `1984` rows received the existing local suppression policy, and the live database remained unchanged.
+
+The live unscheduled legacy executable was then replaced under its exact old hash and zero-scheduler-reference precondition. The active legacy hash count is zero, the projection hash count is one, and the protected root-only rollback copy retains the exact legacy hash. The live database still has zero version-4 rows and no projection cursor because retirement did not invoke the projector.

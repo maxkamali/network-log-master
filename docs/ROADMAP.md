@@ -93,7 +93,7 @@ The operator accepted this exit gate for project-sequencing purposes based on re
 
 ## Milestone 5 - Production normalizer integration
 
-Status: `IN PROGRESS`
+Status: `DONE`
 
 After the current system is reconstructable:
 
@@ -102,13 +102,13 @@ After the current system is reconstructable:
 3. `DONE` — the explicitly authorized private-inventory shadow deployment is active; complete catch-up, steady-state, concurrency, isolation, and unchanged-production validation passed
 4. `DONE` — designed and synthetically rehearsed the immutable-floor, identity-preserving forward handoff and rollback without changing the live handoff
 5. `DONE` — staged the exact-hash handoff package and completed the immutable-floor, identity-preserving production cutover with exact collector/GX10 hash and cardinality parity plus retained mount-only rollback
-6. `NEXT` — collect a bounded multi-cadence stability window and retire transitional GX10 vendor parsing deliberately only after normalized handoff authority is proven
+6. `DONE` — collected the multi-cadence stability window and retired transitional GX10 vendor/message reparsing through an exact-hash, rollback-protected replacement with an unscheduled canonical-field projector while preserving local suppression policy and historical enrichment rows
 
 ## Milestone 6 - Deterministic incident engine on GX10
 
-Status: `FUTURE IMPLEMENTATION`
+Status: `NEXT`
 
-1. implement canonical incident identity and lifecycle
+1. `NEXT` — design and implement canonical incident identity and lifecycle
 2. implement append-only transitions/evidence
 3. implement repeat/burst accounting
 4. implement rolling compact context summaries

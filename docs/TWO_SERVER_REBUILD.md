@@ -27,7 +27,7 @@ devices
 
 The collector also has a separate write-only AI-result transport, validation gate, ClickHouse sink, and Grafana presentation boundary.
 
-The current GX10 package does not contain a producer for that result-return boundary. It also does not automatically run deterministic enrichment and does not contain an application-specific Ollama caller. A successful rebuild must preserve those absences.
+The current GX10 package does not contain a producer for that result-return boundary. It also does not automatically run canonical normalized-field projection and does not contain an application-specific Ollama caller. A successful rebuild must preserve those absences.
 
 ## Host prerequisites
 
@@ -108,7 +108,7 @@ The GX10 spool and four application-state tables must still be empty at this poi
 
 Review the protected collector endpoint before supplying the second activation confirmation.
 
-The activator enables Ollama first and the fetch/ingest timer second. It never enables deterministic enrichment.
+The activator enables Ollama first and the fetch/ingest timer second. It never enables canonical projection.
 
 Require:
 
@@ -127,7 +127,7 @@ After at least one timer interval:
 - confirm replay does not duplicate `(source_file, record_number)` observations
 - rerun both independent runtime verifiers
 
-Do not execute deterministic enrichment merely to make the end-to-end path look longer. Its current absence from scheduling is a required parity result.
+Do not execute canonical projection merely to make the end-to-end path look longer. Its absence from scheduling is deliberate; the automatic chain remains fetch/ingest only.
 
 ### 7. Verify the independent collector result boundary
 
@@ -146,7 +146,7 @@ A disposable two-server rebuild is complete only when the operator records:
 - one successful automatic fetch/ingest cycle
 - replay/idempotency result
 - rerun of both independent runtime verifiers
-- confirmation that deterministic enrichment remains unscheduled
+- confirmation that canonical projection remains unscheduled
 - confirmation that no GX10 result producer or application-specific Ollama caller was invented
 
 Record only public-safe outcomes and hashes. Never record private addresses, ports, usernames, credentials, keys, known-hosts contents, production log rows, or model blob contents.

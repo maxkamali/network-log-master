@@ -11823,3 +11823,26 @@ No ClickHouse schema/data, existing dashboard, datasource, service, schedule, re
 ### Next action
 
 Publish the verifier correction, restage the exact published Grafana tree, and perform a read-only exact GET. If the dashboard persisted with an exact portable contract, do not POST again; run the independent five-dashboard verifier. If it is absent, repeat the create-only call once with the corrected verifier. Then validate all seven queries through Grafana's datasource API and remove the temporary stage.
+
+## 2026-08-24 14:28 PDT - Item 32 live dashboard exact; redacted datasource-query verifier candidate passed locally
+
+### Status
+
+Item 32 remains the single `NEXT` item. The exact `e9ef43c` correction was staged after confirming the obsolete private stage contained no temporary credential. The prior POST had persisted the new dashboard, so no second POST was issued.
+
+Using the corrected published verifier and a no-echo mode-private temporary administrator credential, a read-only API pass proved all five resources present with exact specifications:
+
+```text
+ai-incident-analysis.json api_resource=present spec_exact_match=yes
+four_existing_dashboards=present,spec_exact_match=yes
+GRAFANA_DASHBOARD_VERIFY=PASS
+GRAFANA_AI_DASHBOARD_PORTABLE_VERIFY=PASS
+```
+
+The dashboard is therefore live without replacement of any existing resource. The temporary credential file was removed automatically.
+
+A reusable `verify-ai-dashboard-queries.py` candidate now transforms each captured panel query into Grafana's `/api/ds/query` request format, executes a bounded 30-day read-only range, rejects non-200/error/malformed responses, and prints only panel name plus frame/row counts. It never prints titles, explanations, identifiers, tags, model output, or returned field values. A regression proves the request shape and redacted frame counting. The full Python 3.13 collector suite passes 37 tests.
+
+### Next action
+
+Publish and independently verify the query-verifier candidate, stage that exact script, and run all seven dashboard queries through Grafana's configured ClickHouse datasource. Correct any query-shape defect through the same repository-first gate. After every panel returns successfully, remove the private stage, recheck Grafana and data-path health, reconcile the stale AI presentation/data-contract documentation, mark item 32 complete with no remaining `NEXT`, and publish final closure.

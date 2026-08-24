@@ -1,6 +1,7 @@
 import json
 import importlib.util
 from pathlib import Path
+import sys
 import unittest
 
 
@@ -16,6 +17,19 @@ def load_dashboard_api():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def load_query_verifier():
+    scripts = ROOT / "components/collector/grafana/scripts"
+    sys.path.insert(0, str(scripts))
+    try:
+        path = scripts / "verify-ai-dashboard-queries.py"
+        spec = importlib.util.spec_from_file_location("ai_query_verifier_test", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        sys.path.remove(str(scripts))
 
 
 class AiIncidentDashboardTests(unittest.TestCase):
@@ -100,6 +114,32 @@ class AiIncidentDashboardTests(unittest.TestCase):
         matched, reason = api.capture_matches(live, captured_with_annotations)
         self.assertFalse(matched)
         self.assertEqual(reason, "metadata.annotations differs")
+
+    def test_datasource_query_payload_and_redacted_response_counts(self):
+        verifier = load_query_verifier()
+        panel_query = self.elements["panel-7"]["spec"]["data"]["spec"]["queries"][0]
+        ref_id, payload = verifier.query_payload(panel_query, 1000, 2000)
+        self.assertEqual(ref_id, "A")
+        self.assertEqual(payload["from"], "1000")
+        self.assertEqual(payload["to"], "2000")
+        self.assertEqual(len(payload["queries"]), 1)
+        query = payload["queries"][0]
+        self.assertEqual(query["datasource"], {
+            "type": "grafana-clickhouse-datasource",
+            "uid": DATASOURCE_UID,
+        })
+        self.assertNotIn("body", json.dumps(payload.get("results", {})))
+
+        response = {
+            "results": {
+                "A": {
+                    "frames": [
+                        {"data": {"values": [[1, 2], ["private", "private"]]}}
+                    ]
+                }
+            }
+        }
+        self.assertEqual(verifier.response_counts(response, "A"), (1, 2))
 
 
 if __name__ == "__main__":

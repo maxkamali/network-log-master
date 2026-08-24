@@ -431,7 +431,7 @@ Consequence:
 
 ## ADR-023 - Local reasoning runs are version-bound, crash-safe, and nonauthoritative
 
-**Status:** Accepted as repository candidate
+**Status:** Accepted and implemented unscheduled
 
 Each local-model invocation is bound to one immutable reasoning packet, exact captured model manifest/config, exact prompt/output-schema hashes, and an attempt number. A durable run reservation is committed before contacting loopback Ollama; only strict structured output may become an append-only result.
 
@@ -451,4 +451,5 @@ Consequence:
 - model/prompt registrations and successful canonical results are append-only
 - packet/incident IDs, schema, enumerations, types, counts, lengths, and digests are independently validated
 - the caller is fixed to loopback HTTP, refuses redirects, applies request/response/time bounds, and stores no invalid model content
-- repository, migration, synthetic local-model, protected-copy, unscheduled-install, and managed-invocation gates remain separate; collector result return is out of scope
+- repository, migration, synthetic local-model, protected-copy, and guarded empty/unscheduled-install gates passed independently
+- the working system retains zero packet/model/prompt/run/result rows, zero caller scheduler references, and no production inference; managed invocation remains a separate gate and collector result return remains out of scope

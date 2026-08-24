@@ -32,7 +32,7 @@ Current state:
 - secure collector-side AI-result return transport is proven, but no GX10 result producer was discovered
 - production packet invocation, local-LLM inference, and result production remain future gated phases
 - the deterministic wake-policy/compact-packet schema and exact builder are installed unscheduled under protected backup with zero packet rows, invocations, or scheduler references
-- a repository-only versioned local-reasoning caller/schema/prompt candidate passes synthetic idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; it is not installed or scheduled on the working system
+- the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; its exact artifacts are installed empty and unscheduled under protected backup with zero version/run/result rows and no production inference
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -66,7 +66,7 @@ The three rediscovered live custom applications and deliberate post-rediscovery 
 - `enrich-events.py` — compatibility filename now containing the canonical normalized-field projector
 - `incident-engine.py` — deterministic incident identity, evidence, lifecycle, repeat, and rolling-context engine
 - `build-reasoning-packets.py` — deterministic wake selection and bounded append-only packet construction; no inference
-- `run-local-reasoning.py` — repository-only exact model/prompt/run binding and strict loopback structured inference; not scheduled
+- `run-local-reasoning.py` — exact model/prompt/run binding and strict loopback structured inference; installed but not scheduled
 
 `sbin/runtime_config.py` loads the protected runtime configuration rendered by `install/render-runtime-config.py`. See `sbin/PROVENANCE.md` for live hashes and the function-level parity proof.
 
@@ -89,7 +89,7 @@ The original deterministic-enrichment source/hash remains recorded for provenanc
 - 3 foreign keys
 - the two enabled exact-match suppression patterns from item 12H
 
-`sql/incident-v1.sql` adds the deliberate incident extension: three incident tables, five explicit indexes, and four append-only triggers. `sql/reasoning-v1.sql` adds the item-27 packet table, two indexes, and two append-only triggers. `sql/inference-v1.sql` adds the repository-only item-28 model/prompt/run/result boundary with guarded terminal run transitions and append-only results. `install/initialize-database.py` creates the base plus all three extensions atomically, refuses any existing database, validates integrity/schema/corpus before publication, and installs mode `0640` for the dedicated runtime identity.
+`sql/incident-v1.sql` adds the deliberate incident extension: three incident tables, five explicit indexes, and four append-only triggers. `sql/reasoning-v1.sql` adds the item-27 packet table, two indexes, and two append-only triggers. `sql/inference-v1.sql` adds the versioned item-28 model/prompt/run/result boundary with guarded terminal run transitions and append-only results. `install/initialize-database.py` creates the base plus all three extensions atomically, refuses any existing database, validates integrity/schema/corpus before publication, and installs mode `0640` for the dedicated runtime identity.
 
 The historical suppression-rule names and reasons were not exposed during rediscovery and no initializer survived. The public rebuild therefore uses neutral names/reasons while preserving functional IDs, evaluation order, types, patterns, and enabled state.
 
@@ -121,7 +121,7 @@ See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boun
 
 The large model blobs are intentionally not stored in Git. `install/install-model-store.py` imports an independently obtained exact offline model store with full source/target blob hashing, no overwrite, resumable exact-file reuse, and blobs-before-manifests publication. `install/verify-ollama.py --offline` verifies the exact six-manifest inventory, manifest references and hashes, config digests, declared bytes, and every referenced blob size without calling the Ollama API. The normal mode additionally requires the service active/enabled and exactly one loopback TCP listener.
 
-The item-28 repository candidate adds an application-specific caller, but no unit or timer invokes it and it is not installed on the working system. The active deterministic schedules remain independent of Ollama.
+The item-28 application-specific caller and supporting schema/configuration/prompt artifacts are installed empty and unscheduled under protected backup. No unit or timer invokes the caller, no production inference has run, and the active deterministic schedules remain independent of Ollama.
 
 ## Guarded activation and runtime verification
 

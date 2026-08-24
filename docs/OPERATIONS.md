@@ -114,9 +114,9 @@ The correlation timer uses a one-minute inactive interval. Its runner verifies e
 
 Activation verifies the disabled installation, runs the initial backfill before timer enablement, and then requires active zero-lag verification. Any failure disables only correlation while preserving its replay-safe database state. The independent verifier checks unit/source/config integrity, SQLite integrity/foreign keys, cursor lags, duplicate active identities, evidence aggregates, service result, and timer state.
 
-Historical version-3 enrichment remains in SQLite. Ollama is installed separately, active/enabled, and loopback-only. An application-specific item-28 caller now exists only as a repository candidate; it has no installed working-system artifact, service, timer, run, or result.
+Historical version-3 enrichment remains in SQLite. Ollama is installed separately, active/enabled, and loopback-only. The exact item-28 application-specific schema/caller/configuration/prompt artifacts are installed under a protected backup but remain empty and unscheduled, with no service, timer, packet, model/prompt registration, run, result, or production inference.
 
-The item-27 reasoning-packet schema and builder are installed but empty and unscheduled. Operators must not invoke it ad hoc against the working database. The repository-only item-28 caller fixes loopback transport, reserves one durable run before inference, validates strict bounded output, and makes unavailability a terminal no-result state. It must not be copied or invoked ad hoc; migration, local-model, protected-copy, unscheduled-install, and managed-invocation gates remain. Disabling correlation or any future reasoning schedule must preserve append-only packet and result truth.
+The item-27 reasoning-packet schema and builder are installed but empty and unscheduled. Operators must not invoke the builder or item-28 caller ad hoc against the working database. The caller fixes loopback transport, reserves one durable run before inference, validates strict bounded output, and makes unavailability a terminal no-result state. Only the separately gated managed invocation boundary may call it. Disabling correlation or any future reasoning schedule must preserve append-only packet and result truth.
 
 ## AI result return boundary
 

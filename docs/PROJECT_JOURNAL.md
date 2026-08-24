@@ -9421,3 +9421,54 @@ ITEM28_OLLAMA_ACTIVE=YES
 ### Next action
 
 Publish and independently verify this rehearsal checkpoint. Then use only the published exact artifacts for guarded working-system installation of the empty inference schema/caller/configuration/prompt/output-schema under a new protected backup. Leave it unscheduled and do not invoke any production packet.
+
+## 2026-08-24 02:08 PDT - Item 28 completed with guarded empty/unscheduled working-system installation
+
+### Status
+
+Execution-order item 28 is `DONE`. Item 29 is the single `NEXT` item.
+
+The protected production-state-copy evidence was published and independently matched on GitHub at:
+
+`d1080b94ae871acf26f693ab29570b4f36a5dbec` — `Record local reasoning copy rehearsal`
+
+Only exact artifacts from that published checkpoint were staged. The two existing production timers were briefly stopped after their oneshot services settled. A SQLite online backup was created and independently validated before the exact inference schema, caller, runtime configuration, prompt, and output schema were installed. The original timers resumed and the ordinary deterministic correlation chain caught up before the procedure returned.
+
+The protected pre-inference backup is retained privately with:
+
+- bytes: `1940905984`
+- SHA-256: `2652acbb0389676bda5953859d6d411e6013920eff98a6c74e2028843e14396a`
+- mode: `0600`
+
+The guarded installation completed with zero reasoning packets, model versions, prompt versions, runs, results, or caller scheduler references. It made no Ollama request and produced no collector or Grafana state.
+
+### Independent later-cadence verification
+
+A separate read-only postcheck revalidated the exact installed schema/artifact hashes, protected backup, empty state, timer health, cursor convergence, and active local runtime after ordinary production input advanced:
+
+```text
+recent_max_id=963225
+projection_lag=0
+incident_lag=0
+incidents=68
+active=20
+evidence=973
+transitions=1082
+reasoning_packets=0
+reasoning_model_versions=0
+reasoning_prompt_versions=0
+reasoning_runs=0
+reasoning_results=0
+caller_scheduler_references=0
+production_timers_active=yes
+correlation_restarts=0
+ollama_active=yes
+production_inference_invoked=no
+GX10_ITEM28_INSTALLED_POSTCHECK=PASS
+```
+
+No database path, unit identity, packet/result content, event content, entity identity, or connection value was printed or committed.
+
+### Next action
+
+Design and validate item 29 as a separately disableable managed `packet build -> local inference` boundary with exact hashes, single-cycle locking, bounded cadence work, explicit backlog/run/stale-reservation health, and failure isolation. Start with repository and protected-copy gates. Do not schedule production reasoning or return results to the collector until the separate activation evidence passes.

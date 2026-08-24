@@ -2,9 +2,9 @@
 
 ## Status
 
-Execution-order item 28 has a published calibrated repository/guard candidate and passing protected production-state-copy rehearsal. The working GX10 system does not contain the item-28 inference schema, caller, prompt/configuration artifacts, run rows, or result rows. No production reasoning packet has been built. Synthetic inference and one sanitized production-derived packet inference ran only against isolated temporary databases; no raw/source content or working-state write reached the model path.
+Execution-order item 28 is complete. The published calibrated schema, caller, prompt/configuration artifacts, and output schema are installed on the working GX10 system under a protected pre-inference backup, but remain empty and unscheduled. Production contains zero reasoning packets, model versions, prompt versions, runs, and results; no production packet was built or inferred. Synthetic inference and one sanitized production-derived packet inference ran only against isolated temporary databases; no raw/source content reached the model path.
 
-The candidate consumes only immutable item-27 packets. It cannot change incidents, evidence, transitions, packets, collector state, or Grafana state.
+The installed caller consumes only immutable item-27 packets. It cannot change incidents, evidence, transitions, packets, collector state, or Grafana state.
 
 ## Selected version set
 
@@ -18,7 +18,7 @@ The calibrated candidate uses the second-smallest model in the captured six-mani
 - prompt version: `incident-assessment-v2`
 - output schema version: `2`
 
-The smallest captured model (`qwen3:8b`) passed structural output but failed calibration: one early result under-escalated a critical OSPF case, and stricter attempts safely rejected meaningless or non-packet-derived output. Validation was not weakened. The next bounded candidate, `gemma4:latest`, passed all three synthetic OSPF/interface/BGP cases with strict severity, confidence, action-risk, tag-provenance, canonical-result, and no-op gates. Its exact manifest and active loopback runtime were revalidated. Protected-copy inference remains mandatory before any production installation or invocation.
+The smallest captured model (`qwen3:8b`) passed structural output but failed calibration: one early result under-escalated a critical OSPF case, and stricter attempts safely rejected meaningless or non-packet-derived output. Validation was not weakened. The next bounded candidate, `gemma4:latest`, passed all three synthetic OSPF/interface/BGP cases with strict severity, confidence, action-risk, tag-provenance, canonical-result, and no-op gates. Its exact manifest and active loopback runtime were revalidated. Protected-copy inference passed before the empty unscheduled working-system installation; production invocation remains a separate gate.
 
 Request options are versioned and deterministic: temperature `0`, seed `27`, context `8192`, and maximum prediction `1024` tokens. The caller sets `stream=false`, disables thinking output, and sends a JSON Schema response format.
 
@@ -116,6 +116,35 @@ The rehearsal guard backup is mode `0600`, `1939898368` bytes, and SHA-256 `07fc
 
 The post-rehearsal working system remained at zero packet rows and zero item-28 schema objects. Both deterministic cursors were at event ID `962636` with zero lag, `53` incidents, `5` active incidents, `899` evidence rows, `995` transitions, zero correlation restarts, and both production timers active.
 
+## Guarded working-system installation
+
+Only artifacts from the published protected-copy checkpoint were used. The two existing production timers were briefly quiesced after their oneshot services settled, a root-only SQLite online backup was created and independently validated, and the exact empty inference schema plus four artifacts were installed. No unit, timer, cron reference, packet, version registration, run, result, or Ollama request was created. The original timers resumed and correlation caught up before the installer returned.
+
+The protected backup is mode `0600`, `1940905984` bytes, and SHA-256 `2652acbb0389676bda5953859d6d411e6013920eff98a6c74e2028843e14396a`. Its path remains private.
+
+A later independent ordinary-cadence postcheck validated the exact installed hashes/schema/backup again and observed:
+
+```text
+recent_max_id=963225
+projection_lag=0
+incident_lag=0
+incidents=68
+active=20
+evidence=973
+transitions=1082
+reasoning_packets=0
+reasoning_model_versions=0
+reasoning_prompt_versions=0
+reasoning_runs=0
+reasoning_results=0
+caller_scheduler_references=0
+production_timers_active=yes
+correlation_restarts=0
+ollama_active=yes
+production_inference_invoked=no
+GX10_ITEM28_INSTALLED_POSTCHECK=PASS
+```
+
 ## Item-28 gates
 
 1. `DONE` — publish and independently verify the repository candidate
@@ -123,9 +152,9 @@ The post-rehearsal working system remained at zero packet rows and zero item-28 
 3. `DONE` — run synthetic structured-output quality and failure-path evaluation against loopback local models without production packet data; reject the under-calibrated smallest model and select the exact passing Gemma candidate
 4. `DONE` — publish and independently verify the calibrated artifact/guard correction
 5. `DONE` — rehearse migration, version registration, one-packet success, interruption, invalid output, unavailable runtime, and deterministic rerun on a protected production-state copy
-6. publish and independently verify the protected-copy evidence
-7. install the exact inference schema/caller/configuration/prompt artifacts unscheduled under a new protected backup only after the earlier gates pass
-8. do not invoke a production packet or create a reasoning schedule until a separate managed-invocation gate passes
-9. keep collector result return outside item 28
+6. `DONE` — publish and independently verify the protected-copy evidence
+7. `DONE` — install the exact inference schema/caller/configuration/prompt artifacts empty and unscheduled under a new protected backup
+8. `DONE` — leave production packet invocation and reasoning scheduling to a separate managed-invocation gate
+9. `DONE` — keep collector result return outside item 28
 
-The original fetch/ingest and correlation timers remain independent of this candidate.
+The original fetch/ingest and correlation timers remain independent of this boundary.

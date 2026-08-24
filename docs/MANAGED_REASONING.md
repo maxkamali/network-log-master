@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. The published backlog correction passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. The second corrected natural cadence also kept packets fixed at 12 and reduced pending 7→6, but its single model response failed strict output validation. The caller stored one terminal `INVALID_OUTPUT` run and no result or invalid content. Reasoning was disabled with zero `STARTED` rows or restarts. Protected-copy replay of the same packet reproduced the failure; a second copy-only diagnostic classified one action whose text exactly equaled a risk label. Production remains unchanged at 12 packets, six old-version pending, six runs, five successful results, and one explicit safe failure. Immutable-ID reuse was correctly refused before inference, and prompt revision `r2` proved the local runtime does not enforce `not/enum`. The 140-test `incident-assessment-v2-r3` candidate adds a portable 25-character generation minimum, exposes a clean 12-packet revised-version backlog, and is awaiting exact remote staging and protected-copy replay.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. The published backlog correction passed protected-copy rehearsal, exact inactive installation, protected production resume, and its first independent natural drain cadence. The second corrected natural cadence also kept packets fixed at 12 and reduced pending 7→6, but its single model response failed strict output validation. The caller stored one terminal `INVALID_OUTPUT` run and no result or invalid content. Reasoning was disabled with zero `STARTED` rows or restarts. Protected-copy replay reproduced and classified action text exactly equal to a risk label. Immutable-ID reuse was correctly refused, and prompt revision `r2` proved the local runtime does not enforce `not/enum`. Exact published `incident-assessment-v2-r3` passed 140 remote tests and the same failed packet produced one valid protected-copy result through its portable 25-character generation minimum and unchanged strict validator. Production remains unchanged at 12 packets, six old-version pending, six runs, five successful results, and one explicit safe failure. The four compatibility bytes remain uninstalled.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -205,7 +205,23 @@ The second corrected natural cadence again deferred construction and kept packet
 
 A fresh protected current-state copy removed only the copied terminal diagnostic reservation behind a copy-local no-delete-trigger override, recreated that trigger immediately, and replayed the exact same packet through the unchanged caller at temperature zero. It failed identically. A second independent protected-copy replay classified the response without printing packet or output content: four actions were generated, and one action's text exactly equaled a member of the action-risk enum.
 
-The correction does not relax the caller or rewrite the production failure. The caller continues to reject label-only action text independently. A first protected-copy gate proved the database correctly refuses a changed schema hash under the existing append-only prompt-version registration; it stopped before run reservation or model transport. Prompt revision `r2` used a distinct immutable timestamp and negative enum, but two protected-copy attempts showed the runtime returned the same `action_text` violation. Revision `incident-assessment-v2-r3` retains that enum and also raises the generation-schema minimum action length to 25, longer than every risk label and compatible with the already-calibrated meaningful-action examples. This makes all 12 packets pending for the revised boundary while preserving all original-version runs/results. Exact-old-hash installation is limited to the coordinated runtime config, output schema, caller, and managed runner; the service must remain disabled and any divergent predecessor is refused. Production remained unchanged and disabled throughout diagnosis.
+The correction does not relax the caller or rewrite the production failure. The caller continues to reject label-only action text independently. A first protected-copy gate proved the database correctly refuses a changed schema hash under the existing append-only prompt-version registration; it stopped before run reservation or model transport. Prompt revision `r2` used a distinct immutable timestamp and negative enum, but two protected-copy attempts showed the runtime returned the same `action_text` violation. Revision `incident-assessment-v2-r3` retains that enum and raises the generation-schema minimum action length to 25, longer than every risk label and compatible with the already-calibrated meaningful-action examples. Its exact staged bytes passed all 140 tests on GX10. A fresh caught-up protected copy then used 11 explicit copy-only terminal reservations to make the original failed packet the only eligible `r3` packet. One real-model call produced one valid result through the unchanged validator, with deterministic truth and production unchanged. All 12 packets become pending for `r3` on production while original-version runs/results remain preserved. Exact-old-hash installation is limited to the coordinated runtime config, output schema, caller, and managed runner; the service must remain disabled and any divergent predecessor is refused.
+
+```text
+r3_copy_snapshot_recent_max_id=971920
+r3_copy_model_invocations=1
+r3_copy_same_packet=yes
+r3_copy_only_seeded_runs=11
+r3_copy_outcome=valid
+r3_copy_validation_class=valid
+r3_copy_deterministic_truth_unchanged=yes
+r3_protected_base_bytes=1965944832
+r3_protected_base_sha256=2e485f30b1f939602b8f5e151b8e70eab474a2be6590de7a76b8bf12c1400408
+r3_protected_base_mode=0600
+production_changed=no
+production_reasoning_enabled=no
+GX10_MANAGED_REASONING_R3_COPY_REPLAY=PASS
+```
 
 ## Natural-cadence backlog failure and safe disable
 

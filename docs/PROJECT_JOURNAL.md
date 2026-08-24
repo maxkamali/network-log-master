@@ -10189,3 +10189,49 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify the portable `r3` candidate. Stage and retest only that exact commit. Then repeat the isolated same-packet protected-copy gate and require one valid revised-version result before any inactive production upgrade.
+
+## 2026-08-24 03:45 PDT - Item 29 portable r3 same-packet protected-copy gate passed
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The portable-schema prompt revision was published and independently matched on GitHub at:
+
+`9ca7dad5d107e5dd6bf72483a9f030687e505572` — `Use portable reasoning action bound`
+
+Its exact archive was staged under a new root-only GX10 boundary, normalized to Git modes, and passed all 140 tests plus the filesystem contract on GX10.
+
+A fresh caught-up protected copy retained all production rows, then added 11 explicit copy-only terminal reservations for prompt revision `incident-assessment-v2-r3`. That made the exact packet which previously failed the only eligible revised-version packet. One real local-model invocation produced one valid result through the unchanged strict caller validator. The portable generation schema therefore corrected the diagnosed compatibility failure without relaxing validation.
+
+The copy's incident/evidence/transition digest remained unchanged. Production remained at 12 packets, six original-version pending packets, six total runs, five successes/results, one terminal failure, and zero `STARTED` rows. The reasoning timer remained disabled and no production inference ran.
+
+```text
+published_r3_commit=9ca7dad5d107e5dd6bf72483a9f030687e505572
+remote_tests=140
+copy_snapshot_recent_max_id=971920
+copy_model_invocations=1
+copy_same_packet=yes
+copy_revised_prompt_version=yes
+copy_only_seeded_runs=11
+copy_outcome=valid
+copy_validation_class=valid
+copy_deterministic_truth_unchanged=yes
+protected_base_bytes=1965944832
+protected_base_sha256=2e485f30b1f939602b8f5e151b8e70eab474a2be6590de7a76b8bf12c1400408
+protected_base_mode=0600
+production_packets=12
+production_old_version_pending=6
+production_runs=6
+production_succeeded=5
+production_failures=1
+production_results=5
+production_started=0
+production_reasoning_enabled=no
+production_inference_invoked=no
+GX10_MANAGED_REASONING_R3_COPY_REPLAY=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, connection value, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this protected-copy checkpoint. Then use only the exact staged installer to replace the four exact predecessor runtime-config/schema/caller/runner files while reasoning remains disabled. Require unchanged append-only production state/digest, revised-version pending 12, zero `STARTED` rows, and healthy independent schedules before any protected production drain.

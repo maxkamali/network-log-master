@@ -48,7 +48,7 @@ Target ownership:
 
 GX10 is intentionally not the authoritative raw-log archive, dashboard server, or direct ClickHouse writer.
 
-Current reconstructed implementation is narrower than the target. Its automatic behavior is scheduled read-only backlog fetch followed by replay-safe local SQLite ingest. A deterministic-enrichment executable and Ollama infrastructure exist, but no automatic enrichment invocation, application-specific Ollama caller, or result-return producer was discovered.
+Current reconstructed implementation is narrower than the target. Its automatic behavior has two independent schedules: read-only backlog fetch followed by replay-safe local SQLite ingest, and offline canonical projection followed by deterministic incident correlation. Ollama infrastructure exists, but no application-specific Ollama caller or result-return producer was discovered or has yet been implemented.
 
 ## Current data path
 
@@ -62,6 +62,8 @@ Devices
 GX10
   -> restricted read-only backlog fetch
   -> local durable replay-safe ingest
+  -> separately scheduled canonical projection
+  -> deterministic incident correlation/lifecycle
 ```
 
 Separately present but not connected by a discovered GX10 producer:
@@ -73,7 +75,7 @@ collector write-only result transport
   -> Grafana
 ```
 
-The deterministic GX10 enrichment executable is also separately present and unscheduled. Ollama is installed, active, enabled, loopback-only, and has six complete model manifests, but no application-specific network-observability caller was found.
+Ollama is installed, active, enabled, loopback-only, and has six complete model manifests, but no application-specific network-observability caller was found or has yet been added.
 
 ## Target data path
 
@@ -91,7 +93,7 @@ collector capture
   -> ClickHouse/Grafana
 ```
 
-The collector-side normalizer has passed selected replay/parity, complete live shadow validation, and the production GX10 handoff gate. Its integration remains a separate durable-file worker reading settled collector backlog files without changing Vector's raw sinks. A forward-only handoff view now exposes only verified normalized outputs at or after an immutable floor while retaining the original GX10 transport identity. The raw and shadow histories and exact raw-view rollback remain preserved. After a multi-cadence stability review, transitional GX10 vendor/message reparsing was replaced by an unscheduled canonical-field projector that preserves local suppression policy and historical enrichment evidence. The deterministic GX10 incident schema and engine are installed under protected rollback after replay/determinism proof, but remain unscheduled and empty. A separately disableable offline managed `projection -> incident` runner/service/timer now exists as an inactive repository candidate. Wake policy, Ollama caller, and result producer remain later implementation gates.
+The collector-side normalizer has passed selected replay/parity, complete live shadow validation, and the production GX10 handoff gate. Its integration remains a separate durable-file worker reading settled collector backlog files without changing Vector's raw sinks. A forward-only handoff view now exposes only verified normalized outputs at or after an immutable floor while retaining the original GX10 transport identity. The raw and shadow histories and exact raw-view rollback remain preserved. After a multi-cadence stability review, transitional GX10 vendor/message reparsing was replaced by a canonical-field projector that preserves local suppression policy and historical enrichment evidence. The deterministic GX10 incident schema/engine and separately disableable offline managed `projection -> incident` runner/service/timer passed production backfill and multi-cadence activation gates. Wake policy, incident packets, Ollama caller, and result producer remain later implementation gates.
 
 ## Capture-first contract
 
@@ -117,7 +119,7 @@ CANDIDATE -> OPEN -> RECOVERING -> RESOLVED
 
 The LLM may summarize or explain an incident but does not decide canonical identity, deduplication, or lifecycle state.
 
-The long-lived deterministic incident engine is implemented and installed unscheduled. Its identity, evidence, lifecycle, repeat, rolling-context, transaction, and replay contracts are documented in `docs/INCIDENT_ENGINE.md`. Managed invocation is deliberately separate from implementation: the current automatic chain still does not project canonical rows or process incidents.
+The long-lived deterministic incident engine is implemented and active behind a separately disableable offline schedule. Its identity, evidence, lifecycle, repeat, rolling-context, transaction, replay, and managed-invocation contracts are documented in `docs/INCIDENT_ENGINE.md` and `docs/MANAGED_CORRELATION.md`. The original fetch/ingest schedule remains independent.
 
 ## Context model
 

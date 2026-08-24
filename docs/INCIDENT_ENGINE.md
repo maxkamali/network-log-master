@@ -2,7 +2,7 @@
 
 ## Status and authority boundary
 
-The version-1 incident engine completed execution-order item 25. Its private working-database-copy, cursor-reset replay, independent deterministic rebuild, and guarded unscheduled working-system migration gates pass. The schema and exact engine artifact are installed on GX10 with zero incident state/cursors and a protected pre-migration backup; neither projection nor incident processing is scheduled or active.
+The version-1 incident engine completed execution-order item 25. Its private working-database-copy, cursor-reset replay, independent deterministic rebuild, and guarded unscheduled working-system migration gates pass. Item 26 later completed the separate managed production invocation gate: initial backfill and three scheduled zero-lag cadences passed while the original fetch/ingest timer continued advancing. The protected pre-migration backup remains retained.
 
 The engine consumes only classification-version-4 rows created by the canonical normalized-field projector. It does not parse raw messages, infer identity with an LLM, call Ollama, or emit AI results. Canonical normalized records remain observation authority; deterministic SQLite state remains incident identity and lifecycle authority.
 
@@ -76,9 +76,9 @@ Malformed canonical projection data, schema drift, invalid cursor state, contrad
 
 `components/gx10/install/migrate-incident-engine.py` is the existing-system guard. It requires exact repository hashes, canonicalized exact pre/post schema inventories, the exact functional suppression fields (ID, rule type, pattern, order, and enabled state), zero SQLite version/application markers, explicit root confirmation, an absent engine target, zero scheduler references, and protected destination parents. Canonicalization ignores only DDL whitespace representation; names, statements, constraints, indexes, and triggers must still match. Historical suppression names, reasons, and creation timestamps are nonfunctional metadata and may differ from the deliberately neutral public reconstruction. The guard creates and validates a root-only SQLite backup before applying the schema and installing the engine. Empty-state rollback removes only the new schema and engine; it refuses rollback after an incident or engine cursor exists.
 
-The clean-machine initializer and runtime verifier include the incident schema, and the application installer includes the engine, but the systemd service remains exactly `fetch -> ingest`. Installing the candidate does not run the projector or engine.
+The clean-machine initializer and runtime verifier include the incident schema, and the application installer includes the engine. Base activation keeps the original `fetch -> ingest` service unchanged; the separate correlation installer/activator controls `projection -> incident` backfill and scheduling.
 
-## Working-system unscheduled migration
+## Initial working-system unscheduled migration
 
 The copy-rehearsal checkpoint was published and independently verified at `36631749b3c64d356f45c79088af5760b81f8723`. Under explicit production authorization, the existing timer was paused only after its oneshot settled. The published guard then installed the exact incident schema and engine without invoking either projector or engine.
 
@@ -96,16 +96,18 @@ Postconditions were:
 
 The protected SQLite backup is `1912111104` bytes with SHA-256 `b8a2352b5e96cc1007a98cc4062a69e1c1bf4daa2253f2560a88ee87ce195634`. Its identity-bearing live path is intentionally not published.
 
-## Remaining managed-invocation gate
+## Managed-invocation completion
 
-Before the working GX10 database or invocation chain changes:
+Item 26 completed every managed-invocation gate:
 
-1. design one explicit managed order: canonical projection before incident processing
-2. preserve the existing fetch/ingest service and its failure isolation unless a separately validated unit arrangement supersedes it
-3. expose deterministic success/failure, backlog/cursor lag, counts, duration, and last-watermark telemetry
-4. define CPU/memory/time limits and concurrency exclusion against database writers
-5. rehearse initial backfill, steady-state no-op, newly appended input, failed projection, failed incident transaction, disable, and rollback behavior
-6. separately authorize live invocation only after exact artifacts and all preconditions are published
-7. retain incident state after processing begins; do not use destructive empty-state rollback once any incident or incident cursor exists
+1. exact managed order is canonical projection before incident processing
+2. the original fetch/ingest service and failure boundary remain unchanged
+3. deterministic success/failure, both cursor lags, counts, duration, and watermarks are emitted and independently verified
+4. the service has explicit CPU/memory/time limits, one-cycle locking, and bounded convergence against concurrent ingest
+5. copy rehearsal passed backfill, no-op, new input, projection failure, incident failure, disable, and state-preservation cases
+6. live invocation used separately published, verified, explicitly authorized inactive-install/backfill/activation gates
+7. the first production backfill and three scheduled cadences ended with both cursor lags at zero and zero service restarts
 
-An Ollama caller, wake policy, AI-result producer, and result-return schedule remain later milestones.
+Incident state is now durable production working state. Do not use the destructive empty-state rollback; disable only the correlation schedule and retain state if rollback is needed.
+
+An Ollama caller, deterministic wake policy, compact incident packet, AI-result producer, and result-return schedule remain later milestones.

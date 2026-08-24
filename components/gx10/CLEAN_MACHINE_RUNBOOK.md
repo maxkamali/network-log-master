@@ -9,14 +9,13 @@ It reproduces:
 - the dedicated runtime identity and protected filesystem
 - read-only SFTP backlog fetch
 - replay-safe local SQLite ingest
-- the captured deterministic-enrichment executable, intentionally unscheduled
+- canonical normalized-field projection and deterministic incident processing behind a separate managed offline schedule
 - the exact reconstructed SQLite base, deterministic incident extension, and two functional suppression patterns
-- the automatic `timer -> fetch -> ingest` chain
+- the original automatic `timer -> fetch -> ingest` chain
 - the captured Ollama executable, service, loopback listener, and six-model store
 
 It does not invent:
 
-- an automatic deterministic-enrichment schedule
 - an application-specific Ollama caller
 - a GX10 producer for the collector result-return boundary
 - historical kernel, NVIDIA, CUDA, Ollama, or SQLite bootstrap provenance that was not recovered
@@ -223,7 +222,7 @@ Expected final marker:
 
 The activator repeats the platform and preactivation checks, hashes the complete installed model store, enables Ollama, verifies its loopback-only listener, then enables the fetch/ingest timer. If a post-preflight step fails, it stops a potentially triggered pipeline service and disables/stops the units it changed.
 
-It never enables canonical normalized-field projection.
+It leaves the separately gated correlation timer disabled until Phase 9.
 
 ## Phase 8: post-activation verification
 
@@ -245,6 +244,47 @@ After at least one timer interval, inspect service state and recent service logs
 
 Do not paste private transport values or production log content into the public repository or project journal.
 
+## Phase 9: managed correlation activation
+
+After the base runtime passes and at least one fetch/ingest cycle has completed, install the private correlation binding while leaving its timer disabled:
+
+    GX10_CORRELATION_INSTALL_CONFIRM=INSTALL-UNSCHEDULED-CORRELATION \
+        components/gx10/install/install-correlation.py \
+        --database /var/lib/network-log-gx10/state/events.sqlite3 \
+        --runtime-user network-log-agent \
+        --runtime-group network-log-agent \
+        --pipeline-unit network-log-gx10.service \
+        --apply
+
+Verify the exact inactive boundary:
+
+    components/gx10/install/verify-correlation.py \
+        --installed \
+        --private-runtime
+
+Expected markers:
+
+- `GX10_MANAGED_CORRELATION_INSTALL=PASS`
+- `GX10_MANAGED_CORRELATION_INSTALLED_VERIFY=PASS`
+
+Run the initial backfill and enable only the correlation timer after zero-lag verification:
+
+    GX10_CORRELATION_ACTIVATE_CONFIRM=ENABLE-VERIFIED-CORRELATION \
+        components/gx10/install/activate-correlation.py \
+        --database /var/lib/network-log-gx10/state/events.sqlite3
+
+Expected marker:
+
+`GX10_MANAGED_CORRELATION_ACTIVATION=PASS`
+
+Verify active state after at least three independent correlation timer cadences:
+
+    components/gx10/install/verify-correlation.py \
+        --active \
+        --private-runtime
+
+Require zero projection lag, zero incident lag, successful service result, zero restarts, monotonic incident aggregates, and continued advancement of the original fetch/ingest timer. Do not enable or invoke any Ollama application caller in this phase.
+
 ## Failure and rerun rules
 
 - Stop on the first failed marker. Never weaken a verifier to make installation continue.
@@ -253,8 +293,8 @@ Do not paste private transport values or production log content into the public 
 - A partially copied model store may be resumed only when every existing artifact is exact. Divergent files require operator investigation; the importer never replaces them.
 - Preactivation refuses a used database, spool content, SQLite sidecars, active units, enabled runtime units, unit drop-ins, or altered installed artifacts.
 - Do not use this runbook to repair or modify the working reference GX10.
-- Do not add a projection/incident timer, an Ollama pipeline caller, or a result-return producer as part of reconstruction. Those are separate future implementation decisions. The installed incident engine is inert until a separately validated invocation gate is approved.
-- The application installer now places the item-26 correlation runner and unit files, but the base clean-runtime activator deliberately leaves the correlation timer disabled. Use `docs/MANAGED_CORRELATION.md` and its separate verification/activation gate only after the base runtime passes and operator authorization is explicit.
+- Do not add an Ollama pipeline caller or a result-return producer as part of reconstruction. Those remain separate future implementation decisions.
+- The application installer places the item-26 correlation runner and unit files, but the base clean-runtime activator deliberately leaves the correlation timer disabled. Use Phase 9 and `docs/MANAGED_CORRELATION.md` only after the base runtime passes and operator authorization is explicit.
 
 ## Current validation status
 

@@ -152,7 +152,7 @@ The exact recovered-base DDL is `components/gx10/sql/initialize.sql`. Item 25 de
 
 The extension DDL is `components/gx10/sql/incident-v1.sql`. The database is replaceable working state rather than the authoritative raw archive.
 
-Current automatic writes remain limited to fetch/ingest state and `recent_events`. `event_enrichment` keeps historical classification-version-3 rows. The separate unscheduled projector can add version-4 rows only from exact normalized schema-version-1 fields plus the existing local suppression rules; it performs no vendor/message reparsing. The installed incident engine consumes only those version-4 rows. The working incident tables and both projection/incident cursors remain empty until the managed-invocation gate passes.
+Automatic writes are separated by schedule. The original fetch/ingest chain writes transport state and `recent_events`. The managed offline correlation chain projects version-4 rows only from exact normalized schema-version-1 fields plus the existing local suppression rules, then advances deterministic incident state from only those version-4 rows. Historical classification-version-3 enrichment remains preserved; no vendor/message reparsing occurs in the managed chain. Both stage cursors are transactionally advanced and independently required to reach zero lag after each successful managed cycle.
 
 ## AI result contract
 
@@ -204,4 +204,4 @@ Incident state retains append-only evidence/transitions, first/last seen times, 
 
 The local LLM consumes an incident packet and returns analysis; it does not become the canonical incident database.
 
-The deterministic schema/engine contract is implemented, copy-rehearsed, independently reproduced, and installed unscheduled. No production incident packet, managed invocation, Ollama caller, or result producer is currently claimed; those remain later gates.
+The deterministic schema/engine contract is implemented, copy-rehearsed, independently reproduced, and active through the separately managed production correlation schedule. No production incident packet, Ollama caller, or result producer is currently claimed; those remain later gates.

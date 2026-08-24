@@ -92,7 +92,7 @@ This local database is working state, not the authoritative raw-log archive.
 
 ## GX10 orchestration boundary
 
-The proven automatic chain is exactly:
+The original recovered automatic chain remains:
 
 ```text
 network-log-gx10.timer
@@ -100,9 +100,21 @@ network-log-gx10.timer
   -> ingest-spool.py
 ```
 
-The timer uses a two-minute boot delay, a one-minute inactive interval, and five-second accuracy. The oneshot service is non-root and retains the captured filesystem and kernel hardening.
+The original timer uses a two-minute boot delay, a one-minute inactive interval, and five-second accuracy. Its oneshot service is non-root and retains the captured filesystem and kernel hardening.
 
-The compatibility-path `enrich-events.py` now projects authoritative normalized schema fields and local suppression policy; it performs no vendor/message classification and has no systemd, cron, or other automatic invocation. Historical version-3 enrichment remains in SQLite. Ollama is installed separately, active/enabled, and loopback-only, but no application-specific network-observability caller was discovered.
+A second independent offline chain is now active:
+
+```text
+network-log-gx10-correlation.timer
+  -> canonical projection
+  -> deterministic incident engine
+```
+
+The correlation timer uses a one-minute inactive interval. Its runner verifies exact stage hashes, takes a single-cycle advisory lock, performs up to three ordered passes to converge rows that arrive during execution, and succeeds only when both projection and incident lags are zero. The service has Unix-socket-only address families and may write only within the validated database parent. It does not call Ollama, write results, or change the original fetch/ingest timer.
+
+Activation verifies the disabled installation, runs the initial backfill before timer enablement, and then requires active zero-lag verification. Any failure disables only correlation while preserving its replay-safe database state. The independent verifier checks unit/source/config integrity, SQLite integrity/foreign keys, cursor lags, duplicate active identities, evidence aggregates, service result, and timer state.
+
+Historical version-3 enrichment remains in SQLite. Ollama is installed separately, active/enabled, and loopback-only, but no application-specific network-observability caller has yet been implemented.
 
 ## AI result return boundary
 

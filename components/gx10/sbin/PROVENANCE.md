@@ -47,11 +47,13 @@ The projector:
 - writes classification version 4 for canonical projections
 - advances an atomic `agent_state` cursor with each projection batch
 - is idempotent and fails closed on malformed canonical input or newer projection state
-- remains absent from the automatic `timer -> fetch -> ingest` chain
+- remains absent from the original automatic `timer -> fetch -> ingest` chain and runs only through the separate item-26 correlation schedule
 
 The candidate was rehearsed twice against an on-server SQLite backup: the first run scanned `949845` events and projected `2781` canonical rows while preserving `24207` historical version-3 rows; the second projected zero rows. All projected fields matched an independent re-read, `1984` rows received the existing local suppression policy, and the live database remained unchanged.
 
 The live unscheduled legacy executable was then replaced under its exact old hash and zero-scheduler-reference precondition. The active legacy hash count is zero, the projection hash count is one, and the protected root-only rollback copy retains the exact legacy hash. The live database still has zero version-4 rows and no projection cursor because retirement did not invoke the projector.
+
+Item 26 later activated the exact projector only through the separate managed correlation boundary after protected-copy and inactive-install gates. That later state does not change the item-24 retirement evidence above.
 
 ## Deterministic incident and managed correlation additions
 

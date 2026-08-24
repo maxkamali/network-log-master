@@ -8819,3 +8819,96 @@ PUBLIC_REPOSITORY_VALIDATION=PASS
 ### Next action
 
 Publish and independently verify this correction. Stage only those published exact installer/verifier bytes, atomically upgrade the inactive private drop-in, reverify unchanged database and inactive scheduling, then retry the explicit fail-closed activation.
+
+## 2026-08-24 00:55 PDT - Managed production correlation activated and item 26 completed
+
+### Status
+
+Execution-order item 26 is `DONE`. Item 27 is the single `NEXT` item.
+
+The private write-scope correction was published and independently matched on GitHub at:
+
+`213e1221ae90c0f9f5227f21db4f0fe19139d62c` — `Bind correlation sandbox to validated state root`
+
+The retained-failed-state cleanup was then published and independently matched at:
+
+`8525414fce4d3fd95937c45f01828dbb30f83a37` — `Reset failed correlation state during rollback`
+
+Only exact artifacts from those public checkpoints replaced the two corrected staged files and activator. The installer atomically upgraded only the exact known inactive private drop-in. Independent inactive verification then passed with the database unchanged, correlation service inactive, correlation timer disabled/inactive, and existing fetch/ingest state unchanged:
+
+```text
+recent_max_id=955874
+projection_cursor=0
+projection_lag=955874
+canonical_rows=0
+incident_cursor=0
+incident_lag=0
+incidents=0
+GX10_MANAGED_CORRELATION_INACTIVE_INSTALL=PASS
+```
+
+### Initial production backfill and activation
+
+The explicit activator reverified the complete inactive boundary, ran one timer-disabled managed backfill, required zero lag, enabled only the separate correlation timer, and reverified active state:
+
+```text
+recent_max_id=955874
+projection_cursor=955874
+projection_lag=0
+canonical_rows=8712
+suppressed_rows=6622
+incident_cursor=955874
+incident_lag=0
+incidents=23
+active_incidents=3
+incident_evidence=477
+incident_transitions=519
+incident_state_sha256=5e1797fb69a38fb57a382c42d340602d5ccb187de626c98d6859c988be97dddb
+correlation_timer_active_enabled=yes
+correlation_service_result=success
+existing_pipeline_unchanged=yes
+GX10_MANAGED_CORRELATION_LIVE_ACTIVATION=PASS
+```
+
+No Ollama call, model prompt, AI result, collector write, or Grafana change occurred.
+
+### Three scheduled cadence gates
+
+Three independent timer invocations were observed after the activation/backfill cycle:
+
+| Cadence | Event/cursor ID | Canonical rows | Incidents | Active | Evidence | Transitions | Projection lag | Incident lag | Restarts |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 956240 | 9078 | 24 | 4 | 499 | 542 | 0 | 0 | 0 |
+| 2 | 956338 | 9176 | 24 | 4 | 503 | 546 | 0 | 0 | 0 |
+| 3 | 956413 | 9251 | 24 | 4 | 508 | 551 | 0 | 0 | 0 |
+
+Each cadence independently passed installed artifact/private runtime, SQLite quick/foreign-key, exact schema, dual-watermark, unique-active-identity, and evidence-aggregate verification. Counts remained monotonic. The original fetch/ingest timer advanced during the same window and its service did not enter a failed state.
+
+A final prepublication active verification later reached event/cursor ID `956995` with both lags zero, `9833` canonical rows, `27` incidents, `6` active incidents, `547` evidence rows, and `594` transitions. Both the correlation timer and original fetch/ingest timer remained active.
+
+Markers:
+
+```text
+GX10_MANAGED_CORRELATION_CADENCE_1=PASS
+GX10_MANAGED_CORRELATION_CADENCE_2=PASS
+GX10_MANAGED_CORRELATION_CADENCE_3=PASS
+existing_pipeline_timer_advanced=yes
+aggregate_counts_monotonic=yes
+three_zero_lag_cadences=yes
+GX10_MANAGED_CORRELATION_MULTI_CADENCE=PASS
+```
+
+### Durable boundary
+
+The production automatic paths are now separate:
+
+```text
+fetch/ingest timer -> fetch -> ingest
+correlation timer -> canonical projection -> deterministic incident engine
+```
+
+Failure or disablement of correlation does not stop fetch/ingest. The protected item-25 pre-migration database backup remains retained. The LLM remains outside incident identity, evidence, and lifecycle authority.
+
+### Next action
+
+Publish and independently verify this completion checkpoint. Then begin item 27 by specifying and implementing a deterministic, replay-safe LLM wake policy and compact incident-packet contract over the active incident state. Keep inference unscheduled and exclude collector result production until their own copy-rehearsal and activation gates.

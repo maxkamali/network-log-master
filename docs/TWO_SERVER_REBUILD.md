@@ -127,7 +127,7 @@ After at least one timer interval:
 - confirm replay does not duplicate `(source_file, record_number)` observations
 - rerun both independent runtime verifiers
 
-Do not execute canonical projection merely to make the end-to-end path look longer. Its absence from scheduling is deliberate; the automatic chain remains fetch/ingest only.
+Do not invoke canonical projection ad hoc merely to make the end-to-end path look longer. Follow the component runbook's separate inactive install, initial backfill, zero-lag verification, and correlation-timer activation gate.
 
 ### 7. Verify the independent collector result boundary
 
@@ -144,9 +144,10 @@ A disposable two-server rebuild is complete only when the operator records:
 - GX10 package/platform/preactivation/activation/runtime/Ollama pass markers
 - restricted backlog transport success
 - one successful automatic fetch/ingest cycle
+- successful managed-correlation inactive install, initial backfill, and at least three zero-lag scheduled cadences
 - replay/idempotency result
 - rerun of both independent runtime verifiers
-- confirmation that canonical projection remains unscheduled
+- confirmation that the correlation timer is separately disableable and the original fetch/ingest timer remains healthy
 - confirmation that no GX10 result producer or application-specific Ollama caller was invented
 
 Record only public-safe outcomes and hashes. Never record private addresses, ports, usernames, credentials, keys, known-hosts contents, production log rows, or model blob contents.

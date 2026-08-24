@@ -25,13 +25,12 @@ Current state:
 - secure backlog fetch and durable ingest are operational
 - replay/idempotency protections exist in the ingest path
 - normalized schema-version-1 projection is implemented as the deliberate replacement for transitional vendor/message reparsing
-- a deterministic version-1 incident engine and append-only schema are implemented, validated, and installed unscheduled on the working system under protected backup
-- a separate offline managed `projection -> incident` runner/service/timer is implemented as an inactive repository candidate with exact hashes, bounded cursor convergence, resource limits, telemetry, and state-preserving disable behavior
-- the proven automatic chain is `timer -> fetch -> ingest`
-- canonical projection and incident processing remain deliberately absent from the automatic invocation chain
+- a deterministic version-1 incident engine and append-only schema are implemented, validated, and active on the working system under protected backup
+- a separate offline managed `projection -> incident` runner/service/timer passed initial production backfill and three zero-lag scheduled cadences with exact hashes, bounded cursor convergence, resource limits, telemetry, and state-preserving disable behavior
+- the original automatic chain remains `timer -> fetch -> ingest`; the correlation chain is independently scheduled and disableable
 - Ollama is active with six complete model manifests, but no application-specific observability-pipeline caller was discovered
 - secure collector-side AI-result return transport is proven, but no GX10 result producer was discovered
-- managed projection/incident invocation and local-LLM orchestration remain future gated phases
+- local-LLM wake selection, incident packets, inference, and result production remain future gated phases
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -75,7 +74,7 @@ Validate operator configuration inputs without writing files with:
 
     GX10_SFTP_HOST=collector.example.invalid GX10_SFTP_PORT=2222 GX10_SFTP_USER=spool-reader components/gx10/install/render-runtime-config.py --check
 
-The original deterministic-enrichment source/hash remains recorded for provenance and rollback. The active repository file is now a canonical projector that performs no vendor/message classification, retains local suppression policy, and remains intentionally absent from the proven automatic `timer -> fetch -> ingest` chain.
+The original deterministic-enrichment source/hash remains recorded for provenance and rollback. The active repository file is now a canonical projector that performs no vendor/message classification, retains local suppression policy, and runs only through the separate managed correlation chain rather than the original `timer -> fetch -> ingest` service.
 
 ## SQLite initialization
 
@@ -96,9 +95,13 @@ Do not run the initializer against the working GX10 reference system.
 
 `systemd/network-log-gx10.service` and `systemd/network-log-gx10.timer` preserve the complete captured live scheduling and hardening contract with neutral public identity/path values.
 
-The automatic chain remains exactly:
+The original recovered chain remains exactly:
 
 `timer -> fetch -> ingest`
+
+The separately managed offline chain is:
+
+`correlation timer -> canonical projection -> deterministic incident engine`
 
 `install/install-applications.py` installs the six application files and four pipeline/correlation units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting the correlation timer. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database. `install/migrate-incident-engine.py` provides the guarded existing-database extension and unscheduled engine installation with exact hashes, a protected SQLite backup, and empty-state-only rollback. `install/install-correlation.py`, `activate-correlation.py`, and `verify-correlation.py` implement the separate managed-invocation gate documented in `docs/MANAGED_CORRELATION.md`.
 
@@ -114,7 +117,7 @@ See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boun
 
 The large model blobs are intentionally not stored in Git. `install/install-model-store.py` imports an independently obtained exact offline model store with full source/target blob hashing, no overwrite, resumable exact-file reuse, and blobs-before-manifests publication. `install/verify-ollama.py --offline` verifies the exact six-manifest inventory, manifest references and hashes, config digests, declared bytes, and every referenced blob size without calling the Ollama API. The normal mode additionally requires the service active/enabled and exactly one loopback TCP listener.
 
-No reconstruction artifact creates an application-specific Ollama caller. The proven automatic application chain remains `timer -> fetch -> ingest`.
+No reconstruction artifact creates an application-specific Ollama caller. The active deterministic schedules remain independent of Ollama.
 
 ## Guarded activation and runtime verification
 
@@ -124,12 +127,12 @@ No reconstruction artifact creates an application-specific Ollama caller. The pr
 
 The model-blob hashing pass reads every unique blob and may take substantial time. It makes no API call and runs no inference.
 
-Successful activation enables exactly:
+Base clean-machine activation enables exactly:
 
 - `ollama.service`
 - `network-log-gx10.timer`
 
-The pipeline service remains static; canonical projection and incident processing remain unscheduled. Starting the timer authorizes only the proven automatic `fetch -> ingest` behavior, so run activation only after the operator has reviewed the final clean-machine runbook and confirmed the transport endpoint.
+The pipeline service remains static. Starting the base timer authorizes only the proven automatic `fetch -> ingest` behavior. The clean-machine runbook uses the separate inactive install/backfill/activation gate before enabling correlation, so run each phase only after reviewing its exact boundary.
 
 Do not run the activation script against the working reference system.
 

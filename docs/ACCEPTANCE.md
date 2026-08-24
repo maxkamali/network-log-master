@@ -70,6 +70,7 @@ The later production-normalizer work advanced after the rebuild-acceptance check
 - live GX10 handoff cutover: `PASS` with immutable-floor identity continuity, exact collector/GX10 hash and record-count parity, zero duplicate event identities, and retained raw-view rollback
 - transitional GX10 parser retirement: `PASS` with exact-hash replacement, zero scheduler references, canonical projection live-copy rehearsal, historical version-3 preservation, unchanged live database, and protected rollback
 - deterministic GX10 incident engine: `PASS` with 63 current tests, guarded schema/artifact migration, private live-copy execution, cursor-reset idempotency, independent exact-state reproduction, unscheduled working-system installation, protected pre-migration backup, unchanged automatic chain, and successful ordinary post-migration fetch/ingest cadence
+- managed GX10 correlation activation: `PASS` with 80 current GX10 tests, private-copy backfill/no-op/failure isolation, guarded inactive install, fail-closed production activation correction, full initial backfill, active zero-lag verification, three scheduled zero-lag cadences, zero correlation restarts, monotonic deterministic state, and continued original fetch/ingest timer advancement
 
 The exact forward-identity contract, live evidence, retained rollback, and next stability/retirement gate are in `docs/NORMALIZER_HANDOFF.md` and `docs/CURRENT_STATE.md`.
 

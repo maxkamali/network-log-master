@@ -119,11 +119,11 @@ Exit gate: replaying the same input cannot create duplicate canonical incidents 
 
 ## Milestone 7 - Steady-state local reasoning
 
-Status: `NEXT`
+Status: `IN PROGRESS`
 
-1. `NEXT` — package canonical projection and incident correlation behind a managed, observable, rollback-protected invocation boundary
-2. add health/backlog telemetry
-3. implement deterministic LLM wake policy
+1. `DONE` — packaged canonical projection and incident correlation behind a managed, observable, rollback-protected invocation boundary and activated it through backfill plus multi-cadence gates
+2. `DONE` — added independent watermark/backlog, integrity, incident-aggregate, restart, and timer-health verification for the managed correlation boundary
+3. `NEXT` — implement deterministic LLM wake policy without scheduling inference
 4. assemble compact incident packets
 5. track model/prompt versions
 6. require structured model output

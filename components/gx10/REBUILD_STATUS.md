@@ -10,13 +10,15 @@ Clean-machine GX10 validation is `WAIVED BY OPERATOR` because no disposable Ubun
 
 The later collector-normalizer production integration completed its forward-only GX10 handoff cutover on 2026-08-24. The unchanged fetch/ingest pipeline reached exact collector-ledger parity across the reviewed multi-cadence window. Item 24 then replaced the unscheduled live transitional vendor/message reparser under its exact captured hash with the canonical schema-version-1 projector. The replacement has zero scheduler references, the live database was unchanged, all historical version-3 rows remain, and a root-only exact legacy rollback copy is retained.
 
-Item 25 is complete. The deterministic incident engine passed private working-database-copy rehearsal, cursor-reset replay, and an independent exact-state rebuild. Its three-table append-only extension and exact engine artifact are installed on the working GX10 system under a protected pre-migration backup with zero state, cursors, or scheduler references. The proven automatic chain remains unchanged.
+Item 25 is complete. The deterministic incident engine passed private working-database-copy rehearsal, cursor-reset replay, and an independent exact-state rebuild. Its three-table append-only extension and exact engine artifact were installed on the working GX10 system under a protected pre-migration backup before the separately gated item-26 activation.
 
-Item 26 has a published candidate, passing private working-database-copy rehearsal, and verified inactive working-system installation for a separately managed offline `projection -> incident` service/timer. It preserves fetch/ingest unchanged, enforces exact stage hashes and single-cycle locking, converges both cursors in bounded passes, exposes structured health counts, and has guarded backfill-before-enable activation, verification, and state-preserving disable controls. Live backfill/activation and multi-cadence gates remain pending.
+Item 26 is complete. The separately managed offline `projection -> incident` service/timer passed private working-database-copy rehearsal, inactive working-system installation, fail-closed activation handling, full initial production backfill, active verification, and three independent scheduled zero-lag cadences. It preserves fetch/ingest unchanged, enforces exact stage hashes and single-cycle locking, converges both cursors in bounded passes, exposes structured health counts, and retains guarded backfill-before-enable activation, verification, and state-preserving disable controls.
 
 The private copy full backfill scanned `954790` stored events, projected `7726` canonical rows, suppressed `5830`, and produced `22` incidents, `425` evidence rows, `463` transitions, and `5` active incidents in one 4.3-second managed pass with zero cursor lag. The next pass was a complete no-op. A synthetic appended canonical event advanced both exact watermarks. Malformed projection input rolled back its batch and prevented incident execution; forced incident failure preserved the durable projection and all prior incident state. The working database remained unchanged.
 
-The working-system inactive install then placed and verified exact projector, incident, runner, service, and timer bytes plus a protected private database/identity binding. The new service/timer are inactive/disabled; the database retains zero version-4 rows, incidents, and both cursors. Installed verification reported recent-event max ID `955351` and projection lag `955351`, as expected before the separately gated initial backfill. The existing fetch/ingest pipeline remains unchanged.
+The working-system inactive install placed and verified exact projector, incident, runner, service, and timer bytes plus a protected private database/identity binding. The first activation attempt failed before application execution because the clean-rebuild write path did not exist on this historical installation. Correlation remained disabled and the database unchanged. A published portability correction atomically bound write scope only to the validated database parent; a separate cleanup correction cleared stale failed-unit state after preserving the failure evidence.
+
+The production backfill then projected `8712` canonical rows, applied suppression to `6622`, and created `23` incidents, `477` evidence rows, and `519` transitions with `3` active incidents. Both watermarks reached event ID `955874` with zero lag before the new timer was enabled. Three later scheduled gates reached event IDs `956240`, `956338`, and `956413`, each with zero projection/incident lag and zero service restarts. Third-gate state contained `9251` canonical rows, `24` incidents, `508` evidence rows, `551` transitions, and `4` active incidents. A final prepublication verification later reached event ID `956995` with both lags still zero and both timers active. The existing fetch/ingest timer advanced during the same window.
 
 This document is the component recovery authority for the active GX10 milestone. `docs/CURRENT_STATE.md` remains the authority for project-wide execution order and the single `NEXT` item.
 
@@ -38,10 +40,10 @@ Completed:
 - 18 synthetic configuration/application/database tests passing
 - complete sanitized service/timer capture preserving fetch-then-ingest order, cadence, and all live hardening directives
 - clean-machine application/unit installer with no-overwrite, ownership/mode preflight, systemd verification, and no automatic activation
-- canonical projection remains intentionally unscheduled
+- canonical projection and deterministic incident processing use a separate managed offline schedule
 - deterministic incident schema/engine candidate with stable instance identity, append-only evidence/transitions, event-time lifecycle, repeat accounting, rolling context, and two-layer replay protection
 - guarded existing-database migration with exact schema/artifact hashes, protected SQLite backup, zero-scheduler-reference enforcement, and empty-state-only rollback
-- clean-machine initialization and verification include the incident extension while leaving projection and incident processing unscheduled
+- clean-machine initialization and verification include the incident extension; existing-system managed correlation installation/activation is separately gated
 - exact pinned application-package installer and fail-closed platform verifier
 - exact operator-supplied Ollama binary installer with no automatic activation
 - guarded offline model-store importer with source/target content hashing, no overwrite, and resumable exact reuse
@@ -51,10 +53,10 @@ Completed:
 - complete preactivation verifier with reference-like/nonempty-state refusal
 - exact installed-source, configuration, SQLite, filesystem, systemd, and effective-limit verification
 - dual-confirmation activator with full offline blob hashing, ordered enablement, and failure rollback
-- only Ollama and the fetch/ingest timer are activated; canonical projection remains unscheduled
+- Ollama, the original fetch/ingest timer, and the separately disableable correlation timer are active; no local-reasoning caller is scheduled
 - complete clean-machine operator runbook
 - final structural, syntax, generated/private-artifact, IPv4/public-safety, unit-test, and filesystem-contract audit
-- 79 synthetic tests passing
+- 80 synthetic tests passing
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.
@@ -106,9 +108,13 @@ Required external application tools:
 
 ## Scheduling and service contract
 
-The currently proven automatic chain is:
+The original recovered automatic chain remains:
 
 `timer -> fetch -> ingest`
+
+The separately implemented production chain is:
+
+`correlation timer -> canonical projection -> deterministic incident engine`
 
 The pipeline service is a hardened non-root oneshot with:
 
@@ -198,7 +204,7 @@ The executable exists, but rediscovery found:
 - no cron reference
 - no retained direct invocation evidence in bounded shell history
 
-The normalized production handoff made reparsing those same vendor messages a duplicate and potentially divergent authority. The item-24 replacement therefore projects exact normalized event fields as classification version 4, retains the two local enabled suppression rules, preserves all version-3 history, and advances through an atomic cursor. It remains unscheduled; automatically adding it to the pipeline would be a separate implementation change.
+The normalized production handoff made reparsing those same vendor messages a duplicate and potentially divergent authority. The item-24 replacement therefore projects exact normalized event fields as classification version 4, retains the two local enabled suppression rules, preserves all version-3 history, and advances through an atomic cursor. It remained unscheduled until item 26 added the separately validated managed correlation chain.
 
 An on-server copy rehearsal scanned `949845` stored events, projected `2781` exact canonical rows, preserved `24207` historical version-3 rows, applied local suppression to `1984` rows, and projected zero rows on the second run. The live database was unchanged.
 
@@ -208,11 +214,11 @@ The version-1 candidate consumes only classification-version-4 projections. Corr
 
 Lifecycle is deterministic and event-time based: explicit down-class transitions open immediately, degradation requires repeated adverse evidence within 15 minutes, recovery enters a five-minute quiet state, relapse reopens, and later recurrence creates a new instance. Cursor advancement and incident changes share one transaction, while unique evidence event IDs preserve idempotency even after cursor reset.
 
-The candidate neither parses messages nor calls Ollama. It has no systemd/cron reference and is not installed on the working GX10 system at this checkpoint.
+The engine neither parses messages nor calls Ollama. Its artifact/schema first passed the unscheduled item-25 installation; item 26 later added only the separate managed runner/service/timer reference.
 
 The private live-copy gate migrated an online SQLite backup, projected `5725` canonical rows from `952789` stored events, preserved `24207` historical version-3 rows, and applied local suppression to `4272` projected rows. Incident processing produced `17` deterministic instances, `311` evidence rows, `341` transitions, and `3` active instances. Normal rerun and cursor-reset replay changed no incident state. A second independent migration/projection/engine run from the protected pre-migration copy produced the exact same state SHA-256 `91e0ba1f8968dbf34480334126aeefc4ab5115861a37d4659e77c48b4cacdfa4`.
 
-The working database retained zero version-4 rows and unchanged scheduling throughout rehearsal. The later guarded unscheduled migration installed exactly three empty incident tables and the exact engine artifact while retaining zero projection/incident cursors and zero scheduler references. One ordinary post-migration fetch/ingest cadence advanced source files from `10503` to `10504` and recent events from `953349` to `953430`, with historical version-3 rows unchanged at `24207` and zero service restarts. See `docs/INCIDENT_ENGINE.md` for the remaining managed-invocation gate.
+The working database retained zero version-4 rows and unchanged scheduling throughout rehearsal. The later guarded unscheduled migration installed exactly three empty incident tables and the exact engine artifact while retaining zero projection/incident cursors and zero scheduler references. One ordinary post-migration fetch/ingest cadence advanced source files from `10503` to `10504` and recent events from `953349` to `953430`, with historical version-3 rows unchanged at `24207` and zero service restarts. Item 26 subsequently completed the separately managed production invocation gate. See `docs/INCIDENT_ENGINE.md` and `docs/MANAGED_CORRELATION.md` for the durable contracts and evidence.
 
 ## Ollama and result-return boundary
 
@@ -240,12 +246,12 @@ Reconstruction requirements include:
 - SQLite database mode `0640`
 - runtime user/group ownership for private state and transport material
 
-## Preserved rediscovery conclusions
+## Preserved rediscovery conclusions and later changes
 
 Do not silently change these findings during reconstruction:
 
-- automatic application behavior is `timer -> fetch -> ingest`
-- the captured enrichment was unscheduled; its canonical projector replacement also remains unscheduled
+- automatic application behavior discovered during rediscovery was `timer -> fetch -> ingest`; item 26 later added a separate managed `projection -> incident` schedule without changing that original chain
+- the captured enrichment had no historical scheduler; its canonical projector replacement remained unscheduled until the separately journaled item-26 activation
 - Ollama/model infrastructure is present without an identified observability-pipeline caller
 - the collector result-return boundary is present without an identified GX10 producer
 - missing historical bootstrap/install provenance is reconstructed from effective contracts, not invented as recovered history

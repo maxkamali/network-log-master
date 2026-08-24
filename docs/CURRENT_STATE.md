@@ -32,13 +32,13 @@ The working observability path currently provides:
 - compressed raw file backlog creation and preserved collector-local history
 - restricted read-only retrieval of verified normalized handoff files by GX10
 - GX10 local durable ingest with replay/idempotency protection
-- unscheduled canonical normalized-field projection on GX10, with historical version-3 enrichment preserved
+- managed canonical normalized-field projection and deterministic incident correlation on GX10, with historical version-3 enrichment preserved
 - collector-side write-only AI-result return boundary and validation/ingestion path
 - local Ollama runtime on GX10
 
 Current rediscovery has not identified a GX10 application producer that writes to the collector result-return boundary, nor an application-specific observability-pipeline caller of Ollama.
 
-The deterministic incident correlator now has a validated schema/engine contract, passing private working-database-copy and independent deterministic replay proof, and a completed unscheduled working-system migration under protected backup. Projection and incident invocation remain absent from the automatic chain; production local-LLM orchestration is not yet implemented.
+The deterministic incident correlator now has a validated schema/engine contract, passing private working-database-copy and independent deterministic replay proof, a completed working-system migration under protected backup, and a separately managed production `projection -> incident` timer. Initial backfill and three scheduled zero-lag cadences passed while the original fetch/ingest timer continued advancing. Production local-LLM orchestration is not yet implemented.
 
 ## Normalizer milestone
 
@@ -236,8 +236,8 @@ Durably journaled rediscovery through item 12N and the final closure audit has e
 - local SQLite ingest and replay/idempotency behavior
 - deterministic classification version 3 and enrichment schema
 - complete two-rule active suppression corpus
-- proven automatic runtime chain `timer -> fetch -> ingest`
-- no discovered automatic invocation mechanism for deterministic enrichment
+- rediscovery-time automatic runtime chain `timer -> fetch -> ingest`
+- no rediscovered historical automatic invocation mechanism for deterministic enrichment
 - no discovered GX10 application producer for the collector result-return boundary
 - no discovered application-specific observability-pipeline caller of Ollama
 - Ollama active/enabled service state, executable provenance, loopback listener, model storage, and six complete local model manifests
@@ -251,7 +251,7 @@ The corrected item-12N analyzer resolved command values through helper-function 
 
 The final live closure audit passed. It found exactly one match for each known application/service/timer hash, preserved the timer/service contract, reconfirmed zero systemd/cron enrichment references, verified external dependencies, and passed unchanged postcheck hashes.
 
-After the normalized handoff stability gate passed, item 24 retired the unscheduled live transitional vendor/message reparser under its exact captured hash. The active replacement is the canonical schema-version-1 projector at SHA-256 `f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079`. It has zero scheduler references and was not run against the live database. All `24207` historical version-3 enrichment rows remain; version-4 rows and the projection cursor remain absent until a later explicit invocation/scheduling decision.
+After the normalized handoff stability gate passed, item 24 retired the unscheduled live transitional vendor/message reparser under its exact captured hash. The active replacement is the canonical schema-version-1 projector at SHA-256 `f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079`. Item 26 later placed that exact projector and the deterministic incident engine behind a separate managed offline service/timer. The initial production backfill created `8712` version-4 rows and `23` incidents at zero lag; three later scheduled gates ended at maximum event IDs `956240`, `956338`, and `956413`, all with zero projection/incident lag and zero service restarts. Historical version-3 rows remain preserved.
 
 Detailed reconstruction authority is now in:
 
@@ -269,7 +269,7 @@ The completed public package provides:
 - reference-like/nonempty-state preactivation refusal
 - dual-confirmation activation with full blob hashing and failure rollback
 - complete clean-machine runbook and two-server integration runbook
-- 49 passing GX10 tests
+- 80 passing GX10 tests
 - `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
@@ -279,13 +279,16 @@ The known application hashes remain:
 - ingest: `6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
 - deterministic enrichment: `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
 - canonical projection candidate: `f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079`
+- managed correlation runner: `dde1aff929ec52957250ebd86bac01f88554caf20117b95463bc0313e00722c4`
+- managed correlation service unit: `5dc2525f241f4d0574f695001d11c6cd8e5ff2f5d5597e16afadbedd6ebe0708`
+- managed correlation timer unit: `af4e5d582eaf76b79e5a0a4acbbe7bff9f2cc6643c36fbc8e9ea81ed7367e73c`
 - pipeline service unit: `0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
 - pipeline timer unit: `5371995539846d4cca6014a70548e95c942e9f601d0736b06f4bda61c1ccc0f5`
 
-Current rediscovery conclusions that must not be silently changed during reconstruction:
+Rediscovery conclusions retained as the historical baseline; later implemented changes are separately journaled:
 
-- automatic pipeline behavior currently proven is `timer -> fetch -> ingest`
-- deterministic enrichment exists but is not proven automatically scheduled
+- automatic pipeline behavior discovered before reconstruction was `timer -> fetch -> ingest`
+- deterministic enrichment had no discovered historical scheduler; item 26 later added the separate managed `projection -> incident` schedule
 - Ollama/model infrastructure exists but no observability-pipeline caller has been identified
 - the collector result-return boundary exists but no GX10 result producer has been identified
 - missing historical bootstrap/install provenance should be reconstructed from captured effective contracts rather than invented and presented as discovered history
@@ -298,7 +301,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration, forward-only production cutover, multi-cadence stability review, deliberate transitional-parser retirement, deterministic incident-engine implementation, private deterministic replay, and unscheduled working-system schema/artifact migration are complete. The next action is a separately gated managed projection/incident invocation boundary. The LLM remains outside identity and lifecycle authority.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration, forward-only production cutover, multi-cadence stability review, deliberate transitional-parser retirement, deterministic incident-engine implementation, private deterministic replay, working-system schema/artifact migration, and separately scheduled managed projection/incident boundary are complete. The next action is deterministic local-reasoning wake policy and compact incident-packet construction. The LLM remains outside identity and lifecycle authority.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -329,7 +332,8 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 23. `DONE` — staged the validated exact-hash handoff package, corrected a systemd portability condition before activation, selected and protected an immutable inclusive floor, paused GX10 with zero conflicting identities, switched only its read-only bind view, proved exact collector/GX10 hash and cardinality parity, resumed all schedules, and retained the exact raw-view rollback boundary.
 24. `DONE` — reviewed the multi-cadence normalized-handoff stability window, proved exact schema-v1 authority and legacy field divergence, built/rehearsed a replay-safe canonical projector with local suppression overlay, and atomically replaced the unscheduled live transitional parser under exact hash with protected rollback while leaving the database and automatic fetch/ingest chain unchanged.
 25. `DONE` — implemented and validated deterministic GX10 incident identity/lifecycle, append-only evidence/transitions, repeat/burst accounting, rolling compact context, replay/idempotency, clean-install integration, guarded migration/rollback, private live-copy execution, independent deterministic rebuild, cursor-reset replay, and the unscheduled working-system schema/artifact migration with protected backup and unchanged fetch/ingest operation.
-26. `NEXT` — complete the explicit working-system initial backfill, timer activation, and multi-cadence gates for the managed canonical-projection/incident boundary. The exact candidate is installed and independently verified inactive with private database/identity binding, unchanged database, disabled timer, and untouched fetch/ingest; private-copy execution/failure evidence passes. Ollama invocation and result production remain excluded.
+26. `DONE` — completed the fail-closed production backfill, exact private write-scope correction, timer activation, and three independent zero-lag scheduled cadences for the managed canonical-projection/incident boundary. The original fetch/ingest timer continued advancing, correlation restarts remained zero, and deterministic counts were monotonic.
+27. `NEXT` — design and implement a deterministic, replay-safe LLM wake policy and compact incident-packet contract over the now-active incident state. Keep packet selection/versioning outside the model, keep inference unscheduled until copy rehearsal and explicit activation gates pass, and do not add collector result production in this item.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

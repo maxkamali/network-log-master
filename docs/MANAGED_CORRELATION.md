@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 26 has a published repository candidate, passing private working-database-copy rehearsal, and a verified inactive working-system installation. The correlation timer remains disabled and neither stage has run against the working database at this checkpoint. The existing automatic chain remains exactly `timer -> fetch -> ingest`.
+Execution-order item 26 is complete. The published candidate passed private working-database-copy rehearsal, verified inactive working-system installation, fail-closed production activation, full initial backfill, active zero-lag verification, and three independent scheduled zero-lag cadences. The correlation timer is active; the original `timer -> fetch -> ingest` chain remains independently active and unchanged.
 
 The candidate manages only two deterministic stages in this exact order:
 
@@ -84,14 +84,12 @@ Any activation error disables/stops only correlation and clears the failed unit 
 
 Disabling correlation stops/disables its timer and stops its oneshot without removing schema, cursors, incident truth, the existing fetch/ingest chain, or the protected item-25 pre-migration backup.
 
-## Remaining gate
+## Production activation evidence
 
-Before live activation:
+The first production start failed before application execution because the clean-rebuild write path was absent on the historical installation. The fail-closed activator disabled correlation and preserved the unchanged database. A published correction reset the service write scope and allowed only the parent of the already validated database; a second cleanup correction clears stale failed-unit state after journal evidence is retained.
 
-1. publish and independently verify exact candidate hashes
-2. `DONE` — rehearse backfill/no-op/new-input/projection-failure/incident-failure behavior on a protected working-database copy
-3. verify `systemd-analyze`, unit security/resource properties, and no network access
-4. confirm working-system item-25 state and protected backup still match
-5. install inactive first, verify, then run one explicitly observed backfill
-6. enable the separate timer only after backfill and zero-lag verification pass
-7. collect multiple steady-state cadences before closing item 26
+The successful initial backfill ended at event ID `955874` with zero projection and incident lag, `8712` canonical version-4 rows, `23` incidents, `477` evidence rows, `519` transitions, and `3` active incidents. Only after this verification did activation enable the correlation timer.
+
+Three later scheduled gates ended at event IDs `956240`, `956338`, and `956413`. Every gate independently passed SQLite/schema/unit/private-runtime verification with zero projection lag, zero incident lag, and zero service restarts. Counts were monotonic, third-gate state contained `9251` canonical rows, `24` incidents, `508` evidence rows, `551` transitions, and `4` active incidents, and the original fetch/ingest timer advanced during the observation window. A final prepublication verification later reached event ID `956995` with both lags still zero and both timers active.
+
+The next gate is deterministic LLM wake selection and compact incident-packet construction. No inference or result-return schedule is added by item 26.

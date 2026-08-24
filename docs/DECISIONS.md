@@ -353,6 +353,7 @@ Consequence:
 - a transactional cursor makes projection append-only, bounded, resumable, and idempotent
 - projection remains absent from the proven automatic `timer -> fetch -> ingest` chain until a later explicit scheduling decision
 - the live retirement used exact old/new hashes, zero-scheduler-reference preconditions, atomic replacement, a root-only rollback copy, and an unchanged-database postcheck
+- item 26 later made that explicit scheduling decision through a separate managed correlation unit without altering the original fetch/ingest chain
 
 ## ADR-020 - Incident truth is deterministic, event-sourced, and independent of the LLM
 
@@ -379,7 +380,7 @@ Consequence:
 
 ## ADR-021 - Deterministic correlation runs in a separate offline managed unit
 
-**Status:** Accepted
+**Status:** Accepted and implemented
 
 Canonical projection and deterministic incident processing will run in one exact ordered wrapper behind a separate oneshot service and timer. The existing fetch/ingest service remains unchanged.
 
@@ -397,7 +398,8 @@ Consequence:
 - the correlation service invokes only exact-hash projector and incident artifacts in that order
 - a runtime-owned single-instance lock prevents overlapping correlation cycles
 - up to three ordered passes may run to converge with concurrent ingestion; nonzero lag after that is a visible failure
-- the service has an independent timer, CPU/memory/time/task limits, Unix-socket-only address families, and application-state-only write access
+- the service has an independent timer, CPU/memory/time/task limits, Unix-socket-only address families, and private write access limited to the validated database parent
 - activation performs one verified timer-disabled backfill before enabling the timer
 - activation failure disables only correlation and preserves deterministic state for replay
 - Ollama, wake policy, result production, and collector result return remain out of scope
+- production activation completed after inactive installation, one zero-lag initial backfill, and three independent zero-lag scheduled cadences; the original fetch/ingest timer advanced throughout

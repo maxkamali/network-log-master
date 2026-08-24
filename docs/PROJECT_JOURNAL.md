@@ -10929,3 +10929,47 @@ No private database/outbox path, result/packet/event/entity content, connection 
 ### Next action
 
 Run the full public gate, publish the completed local-producer checkpoint, and independently verify GitHub. Then design repository/copy-only write-only transport replay safety. Explicitly close the crash window between successful remote upload and local ready→delivered acknowledgment, and define collector-side deterministic duplicate handling before installing any writer credential or transmitting a production file.
+
+## 2026-08-24 05:01 PDT - Item 30 durable collector acceptance candidate passed repository/copy gates
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The completed local-producer checkpoint was published and independently matched on GitHub at:
+
+`197e8f05178dd7a7fb26b46305391386797993ac` — `Complete local result production`
+
+The prior collector gate used only the continued presence of a same-name ready file as its duplicate check. Removing that file reopened the filename for acceptance, while the current ClickHouse result table provides no independent file-identity deduplication. This left the exact crash window identified by item 30: successful upload followed by interruption before GX10's local ready-to-delivered transition could cause a later deterministic retry to be accepted again after collector ready-file removal.
+
+The repository candidate now maintains a versioned SQLite acceptance ledger beneath the protected ready directory. Every accepted basename is bound append-only to exact SHA-256, byte size, record count, and timezone-aware acceptance time. The gate verifies ledger mode/owner/link/schema/version/triggers/quick-check/rows before incoming processing. Exact and divergent replays are quarantined distinctly even after ready-file removal.
+
+Publication orders ready persistence before ledger insertion. Startup reconciles valid ready files with missing rows, closing interruption after publication and before ledger commit. The no-overwrite link/unlink step also recognizes and repairs only its exact same-inode two-link intermediate state; unexplained hard links fail closed. Ledger update/delete triggers are immutable, and all SQLite commits plus affected directories receive durability synchronization.
+
+Eleven focused tests pass locally and from the exact candidate staged in temporary storage on the collector's Linux/Python runtime. They cover first acceptance, existing-ready bootstrap, exact replay with/without the ready file, divergent replay, malformed rejection, ledger immutability/mode tamper, ready divergence, publication-before-ledger interruption, and link-before-unlink interruption.
+
+```text
+local_result_gate_tests=11
+collector_staged_result_gate_tests=11
+candidate_gate_sha256=e23c887e5a4446a19d6ac3730ade130f0f75691fa3730137db1b00847354622f
+candidate_archive_sha256=486ef1a1380945e7ff0621d3da59a1d993678fc14a2ef67c49e719f984e0e6b8
+installed_predecessor_sha256=6aebc562ab305ec201e687dbce4d1ac85693c52551bd70cf5f6a7a13df0c9515
+live_gate_matches_published_predecessor=yes
+live_timer=enabled,active
+live_service=inactive
+live_service_restarts=0
+live_incoming_files=0
+live_ready_jsonl=0
+live_rejected_files=0
+live_acceptance_ledger_exists=no
+credential_installed=no
+collector_result_transmission_invoked=no
+AI_RESULTS_GATE_PACKAGE_VALIDATION=PASS
+AI_RESULTS_GATE_COLLECTOR_STAGED_VALIDATION=PASS
+```
+
+The full independent local gates also pass: all 159 GX10 tests and filesystem contract, 14 collector normalizer/handoff tests, public current-tree/history/link/ref validation, strict Git object verification, and diff whitespace validation.
+
+No live collector gate/spool/unit was changed. No private connection value, result/packet/event/entity content, credential, key material, or model output was printed or committed.
+
+### Next action
+
+Publish this repository/copy checkpoint and independently verify GitHub. Then stop only the collector gate timer, require the exact predecessor/candidate hashes and empty-spool preconditions, preserve exact rollback bytes, atomically install the candidate, run one ledger-bootstrap service cycle, independently verify the empty immutable ledger and timer/service health, and publish that live-gate checkpoint. Do not install a writer credential or transmit a result.

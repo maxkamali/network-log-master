@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
 import json
+import hashlib
 import os
+import re
+import sqlite3
 import stat
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 INCOMING = Path("/var/spool/ai-results/incoming")
@@ -15,12 +18,28 @@ REJECTED = Path("/var/spool/ai-results/rejected")
 SETTLE_SECONDS = 90
 MAX_FILE_BYTES = 256 * 1024
 MAX_RECORDS = 100
+LEDGER_NAME = ".accepted-v1.sqlite3"
+LEDGER_VERSION = 1
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 os.umask(0o027)
 
 
+class GateError(RuntimeError):
+    pass
+
+
 def log(message):
     print(f"{datetime.now().astimezone().isoformat()} {message}", flush=True)
+
+
+def fsync_directory(path):
+    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY)
+
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
 
 
 def valid_timestamp(value):
@@ -119,52 +138,69 @@ def reject(path, reason):
     reason_file = REJECTED / f"{destination.name}.reason.txt"
     reason_file.write_text(reason + "\n", encoding="utf-8")
     os.chmod(reason_file, 0o640)
+    fsync_directory(REJECTED)
+    fsync_directory(INCOMING)
 
     log(f"REJECTED {path.name}: {reason}")
 
 
-def process(path):
+def validate_file(path, require_settled):
     try:
-        st = path.lstat()
+        before = path.lstat()
     except FileNotFoundError:
-        return
+        return None
 
-    if not stat.S_ISREG(st.st_mode):
-        reject(path, "not a regular file")
-        return
+    if not stat.S_ISREG(before.st_mode):
+        return "not a regular file", None
+
+    if before.st_nlink != 1:
+        return "file must have exactly one hard link", None
 
     if not path.name.endswith(".jsonl"):
-        reject(path, "filename must end in .jsonl")
-        return
+        return "filename must end in .jsonl", None
 
-    age = time.time() - st.st_mtime
+    if require_settled:
+        age = time.time() - before.st_mtime
 
-    if age < SETTLE_SECONDS:
-        log(
-            f"WAIT {path.name}: "
-            f"only {age:.0f}s old; requires {SETTLE_SECONDS}s settling"
-        )
-        return
+        if age < SETTLE_SECONDS:
+            return (
+                f"WAIT:{age:.0f}:only {age:.0f}s old; "
+                f"requires {SETTLE_SECONDS}s settling",
+                None,
+            )
 
-    if st.st_size == 0:
-        reject(path, "file is empty")
-        return
+    if before.st_size == 0:
+        return "file is empty", None
 
-    if st.st_size > MAX_FILE_BYTES:
-        reject(
-            path,
-            f"file exceeds {MAX_FILE_BYTES} byte limit"
-        )
-        return
+    if before.st_size > MAX_FILE_BYTES:
+        return f"file exceeds {MAX_FILE_BYTES} byte limit", None
 
     try:
-        text = path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        reject(path, "file is not valid UTF-8")
-        return
+        payload = path.read_bytes()
     except PermissionError:
-        log(f"ERROR {path.name}: gate cannot read file")
-        return
+        return "ERROR:gate cannot read file", None
+
+    try:
+        after = path.lstat()
+    except FileNotFoundError:
+        return "ERROR:file disappeared during validation", None
+
+    stable_fields = (
+        "st_dev",
+        "st_ino",
+        "st_mode",
+        "st_nlink",
+        "st_size",
+        "st_mtime_ns",
+    )
+
+    if any(getattr(before, field) != getattr(after, field) for field in stable_fields):
+        return "ERROR:file changed during validation", None
+
+    try:
+        text = payload.decode("utf-8")
+    except UnicodeDecodeError:
+        return "file is not valid UTF-8", None
 
     records = []
 
@@ -173,58 +209,371 @@ def process(path):
             continue
 
         if len(records) >= MAX_RECORDS:
-            reject(path, f"file exceeds {MAX_RECORDS} JSON records")
-            return
+            return f"file exceeds {MAX_RECORDS} JSON records", None
 
         try:
             obj = json.loads(line)
         except json.JSONDecodeError as exc:
-            reject(
-                path,
-                f"line {line_number}: invalid JSON: {exc.msg}"
-            )
-            return
+            return f"line {line_number}: invalid JSON: {exc.msg}", None
 
         error = validate_record(obj)
 
         if error:
-            reject(path, f"line {line_number}: {error}")
-            return
+            return f"line {line_number}: {error}", None
 
         records.append(obj)
 
     if not records:
-        reject(path, "file contains no JSON records")
+        return "file contains no JSON records", None
+
+    return None, {
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "size": len(payload),
+        "record_count": len(records),
+    }
+
+
+def ledger_path():
+    return READY / LEDGER_NAME
+
+
+def validate_ledger_file(path):
+    metadata = path.lstat()
+
+    if not stat.S_ISREG(metadata.st_mode):
+        raise GateError("acceptance ledger is not a regular file")
+
+    if metadata.st_nlink != 1:
+        raise GateError("acceptance ledger must have exactly one hard link")
+
+    if metadata.st_uid != os.getuid():
+        raise GateError("acceptance ledger owner differs from gate service")
+
+    if stat.S_IMODE(metadata.st_mode) != 0o640:
+        raise GateError("acceptance ledger mode must be 0640")
+
+
+def open_ledger():
+    path = ledger_path()
+
+    try:
+        validate_ledger_file(path)
+    except FileNotFoundError:
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(path, flags, 0o640)
+        os.close(descriptor)
+        fsync_directory(READY)
+        validate_ledger_file(path)
+
+    connection = sqlite3.connect(path, timeout=0)
+
+    try:
+        connection.execute("PRAGMA busy_timeout = 0")
+        connection.execute("PRAGMA journal_mode = DELETE")
+        connection.execute("PRAGMA synchronous = FULL")
+        connection.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS accepted (
+                filename TEXT PRIMARY KEY,
+                sha256 TEXT NOT NULL,
+                size INTEGER NOT NULL,
+                record_count INTEGER NOT NULL,
+                accepted_at TEXT NOT NULL
+            ) WITHOUT ROWID;
+
+            CREATE TRIGGER IF NOT EXISTS accepted_no_update
+            BEFORE UPDATE ON accepted
+            BEGIN
+                SELECT RAISE(ABORT, 'accepted rows are immutable');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS accepted_no_delete
+            BEFORE DELETE ON accepted
+            BEGIN
+                SELECT RAISE(ABORT, 'accepted rows are immutable');
+            END;
+            """
+        )
+
+        version = connection.execute("PRAGMA user_version").fetchone()[0]
+
+        if version == 0:
+            connection.execute(f"PRAGMA user_version = {LEDGER_VERSION}")
+            connection.commit()
+            fsync_directory(READY)
+        elif version != LEDGER_VERSION:
+            raise GateError(f"unsupported acceptance ledger version {version}")
+
+        columns = tuple(connection.execute("PRAGMA table_info(accepted)"))
+
+        if columns != (
+            (0, "filename", "TEXT", 1, None, 1),
+            (1, "sha256", "TEXT", 1, None, 0),
+            (2, "size", "INTEGER", 1, None, 0),
+            (3, "record_count", "INTEGER", 1, None, 0),
+            (4, "accepted_at", "TEXT", 1, None, 0),
+        ):
+            raise GateError("acceptance ledger schema differs")
+
+        triggers = {
+            row[0]: " ".join(row[1].split())
+            for row in connection.execute(
+                "SELECT name, sql FROM sqlite_master "
+                "WHERE type = 'trigger' AND tbl_name = 'accepted'"
+            )
+        }
+        expected_triggers = {
+            "accepted_no_update": " ".join(
+                """
+                CREATE TRIGGER accepted_no_update
+                BEFORE UPDATE ON accepted
+                BEGIN
+                    SELECT RAISE(ABORT, 'accepted rows are immutable');
+                END
+                """.split()
+            ),
+            "accepted_no_delete": " ".join(
+                """
+                CREATE TRIGGER accepted_no_delete
+                BEFORE DELETE ON accepted
+                BEGIN
+                    SELECT RAISE(ABORT, 'accepted rows are immutable');
+                END
+                """.split()
+            ),
+        }
+
+        if triggers != expected_triggers:
+            raise GateError("acceptance ledger immutability triggers differ")
+
+        if connection.execute("PRAGMA quick_check").fetchone() != ("ok",):
+            raise GateError("acceptance ledger quick_check failed")
+
+        for row in connection.execute(
+            "SELECT filename, sha256, size, record_count, accepted_at "
+            "FROM accepted"
+        ):
+            filename, digest, size, record_count, accepted_at = row
+
+            if (
+                not isinstance(filename, str)
+                or Path(filename).name != filename
+                or not filename.endswith(".jsonl")
+                or not isinstance(digest, str)
+                or not SHA256_RE.fullmatch(digest)
+                or not isinstance(size, int)
+                or size <= 0
+                or size > MAX_FILE_BYTES
+                or not isinstance(record_count, int)
+                or record_count <= 0
+                or record_count > MAX_RECORDS
+                or not valid_timestamp(accepted_at)
+            ):
+                raise GateError("acceptance ledger contains an invalid row")
+
+        return connection
+    except Exception:
+        connection.close()
+        raise
+
+
+def ledger_row(connection, filename):
+    return connection.execute(
+        "SELECT sha256, size, record_count FROM accepted WHERE filename = ?",
+        (filename,),
+    ).fetchone()
+
+
+def same_acceptance(row, evidence):
+    return row == (
+        evidence["sha256"],
+        evidence["size"],
+        evidence["record_count"],
+    )
+
+
+def record_acceptance(connection, filename, evidence):
+    accepted_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    with connection:
+        connection.execute(
+            "INSERT INTO accepted "
+            "(filename, sha256, size, record_count, accepted_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (
+                filename,
+                evidence["sha256"],
+                evidence["size"],
+                evidence["record_count"],
+                accepted_at,
+            ),
+        )
+
+    fsync_directory(READY)
+
+
+def recover_linked_publish(path):
+    ready_metadata = path.lstat()
+
+    if ready_metadata.st_nlink == 1:
+        return False
+
+    incoming_path = INCOMING / path.name
+
+    try:
+        incoming_metadata = incoming_path.lstat()
+    except FileNotFoundError as exc:
+        raise GateError(
+            f"ready file {path.name} has an unexplained hard link"
+        ) from exc
+
+    if (
+        ready_metadata.st_nlink != 2
+        or not stat.S_ISREG(incoming_metadata.st_mode)
+        or incoming_metadata.st_dev != ready_metadata.st_dev
+        or incoming_metadata.st_ino != ready_metadata.st_ino
+    ):
+        raise GateError(
+            f"ready file {path.name} has an unexplained hard link"
+        )
+
+    incoming_path.unlink()
+    fsync_directory(INCOMING)
+
+    if path.lstat().st_nlink != 1:
+        raise GateError(f"linked publish recovery failed for {path.name}")
+
+    log(f"RECOVERED linked ready publication for {path.name}")
+    return True
+
+
+def reconcile_ready(connection):
+    recovered = 0
+
+    with connection:
+        for path in sorted(READY.glob("*.jsonl")):
+            recover_linked_publish(path)
+            error, evidence = validate_file(path, require_settled=False)
+
+            if error:
+                raise GateError(f"ready reconciliation failed for {path.name}: {error}")
+
+            row = ledger_row(connection, path.name)
+
+            if row is None:
+                accepted_at = (
+                    datetime.now(timezone.utc)
+                    .isoformat()
+                    .replace("+00:00", "Z")
+                )
+                connection.execute(
+                    "INSERT INTO accepted "
+                    "(filename, sha256, size, record_count, accepted_at) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (
+                        path.name,
+                        evidence["sha256"],
+                        evidence["size"],
+                        evidence["record_count"],
+                        accepted_at,
+                    ),
+                )
+                recovered += 1
+            elif not same_acceptance(row, evidence):
+                raise GateError(
+                    f"ready file {path.name} differs from durable acceptance"
+                )
+
+    if recovered:
+        fsync_directory(READY)
+        log(f"RECOVERED {recovered} ready acceptance ledger row(s)")
+
+    return recovered
+
+
+def publish_ready(path, destination):
+    try:
+        os.link(path, destination, follow_symlinks=False)
+    except FileExistsError as exc:
+        raise GateError(
+            f"ready destination appeared concurrently: {destination.name}"
+        ) from exc
+
+    fsync_directory(READY)
+    path.unlink()
+    fsync_directory(INCOMING)
+
+
+def process(connection, path):
+    result = validate_file(path, require_settled=True)
+
+    if result is None:
+        return
+
+    error, evidence = result
+
+    if error and error.startswith("WAIT:"):
+        _, _, message = error.split(":", 2)
+        log(f"WAIT {path.name}: {message}")
+        return
+
+    if error and error.startswith("ERROR:"):
+        raise GateError(f"{path.name}: {error[6:]}")
+
+    if error:
+        reject(path, error)
         return
 
     destination = READY / path.name
+    row = ledger_row(connection, path.name)
 
-    if destination.exists():
-        reject(path, "duplicate filename already exists in ready")
+    if row is not None:
+        if same_acceptance(row, evidence):
+            reject(path, "exact filename/content already accepted")
+        else:
+            reject(path, "filename conflicts with durable acceptance")
         return
 
-    os.rename(path, destination)
+    if destination.exists():
+        raise GateError(f"unreconciled ready destination exists: {path.name}")
+
+    publish_ready(path, destination)
+    record_acceptance(connection, destination.name, evidence)
 
     log(
         f"ACCEPTED {destination.name}: "
-        f"{len(records)} record(s), {st.st_size} bytes"
+        f"{evidence['record_count']} record(s), {evidence['size']} bytes"
     )
 
 
 def main():
+    connection = None
+
     try:
+        connection = open_ledger()
+        reconcile_ready(connection)
         entries = sorted(INCOMING.iterdir())
-    except PermissionError:
-        log("FATAL: cannot enumerate incoming directory")
+    except (OSError, sqlite3.Error, GateError) as exc:
+        log(f"FATAL: {type(exc).__name__}: {exc}")
+
+        if connection is not None:
+            connection.close()
+
         return 1
+
+    had_error = False
 
     for path in entries:
         try:
-            process(path)
-        except Exception as exc:
+            process(connection, path)
+        except (OSError, sqlite3.Error, GateError) as exc:
             log(f"ERROR {path.name}: {type(exc).__name__}: {exc}")
+            had_error = True
 
-    return 0
+    connection.close()
+
+    return 1 if had_error else 0
 
 
 if __name__ == "__main__":

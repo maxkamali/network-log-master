@@ -249,12 +249,13 @@ The independent live verifier passed:
 Captured:
 
 - result validation implementation
+- versioned immutable accepted filename/content ledger and startup reconciliation
 - systemd service
 - systemd timer
 - service filesystem-access drop-in
 - incoming/ready/rejected workflow
 
-The live implementation and public capture were validated for exact implementation parity where naming is not environment-specific.
+The original live implementation and public capture were validated for exact implementation parity where naming is not environment-specific. The item-30 durable-ledger revision passes 11 local and 11 exact collector-staged tests but is not yet installed at this checkpoint.
 
 ## GX10 spool retention
 

@@ -131,10 +131,11 @@ Current validation policy includes:
 - required title and body
 - accepted files move atomically to a ready area
 - rejected files are quarantined with a reason
+- the current repository candidate records immutable accepted filename/content identity beyond ready-file retention
 
 Validated records are then ingested into ClickHouse and become available to Grafana.
 
-No historical GX10 application producer for this boundary was discovered. The item-30 version-1 no-network local producer is now active after protected activation and has 15 collector-valid ready files, zero delivered, and no writer credential/sender/collector transmission. Current operations must still not claim a working AI-result round trip. See `docs/RESULT_OUTBOX.md`.
+No historical GX10 application producer for this boundary was discovered. The item-30 version-1 no-network local producer is now active after protected activation; the last completed natural catch-up evidence had 16 collector-valid ready files, zero delivered, and no writer credential/sender/collector transmission. The durable collector acceptance-ledger candidate passes repository and exact collector-staged tests but is not yet installed. Current operations must still not claim a working AI-result round trip. See `docs/RESULT_OUTBOX.md` and `docs/RESULT_TRANSPORT.md`.
 
 ## Grafana operational boundary
 

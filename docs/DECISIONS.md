@@ -509,3 +509,28 @@ Consequence:
 - local activation must pause only managed reasoning, bind all five reasoning tables to one before/after digest, run exactly one producer cycle while the outbox timer is disabled, enable that timer only after cardinality verification, and restore reasoning on every path
 - local production is accepted only after multiple natural exact-no-op cadences and one natural reasoning-success/outbox-file catch-up preserve all prior file bytes
 - a later sender must define durable acknowledgment semantics before it may remove or retransmit a local ready file
+
+## ADR-026 - Collector acceptance identity is durable beyond ready-file retention
+
+**Status:** Accepted; repository and exact collector-staged gates complete
+
+The collector validation gate records every accepted result filename, SHA-256 digest, byte size, record count, and acceptance time in a versioned append-only SQLite ledger under the protected ready boundary. A filename can be accepted only once for one exact payload, even after its ready file is removed.
+
+Why:
+
+- a deterministic sender must retry the same filename after interruption
+- successful remote upload can occur before GX10 records its local delivered transition
+- retaining a ready file is not a durable acceptance identity because retention or operations may later remove it
+- ClickHouse's current result table does not independently deduplicate replayed files
+- collector rejection must distinguish exact replay from same-name divergent content without re-ingesting either
+
+Consequence:
+
+- the gate reconciles valid preexisting ready files into the ledger before processing incoming files
+- first acceptance publishes the validated file before committing its ledger row; a crash in between is recovered from ready on the next cycle
+- the no-overwrite link/unlink publication step also recovers its intermediate two-link state after interruption
+- ledger rows have immutable update/delete triggers, strict schema/version/content checks, synchronous commits, and directory `fsync`
+- exact and divergent replays are both quarantined with different reasons and never republished to ready
+- the ledger remains authoritative after a ready file is removed, so deterministic sender replay cannot create a second ClickHouse ingestion
+- the sender may move a local ready file to delivered after successful transport completion; collector acceptance/rejection remains independently observable
+- installation and production sender transmission remain separate gates

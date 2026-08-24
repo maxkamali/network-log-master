@@ -11407,3 +11407,48 @@ No result content, private filename/digest, key, credential, connection value, o
 ### Next action
 
 Publish and independently verify this correction. Require the exact installed predecessor/candidate hashes, stopped gate timer, one unchanged settled incoming file, and zero ledger/ready/rejected. Preserve exact rollback bytes, install the candidate, run the gate once, and require one accepted ledger/ready file before restoring the timer. Then obtain explicit approval for the root-protected local Grafana-reader credential use needed for direct ClickHouse row/provenance verification.
+
+## 2026-08-24 08:58 PDT - Item 30 first transport durably accepted after cross-owner correction
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The cross-owner gate correction was published and independently matched on GitHub at:
+
+`6f4491322a4998fd813fa94cf46482c41f80eb01` — `Handle cross owner result publication`
+
+The guarded installer required the exact durable-ledger predecessor/candidate hashes, stopped gate timer, inactive service, exactly one settled incoming file, zero ready/rejected files, and zero ledger rows. It preserved the exact predecessor in a new root-only mode-`0600` backup, installed the candidate mode `0755`, ran the gate once, and retained automatic rollback until one ready file and one ledger row passed. It then restored the enabled/active timer.
+
+Independent private comparison proved GX10 delivered, collector ready, and the immutable acceptance row have identical filename and SHA-256 without printing either. The gate/authorization/SSH/Vector/ClickHouse services pass. GX10's configured sender remains disabled/inactive and full verification now reports 60 reasoning results, 59 ready, one delivered, zero started rows, and zero projection/incident lag; the original pipeline schedule remains enabled/active.
+
+```text
+published_correction=6f4491322a4998fd813fa94cf46482c41f80eb01
+installed_gate_sha256=aecf3e862b489498389ce56a1859f60935c18de56db23c4a22b718033e40c974
+protected_gate_predecessor_sha256=e23c887e5a4446a19d6ac3730ade130f0f75691fa3730137db1b00847354622f
+collector_incoming=0
+collector_ready=1
+collector_rejected=0
+collector_ledger_rows=1
+gx10_collector_ledger_ready_parity=yes
+sender_timer=disabled,inactive
+sender_service=inactive,restarts-0
+outbox_results=60
+outbox_ready=59
+outbox_delivered=1
+reasoning_started=0
+projection_lag=0
+incident_lag=0
+collector_gate_timer=enabled,active
+vector=active
+clickhouse=active
+clickhouse_row_provenance=pending-explicit-read-credential-authorization
+COLLECTOR_CROSS_OWNER_GATE_INSTALL=PASS
+FIRST_LIVE_LEDGER_READY_GX10_PARITY=PASS
+GX10_CONFIGURED_INACTIVE_FULL_POSTCHECK=PASS
+COLLECTOR_CONFIGURED_WRITER_FULL_POSTCHECK=PASS
+```
+
+No result content, private filename/digest, key, credential, connection value, or private path was printed or committed. No replay or divergent test has begun.
+
+### Next action
+
+After explicit operator approval, read the existing root-protected Grafana-reader credential only in collector memory and run bounded read-only ClickHouse queries for the privately bound run ID. Require exactly one row and exact `raw_json` byte/digest/provenance equivalence, then publish first-live closure before exact replay.

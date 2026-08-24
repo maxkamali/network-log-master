@@ -108,6 +108,8 @@ The first manual sender cycle completed transport and local delivery exactly as 
 
 The corrected gate copies validated bytes into a gate-owned, fsynced ready-directory partial, revalidates both source and copy against the original evidence, uses a same-owner no-overwrite hard link only as the atomic publication step, persists ready, removes incoming, then removes the marker. A crash leaves a recognizable two-link ready/marker state; recovery accepts only that exact inode relation and exact incoming bytes before completing cleanup. Eleven local and eleven collector-runtime tests pass, including first acceptance with a deliberately different ready inode and interruption recovery.
 
+The exact correction was installed under a new root-only predecessor backup while the gate timer was stopped and the settled incoming file remained unchanged. One explicit gate cycle accepted it, created exactly one immutable ledger row and one ready file, and restored the enabled/active timer. Private comparison proves GX10 delivered, ledger, and collector ready names/digests are identical. Sender/outbox/correlation/reasoning/original-pipeline and collector gate/Vector/ClickHouse service health all pass; direct ClickHouse row/provenance selection awaits explicit authorization to use the existing local read-only datasource credential.
+
 ## Passed repository/copy gates
 
 The 11 focused tests prove:

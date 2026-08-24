@@ -512,7 +512,7 @@ Consequence:
 
 ## ADR-026 - Collector acceptance identity is durable beyond ready-file retention
 
-**Status:** Accepted and active after guarded empty-ledger bootstrap
+**Status:** Accepted and active after cross-owner publication correction
 
 The collector validation gate records every accepted result filename, SHA-256 digest, byte size, record count, and acceptance time in a versioned append-only SQLite ledger under the protected ready boundary. A filename can be accepted only once for one exact payload, even after its ready file is removed.
 

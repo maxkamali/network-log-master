@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import importlib.util
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -142,6 +143,46 @@ class ManagedReasoningInstallTests(unittest.TestCase):
                 current,
                 INSTALLER.PREVIOUS_TIMER_BYTES,
                 0o644,
+                os.getuid(),
+                os.getgid(),
+            )
+
+    def test_runner_upgrade_accepts_only_exact_prior_hash(self):
+        target = self.root / 'managed-runner.py'
+        previous = b'previous runner\n'
+        current = b'current runner\n'
+        target.write_bytes(previous)
+        target.chmod(0o755)
+        previous_sha256 = hashlib.sha256(previous).hexdigest()
+        action, saved = INSTALLER.install_or_upgrade_sha256(
+            target,
+            current,
+            previous_sha256,
+            0o755,
+            os.getuid(),
+            os.getgid(),
+        )
+        self.assertEqual(action, 'upgraded')
+        self.assertEqual(saved, previous)
+        self.assertEqual(target.read_bytes(), current)
+        action, saved = INSTALLER.install_or_upgrade_sha256(
+            target,
+            current,
+            previous_sha256,
+            0o755,
+            os.getuid(),
+            os.getgid(),
+        )
+        self.assertEqual((action, saved), ('reused', None))
+        target.write_bytes(b'divergent\n')
+        with self.assertRaisesRegex(
+            INSTALLER.InstallError, 'upgrade artifact differs'
+        ):
+            INSTALLER.install_or_upgrade_sha256(
+                target,
+                current,
+                previous_sha256,
+                0o755,
                 os.getuid(),
                 os.getgid(),
             )

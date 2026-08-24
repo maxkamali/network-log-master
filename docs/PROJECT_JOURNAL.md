@@ -9797,3 +9797,50 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify this failed-cadence/safe-disable checkpoint. Keep reasoning disabled while designing a bounded admission or coalescing correction that preserves all append-only state and prevents packet creation from outpacing one inference per cadence. Rehearse the correction on a protected production-state copy before any production resume.
+
+## 2026-08-24 03:01 PDT - Item 29 bounded-backlog candidate built
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The failed-cadence/safe-disable checkpoint was published and independently matched on GitHub at:
+
+`f0cbf8c170e65d3239bd09b0a250873fe40c5141` — `Record managed reasoning backlog gate failure`
+
+Production reasoning remains disabled and inactive. No production packet, run, result, model call, or installed artifact changed during candidate development.
+
+The corrected managed runner still validates the exact deterministic builder and item-28 inference artifacts and still permits at most one run/result. It now checks exact selected-version pending state under the same cycle lock:
+
+- if pending is nonzero, the builder is not loaded or run
+- the existing highest-priority pending packet receives the one allowed reservation
+- packet count must remain fixed and pending count must fall by exactly one
+- only a pending-zero cycle may run the builder, which coalesces intervening incident changes into the next latest deterministic packet set
+
+Aggregate telemetry reports whether the builder was deferred. Existing packets, model/prompt registrations, runs, and results remain append-only.
+
+The installer permits atomic runner replacement only when the existing root-owned mode-`0755` bytes match the exact published predecessor hash. It refuses every other divergence and retains predecessor bytes for rollback if a later installation gate fails.
+
+Candidate SHA-256 values:
+
+- managed runner: `c0c095661a7042be57230fb8fc856c03f5fe191ab604e4e246138f28156a3bee`
+- installer: `f1f1cbc1dbe079c6e0ee8a1b67b54abd3d677199fbff43e5b633e5b8e8aec5e8`
+- service: `3559ed6a5bdfc98de3544bc6bf7f69cf6459a9cb50083cd96db632a27e52e64a`
+- timer: `c284e9d8cbb71775dc6b67b7451bb024d689b4ec27b89de987443a6ff77cad34`
+
+Two new focused tests prove exact pending-backlog builder deferral/drain and exact-old-hash runner upgrade/divergence refusal. Twenty-three focused item-29 tests pass within the 138-test GX10 suite.
+
+Validation:
+
+```text
+138 tests passed
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+PUBLIC_REPOSITORY_CURRENT_TREE=PASS
+PUBLIC_REPOSITORY_HISTORY=PASS
+PUBLIC_REPOSITORY_LINKS=PASS
+PUBLIC_REPOSITORY_REF_TOPOLOGY=PASS
+PUBLIC_REPOSITORY_VALIDATION=PASS
+```
+
+### Next action
+
+Publish and independently verify this candidate. Stage only that exact checkpoint, create a fresh protected current-production-state copy while reasoning remains disabled, and prove one real-model cycle leaves packet count fixed at 12 while advancing runs/results from three to four and pending from nine to eight. Verify deterministic truth isolation before any working-system upgrade.

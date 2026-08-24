@@ -473,6 +473,7 @@ Consequence:
 - the runner validates exact builder/caller/configuration/prompt/output hashes and owns a separate mode-`0600` cycle lock
 - any preexisting `STARTED` reservation fails the cycle before new work
 - each cycle can add at most one run and one result; terminal inference failure remains explicit and nonauthoritative
+- packet construction is deferred whenever selected-version backlog exists; that drain cycle must keep packet count fixed and reduce pending count by exactly one reservation before construction can resume at pending zero
 - the service can write only beside the validated database and can connect only to IPv4 loopback plus Unix sockets
 - the timer's first scheduled cycle is relative to enablement, not host boot; an exact published inactive predecessor may be atomically upgraded, while any divergent target is refused
 - inactive installation, protected-copy rehearsal, protected initial production cycle, timer enablement, and multi-cadence evidence remain separate gates

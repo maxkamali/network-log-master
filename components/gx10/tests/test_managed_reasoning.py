@@ -118,7 +118,9 @@ class ManagedReasoningTests(unittest.TestCase):
     def test_empty_cycle_is_noop_and_reports_health(self):
         result, output, error = self.run_runner()
         self.assertEqual(result, 0, error)
-        self.assertIn('packets_created=0 invoked=0', output)
+        self.assertIn(
+            'packets_created=0 builder_deferred=0 invoked=0', output
+        )
         self.assertIn('pending=0', output)
         self.assertIn('GX10_MANAGED_REASONING=PASS', output)
 
@@ -147,6 +149,44 @@ class ManagedReasoningTests(unittest.TestCase):
         self.assertIn('succeeded=1', output)
         self.assertIn('results=1', output)
         self.assertIn('pending=0', output)
+
+    def test_pending_backlog_defers_builder_and_drains_exactly_one(self):
+        self.add_packet('packet-1')
+        self.add_packet('packet-2')
+        self.packet_builder.write_text(
+            '#!/usr/bin/env python3\n'
+            'import sqlite3\n'
+            'def run(database):\n'
+            '    c=sqlite3.connect(database)\n'
+            "    c.execute(\"INSERT INTO reasoning_packets VALUES ('packet-3')\")\n"
+            '    c.commit()\n'
+            '    c.close()\n'
+            '    return 0\n'
+        )
+        self.packet_builder.chmod(0o755)
+        self.caller.write_text(
+            '#!/usr/bin/env python3\n'
+            'import sqlite3\n'
+            f'MODEL={self.runner.MODEL_VERSION!r}\n'
+            f'PROMPT={self.runner.PROMPT_VERSION!r}\n'
+            'def run(database, **kwargs):\n'
+            '    c=sqlite3.connect(database)\n'
+            "    c.execute('INSERT INTO reasoning_model_versions VALUES (?)',(MODEL,))\n"
+            "    c.execute('INSERT INTO reasoning_prompt_versions VALUES (?)',(PROMPT,))\n"
+            "    c.execute(\"INSERT INTO reasoning_runs VALUES ('run-1','packet-1',?,?,1,'SUCCEEDED')\",(MODEL,PROMPT))\n"
+            "    c.execute(\"INSERT INTO reasoning_results VALUES ('run-1')\")\n"
+            '    c.commit()\n'
+            '    c.close()\n'
+            '    return 0\n'
+        )
+        self.caller.chmod(0o755)
+        self.refresh_hashes()
+        result, output, error = self.run_runner()
+        self.assertEqual(result, 0, error)
+        self.assertIn(
+            'packets_created=0 builder_deferred=1 invoked=1', output
+        )
+        self.assertIn('packets=2 pending=1', output)
 
     def test_safe_terminal_failure_is_visible_and_bounded(self):
         self.add_packet()

@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has a published repository candidate, passing synthetic tests, passing protected current-production-state-copy rehearsal, exact inactive working-system installation, and protected initial production activation. A final pre-activation review caught and corrected the initial boot-relative timer before any inference. The activator then created a protected backup, completed exactly one bounded production cycle while the timer was disabled, passed aggregate verification, and enabled the timer. Two natural cadences each completed exactly one successful inference, but each also built four new packets; pending backlog grew from three to six to nine. This failed the stability gate. The reasoning timer is disabled/inactive with all append-only state preserved while bounded-backlog policy is corrected. Fetch/ingest, deterministic correlation, and Ollama remain healthy.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Two natural cadences each completed exactly one successful inference, but each also built four new packets; pending backlog grew from three to six to nine. This failed the stability gate, and the reasoning timer was disabled with all append-only state preserved. A 138-test bounded-backlog candidate now defers packet construction whenever any selected-version packet is pending and requires the one allowed inference attempt to reduce pending count by exactly one. Fetch/ingest, deterministic correlation, and Ollama remain healthy while the correction awaits publication and protected-copy rehearsal.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -20,10 +20,11 @@ Each cycle:
 
 1. validates SQLite integrity, foreign keys, reasoning-table presence, run/result consistency, and current reasoning health
 2. refuses to continue if any `STARTED` reservation remains after the cycle lock is acquired
-3. runs the deterministic packet builder once
+3. runs the deterministic packet builder once only when the exact selected-version pending backlog is empty; otherwise reports explicit builder deferral
 4. calls the item-28 reasoning boundary once, which reserves at most one highest-priority pending packet
 5. proves that the cycle added at most one run and at most one result
-6. emits aggregate health without packet, incident, event, or entity content
+6. when backlog existed at cycle start, proves packet count did not grow and pending count fell by exactly one reservation
+7. emits aggregate health without packet, incident, event, or entity content
 
 Packet construction may append deterministic facts for currently qualifying incidents, but the expensive and untrusted model boundary is limited to one invocation per cycle. The oneshot service has a three-minute timeout, one-CPU quota, 1-GiB memory limit, 32-task limit, low CPU/I/O priority, write access only to the validated database parent, and network policy limited to Unix sockets plus IPv4 loopback. The caller itself still hard-codes the loopback Ollama endpoint and refuses redirects.
 
@@ -63,7 +64,7 @@ An acquired cycle lock makes every preexisting `STARTED` reservation an unreconc
 - the validated application database, runtime identity, and exact installed item-27/item-28 dependency bytes
 - loaded correlation and Ollama dependencies
 - safe absolute database and unit names
-- absent or exact managed runner/service/timer/configuration/drop-in targets; the timer alone may also be the exact published inactive boot-relative predecessor and is then atomically upgraded
+- absent or exact managed runner/service/timer/configuration/drop-in targets; the timer may also be the exact published inactive boot-relative predecessor, and the runner may be the exact published pre-backlog-correction version, for atomic upgrade only
 - inactive and disabled managed reasoning units
 
 It installs only the managed runner, service/timer, private database-path configuration, and runtime-identity/ordering/write-scope drop-in. It runs `systemd-analyze verify` and reloads systemd but does not build packets, call Ollama, or enable the timer.
@@ -74,7 +75,7 @@ It installs only the managed runner, service/timer, private database-path config
 
 ## Candidate validation
 
-Twenty-one focused tests currently prove:
+Twenty-three focused tests currently prove:
 
 - strict private database configuration
 - exact dependency hashes and file metadata
@@ -84,15 +85,17 @@ Twenty-one focused tests currently prove:
 - refusal of two-run behavior
 - explicit `STARTED` interruption refusal
 - aggregate backlog/run/result health
+- pending-backlog builder deferral and exact one-reservation drain
 - canonical private config/drop-in rendering
 - atomic exact-file reuse and divergence refusal
 - exact-old-hash timer upgrade and divergent-old refusal
+- exact-old-hash runner upgrade and divergent-old refusal
 - protected-backup-first activation order
 - activation failure isolation and bounded-cycle enforcement
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `136` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, and protected initial production activation have passed. The first two natural cadences passed per-cycle inference safety but failed bounded-backlog stability. A corrected backlog policy plus new protected and production cadence gates are required. Collector result return is outside item 29.
+The full GX10 suite currently passes `138` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, and protected initial production activation have passed. The first two natural cadences passed per-cycle inference safety but failed bounded-backlog stability. The correction must be published, rehearsed against a protected current-state copy, installed while disabled, and pass new production cadence gates. Collector result return is outside item 29.
 
 ## Protected current-state-copy evidence
 
@@ -199,15 +202,17 @@ The first natural cadence reached event ID `967397`, created four new packets, c
 
 Because packet arrival exceeded bounded inference throughput in two consecutive natural cadences, item 29 did not pass stability. Only the managed reasoning timer was disabled and stopped. A later verifier at event ID `967946` proved 12 packets, nine pending, three successful runs/results, zero failures/`STARTED` rows/restarts, disabled/inactive reasoning units, zero deterministic lag, and healthy fetch/ingest plus correlation schedules. No state was deleted or rewritten.
 
-The next candidate must bound packet admission or coalesce pending work so automatic backlog cannot grow faster than the deliberate one-inference-per-cycle ceiling. It must preserve existing append-only packets/runs/results and pass protected-copy plus new multi-cadence production gates before reasoning is re-enabled.
+The correction defers the deterministic builder whenever any selected-version packet is pending. The cycle still validates the exact builder bytes, but it spends its single model reservation on existing backlog and fails unless packet count stays fixed and pending falls by exactly one. Only pending-zero cycles may build current latest-state packets, coalescing all intervening incident changes into the next deterministic packet per qualifying incident rather than admitting another set during every drain cycle.
+
+The installer permits an atomic runner replacement only when the installed predecessor has exact SHA-256 `f79ed272a8638449bc6a98aefa1758e711a69645950c284869d96e03704432ca` and exact root ownership/mode. Any later install failure restores the captured exact predecessor. Existing packets/runs/results are not rewritten.
 
 ## Exact candidate artifacts
 
-- managed runner SHA-256: `f79ed272a8638449bc6a98aefa1758e711a69645950c284869d96e03704432ca`
-- installer SHA-256: `6c8ee52f8a7247275b1812129dc97bbd49c71cf741b5973153ed6391fabf90ba`
+- managed runner SHA-256: `c0c095661a7042be57230fb8fc856c03f5fe191ab604e4e246138f28156a3bee`
+- installer SHA-256: `f1f1cbc1dbe079c6e0ee8a1b67b54abd3d677199fbff43e5b633e5b8e8aec5e8`
 - activator SHA-256: `04d16e1c3eac68cc04a533bba7571ba5534a2f07af8da566a2f9c725d50b43d3`
 - verifier SHA-256: `b80d3de36cdeac1ea268c9c12a1edfe1dce83e248e57eefff99872ec11622708`
 - service SHA-256: `3559ed6a5bdfc98de3544bc6bf7f69cf6459a9cb50083cd96db632a27e52e64a`
 - timer SHA-256: `c284e9d8cbb71775dc6b67b7451bb024d689b4ec27b89de987443a6ff77cad34`
 
-These hashes describe the corrected pre-activation candidate. The runner, activator, verifier, and service are byte-identical to the protected-copy candidate; only the installer and timer changed. The exact corrected timer is installed inactive on the working system.
+These hashes describe the bounded-backlog candidate. The activator, verifier, service, and corrected timer are byte-identical to the activation candidate; only the runner and installer changed. The working system still has the exact predecessor runner and corrected timer installed inactive.

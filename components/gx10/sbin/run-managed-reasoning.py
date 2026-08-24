@@ -267,13 +267,15 @@ def emit_summary(
     result: str,
     duration_ms: int,
     packets_created: int,
+    builder_deferred: int,
     invoked: int,
 ) -> None:
     print(
         'MANAGED_REASONING '
         'schema=1 '
         f'result={result} duration_ms={duration_ms} '
-        f'packets_created={packets_created} invoked={invoked} '
+        f'packets_created={packets_created} '
+        f'builder_deferred={builder_deferred} invoked={invoked} '
         f'packets={state["packets"]} pending={state["pending"]} '
         f'model_versions={state["model_versions"]} '
         f'prompt_versions={state["prompt_versions"]} '
@@ -318,6 +320,7 @@ def main(
     descriptor = None
     started_at = time.monotonic()
     packets_created = 0
+    builder_deferred = 0
     invoked = 0
     try:
         for path, expected_hash, mode in (
@@ -334,23 +337,29 @@ def main(
             raise ManagedReasoningError(
                 'managed reasoning has an unreconciled STARTED reservation'
             )
-        packet_builder = load_stage(
-            'gx10_managed_reasoning_packets',
-            packet_builder_path,
-            selected_database,
-        )
         caller = load_stage(
             'gx10_managed_local_reasoning',
             caller_path,
             selected_database,
         )
-        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
-            packet_result = packet_builder.run(selected_database)
-        if packet_result != 0:
-            raise ManagedReasoningError(
-                'reasoning packet stage failed'
+        if before['pending']:
+            builder_deferred = 1
+            after_packets = before
+        else:
+            packet_builder = load_stage(
+                'gx10_managed_reasoning_packets',
+                packet_builder_path,
+                selected_database,
             )
-        after_packets = snapshot(selected_database)
+            with redirect_stdout(io.StringIO()), redirect_stderr(
+                io.StringIO()
+            ):
+                packet_result = packet_builder.run(selected_database)
+            if packet_result != 0:
+                raise ManagedReasoningError(
+                    'reasoning packet stage failed'
+                )
+            after_packets = snapshot(selected_database)
         packets_created = after_packets['packets'] - before['packets']
         if packets_created < 0:
             raise ManagedReasoningError(
@@ -390,6 +399,13 @@ def main(
             raise ManagedReasoningError(
                 'managed reasoning left a STARTED reservation'
             )
+        if before['pending'] and (
+            packets_created
+            or final['pending'] != before['pending'] - new_runs
+        ):
+            raise ManagedReasoningError(
+                'managed reasoning backlog admission differs'
+            )
         duration_ms = int((time.monotonic() - started_at) * 1000)
         if reasoning_result != 0:
             emit_summary(
@@ -397,6 +413,7 @@ def main(
                 result='safe_failure',
                 duration_ms=duration_ms,
                 packets_created=packets_created,
+                builder_deferred=builder_deferred,
                 invoked=invoked,
             )
             print('GX10_MANAGED_REASONING=SAFE_FAILURE', file=sys.stderr)
@@ -410,6 +427,7 @@ def main(
             result='pass',
             duration_ms=duration_ms,
             packets_created=packets_created,
+            builder_deferred=builder_deferred,
             invoked=invoked,
         )
         print('GX10_MANAGED_REASONING=PASS')

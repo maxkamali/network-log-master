@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import grp
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -95,6 +96,9 @@ PREVIOUS_TIMER_BYTES = (
     '\n[Install]\n'
     'WantedBy=timers.target\n'
 ).encode()
+PREVIOUS_RUNNER_SHA256 = (
+    'f79ed272a8638449bc6a98aefa1758e711a69645950c284869d96e03704432ca'
+)
 
 
 class InstallError(ValueError):
@@ -219,6 +223,55 @@ def install_or_upgrade_bytes(
         os.replace(temporary, target)
         fsync_directory(target.parent)
         return 'upgraded'
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def install_or_upgrade_sha256(
+    target,
+    data,
+    previous_sha256,
+    mode,
+    uid=0,
+    gid=0,
+):
+    target = Path(target)
+    if not target.exists() and not target.is_symlink():
+        install_bytes(target, data, mode, uid, gid)
+        return 'created', None
+    details = validate_regular(
+        target, 'existing managed reasoning upgrade artifact'
+    )
+    if (
+        details.st_uid != uid
+        or details.st_gid != gid
+        or stat.S_IMODE(details.st_mode) != mode
+    ):
+        raise InstallError(
+            'existing managed reasoning upgrade metadata differs'
+        )
+    current = target.read_bytes()
+    if current == data:
+        return 'reused', None
+    if hashlib.sha256(current).hexdigest() != previous_sha256:
+        raise InstallError(
+            'existing managed reasoning upgrade artifact differs'
+        )
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f'.{target.name}.', dir=target.parent
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, 'wb') as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chown(temporary, uid, gid)
+        os.chmod(temporary, mode)
+        os.replace(temporary, target)
+        fsync_directory(target.parent)
+        return 'upgraded', current
     finally:
         if temporary.exists():
             temporary.unlink()
@@ -384,10 +437,24 @@ def apply_install(
         )
         ensure_directory(DROPIN_DIR, 0, 0, 0o755, created_directories)
         for source, target, mode in ARTIFACTS:
-            if target == SYSTEMD_DIR / TIMER:
+            source_bytes = source.read_bytes()
+            if target == LIBEXEC_DIR / 'run-managed-reasoning.py':
+                action, previous = install_or_upgrade_sha256(
+                    target,
+                    source_bytes,
+                    PREVIOUS_RUNNER_SHA256,
+                    mode,
+                )
+                if action == 'created':
+                    created_files.append(target)
+                elif action == 'upgraded':
+                    upgraded_files.append(
+                        (target, previous, source_bytes, mode)
+                    )
+            elif target == SYSTEMD_DIR / TIMER:
                 action = install_or_upgrade_bytes(
                     target,
-                    source.read_bytes(),
+                    source_bytes,
                     PREVIOUS_TIMER_BYTES,
                     mode,
                 )
@@ -395,9 +462,9 @@ def apply_install(
                     created_files.append(target)
                 elif action == 'upgraded':
                     upgraded_files.append(
-                        (target, PREVIOUS_TIMER_BYTES, source.read_bytes(), mode)
+                        (target, PREVIOUS_TIMER_BYTES, source_bytes, mode)
                     )
-            elif install_bytes(target, source.read_bytes(), mode):
+            elif install_bytes(target, source_bytes, mode):
                 created_files.append(target)
         if install_bytes(CONFIG_PATH, config, 0o640, gid=group.gr_gid):
             created_files.append(CONFIG_PATH)

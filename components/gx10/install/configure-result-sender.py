@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
-import json
 import os
 from pathlib import Path
 import stat
@@ -120,26 +119,15 @@ def install_bytes(path, data, mode, uid, gid):
             temporary.unlink()
 
 
-def expected_configuration(verifier, state):
-    verifier.validate_file(RUNTIME_CONFIG, 0o640, 0, state['gid'])
-    try:
-        runtime = json.loads(RUNTIME_CONFIG.read_text(encoding='utf-8'))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise ConfigureError('result sender runtime configuration differs') from exc
-    if not isinstance(runtime, dict) or set(runtime) != {
-        'sftp_host',
-        'sftp_port',
-        'sftp_user',
-    }:
-        raise ConfigureError('result sender runtime configuration differs')
+def expected_configuration(runtime, state):
     data = {
         'delivered_path': str(state['delivered']),
         'identity_path': str(state['identity']),
         'known_hosts_path': str(state['known_hosts']),
         'ready_path': str(state['ready']),
         'schema_version': 1,
-        'sftp_host': runtime['sftp_host'],
-        'sftp_port': int(runtime['sftp_port']),
+        'sftp_host': runtime['host'],
+        'sftp_port': runtime['port'],
         'sftp_user': 'ai_results_writer',
     }
     return (json.dumps(data, separators=(',', ':'), sort_keys=True) + '\n').encode(
@@ -147,24 +135,26 @@ def expected_configuration(verifier, state):
     )
 
 
-def configure(identity_input):
+def configure(
+    identity_input,
+    runtime_config=RUNTIME_CONFIG,
+    legacy_fetch_source=None,
+):
     require_inactive()
     verifier = load_verifier()
     state = verifier.runtime_state()
+    runtime = verifier.runtime_inputs(state, runtime_config, legacy_fetch_source)
     supplied_public = validate_identity_input(identity_input)
-    reader_identity = state['identity'].parent / 'spool-reader.key'
-    verifier.validate_file(reader_identity, 0o600, state['uid'], state['gid'])
-    if supplied_public == public_key(reader_identity):
+    if supplied_public == public_key(runtime['reader_identity']):
         raise ConfigureError('result writer identity is not role-separated')
-    source_known_hosts = state['identity'].parent / 'known_hosts'
-    verifier.validate_file(source_known_hosts, 0o600, state['uid'], state['gid'])
-    expected_config = expected_configuration(verifier, state)
+    source_known_hosts = runtime['source_known_hosts']
+    expected_config = expected_configuration(runtime, state)
     targets = (state['identity'], state['known_hosts'], SENDER_CONFIG)
     present = tuple(path.exists() or path.is_symlink() for path in targets)
     if any(present):
         if not all(present):
             raise ConfigureError('result sender private state is partial')
-        verifier.verify_configured()
+        verifier.verify_configured(runtime_config, legacy_fetch_source)
         if (
             public_key(state['identity']) != supplied_public
             or state['known_hosts'].read_bytes() != source_known_hosts.read_bytes()
@@ -200,7 +190,7 @@ def configure(identity_input):
         )
         created.append(SENDER_CONFIG)
         require_inactive()
-        verifier.verify_configured()
+        verifier.verify_configured(runtime_config, legacy_fetch_source)
         require_inactive()
         return {'created': 3, 'reused': 0}
     except Exception:
@@ -222,6 +212,9 @@ def main():
         type=Path,
         default=IDENTITY_INPUT_DEFAULT,
     )
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument('--runtime-config', type=Path)
+    source.add_argument('--legacy-fetch-source', type=Path)
     parser.add_argument(
         '--confirm-configure-disabled-result-sender',
         action='store_true',
@@ -232,7 +225,11 @@ def main():
             raise ConfigureError('run the result sender configurator as root')
         if not args.confirm_configure_disabled_result_sender:
             raise ConfigureError('disabled result sender confirmation is absent')
-        result = configure(args.identity_input)
+        result = configure(
+            args.identity_input,
+            args.runtime_config or RUNTIME_CONFIG,
+            args.legacy_fetch_source,
+        )
         print(
             'RESULT_SENDER_CONFIGURE schema=1 '
             f'created={result["created"]} reused={result["reused"]} '

@@ -11249,3 +11249,38 @@ No key content, private runtime path, connection value, result/packet/event/enti
 ### Next action
 
 Run the public gate, publish and independently verify the compatibility correction, then rerun the exact configured-inactive GX10 configurator. Independently verify collector authorization/backup exactness, GX10 private metadata/configuration, disabled/inactive sender, active outbox, and all existing schedule health before publishing the first-live/replay plan.
+
+## 2026-08-24 08:34 PDT - Item 30 captured-private-runtime derivation corrected before configuration
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The optional-key-comment correction was published and independently matched on GitHub at:
+
+`26e673afbfeb52c53cd099a97da5ac5517ea48f8` — `Accept writer key comments safely`
+
+The second GX10 configure attempt passed the corrected key parser and reached postinstall verification, where it safely refused the reconstructed public runtime-config/key-path assumptions. The configurator removed all three new targets. Read-only metadata checks then established that the captured working application predates the reconstructed clean-build JSON runtime file and uses private identity-bearing constants; its known-hosts file remains at the validated private-home role, while the public-default reader-key basename is intentionally absent.
+
+The corrected candidate now supports two explicit and mutually exclusive provenance modes. Clean rebuilds retain the strict root-owned JSON runtime contract. The reference working system uses only a caller-supplied captured fetch source whose bytes must match the already-published rediscovery SHA-256. The verifier parses that exact file as AST without executing it, accepts only literal host/port/user and `Path` assignments, requires the derived key and known-hosts paths inside the rederived service SSH directory, and independently validates their service ownership/modes. The writer role remains fixed and distinct.
+
+One focused regression constructs an exact-hash synthetic legacy fetch contract and proves endpoint/key/known-host derivation. All 184 GX10 tests and package/filesystem contracts pass locally. All 184 tests and the filesystem contract pass from exact corrected bytes on GX10. Neither refusal invoked SFTP or left sender targets.
+
+```text
+gx10_configure_second_attempt=safe-postverify-refusal,created-targets-removed
+gx10_sender_timer=disabled,inactive
+gx10_sender_service=inactive
+gx10_sender_private_targets=absent
+legacy_fetch_source_binding=published-sha256,root-0755-single-link,AST-literals-only
+local_gx10_tests=184
+gx10_staged_gx10_tests=184
+corrected_configurator_sha256=d652b056fb0601e4b879eec9ffee31723a6f351e0828b4bd9a7028bba68e9aa9
+corrected_verifier_sha256=fc6a9c851d6ba845c9776a8aeab6d6fd9df4f4b64b6d2c12e532361b9672d8d0
+corrected_management_tests_sha256=9dd39739ceae778a007f06ecf7a9d3384451681d4641b48183191c4e9fb42fe6
+collector_result_transmission_invoked=no
+GX10_CAPTURED_RUNTIME_DERIVATION=PASS
+```
+
+No private runtime path/value, key content, connection value, result/packet/event/entity content, credential, or model output was printed or committed. The collector's dedicated authorization and exact predecessor backup remain installed; the GX10 private targets remain absent.
+
+### Next action
+
+Run the public gate, publish and independently verify this correction, privately resolve the unique live fetch source only by its published SHA-256, and rerun the configured-inactive GX10 configurator with that source. Then independently verify both hosts and publish the first-live/replay plan before any transport.

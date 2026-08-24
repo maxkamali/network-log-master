@@ -5,6 +5,7 @@ from contextlib import redirect_stderr, redirect_stdout
 import hashlib
 import importlib.util
 import io
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -255,6 +256,14 @@ class ResultSenderManagementTests(unittest.TestCase):
             'known_hosts': ssh_dir / 'result-writer-known_hosts',
         }
 
+    def runtime_inputs(self, state):
+        return {
+            'host': 'collector.example.invalid',
+            'port': 1,
+            'reader_identity': state['identity'].parent / 'spool-reader.key',
+            'source_known_hosts': state['identity'].parent / 'known_hosts',
+        }
+
     def test_configurator_installs_private_state_last_config_and_stays_inactive(self):
         state = self.private_state()
         config = self.root / 'result-sender.json'
@@ -270,6 +279,7 @@ class ResultSenderManagementTests(unittest.TestCase):
 
         verifier = types.SimpleNamespace(
             runtime_state=lambda: state,
+            runtime_inputs=lambda *args: self.runtime_inputs(state),
             validate_file=lambda *args, **kwargs: None,
             verify_staged=mock.Mock(),
             verify_configured=mock.Mock(),
@@ -310,7 +320,10 @@ class ResultSenderManagementTests(unittest.TestCase):
             ],
         )
         verifier.verify_staged.assert_called_once_with()
-        verifier.verify_configured.assert_called_once_with()
+        verifier.verify_configured.assert_called_once_with(
+            self.configurator.RUNTIME_CONFIG,
+            None,
+        )
 
     def test_configurator_failure_removes_only_new_private_state(self):
         state = self.private_state()
@@ -323,6 +336,7 @@ class ResultSenderManagementTests(unittest.TestCase):
 
         verifier = types.SimpleNamespace(
             runtime_state=lambda: state,
+            runtime_inputs=lambda *args: self.runtime_inputs(state),
             validate_file=lambda *args, **kwargs: None,
             verify_staged=mock.Mock(),
             verify_configured=mock.Mock(
@@ -370,6 +384,7 @@ class ResultSenderManagementTests(unittest.TestCase):
         identity_input.write_bytes(b'writer-key\n')
         verifier = types.SimpleNamespace(
             runtime_state=lambda: state,
+            runtime_inputs=lambda *args: self.runtime_inputs(state),
             validate_file=lambda *args, **kwargs: None,
         )
         with (
@@ -421,6 +436,38 @@ class ResultSenderManagementTests(unittest.TestCase):
                 self.verifier.public_key(self.root / 'installed.key'),
                 f'ssh-ed25519 {encoded}',
             )
+
+    def test_verifier_derives_exact_captured_legacy_runtime_contract(self):
+        state = self.private_state()
+        reader = state['identity'].parent / 'spool-reader.key'
+        known = state['identity'].parent / 'known_hosts'
+        source = self.root / 'captured-fetch.py'
+        source.write_text(
+            'from pathlib import Path\n'
+            f'DB = Path({str(self.root / "state.db")!r})\n'
+            f'TMP_DIR = Path({str(self.root / "tmp")!r})\n'
+            f'INCOMING_DIR = Path({str(self.root / "incoming")!r})\n'
+            "SFTP_HOST = 'collector.example.invalid'\n"
+            "SFTP_PORT = '1'\n"
+            "SFTP_USER = 'reader'\n"
+            f'SSH_KEY = Path({str(reader)!r})\n'
+            f'KNOWN_HOSTS = Path({str(known)!r})\n',
+            encoding='utf-8',
+        )
+        source.chmod(0o755)
+        digest = hashlib.sha256(source.read_bytes()).hexdigest()
+        with (
+            mock.patch.object(self.verifier, 'validate_file'),
+            mock.patch.object(self.verifier, 'LEGACY_FETCH_SHA256', digest),
+        ):
+            runtime = self.verifier.runtime_inputs(
+                state,
+                legacy_fetch_source=source,
+            )
+        self.assertEqual(runtime['host'], 'collector.example.invalid')
+        self.assertEqual(runtime['port'], 1)
+        self.assertEqual(runtime['reader_identity'], reader)
+        self.assertEqual(runtime['source_known_hosts'], known)
 
 
 if __name__ == '__main__':

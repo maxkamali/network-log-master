@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import grp
+import hashlib
 import importlib.util
 import json
 import os
@@ -28,6 +30,7 @@ OUTBOX_SERVICE = 'network-log-gx10-result-outbox.service'
 OUTBOX_TIMER = 'network-log-gx10-result-outbox.timer'
 DROPIN_PATH = SYSTEMD_DIR / f'{SERVICE}.d' / '10-runtime.conf'
 SSH_KEYGEN = Path('/usr/bin/ssh-keygen')
+LEGACY_FETCH_SHA256 = '662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b'
 SAFE_NAME_RE = re.compile(r'^[A-Za-z0-9_.@-]+$')
 ARTIFACTS = (
     (
@@ -233,25 +236,100 @@ def public_key(path):
     return ' '.join(fields[:2])
 
 
-def verify_configured():
+def assigned_values(tree):
+    values = {}
+    for node in tree.body:
+        if not isinstance(node, ast.Assign) or len(node.targets) != 1:
+            continue
+        if isinstance(node.targets[0], ast.Name):
+            values[node.targets[0].id] = node.value
+    return values
+
+
+def constant(values, name):
+    node = values.get(name)
+    if not isinstance(node, ast.Constant) or not isinstance(node.value, (str, int)):
+        raise ValueError('managed result sender legacy runtime differs')
+    return node.value
+
+
+def path_constant(values, name):
+    node = values.get(name)
+    if (
+        not isinstance(node, ast.Call)
+        or not isinstance(node.func, ast.Name)
+        or node.func.id != 'Path'
+        or len(node.args) != 1
+        or node.keywords
+        or not isinstance(node.args[0], ast.Constant)
+        or not isinstance(node.args[0].value, str)
+    ):
+        raise ValueError('managed result sender legacy runtime differs')
+    return absolute_path(node.args[0].value, 'legacy path')
+
+
+def runtime_inputs(state, runtime_config=RUNTIME_CONFIG, legacy_fetch_source=None):
+    if legacy_fetch_source is None:
+        validate_file(runtime_config, 0o640, 0, state['gid'])
+        try:
+            runtime = json.loads(Path(runtime_config).read_text(encoding='utf-8'))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError('managed result sender runtime configuration differs') from exc
+        if not isinstance(runtime, dict) or set(runtime) != {
+            'sftp_host',
+            'sftp_port',
+            'sftp_user',
+        }:
+            raise ValueError('managed result sender runtime configuration differs')
+        reader_identity = state['identity'].parent / 'spool-reader.key'
+        source_known_hosts = state['identity'].parent / 'known_hosts'
+        host = runtime['sftp_host']
+        port = runtime['sftp_port']
+    else:
+        source = Path(legacy_fetch_source)
+        validate_file(source, 0o755, 0, 0)
+        data = source.read_bytes()
+        if hashlib.sha256(data).hexdigest() != LEGACY_FETCH_SHA256:
+            raise ValueError('managed result sender legacy runtime differs')
+        try:
+            tree = ast.parse(data.decode('utf-8'))
+        except (UnicodeDecodeError, SyntaxError) as exc:
+            raise ValueError('managed result sender legacy runtime differs') from exc
+        values = assigned_values(tree)
+        host = constant(values, 'SFTP_HOST')
+        port = constant(values, 'SFTP_PORT')
+        reader_user = constant(values, 'SFTP_USER')
+        if not isinstance(reader_user, str) or not reader_user:
+            raise ValueError('managed result sender legacy runtime differs')
+        reader_identity = path_constant(values, 'SSH_KEY')
+        source_known_hosts = path_constant(values, 'KNOWN_HOSTS')
+        if (
+            reader_identity.parent != state['identity'].parent
+            or source_known_hosts != state['identity'].parent / 'known_hosts'
+        ):
+            raise ValueError('managed result sender legacy runtime differs')
+    validate_file(reader_identity, 0o600, state['uid'], state['gid'])
+    validate_file(source_known_hosts, 0o600, state['uid'], state['gid'])
+    return {
+        'host': host,
+        'port': int(port),
+        'reader_identity': reader_identity,
+        'source_known_hosts': source_known_hosts,
+    }
+
+
+def verify_configured(runtime_config=RUNTIME_CONFIG, legacy_fetch_source=None):
     state = verify_public_package()
     validate_file(SENDER_CONFIG, 0o640, 0, state['gid'])
     validate_file(state['identity'], 0o600, state['uid'], state['gid'])
     validate_file(state['known_hosts'], 0o600, state['uid'], state['gid'])
     if not public_key(state['identity']):
         raise ValueError('managed result sender identity differs')
-    validate_file(RUNTIME_CONFIG, 0o640, 0, state['gid'])
+    runtime = runtime_inputs(state, runtime_config, legacy_fetch_source)
     try:
-        runtime = json.loads(RUNTIME_CONFIG.read_text(encoding='utf-8'))
         configured = json.loads(SENDER_CONFIG.read_text(encoding='utf-8'))
     except (OSError, json.JSONDecodeError) as exc:
         raise ValueError('managed result sender configuration differs') from exc
-    if not isinstance(runtime, dict) or set(runtime) != {
-        'sftp_host',
-        'sftp_port',
-        'sftp_user',
-    }:
-        raise ValueError('managed result sender runtime configuration differs')
     runner_path = LIBEXEC_DIR / 'run-result-sender.py'
     specification = importlib.util.spec_from_file_location(
         'verified_installed_result_sender_runner', runner_path
@@ -264,8 +342,8 @@ def verify_configured():
         or parsed['delivered'] != state['delivered']
         or parsed['identity'] != state['identity']
         or parsed['known_hosts'] != state['known_hosts']
-        or parsed['host'] != runtime['sftp_host']
-        or parsed['port'] != int(runtime['sftp_port'])
+        or parsed['host'] != runtime['host']
+        or parsed['port'] != runtime['port']
         or parsed['user'] != 'ai_results_writer'
     ):
         raise ValueError('managed result sender configured values differ')
@@ -296,12 +374,18 @@ def main():
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument('--staged', action='store_true')
     mode.add_argument('--configured', action='store_true')
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument('--runtime-config', type=Path)
+    source.add_argument('--legacy-fetch-source', type=Path)
     args = parser.parse_args()
     try:
         if os.geteuid() != 0:
             raise ValueError('run the managed result sender verifier as root')
         if args.configured:
-            verify_configured()
+            verify_configured(
+                args.runtime_config or RUNTIME_CONFIG,
+                args.legacy_fetch_source,
+            )
         else:
             verify_staged()
         print(

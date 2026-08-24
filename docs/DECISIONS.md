@@ -537,7 +537,7 @@ Consequence:
 
 ## ADR-027 - Result sending is single-file, exact-byte, and transport-acknowledged
 
-**Status:** Accepted; configured-inactive candidate passed repository/staged gates
+**Status:** Accepted; configured-inactive production gate passed
 
 The GX10 sender transmits at most one oldest ready result per cycle under the same lock used by the no-network producer. It uploads the existing canonical file under its unchanged deterministic basename and moves it locally to delivered only after the bounded SFTP process returns success.
 

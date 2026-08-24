@@ -11285,7 +11285,7 @@ No private runtime path/value, key content, connection value, result/packet/even
 
 Run the public gate, publish and independently verify this correction, privately resolve the unique live fetch source only by its published SHA-256, and rerun the configured-inactive GX10 configurator with that source. Then independently verify both hosts and publish the first-live/replay plan before any transport.
 
-## 2026-08-24 08:51 PDT - Item 30 canonical configuration render regression corrected
+## 2026-08-24 08:40 PDT - Item 30 canonical configuration render regression corrected
 
 ### Status
 
@@ -11315,3 +11315,52 @@ No private path/value, key content, connection value, result/packet/event/entity
 ### Next action
 
 Publish and independently verify this correction, then rerun the same fixed wrapper. Independently verify both hosts and publish the first-live/replay plan before any transport.
+
+## 2026-08-24 08:44 PDT - Item 30 configured-inactive production gate passed
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The canonical-render correction was published and independently matched on GitHub at:
+
+`0943358449c8f3db6ed888643c9e56f68798c986` — `Cover canonical sender configuration`
+
+The fixed wrapper resolved exactly one captured fetcher by its published hash, copied it only to protected temporary runtime storage, and ran the exact published configurator. Configuration installed the dedicated writer identity, separate writer known-hosts, and canonical configuration while the sender timer/service remained disabled/inactive. The independent configured verifier passed. A second wrapper execution proved exact three-for-three idempotent reuse and repeated verification without SFTP.
+
+The installed GX10 writer fingerprint matched the collector's newly authorized public key without printing either. The root-only temporary private/public inputs were then removed from both hosts and the VM. Independent collector verification proved exact predecessor-backup-plus-one-line authorization, metadata, `sshd -t`, active result gate, Vector, and ClickHouse. Independent GX10 verification passed the configured sender, active outbox, zero-lag correlation/reasoning, and original pipeline schedule.
+
+```text
+github_checkpoint=0943358449c8f3db6ed888643c9e56f68798c986
+sender_configuration=installed,canonical
+writer_identity=installed,dedicated
+writer_known_hosts=installed,separate
+sender_timer=disabled,inactive
+sender_service=inactive
+sender_configuration_reuse=3
+ephemeral_key_inputs=removed
+outbox_results=58
+outbox_ready=57
+outbox_delivered=0
+correlation_projection_lag=0
+correlation_incident_lag=0
+reasoning_started=0
+reasoning_succeeded=58
+reasoning_failures=1
+reasoning_results=58
+original_pipeline_timer=enabled,active
+collector_authorization=exact-predecessor-plus-one-line
+collector_gate=enabled,active,restarts-0
+vector=active
+clickhouse=active
+collector_result_transmission_invoked=no
+GX10_CONFIGURED_INACTIVE_PRODUCTION=PASS
+GX10_CONFIGURED_INACTIVE_FULL_POSTCHECK=PASS
+COLLECTOR_CONFIGURED_WRITER_FULL_POSTCHECK=PASS
+```
+
+The active outbox had one newly completed reasoning result not yet projected at the instant of verification (`58` results, `57` ready, zero delivered); this is an ordinary active-schedule timing state, not loss or sender activity.
+
+No private path/value, key content, connection value, result/packet/event/entity content, credential, or model output was printed or committed. No SFTP invocation or outbox movement occurred.
+
+### Next action
+
+Publish this configured-inactive checkpoint and the bounded first-live/replay plan. Then invoke exactly one sender service cycle with its timer still disabled, bind the selected deterministic filename/digest privately, and prove local delivered transition, collector durable acceptance, Vector/ClickHouse single-row ingestion with complete `raw_json` provenance, and all schedule health before any replay or malformed/divergent test.

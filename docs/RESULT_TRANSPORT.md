@@ -91,6 +91,19 @@ Seven new management tests cover config-last installation, failure cleanup, part
 
 The matching collector authorizer is independently guarded. It accepts exactly one root-owned public Ed25519 input, refuses key duplication, preserves the complete predecessor `authorized_keys` bytes in a root-only mode-`0600` backup, atomically appends only the new line, and runs `sshd -t` without reloading or restarting SSH. Any failure after publication restores the exact predecessor and removes attempt-created backup state. An exact already-authorized key is idempotently reusable and, when the protected backup exists, must equal the exact backup plus that single line. Five synthetic append/reuse/duplicate/private-input/rollback tests pass locally and from exact bytes staged on the collector runtime.
 
+## Configured-inactive production state
+
+The dedicated authorization and all GX10 private inputs are installed and independently verified. Exact idempotent configuration reuse passed. Temporary key inputs were removed after the installed GX10 identity matched the collector authorization. The sender timer/service remain disabled/inactive and have never invoked SFTP. The active outbox and all prior deterministic schedules remain healthy; the collector result gate, Vector, ClickHouse, SSH configuration, authorization metadata, and exact predecessor-backup relation pass.
+
+## Bounded first-live and replay plan
+
+1. Keep the sender timer disabled. Capture the oldest ready filename, exact digest, and relevant ClickHouse/collector-ledger baseline privately without printing content or identifiers.
+2. Start exactly one sender service cycle manually. Require success, zero restarts, exactly one ready-to-delivered transition, unchanged bytes/name, and no second send.
+3. Wait only for the existing collector gate and Vector cadences. Require one new immutable acceptance-ledger row bound to the exact name/digest, no rejection, and exactly one ClickHouse row whose stored `raw_json` is byte-equivalent to the canonical sent line and preserves the complete versioned provenance contract.
+4. Reverify sender disabled/inactive, outbox cardinality, correlation/reasoning zero lag, original pipeline health, collector gate, Vector, and ClickHouse. Publish the first-live checkpoint before replay.
+5. Upload the exact delivered bytes/name once more through the same fixed writer credential without altering local delivered state. Require collector classification as exact already-accepted replay, no new acceptance-ledger row, and no second ClickHouse row.
+6. Upload one bounded same-name divergent derivative created only in protected temporary storage. Require conflict quarantine, no acceptance-ledger mutation, no ClickHouse row, and immediate deletion of the temporary derivative. Reverify all schedules and publish closure before considering recurring sender activation.
+
 ## Passed repository/copy gates
 
 The 11 focused tests prove:
@@ -113,7 +126,6 @@ After GitHub independently matched the published candidate, the guarded upgrader
 
 ## Remaining gates
 
-1. Publish and independently verify the configured-inactive candidate.
-2. Publish the exact-backup collector authorizer, then generate/install a dedicated writer identity, install only its matching collector authorization, bind the separate pinned known-host file, retain exact rollback evidence, and pass configured-inactive production verification with no SFTP invocation.
-3. Publish the bounded first-live/replay plan, then transmit one file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
-4. Prove an exact replay creates no second ClickHouse row and a controlled malformed/divergent file remains isolated.
+1. Publish and independently verify the configured-inactive production checkpoint and bounded plan.
+2. Transmit exactly one file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
+3. Prove an exact replay creates no second ClickHouse row and a controlled divergent file remains isolated; then decide whether to enable the recurring sender timer.

@@ -7322,3 +7322,36 @@ The verification did not use or publish the local fine-grained token file, priva
 This verification closes publication of execution-order item 16. It does not close execution-order item 17 or the ultimate project acceptance criterion.
 
 The single `NEXT` item remains disposable clean collector, GX10, and two-server execution on suitable systems. No reference-system write or service-state change occurred during final publication or verification.
+
+## 2026-08-23 17:08 PDT - Operator acceptance of clean-host residual risk
+
+### Decision
+
+The operator confirmed that no pair of disposable servers is available and directed the project to assume the validated rebuild packages are sufficient and continue toward the end goal.
+
+Execution-order items 11, 13, and 17 are therefore `WAIVED BY OPERATOR`, not passed. Clean collector, clean GX10, and clean two-server execution remain empirically unverified.
+
+ADR-016 records the durable rationale and consequence.
+
+### Evidence retained
+
+The decision relies on the already-published evidence:
+
+- repository-only and reachable-history sanitation pass
+- 73 normalizer tests and 42 GX10 package tests pass
+- collector synthetic/static/runtime-contract gates pass
+- Git integrity and public topology pass
+- read-only reference connectivity and core-runtime revalidation pass
+- guarded installers, independent verifiers, rollback boundaries, and operator runbooks are published
+
+The waiver does not reinterpret unavailable external execution as empirical evidence.
+
+### Safety and execution consequence
+
+The operator authorization changes project sequencing only. It does not authorize running clean-machine installers against either working reference system, destructive production changes, or bypassing later migration/cutover safeguards.
+
+The rebuild/documentation milestone is accepted with residual risk. Execution-order item 18 is now the single `NEXT` item:
+
+`18. NEXT — design collector-side production-normalizer integration, including explicit input/output boundaries, private platform-inventory injection, shadow observability, failure isolation, and rollback behavior.`
+
+Publish this decision checkpoint before materially implementing item 18.

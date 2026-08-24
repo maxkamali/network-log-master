@@ -6,9 +6,9 @@ Repository-only two-server rebuild acceptance: `PASS`.
 
 Read-only reference-system revalidation: `PASS`.
 
-Disposable clean two-server execution: `DEFERRED`.
+Disposable clean two-server execution: `WAIVED BY OPERATOR`, empirically unverified.
 
-The public collector and GX10 rebuild packages, component runbooks, cross-system runbook, current/target architecture split, and final sanitation gate are complete. Suitable disposable Debian 13 amd64 and Ubuntu 24.04 arm64 GX10-class targets are not currently available, so the project does not claim that clean-host execution has passed.
+The public collector and GX10 rebuild packages, component runbooks, cross-system runbook, current/target architecture split, and final sanitation gate are complete. Suitable disposable Debian 13 amd64 and Ubuntu 24.04 arm64 GX10-class targets are not available. On 2026-08-23, the operator explicitly accepted that residual risk and authorized advancement; the project still does not claim that clean-host execution passed.
 
 ## Durable public-repository gate
 
@@ -92,18 +92,18 @@ The GX10 check validated package/platform state, Ollama executable/unit/model me
 
 Previously journaled component-specific live runtime gates remain authoritative, including `COLLECTOR_RUNTIME_VERIFY=PASS`, `TRANSPORT_VERIFY=PASS`, application/unit hash closure, and unchanged live GX10 application hashes.
 
-## Deferred external execution
+## Waived external execution and residual risk
 
-The following are not marked complete:
+The following remain empirically unverified:
 
 - clean collector execution on disposable Debian 13 amd64
 - clean GX10 execution on disposable Ubuntu 24.04 arm64 GX10-class hardware
 - full disposable two-server execution of `docs/TWO_SERVER_REBUILD.md`
 
-When those systems become available, execute the component and cross-system runbooks exactly and append public-safe results here and in `docs/PROJECT_JOURNAL.md`.
+These checks no longer block subsequent milestones because the operator explicitly waived the execution gate. When suitable systems become available, execute the component and cross-system runbooks exactly and append public-safe results here and in `docs/PROJECT_JOURNAL.md`.
 
 ## Acceptance interpretation
 
 The repository contains the implementation, guarded installers, offline dependencies contract, verifiers, current/target architecture, and operator instructions necessary to attempt a deterministic rebuild without undocumented conversational memory.
 
-Repository and reference-read-only evidence pass. Environmental execution evidence remains deferred, not assumed.
+Repository and reference-read-only evidence pass. Environmental execution evidence is waived for project sequencing, not assumed or represented as a pass. The rebuild/documentation milestone is therefore accepted with residual risk.

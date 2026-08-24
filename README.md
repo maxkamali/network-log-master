@@ -2,9 +2,9 @@
 
 A capture-first network observability and local-AI incident reasoning platform.
 
-This repository is the master public engineering record and active source repository for the deterministic normalizer plus complete public-safe collector and GX10 rebuild packages. Disposable-host execution of both clean-machine runbooks remains explicitly deferred.
+This repository is the master public engineering record and active source repository for the deterministic normalizer plus complete public-safe collector and GX10 rebuild packages. Disposable-host execution of both clean-machine runbooks was not available and remains empirically unverified.
 
-Final repository-only rebuild milestone status: `PUBLISHED`. Ultimate clean-two-server execution status: `DEFERRED`, not passed.
+Final repository-only rebuild milestone status: `PUBLISHED`. The operator explicitly accepted the residual clean-host execution risk on 2026-08-23 so the project could advance; the unavailable execution is `WAIVED`, not falsely recorded as passed.
 
 ## Start here
 
@@ -25,6 +25,8 @@ The reconstruction/documentation effort is complete only when:
 > Two clean servers, this public repository, and operator-supplied environment values are sufficient for another engineer or AI to reconstruct the current functional system without undocumented implementation memory.
 
 Environment-specific credentials, addresses, usernames, SSH keys, certificate private keys, and similar identity-bearing values are intentionally supplied during rebuild and are not stored publicly.
+
+The empirical clean-host proof was unavailable. The operator accepted that residual risk and authorized the project to treat the rebuild/documentation milestone as complete for execution-order purposes while retaining the missing evidence as an explicit qualification.
 
 ## Core design
 

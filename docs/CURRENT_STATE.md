@@ -4,19 +4,23 @@ Last verified project checkpoint: 2026-08-23.
 
 This file is the authority for current execution order. Exactly one item should be marked `NEXT`.
 
-## Project acceptance criterion
+## Project acceptance criterion and disposition
 
 The rebuild/documentation project is complete only when two clean servers, this public repository, and operator-supplied environment values are sufficient for another engineer or AI to reconstruct the current functional system without undocumented implementation memory.
 
 Environment-specific credentials, addresses, usernames, SSH keys, certificate private keys, and similar identity-bearing values are intentionally supplied by the operator during rebuild rather than stored publicly.
 
+Suitable disposable systems were unavailable. On 2026-08-23, the operator explicitly accepted the residual risk and authorized advancement without executing the clean-host gate. This closes the rebuild/documentation milestone for project sequencing; it does not manufacture empirical clean-host evidence.
+
 ## Final rebuild milestone status
 
 Public rebuild packages, documentation, sanitation, and repository/read-only-reference acceptance: `DONE`.
 
-Disposable clean-two-server execution: `DEFERRED`.
+Disposable clean-two-server execution: `WAIVED BY OPERATOR`, empirically unverified.
 
-The final public repository milestone is published without claiming that unavailable clean-host execution passed. The project acceptance criterion above remains open until item 17 executes successfully on suitable disposable systems.
+Rebuild/documentation milestone disposition: `ACCEPTED WITH RESIDUAL RISK`.
+
+The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
 ## Platform state
 
@@ -275,7 +279,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, and final public milestone publication are complete. Disposable-host validation remains explicitly deferred. The next technical action is execution of the clean collector, GX10, and two-server runbooks on suitable disposable systems.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, and final public milestone publication are complete. The unavailable disposable-host gate was explicitly waived by the operator with residual risk retained. The next technical action is collector-side production-normalizer integration design.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -291,13 +295,14 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 8. `DONE` — collector installer structural, credential-exposure, dependency, failure-cleanup, and public-safety validation completed.
 9. `DONE` — collector README and operator-facing clean-machine rebuild documentation completed and validated.
 10. `DONE` — final collector public sanitation passed and the public collector rebuild-package/documentation milestone was closed.
-11. `DEFERRED` — clean-machine collector rebuild validation remains outstanding because no disposable Debian 13 amd64 validation system is currently available.
+11. `WAIVED BY OPERATOR` — clean-machine collector rebuild validation remains empirically unverified because no disposable Debian 13 amd64 validation system is available.
 12. `DONE` — reconstructed the captured GX10 implementation as a public clean-machine rebuild package with guarded activation, offline model import, operator runbook, and final package audit.
-13. `DEFERRED` — clean-machine GX10 end-to-end validation remains outstanding because no disposable Ubuntu 24.04 arm64 GX10-class validation system is currently available; repository-only package/documentation validation passes.
+13. `WAIVED BY OPERATOR` — clean-machine GX10 end-to-end validation remains empirically unverified because no disposable Ubuntu 24.04 arm64 GX10-class validation system is available; repository-only package/documentation validation passes.
 14. `DONE` — reconciled full two-server architecture, current/target data contracts, operations, key-role boundaries, rebuild order, and acceptance documentation.
 15. `DONE` — final current-tree/reachable-history sanitation, component tests, collector synthetic validation, Git/ref/link checks, private-identifier audit, and read-only two-server revalidation passed; disposable-host execution remains deferred.
 16. `DONE` — published the final public rebuild milestone with complete repository/reference-read-only evidence and explicit clean-host deferrals.
-17. `NEXT` — execute the collector, GX10, and two-server clean-machine runbooks on suitable disposable hosts; do not claim full project acceptance until all required evidence passes.
+17. `WAIVED BY OPERATOR` — disposable collector, GX10, and two-server execution was unavailable; the operator accepted the residual risk and authorized advancement without representing this gate as passed.
+18. `NEXT` — design collector-side production-normalizer integration, including explicit input/output boundaries, private platform-inventory injection, shadow observability, failure isolation, and rollback behavior.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

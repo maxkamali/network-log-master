@@ -260,3 +260,24 @@ Consequence:
 - the collector rebuild reproduces the write-only result boundary but the GX10 rebuild installs no result-writer key or producer
 - architecture, data-contract, operations, and rebuild documents distinguish current reconstructed behavior from future target behavior
 - future incident-engine, wake-policy, Ollama-caller, and result-producer work requires its own design, tests, migration, and rollback gates
+
+## ADR-016 - Unavailable clean-host execution is waived with residual risk
+
+**Status:** Accepted by operator
+
+The rebuild/documentation milestone may advance without disposable clean collector and GX10 execution because suitable systems are unavailable and the operator explicitly accepted the residual risk on 2026-08-23.
+
+Why:
+
+- repository-only, synthetic, component-test, sanitation, Git-integrity, and read-only-reference gates pass
+- both rebuild packages contain guarded installers, verifiers, rollback boundaries, and complete operator documentation
+- no suitable disposable Debian 13 amd64 and Ubuntu 24.04 arm64 GX10-class pair is available
+- indefinite blocking would not create additional evidence without the missing external systems
+
+Consequence:
+
+- clean collector, clean GX10, and clean two-server execution are recorded as `WAIVED BY OPERATOR`, not `PASS`
+- the rebuild/documentation milestone is accepted with explicit residual risk for project-sequencing purposes
+- future work may proceed to production-normalizer integration design
+- no installer may be run against a working reference system merely to replace the missing disposable-host evidence
+- if suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded

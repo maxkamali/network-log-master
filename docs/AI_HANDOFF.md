@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-The final repository rebuild milestone is published. The single active gate is disposable clean-two-server execution; read `docs/ACCEPTANCE.md` before attempting it. Do not advance future production integration merely because repository-only acceptance passed.
+The final repository rebuild milestone is published. On 2026-08-23, the operator explicitly waived unavailable disposable clean-two-server execution and accepted the residual risk without labeling that execution passed. The single active item is collector-side production-normalizer integration design; read `docs/ACCEPTANCE.md` and `docs/NORMALIZER_MIGRATION.md` before advancing it.
 
 The proven automatic application chain is:
 

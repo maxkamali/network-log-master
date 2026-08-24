@@ -22,7 +22,7 @@ Production cutover remains a later controlled migration task and is not required
 
 ## Milestone 2 - Collector rebuild package
 
-Status: `DONE` for the public rebuild package and documentation; clean-machine end-to-end validation is deferred pending a disposable Debian 13 amd64 system.
+Status: `DONE` for the public rebuild package and documentation; clean-machine end-to-end validation was unavailable and explicitly waived by the operator with residual risk retained.
 
 Goal: reconstruct the working collector from public artifacts plus operator-supplied environment values.
 
@@ -45,13 +45,13 @@ Completed capture includes:
 - dashboard restore/verification wiring in the clean-machine runtime installer
 - package-install no-autostart protection with synthetic systemd behavior proof
 
-The installer structural, credential-exposure, public-safety, operator-documentation, and final sanitation gates are complete. Clean-machine collector rebuild validation remains deferred.
+The installer structural, credential-exposure, public-safety, operator-documentation, and final sanitation gates are complete. Clean-machine collector rebuild validation remains empirically unverified.
 
 Exit gate: another engineer/AI can reconstruct the current collector on a clean server from the repository plus operator-supplied environment values without undocumented implementation memory.
 
 ## Milestone 3 - GX10 rebuild capture
 
-Status: `DONE` for the public rebuild package and documentation; clean-machine end-to-end validation is deferred pending a disposable Ubuntu 24.04 arm64 GX10-class system.
+Status: `DONE` for the public rebuild package and documentation; clean-machine end-to-end validation was unavailable and explicitly waived by the operator with residual risk retained.
 
 Goal: capture and reconstruct the currently functional GX10 implementation before adding new incident-engine architecture.
 
@@ -74,32 +74,34 @@ Exit gate: another engineer/AI can reconstruct the current functional GX10 on a 
 
 ## Milestone 4 - Two-server rebuild acceptance
 
-Status: `DONE` for repository-only and read-only-reference acceptance; disposable clean two-server execution is deferred.
+Status: `ACCEPTED WITH RESIDUAL RISK`; repository-only and read-only-reference acceptance passed, while unavailable disposable clean-two-server execution was explicitly waived by the operator.
 
 1. `DONE` — reconcile collector and GX10 rebuild assumptions
 2. `DONE` — document the complete operator-supplied environment-value contract
 3. `DONE` — document service installation/start order and cross-server dependencies
 4. `DONE` — distinguish reconstructed current behavior from target architecture
 5. `DONE` — validate public examples/fixtures and run final repository sanitation/publication gates
-6. `DEFERRED` — perform clean two-server rebuild validation when suitable disposable hosts are available
+6. `WAIVED BY OPERATOR` — clean two-server rebuild validation was unavailable and remains empirically unverified
 7. `DONE` — publish final repository acceptance status without concealing deferred external validation
-8. `NEXT` — execute the full clean two-server runbook when suitable disposable hosts are available
+8. `WAIVED BY OPERATOR` — do not block subsequent milestones on unavailable disposable hosts; retain the missing evidence as residual risk
 
 Exit gate:
 
 > Two clean servers, this public repository, and operator-supplied environment values are sufficient to reconstruct the current functional system.
 
+The operator accepted this exit gate for project-sequencing purposes based on repository-only, synthetic, and read-only-reference evidence. Actual clean-host execution remains unproven and should still be performed if suitable systems later become available.
+
 ## Milestone 5 - Production normalizer integration
 
-Status: `DEFERRED UNTIL CLEAN TWO-SERVER ACCEPTANCE PASSES`
+Status: `IN PROGRESS`
 
 After the current system is reconstructable:
 
-1. design collector-side normalizer production integration
-2. establish explicit rollback behavior
-3. run shadow/parallel validation where practical
-4. promote only after replay and production validation remain clean
-5. retire transitional GX10 vendor parsing deliberately
+1. `NEXT` — design collector-side normalizer production integration
+2. `QUEUED` — establish explicit rollback behavior
+3. `QUEUED` — run shadow/parallel validation where practical
+4. `QUEUED` — promote only after replay and production validation remain clean
+5. `QUEUED` — retire transitional GX10 vendor parsing deliberately
 
 ## Milestone 6 - Deterministic incident engine on GX10
 

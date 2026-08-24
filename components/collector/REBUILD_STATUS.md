@@ -6,7 +6,7 @@ Status: public collector rebuild package, sanitation, and operator documentation
 
 This file records detailed collector-specific rebuild evidence and remaining technical work. `docs/CURRENT_STATE.md` at the repository root is the authority for project execution order and the single `NEXT` item.
 
-The later production-normalizer shadow extension is implemented separately under `components/collector/normalizer/`. It is not part of reconstructed current behavior and is not invoked by the clean-machine rebuild installer. Its design and later deployment gates are controlled by `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
+The later production-normalizer shadow extension is implemented separately under `components/collector/normalizer/`. It is not part of the clean-machine reconstruction path and is not invoked by that installer. It was separately authorized and activated on the reference collector in isolated shadow-only mode on 2026-08-23; its design, evidence review, and later promotion gates are controlled by `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
 
 After each completed validated collector sub-section, append and push a `docs/PROJECT_JOURNAL.md` entry before materially proceeding into the next sub-section.
 

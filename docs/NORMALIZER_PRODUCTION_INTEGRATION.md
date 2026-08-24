@@ -6,7 +6,9 @@ Design: `DONE`.
 
 Repository implementation and synthetic validation: `DONE`.
 
-Bounded live shadow deployment: `NEXT`, requiring explicit authorization and a private trusted platform inventory.
+Bounded live shadow deployment: `ACTIVE`; explicit authorization and a private trusted platform inventory were supplied on 2026-08-23.
+
+Initial deployment verification: `PASS` for 200 files and 18,446 records. Catch-up and steady-state evidence review remains in progress.
 
 Production cutover remains unauthorized.
 
@@ -23,7 +25,7 @@ Vector currently fans each parsed/raw-preserved syslog observation to:
 - the ClickHouse raw syslog sink
 - the compressed `/var/spool/vector-ai` backlog consumed read-only by GX10
 
-The production path does not call Python. The collector-side normalizer has 73 passing tests and selected replay/parity evidence, but is not deployed in that path.
+The production Vector/ClickHouse/GX10 path does not call Python. The collector-side normalizer runs beside it as an isolated durable-file shadow worker; its output is not consumed by GX10 or any production sink.
 
 ## Chosen architecture
 
@@ -226,8 +228,8 @@ Because GX10 idempotency is keyed by source file and record number, cutover and 
 4. `DONE` — add a repository-only installer/verifier that does not activate the worker by default
 5. `DONE` — prove source immutability, exact record cardinality, deterministic output, resume, mutation refusal, and failure isolation
 6. `DONE` — publish the repository implementation checkpoint
-7. `NEXT` — request explicit authorization and a trusted private inventory for bounded deployment in shadow-only mode
-8. collect/review shadow evidence
+7. `DONE` — received explicit authorization, established the private inventory, staged the package, and activated it in shadow-only mode
+8. `NEXT` — collect/review catch-up and steady-state shadow evidence
 9. design and rehearse the file-identity-safe GX10 handoff switch and rollback
 10. request explicit production-cutover authorization
 
@@ -236,7 +238,7 @@ Because GX10 idempotency is keyed by source file and record number, cutover and 
 This phase does not:
 
 - change live Vector inputs, raw ClickHouse delivery, or current GX10 handoff
-- infer platforms from message text
+- infer platforms from message text at runtime; the installed worker trusts only the protected private inventory
 - implement the incident engine or an Ollama caller
 - enable a GX10 AI-result producer
 - retire transitional GX10 parsing

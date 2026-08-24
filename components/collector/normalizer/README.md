@@ -4,7 +4,7 @@
 
 Repository implementation and synthetic validation: complete.
 
-Live collector deployment: not performed.
+Live collector deployment: active in authorized shadow-only mode as of 2026-08-23; production handoff promotion is not authorized.
 
 This package stages the deterministic Python normalizer as a separate collector-local shadow worker. It does not change Vector, ClickHouse, the current `/var/spool/vector-ai` backlog, the GX10 SFTP view, or any live service state unless an operator later performs a separately authorized deployment.
 
@@ -104,6 +104,14 @@ Item 19 does not provide an automatic activation command. A later explicitly aut
 7. confirm Vector, ClickHouse, and the current GX10 backlog remain unchanged
 
 Promotion of GX10 to normalized output is a separate later gate.
+
+To stop shadow execution without deleting evidence:
+
+```text
+sudo systemctl disable --now network-log-normalizer-shadow.timer
+```
+
+Stopping the timer does not alter Vector, ClickHouse, the raw backlog, the GX10 bind mount, normalized output, or the ledger.
 
 ## Failure and retry
 

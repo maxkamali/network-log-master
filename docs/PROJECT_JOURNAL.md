@@ -7476,3 +7476,97 @@ No production log, inventory content, credential, or private connection value wa
 No file, account, unit, configuration, service state, Vector path, ClickHouse path, or GX10 handoff was changed on either reference system.
 
 Item 20 requires a distinct authorization because it will stage new isolated files/account/units and generate new shadow output on the working collector. It also requires a trusted private source-IP platform inventory; runtime platform authority must not be inferred solely from messages.
+
+## 2026-08-23 20:38 PDT - Normalizer shadow deployed and activated
+
+### Status
+
+Execution-order item 20 is `DONE`.
+
+Execution-order item 21 is now the single `NEXT` item.
+
+The operator explicitly directed the project to build the private inventory candidate and deploy shadow mode on the working collector. This authorized the isolated collector writes and shadow service-state change described below. It did not authorize GX10 handoff promotion, Vector/ClickHouse changes, raw-backlog mutation, or production cutover.
+
+### Private inventory qualification
+
+A one-time root-operated candidate builder scanned only settled compressed backlog files. It accepted exact platform-specific EOS, IOS XR, or NX-OS signatures only when all evidence for a canonical source identity was conflict-free. Unknown sources remained absent from the inventory and therefore continue through generic capture-first normalization. The running worker does not infer platform from message content; it trusts only the installed protected inventory.
+
+Public-safe derivation totals:
+
+- settled files examined: `11922`
+- records examined: `1101997`
+- invalid or identityless records: `0`
+- distinct source identities: `281`
+- candidate entries: `184`
+- EOS entries: `6`
+- IOS XR entries: `5`
+- NX-OS entries: `173`
+- ambiguous identities omitted: `0`
+- unknown identities omitted: `97`
+- exact-signature evidence events: EOS `527`, IOS XR `120`, NX-OS `36016`
+
+The candidate and its audit remain outside the public repository beneath a root-only collector directory. Input files are mode `0600`. The installer copied the runtime inventory to the protected `0640 root:network-log-normalizer` target. No source identity or private inventory content was printed or committed.
+
+### Baseline and staging
+
+Before staging:
+
+- local `HEAD` and public GitHub `main` both equaled `c68c96642aef97a520d1392467c1247444511d25`
+- Vector, ClickHouse, and Grafana were active and enabled
+- the shadow timer was absent/inactive and the shadow output path did not exist
+- the raw backlog contained `11923` files totaling `67941148` bytes at the baseline instant
+- Vector configuration SHA-256 was `c6c3cfed6ff4cd30c2bba220211403d56611a966145a76004e866050ae9c1a90`
+- `/etc/fstab` SHA-256 was `37244f78ab8701d0375de18dda408060e1a519838a1351d8fe281e2258d07189`
+- a protected 24-file source sample passed full SHA-256 verification
+- exactly one live match remained for each recorded GX10 fetch, ingest, enrichment, and pipeline-service-unit hash
+
+The guarded installer then created the locked runtime identity, isolated state/output/configuration paths, installed the manifest-verified artifacts and units, and left the timer disabled/inactive. The independent staged verifier returned:
+
+```text
+platform_entries=184
+completed_files=0
+normalized_records=0
+normalizer_shadow_mode=staged
+NORMALIZER_SHADOW_RUNTIME_VERIFY=PASS
+NORMALIZER_SHADOW_INSTALL=STAGED
+normalizer_shadow_timer=disabled,inactive
+```
+
+### Bounded activation evidence
+
+One manual bounded cycle completed before activation:
+
+- completed files: `100`
+- input/output records: `7578` / `7578`
+- generic/parser-enriched records: `7467` / `111`
+- inventory hits/misses: `6516` / `1062`
+- parser-error records: `0`
+
+The independent staged verifier passed the entire output/ledger inventory after that cycle. Only `network-log-normalizer-shadow.timer` was then enabled and started.
+
+The first scheduled cycle advanced the durable cursor to these cumulative totals:
+
+- completed files: `200`
+- input/output records: `18446` / `18446`
+- generic/parser-enriched records: `17926` / `520`
+- inventory hits/misses: `15869` / `2577`
+- parser-error records: `0`
+- source/output bytes: `1116296` / `1236970`
+
+The independent active verifier returned `NORMALIZER_SHADOW_RUNTIME_VERIFY=PASS`. The timer was active/enabled and the oneshot service returned to inactive/success between cycles.
+
+### Isolation and unchanged postcheck
+
+After activation:
+
+- the protected 24-file source sample remained byte-identical
+- Vector configuration and `/etc/fstab` retained their exact baseline hashes
+- Vector, ClickHouse, and Grafana remained active and enabled
+- the restricted GX10 bind mount remained mounted read-only with `nosuid,nodev,noexec`
+- the raw spool continued growing normally; no raw source file was renamed, modified, or deleted by shadow execution
+- exactly one live match remained for every recorded GX10 fetch, ingest, enrichment, and pipeline-service-unit hash
+- the GX10 handoff remained on the raw backlog
+
+### Next action
+
+Keep the isolated timer active and collect catch-up plus steady-state evidence. Review exact cardinality, inventory coverage/misses, parser errors, cursor/backlog age, source immutability, service isolation, and continued raw-handoff health before designing or rehearsing any handoff switch. Production cutover remains separately gated and unauthorized.

@@ -74,7 +74,7 @@ Collector-side shadow integration implementation is now complete in the reposito
 - pinned reference dependencies: Python `3.13.5-1` and Zstandard `1.5.7+dfsg-1`
 - 88 full normalizer/worker tests passing and 9 collector-package tests passing
 
-The shadow package is not deployed. The live Vector, ClickHouse, raw backlog, GX10 handoff, and service state remain unchanged.
+The shadow package is deployed and active on the collector under its isolated timer. Initial live evidence covers 200 completed files and 18,446 normalized records with exact cardinality, 520 parser enrichments, and zero parser errors. The live Vector, ClickHouse, raw backlog, and GX10 handoff remain unchanged.
 
 ## Collector rebuild milestone
 
@@ -293,7 +293,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration design, and repository shadow-package implementation are complete. The next technical action is a separately authorized bounded live shadow deployment using a trusted private platform inventory; production cutover remains unauthorized.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration design, repository shadow-package implementation, and authorized shadow deployment are complete. The next technical action is collection and review of catch-up and steady-state shadow evidence; production cutover remains unauthorized.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -318,7 +318,8 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 17. `WAIVED BY OPERATOR` — disposable collector, GX10, and two-server execution was unavailable; the operator accepted the residual risk and authorized advancement without representing this gate as passed.
 18. `DONE` — designed collector-side production-normalizer integration with durable input/output boundaries, private platform-inventory injection, shadow observability, failure isolation, promotion gates, and rollback behavior.
 19. `DONE` — implemented and validated the repository-side durable normalizer shadow worker, private-inventory validator, idempotency ledger, packaging, and independent verifier without deploying to the live collector.
-20. `NEXT` — obtain explicit live-shadow authorization and a trusted private source-IP platform inventory, then stage and run the normalizer on the collector in bounded shadow-only mode without changing Vector, ClickHouse, or the GX10 handoff.
+20. `DONE` — obtained explicit live-shadow authorization, built and privately installed a conservative source-IP platform inventory, staged the package, completed two independently verified cycles, and activated only the isolated shadow timer without changing Vector, ClickHouse, or the GX10 handoff.
+21. `NEXT` — collect and review catch-up plus steady-state shadow evidence, including cardinality, inventory coverage, parser errors, backlog age, source immutability, service isolation, and continued raw-handoff health; do not promote the GX10 handoff without separate authorization.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

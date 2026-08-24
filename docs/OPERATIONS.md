@@ -70,7 +70,7 @@ The implemented production-integration package adds a separate collector-local w
 
 The worker is not inline with Vector. Failure cannot block the existing raw ClickHouse sink or raw GX10 backlog. It has no network or ClickHouse credentials and cannot modify source files. The complete design, acceptance metrics, promotion boundary, and rollback rules are in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
 
-Repository implementation, packaging, and synthetic validation are complete. The live collector does not yet have this worker staged or active.
+Repository implementation, packaging, and synthetic validation are complete. The worker is staged and active on the live collector in isolated shadow-only mode. Its output and ledger are not part of the Vector, ClickHouse, or GX10 production path. Initial independent runtime verification passed; catch-up and steady-state evidence review remains open.
 
 ## GX10 local ingest
 

@@ -99,8 +99,8 @@ After the current system is reconstructable:
 
 1. `DONE` — design collector-side normalizer production integration
 2. `DONE` — implement the repository-side durable shadow worker, validation, packaging, and rollback safeguards
-3. `NEXT` — obtain explicit authorization/private inventory and run a bounded shadow-only validation period
-4. `QUEUED` — promote only after replay and production validation remain clean
+3. `IN PROGRESS` — the explicitly authorized private-inventory shadow deployment is active; initial validation passed and catch-up/steady-state evidence collection remains open
+4. `QUEUED` — promote only after replay and production validation remain clean and the operator separately authorizes cutover
 5. `QUEUED` — retire transitional GX10 vendor parsing deliberately
 
 ## Milestone 6 - Deterministic incident engine on GX10

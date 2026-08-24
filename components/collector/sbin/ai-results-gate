@@ -419,27 +419,48 @@ def recover_linked_publish(path):
     if ready_metadata.st_nlink == 1:
         return False
 
-    incoming_path = INCOMING / path.name
+    partials = tuple(READY.glob(f'.{path.name}.publish-*'))
 
-    try:
-        incoming_metadata = incoming_path.lstat()
-    except FileNotFoundError as exc:
+    if len(partials) != 1:
         raise GateError(
             f"ready file {path.name} has an unexplained hard link"
-        ) from exc
+        )
+
+    partial = partials[0]
+    partial_metadata = partial.lstat()
 
     if (
         ready_metadata.st_nlink != 2
-        or not stat.S_ISREG(incoming_metadata.st_mode)
-        or incoming_metadata.st_dev != ready_metadata.st_dev
-        or incoming_metadata.st_ino != ready_metadata.st_ino
+        or not stat.S_ISREG(partial_metadata.st_mode)
+        or partial_metadata.st_dev != ready_metadata.st_dev
+        or partial_metadata.st_ino != ready_metadata.st_ino
     ):
         raise GateError(
             f"ready file {path.name} has an unexplained hard link"
         )
 
-    incoming_path.unlink()
-    fsync_directory(INCOMING)
+    incoming_path = INCOMING / path.name
+
+    try:
+        incoming_metadata = incoming_path.lstat()
+    except FileNotFoundError:
+        incoming_metadata = None
+
+    if incoming_metadata is not None:
+        if (
+            not stat.S_ISREG(incoming_metadata.st_mode)
+            or incoming_metadata.st_nlink != 1
+            or incoming_path.read_bytes() != path.read_bytes()
+        ):
+            raise GateError(
+                f"ready file {path.name} recovery input differs"
+            )
+
+        incoming_path.unlink()
+        fsync_directory(INCOMING)
+
+    partial.unlink()
+    fsync_directory(READY)
 
     if path.lstat().st_nlink != 1:
         raise GateError(f"linked publish recovery failed for {path.name}")
@@ -453,6 +474,9 @@ def reconcile_ready(connection):
 
     with connection:
         for path in sorted(READY.glob("*.jsonl")):
+            if path.name.startswith('.') and '.publish-' in path.name:
+                continue
+
             recover_linked_publish(path)
             error, evidence = validate_file(path, require_settled=False)
 
@@ -485,6 +509,9 @@ def reconcile_ready(connection):
                     f"ready file {path.name} differs from durable acceptance"
                 )
 
+        if tuple(READY.glob('.*.publish-*.jsonl')):
+            raise GateError('orphaned ready publication partial exists')
+
     if recovered:
         fsync_directory(READY)
         log(f"RECOVERED {recovered} ready acceptance ledger row(s)")
@@ -492,17 +519,56 @@ def reconcile_ready(connection):
     return recovered
 
 
-def publish_ready(path, destination):
-    try:
-        os.link(path, destination, follow_symlinks=False)
-    except FileExistsError as exc:
-        raise GateError(
-            f"ready destination appeared concurrently: {destination.name}"
-        ) from exc
+def publish_ready(path, destination, evidence):
+    temporary = READY / f'.{destination.name}.publish-{os.getpid()}.jsonl'
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    flags |= getattr(os, 'O_NOFOLLOW', 0)
+    descriptor = os.open(temporary, flags, 0o640)
+    published = False
 
-    fsync_directory(READY)
-    path.unlink()
-    fsync_directory(INCOMING)
+    try:
+        with os.fdopen(descriptor, 'wb', closefd=True) as handle:
+            handle.write(path.read_bytes())
+            handle.flush()
+            os.fsync(handle.fileno())
+
+        copied_error, copied_evidence = validate_file(
+            temporary,
+            require_settled=False,
+        )
+        source_error, source_evidence = validate_file(
+            path,
+            require_settled=False,
+        )
+
+        if (
+            copied_error
+            or source_error
+            or copied_evidence != evidence
+            or source_evidence != evidence
+        ):
+            raise GateError('ready publication source changed')
+
+        try:
+            os.link(temporary, destination, follow_symlinks=False)
+        except FileExistsError as exc:
+            raise GateError(
+                f"ready destination appeared concurrently: {destination.name}"
+            ) from exc
+
+        published = True
+        fsync_directory(READY)
+        path.unlink()
+        fsync_directory(INCOMING)
+        temporary.unlink()
+        fsync_directory(READY)
+    finally:
+        if not published:
+            try:
+                temporary.unlink()
+                fsync_directory(READY)
+            except FileNotFoundError:
+                pass
 
 
 def process(connection, path):
@@ -538,7 +604,7 @@ def process(connection, path):
     if destination.exists():
         raise GateError(f"unreconciled ready destination exists: {path.name}")
 
-    publish_ready(path, destination)
+    publish_ready(path, destination, evidence)
     record_acceptance(connection, destination.name, evidence)
 
     log(

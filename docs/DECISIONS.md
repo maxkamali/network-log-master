@@ -527,8 +527,8 @@ Why:
 Consequence:
 
 - the gate reconciles valid preexisting ready files into the ledger before processing incoming files
-- first acceptance publishes the validated file before committing its ledger row; a crash in between is recovered from ready on the next cycle
-- the no-overwrite link/unlink publication step also recovers its intermediate two-link state after interruption
+- first acceptance copies validated writer-owned bytes into gate-owned protected temporary storage and revalidates source/copy evidence before publishing ready and committing its ledger row
+- a same-owner no-overwrite ready/marker link provides atomic publication; a crash in the two-link state is recovered only with the exact marker inode and exact incoming bytes
 - ledger rows have immutable update/delete triggers, strict schema/version/content checks, synchronous commits, and directory `fsync`
 - exact and divergent replays are both quarantined with different reasons and never republished to ready
 - the ledger remains authoritative after a ready file is removed, so deterministic sender replay cannot create a second ClickHouse ingestion

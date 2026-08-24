@@ -104,6 +104,10 @@ The dedicated authorization and all GX10 private inputs are installed and indepe
 5. Upload the exact delivered bytes/name once more through the same fixed writer credential without altering local delivered state. Require collector classification as exact already-accepted replay, no new acceptance-ledger row, and no second ClickHouse row.
 6. Upload one bounded same-name divergent derivative created only in protected temporary storage. Require conflict quarantine, no acceptance-ledger mutation, no ClickHouse row, and immediate deletion of the temporary derivative. Reverify all schedules and publish closure before considering recurring sender activation.
 
+The first manual sender cycle completed transport and local delivery exactly as planned. Collector acceptance then exposed one Linux ownership boundary absent from the same-user synthetic tests: `fs.protected_hardlinks` prevents the unprivileged gate account from hard-linking the writer-owned incoming inode. The file remained incoming and the ledger/ready/rejected states remained empty. The timer was stopped to isolate retries.
+
+The corrected gate copies validated bytes into a gate-owned, fsynced ready-directory partial, revalidates both source and copy against the original evidence, uses a same-owner no-overwrite hard link only as the atomic publication step, persists ready, removes incoming, then removes the marker. A crash leaves a recognizable two-link ready/marker state; recovery accepts only that exact inode relation and exact incoming bytes before completing cleanup. Eleven local and eleven collector-runtime tests pass, including first acceptance with a deliberately different ready inode and interruption recovery.
+
 ## Passed repository/copy gates
 
 The 11 focused tests prove:

@@ -86,10 +86,12 @@ class AIResultsGateTests(unittest.TestCase):
     def test_first_acceptance_moves_file_and_records_durable_identity(self):
         source = self.write_incoming()
         expected = source.read_bytes()
+        source_inode = source.stat().st_ino
 
         self.assertEqual(GATE.main(), 0)
         self.assertFalse(source.exists())
         self.assertEqual((self.ready / source.name).read_bytes(), expected)
+        self.assertNotEqual((self.ready / source.name).stat().st_ino, source_inode)
         rows = self.ledger_rows()
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0][0], source.name)
@@ -147,11 +149,15 @@ class AIResultsGateTests(unittest.TestCase):
     def test_crash_between_link_and_unlink_is_reconciled(self):
         source = self.write_incoming()
         destination = self.ready / source.name
-        os.link(source, destination)
-        self.assertEqual(source.stat().st_nlink, 2)
+        partial = self.ready / f'.{source.name}.publish-123.jsonl'
+        partial.write_bytes(source.read_bytes())
+        partial.chmod(0o640)
+        os.link(partial, destination)
+        self.assertEqual(destination.stat().st_nlink, 2)
 
         self.assertEqual(GATE.main(), 0)
         self.assertFalse(source.exists())
+        self.assertFalse(partial.exists())
         self.assertEqual(destination.stat().st_nlink, 1)
         self.assertEqual(len(self.ledger_rows()), 1)
 

@@ -11364,3 +11364,46 @@ No private path/value, key content, connection value, result/packet/event/entity
 ### Next action
 
 Publish this configured-inactive checkpoint and the bounded first-live/replay plan. Then invoke exactly one sender service cycle with its timer still disabled, bind the selected deterministic filename/digest privately, and prove local delivered transition, collector durable acceptance, Vector/ClickHouse single-row ingestion with complete `raw_json` provenance, and all schedule health before any replay or malformed/divergent test.
+
+## 2026-08-24 08:55 PDT - Item 30 first transport passed; collector ownership correction passed staged gates
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The configured-inactive production checkpoint and bounded plan were published and independently matched on GitHub at:
+
+`9157b65` — `Record configured inactive transport`
+
+The aggregate collector baseline was zero ledger rows and zero incoming/ready/rejected files. The sender timer remained disabled. One manual service cycle paused only the no-network outbox timer for cardinality, transmitted exactly one oldest file, moved ready `59 -> 58` and delivered `0 -> 1`, restored the active outbox timer, and retained zero sender restarts. Private cross-host comparison proved unchanged filename and SHA-256.
+
+After the 90-second settle boundary, the collector gate failed safely before ready publication. Redacted diagnostics identified `EPERM` on the incoming-to-ready hard link. Linux protected-hardlink policy correctly prevents the unprivileged gate account from linking a writer-owned inode, even though its ACL permits read/delete. The incoming file remained unchanged; ledger, ready, and rejected remained zero. Only the gate timer was stopped and its failed state reset.
+
+The corrected gate copies validated bytes into a gate-owned mode-`0640` ready partial, fsyncs and revalidates both the source and copy against the original digest/size/count evidence, then uses a same-owner no-overwrite hard link for atomic ready publication. It persists ready, removes/persists incoming, removes the marker, and persists ready again. A crash after publication retains a recognizable ready/marker two-link inode; recovery accepts only that exact marker relation and exact incoming bytes before cleanup and ledger reconciliation. Orphan/divergent markers fail closed.
+
+All 11 durable acceptance tests pass locally and from exact staged bytes on the collector runtime. First acceptance now asserts the ready inode differs from the writer-owned source. The interruption test directly constructs and recovers the new two-link ready/marker state.
+
+```text
+sender_timer=disabled,inactive
+first_live_ready_before=59
+first_live_ready_after=58
+first_live_delivered_before=0
+first_live_delivered_after=1
+cross_host_name_hash_parity=yes
+collector_incoming=1
+collector_ready=0
+collector_rejected=0
+collector_ledger_rows=0
+collector_gate_timer=stopped-for-correction
+collector_gate_failure=protected-hardlink-ownership-boundary
+corrected_gate_sha256=aecf3e862b489498389ce56a1859f60935c18de56db23c4a22b718033e40c974
+corrected_gate_tests_sha256=e953afdbcfe6f26dd70dceacb7704a88437b16f2e8f899b2b7abb1327e021483
+local_gate_tests=11
+collector_staged_gate_tests=11
+clickhouse_query=requires-separate-local-reader-credential-approval
+COLLECTOR_CROSS_OWNER_PUBLICATION_CANDIDATE=PASS
+```
+
+No result content, private filename/digest, key, credential, connection value, or private path was printed or committed. ClickHouse was not mutated by the failed acceptance attempt.
+
+### Next action
+
+Publish and independently verify this correction. Require the exact installed predecessor/candidate hashes, stopped gate timer, one unchanged settled incoming file, and zero ledger/ready/rejected. Preserve exact rollback bytes, install the candidate, run the gate once, and require one accepted ledger/ready file before restoring the timer. Then obtain explicit approval for the root-protected local Grafana-reader credential use needed for direct ClickHouse row/provenance verification.

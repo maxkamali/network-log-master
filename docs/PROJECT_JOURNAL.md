@@ -8322,3 +8322,30 @@ Corrected migration-guard SHA-256:
 ### Next action
 
 Run the full package/public validation, publish and independently verify this narrow validator correction, replace only the temporary staged guard with those published bytes, then restart the protected copy rehearsal from a fresh database copy. The working database remains outside the rehearsal mutation boundary.
+
+## 2026-08-24 00:15 PDT - Functional suppression boundary corrected before migration
+
+### Status
+
+Execution-order item 25 remains the single `NEXT` item and is in progress.
+
+The corrected schema-comparison guard was published at `5e8445b9cd3ac1d2ed675425d02275c956916494` and independently matched GitHub. A fresh root-only working-database copy was created from those published inputs. Migration again failed closed before its protected backup, engine installation, or incident-schema transaction.
+
+The remaining mismatch was the already documented public-sanitation boundary for suppression rules: the working database retains historical private names/reasons/timestamps, while the reconstructed public initializer deliberately uses neutral nonfunctional metadata. Functional rule IDs, evaluation order, rule types, patterns, and enabled state are the recovered contract.
+
+The guard now compares exactly those functional fields and does not require private nonfunctional metadata to equal the public reconstruction. Tests prove both sides of the boundary:
+
+- functional enabled-state drift is refused before backup or installation
+- name/reason/creation-time differences with identical functional fields are accepted
+
+The migration subset passes `6/6`; the complete GX10 suite contains `63` tests.
+
+Corrected migration-guard SHA-256:
+
+`2285f699bab9122954b852ab82834efc6472260561458128c4c2e4fb86051ab1`
+
+The working database, active projection artifact, and automatic pipeline remain unchanged.
+
+### Next action
+
+Publish and independently verify this narrower functional-contract correction. Then discard only the second failed temporary copy, stage the new published guard, and rerun the full private copy rehearsal from a new online SQLite backup.

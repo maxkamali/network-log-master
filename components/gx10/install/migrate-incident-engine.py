@@ -134,15 +134,17 @@ def validate_database(
     try:
         expected.executescript(BASE_SCHEMA.read_text(encoding="utf-8"))
         expected_suppression = expected.execute(
-            "SELECT * FROM suppression_rules ORDER BY id"
+            "SELECT id, rule_type, pattern, enabled "
+            "FROM suppression_rules ORDER BY id"
         ).fetchall()
     finally:
         expected.close()
     actual_suppression = connection.execute(
-        "SELECT * FROM suppression_rules ORDER BY id"
+        "SELECT id, rule_type, pattern, enabled "
+        "FROM suppression_rules ORDER BY id"
     ).fetchall()
     if actual_suppression != expected_suppression:
-        raise MigrationError("suppression corpus differs")
+        raise MigrationError("functional suppression corpus differs")
     if connection.execute("PRAGMA user_version").fetchone()[0] != 0:
         raise MigrationError("unexpected SQLite user_version")
     if connection.execute("PRAGMA application_id").fetchone()[0] != 0:

@@ -142,7 +142,7 @@ class IncidentMigrationTests(unittest.TestCase):
         connection.close()
         with self.assertRaisesRegex(
             GUARD.MigrationError,
-            'suppression corpus differs',
+            'functional suppression corpus differs',
         ):
             GUARD.apply_migration(
                 self.database,
@@ -151,6 +151,26 @@ class IncidentMigrationTests(unittest.TestCase):
             )
         self.assertFalse(self.target.exists())
         self.assertFalse(self.backup.exists())
+
+    def test_nonfunctional_suppression_metadata_drift_is_accepted(self):
+        connection = sqlite3.connect(self.database)
+        connection.execute(
+            """
+            UPDATE suppression_rules
+            SET name = 'historical-private-name',
+                reason = 'historical private reason',
+                created_at = '2025-01-01T00:00:00+00:00'
+            WHERE id = 1
+            """
+        )
+        connection.commit()
+        connection.close()
+        GUARD.apply_migration(self.database, self.target, self.backup)
+        GUARD.validate_installed_state(
+            self.database,
+            self.target,
+            self.backup,
+        )
 
     def test_rollback_refuses_cursor_or_incident_state(self):
         GUARD.apply_migration(self.database, self.target, self.backup)

@@ -67,9 +67,9 @@ The later production-normalizer work advanced after the rebuild-acceptance check
 - normalizer/parser/replay/shadow/handoff suite: `94 passed`
 - collector shadow/handoff package tests: `14 passed`
 - forward-only GX10 handoff and rollback synthetic rehearsal: `PASS`
-- live GX10 handoff cutover: explicitly authorized, not yet performed
+- live GX10 handoff cutover: `PASS` with immutable-floor identity continuity, exact collector/GX10 hash and record-count parity, zero duplicate event identities, and retained raw-view rollback
 
-The exact forward-identity contract and the remaining production gate are in `docs/NORMALIZER_HANDOFF.md` and `docs/CURRENT_STATE.md`.
+The exact forward-identity contract, live evidence, retained rollback, and next stability/retirement gate are in `docs/NORMALIZER_HANDOFF.md` and `docs/CURRENT_STATE.md`.
 
 ## Public history and remote topology
 

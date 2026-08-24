@@ -137,12 +137,12 @@ The IOS XR reason/detail difference was confirmed as representation-only and did
 
 Sanitized repeated replay is deterministic and the full normalizer suite passes 73 tests.
 
-This milestone does not authorize production cutover.
+This replay milestone alone did not authorize production cutover. The later shadow, handoff, and explicit operator-authorization gates completed separately, culminating in the 2026-08-24 production activation recorded in `docs/NORMALIZER_HANDOFF.md`.
 
 ## Production integration design status
 
-The production integration design is complete in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
+The production integration design and forward-only handoff activation are complete in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` and `docs/NORMALIZER_HANDOFF.md`.
 
-The selected architecture is a collector-local durable-file shadow worker that reads settled source backlog files without modifying them and writes atomic normalized shadow files with a durable idempotency ledger. Vector's current raw ClickHouse and GX10 backlog outputs remain unchanged during shadow operation.
+The selected architecture is a collector-local durable-file worker that reads settled source backlog files without modifying them and writes atomic normalized shadow files with a durable idempotency ledger. Vector's raw ClickHouse and backlog outputs remain unchanged. Verified at/after-floor normalized files are now copied into a separate handoff view under their original GX10 transport identities.
 
-The next repository phase implements and validates that shadow worker without deploying it. `docs/CURRENT_STATE.md` remains the execution authority; this migration document is not the execution queue.
+The next gate collects bounded post-cutover stability evidence before deliberately retiring transitional GX10 vendor parsing. `docs/CURRENT_STATE.md` remains the execution authority; this migration document is not the execution queue.

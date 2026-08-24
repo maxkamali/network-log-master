@@ -1,6 +1,6 @@
 # Current State
 
-Last verified project checkpoint: 2026-08-23.
+Last verified project checkpoint: 2026-08-24.
 
 This file is the authority for current execution order. Exactly one item should be marked `NEXT`.
 
@@ -29,8 +29,8 @@ The working observability path currently provides:
 - network syslog collection through Vector
 - durable raw syslog storage in ClickHouse
 - Grafana visualization over captured ClickHouse data
-- compressed file backlog creation for GX10
-- restricted read-only backlog retrieval by GX10
+- compressed raw file backlog creation and preserved collector-local history
+- restricted read-only retrieval of verified normalized handoff files by GX10
 - GX10 local durable ingest with replay/idempotency protection
 - transitional deterministic enrichment implementation on GX10
 - collector-side write-only AI-result return boundary and validation/ingestion path
@@ -60,7 +60,7 @@ Reference milestone commit:
 
 `4220f50474d608fd8745b4465398af521d7625bd`
 
-The production collector GX10 handoff has not yet been switched to normalized output. Production cutover remains a later explicitly authorized controlled migration task.
+The production collector GX10 handoff was switched to verified normalized output on 2026-08-24 through the documented immutable-floor, identity-preserving bind-only cutover. Raw backlog and shadow history remain intact, and the exact mount-only rollback boundary is retained.
 
 Collector-side shadow integration implementation is now complete in the repository:
 
@@ -76,7 +76,7 @@ Collector-side shadow integration implementation is now complete in the reposito
 - synthetic cutover/retry/rollback proof with no historical exposure or duplicate GX10 identities
 - 94 full normalizer/worker tests passing and 14 collector-package tests passing
 
-The shadow package is deployed and active on the collector under its isolated timer. Bounded catch-up and steady-state evidence covers 11,983 completed files and 1,107,749 normalized records with exact cardinality, 36,241 parser enrichments, zero parser errors, zero incomplete rows, and zero pending work after every reviewed steady-state cycle. A later read-only item-23 readiness resnapshot passed over 12,001 completed files and 1,109,388 records. The live Vector, ClickHouse, raw backlog, and GX10 handoff remain unchanged.
+The shadow package is deployed and active on the collector under its isolated timer. Bounded catch-up and steady-state evidence covers 11,983 completed files and 1,107,749 normalized records with exact cardinality, 36,241 parser enrichments, zero parser errors, zero incomplete rows, and zero pending work after every reviewed steady-state cycle. The item-23 stable cutover snapshot passed over 12,082 completed files and 1,117,167 records; the final post-cutover snapshot passed over 12,099 files and 1,118,724 records. The separate handoff publisher is active, and GX10 consumed the first 19 verified at/after-floor files and 1,916 records with exact aggregate parity, zero failed/queued rows, and zero duplicate identities. Vector, ClickHouse, raw backlog creation, and historical transport identities remain unchanged.
 
 ## Collector rebuild milestone
 
@@ -295,7 +295,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration design, repository shadow-package implementation, authorized shadow deployment, bounded live evidence review, and forward-only file-identity handoff design/rehearsal are complete. Explicit production-cutover authorization is recorded. The next action is publish the validated exact-hash staging package, then execute the live preflight and bounded cutover; no handoff artifact is installed yet and the live GX10 handoff remains on the raw backlog.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration design, repository shadow/handoff implementation, authorized deployments, bounded live evidence review, and forward-only file-identity production cutover are complete. The next action is a deliberate post-cutover stability and transitional-parser retirement gate before incident-engine implementation.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -323,7 +323,8 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 20. `DONE` — obtained explicit live-shadow authorization, built and privately installed a conservative source-IP platform inventory, staged the package, completed two independently verified cycles, and activated only the isolated shadow timer without changing Vector, ClickHouse, or the GX10 handoff.
 21. `DONE` — completed historical catch-up, five normal-cadence steady-state cycles, active-concurrency verifier correction/proof, full cardinality/output verification, source immutability checks, service isolation checks, and unchanged raw-handoff/GX10 artifact validation.
 22. `DONE` — designed and synthetically rehearsed a forward-only file-identity-safe GX10 handoff and rollback using one immutable inclusive floor, verified normalized copies under original transport names, a separate durable ledger, and unchanged GX10 idempotency keys; the live handoff was not changed.
-23. `NEXT` — production cutover is explicitly authorized; publish and stage the validated exact-hash handoff package, execute the documented preflight, switch only the GX10 read-only bind view, validate a bounded live cycle, and retain the exact rollback boundary.
+23. `DONE` — staged the validated exact-hash handoff package, corrected a systemd portability condition before activation, selected and protected an immutable inclusive floor, paused GX10 with zero conflicting identities, switched only its read-only bind view, proved exact collector/GX10 hash and cardinality parity, resumed all schedules, and retained the exact raw-view rollback boundary.
+24. `NEXT` — collect and review a bounded multi-cadence normalized-handoff stability window, then deliberately retire transitional GX10 vendor parsing only after proving that normalized fields remain authoritative and replay-safe.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

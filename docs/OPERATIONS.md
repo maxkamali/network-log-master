@@ -70,9 +70,9 @@ The implemented production-integration package adds a separate collector-local w
 
 The worker is not inline with Vector. Failure cannot block the existing raw ClickHouse sink or raw GX10 backlog. It has no network or ClickHouse credentials and cannot modify source files. The complete design, acceptance metrics, promotion boundary, and rollback rules are in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
 
-Repository implementation, packaging, and synthetic validation are complete. The worker is staged and active on the live collector in isolated shadow-only mode. Its output and ledger are not part of the Vector, ClickHouse, or GX10 production path. Complete historical catch-up, five normal-cadence steady-state cycles, full output verification, and unchanged-production checks passed. Production handoff promotion remains separately gated.
+Repository implementation, packaging, synthetic validation, live shadow catch-up, and five initial normal-cadence steady-state cycles are complete. The shadow worker remains isolated from Vector and ClickHouse, while its independently verified output now supplies the separate forward-only GX10 handoff publisher.
 
-The selected handoff design uses an immutable inclusive path floor and a separate verified handoff root. At/after-floor normalized files are copied under their original raw transport names so GX10 retains its existing filename and replay identity. The repository implementation and synthetic rollback proof are complete, but no handoff candidate artifact is installed. The exact authorization, preflight, bind-only activation, verification, and rollback procedure is `docs/NORMALIZER_HANDOFF.md`.
+The production handoff uses an immutable inclusive path floor and a separate verified handoff root. At/after-floor normalized files are copied under their original raw transport names so GX10 retains its existing filename and replay identity. The guarded bind-only activation passed with exact collector/GX10 hash and record-count parity, and all automatic schedules are active. Raw and shadow files remain untouched; rollback is still the documented read-only bind-view restoration in `docs/NORMALIZER_HANDOFF.md`.
 
 ## GX10 local ingest
 

@@ -308,7 +308,7 @@ Consequence:
 
 ## ADR-018 - GX10 normalized promotion uses a forward-only identity-preserving handoff view
 
-**Status:** Accepted
+**Status:** Accepted and implemented
 
 Normalized promotion will not directly expose the shadow-output tree and will not replay normalized history under a new remote namespace. A protected immutable plan selects one inclusive first normalized source path. Only verified completed shadow outputs at or after that floor are copied into a separate handoff root, using their original raw relative paths and filenames.
 
@@ -328,4 +328,4 @@ Consequence:
 - publication requires exact shadow-ledger path, hash, Zstandard, cardinality, mode, and ownership evidence and uses synchronized atomic no-overwrite copies rather than hard links
 - successfully ingested at/after-floor files remain idempotent after raw-view rollback because their GX10 remote identities do not change
 - production staging, timer activation, bind switching, and rollback execution require a separate explicit operator authorization and the preflight in `docs/NORMALIZER_HANDOFF.md`
-- the item-22 implementation and rehearsal are repository-only and do not change either reference system
+- item 22 remained repository-only; the separately authorized item-23 production activation completed on 2026-08-24 with exact collector/GX10 parity and a retained raw-view rollback boundary

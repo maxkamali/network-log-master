@@ -18,7 +18,7 @@ Completed:
 
 Exit gate completed: replay/parity finished with 21 strict matches, 3 intentional OSPFv3 differences, and 0 unexpected differences.
 
-Production cutover remains a later controlled migration task and is not required to finish the rebuild-documentation milestone.
+The later production cutover completed under Milestone 5 without changing this historical replay/parity result.
 
 ## Milestone 2 - Collector rebuild package
 
@@ -101,8 +101,8 @@ After the current system is reconstructable:
 2. `DONE` — implement the repository-side durable shadow worker, validation, packaging, and rollback safeguards
 3. `DONE` — the explicitly authorized private-inventory shadow deployment is active; complete catch-up, steady-state, concurrency, isolation, and unchanged-production validation passed
 4. `DONE` — designed and synthetically rehearsed the immutable-floor, identity-preserving forward handoff and rollback without changing the live handoff
-5. `NEXT` — explicit authorization is recorded; stage the exact-hash handoff package and execute the bounded production cutover/rollback gate
-6. `QUEUED` — retire transitional GX10 vendor parsing deliberately after normalized handoff stability is proven
+5. `DONE` — staged the exact-hash handoff package and completed the immutable-floor, identity-preserving production cutover with exact collector/GX10 hash and cardinality parity plus retained mount-only rollback
+6. `NEXT` — collect a bounded multi-cadence stability window and retire transitional GX10 vendor parsing deliberately only after normalized handoff authority is proven
 
 ## Milestone 6 - Deterministic incident engine on GX10
 

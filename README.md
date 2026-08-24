@@ -76,7 +76,7 @@ The active normalizer source is [`components/normalizer/`](components/normalizer
 
 The selected replay/parity milestone is complete with 73 tests passing and 0 unexpected semantic differences in the reviewed 24-sample production replay scope.
 
-The collector-side durable shadow worker, private-inventory validator, ledger, non-activating installer, hardened unit/timer, artifact manifest, and independent verifier are implemented. The forward-only GX10 handoff publisher, separate exact-hash staging package, and cutover/rollback contract are also repository-implemented and synthetically rehearsed. The expanded suite has 94 normalizer/worker tests plus 14 collector-package tests passing. The shadow package is active on the reference collector and its complete catch-up/steady-state validation passed. Production-cutover authorization is recorded, but the handoff package is not yet installed and GX10 still consumes the raw view.
+The collector-side durable shadow worker, private-inventory validator, ledger, hardened unit/timer, artifact manifests, handoff publisher, and independent verifiers are implemented. The expanded suite has 94 normalizer/worker tests plus 14 collector-package tests passing. Complete shadow catch-up/steady-state validation passed, and the forward-only immutable-floor handoff completed its production cutover with exact collector/GX10 file-hash and record-count parity. GX10 now consumes the verified normalized handoff view; the raw backlog, shadow history, and exact mount-only rollback boundary remain preserved.
 
 ### Collector
 

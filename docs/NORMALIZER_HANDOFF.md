@@ -2,11 +2,11 @@
 
 ## Status and authority
 
-Repository design and synthetic rehearsal: complete.
+Repository design and synthetic rehearsal: `DONE`.
 
-Live collector/GX10 staging and activation: explicitly authorized; not yet performed.
+Live collector/GX10 staging and activation: `DONE` on 2026-08-24.
 
-This document defines the selected file-identity contract, preflight, activation, verification, and rollback sequence for a later explicitly authorized production cutover. `docs/CURRENT_STATE.md` remains the authority for execution order.
+This document records the selected file-identity contract, completed preflight/activation evidence, and retained rollback sequence. `docs/CURRENT_STATE.md` remains the authority for execution order.
 
 ## Problem resolved
 
@@ -58,7 +58,7 @@ The repository-only candidate consists of:
 - `components/collector/normalizer/systemd/network-log-normalizer-handoff.service`
 - `components/collector/normalizer/systemd/network-log-normalizer-handoff.timer`
 
-These artifacts remain deliberately absent from the active shadow package manifest. A separate handoff-only exact-hash manifest, guarded non-activating installer, and independent runtime verifier are now repository-validated. They are not yet installed on the collector and the candidate timer is not enabled. Staging adds new handoff artifacts without mutating the already verified live shadow package in place.
+These artifacts remain deliberately absent from the active shadow package manifest. The separate handoff-only exact-hash manifest, guarded non-activating installer, and independent runtime verifier are repository-validated and installed on the collector. Staging added new handoff artifacts without mutating the already verified live shadow package in place; the handoff timer was activated only after the protected plan, empty ledger, unit portability, and GX10 pause gates passed.
 
 The publisher:
 
@@ -142,6 +142,33 @@ The activation checkpoint must record:
 - exact bind source/options and service/timer states
 
 The transition is not accepted if a raw path at or after `F` was already present in GX10 before activation, if a normalized path is ignored, if history before `F` is exposed, or if record/hash/cardinality evidence differs.
+
+## Live activation evidence
+
+The authorized production activation completed on 2026-08-24 with inclusive floor:
+
+```text
+2026/08/24/06/syslog-20260824-0612.jsonl.zst
+```
+
+Public-safe immutable evidence:
+
+- protected plan SHA-256: `5cd4d29d4675b706db348845168b7f5c319004db90ed3342acb860d35e92464c`
+- installed handoff-package manifest SHA-256: `26b52aa0a75318ee6c2e768bffd91a8bf37c13b836c3f5b81691c687f8bb61d7`
+- pre-cutover `/etc/fstab` SHA-256: `37244f78ab8701d0375de18dda408060e1a519838a1351d8fe281e2258d07189`
+- post-cutover `/etc/fstab` SHA-256: `9f42af9d43124d66c3cb02cc20b23b7ee7272e02fd1afef428dcddd0e9e98259`
+- stable pre-switch shadow verification: `12,082` completed files and `1,117,167` records
+- stable pre-switch handoff verification: exactly one file at the floor, `69` records, zero missing/orphaned/pre-floor files
+- first-file SHA-256: `a9d99713de4aae447d8ad41154b3ee25332fe190a60f41f54bbb5441440275d6`
+- first ordered publication state after schedules resumed: `4` verified files and `332` records
+- GX10 bounded cycle: source files `10,437 -> 10,441`; recent events `947,064 -> 947,396`
+- all four GX10 file sizes, SHA-256 values, and record counts exactly matched the independent collector handoff ledger
+- all GX10 source rows remained `processed`; incoming files and duplicate `(source_file, record_number)` identities remained zero
+- the GX10 timer, shadow timer, and handoff timer resumed enabled/active with successful inactive oneshots and zero restarts at the acceptance instant
+- twelve subsequent automatic observations, including one idempotent no-new-file cycle, advanced both systems to exactly `19` at/after-floor files and `1,916` records; final complete stable verification covered `12,099` shadow files and `1,118,724` records with zero missing/orphaned handoff files
+- the live bind source is the handoff root with `ro,nosuid,nodev,noexec`; the protected raw-view definition and operator-private rollback copy remain available
+
+During staging, the collector reported that `ConditionPathIsRegularFile` was unsupported by its systemd version. Activation stopped while the timer was still disabled and the raw bind remained live. The unit was changed to portable `ConditionPathExists`; strict application-level regular-file, symlink, mode, ownership, and plan-content validation remains mandatory. The corrected artifact passed exact old-hash replacement, clean `systemd-analyze verify`, and the independent staged verifier before activation.
 
 ## Rollback sequence
 

@@ -6,7 +6,7 @@ Status: public collector rebuild package, sanitation, and operator documentation
 
 This file records detailed collector-specific rebuild evidence and remaining technical work. `docs/CURRENT_STATE.md` at the repository root is the authority for project execution order and the single `NEXT` item.
 
-The later production-normalizer shadow extension is implemented separately under `components/collector/normalizer/`. It is not part of the clean-machine reconstruction path and is not invoked by that installer. It was separately authorized and activated on the reference collector in isolated shadow-only mode on 2026-08-23. Its live evidence gate and forward-only handoff design/rehearsal are complete. Production staging/cutover authorization is now recorded; the separate handoff package remains undeployed until its live preflight passes under `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` and `docs/NORMALIZER_HANDOFF.md`.
+The later production-normalizer extension is implemented separately under `components/collector/normalizer/`. It is not part of the clean-machine reconstruction path and is not invoked by that installer. Shadow mode was separately authorized and activated on 2026-08-23. Its catch-up/steady-state evidence and the forward-only handoff design/rehearsal passed. On 2026-08-24 the separate handoff package completed its guarded immutable-floor production activation with exact collector/GX10 hash and cardinality parity; the raw backlog and exact mount-only rollback remain preserved. See `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` and `docs/NORMALIZER_HANDOFF.md`.
 
 After each completed validated collector sub-section, append and push a `docs/PROJECT_JOURNAL.md` entry before materially proceeding into the next sub-section.
 

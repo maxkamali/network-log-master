@@ -4,15 +4,15 @@
 
 Repository implementation and synthetic validation: complete.
 
-Live collector deployment: active in authorized shadow-only mode as of 2026-08-23. Production handoff promotion is explicitly authorized but has not yet been staged or activated.
+Live collector deployment: shadow worker active as of 2026-08-23; forward-only handoff publisher and GX10 bind cutover active as of 2026-08-24.
 
 Bounded live verification: complete for historical catch-up plus five normal-cadence steady-state cycles. The active verifier tolerates legitimate append-only worker progress by resnapshotting newly completed rows, while still failing on missing, orphaned, mutated, incomplete, or disappearing evidence.
 
-This package stages the deterministic Python normalizer as a separate collector-local shadow worker. It does not change Vector, ClickHouse, the current `/var/spool/vector-ai` backlog, the GX10 SFTP view, or any live service state unless an operator later performs a separately authorized deployment.
+This package stages the deterministic Python normalizer as a separate collector-local shadow worker plus an independently packaged forward handoff publisher. The guarded production activation changed only the GX10 read-only SFTP bind view; Vector, ClickHouse, `/var/spool/vector-ai`, shadow history, and existing GX10 identities remain unchanged.
 
 The architecture and promotion/rollback gates are in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
 
-The forward-only handoff design and synthetic rehearsal are complete in `docs/NORMALIZER_HANDOFF.md`. Its launcher, example plan, and hardened unit candidates are repository-only, excluded from the active shadow manifest, and not installed or enabled on the collector.
+The forward-only handoff design, synthetic rehearsal, and live activation are complete in `docs/NORMALIZER_HANDOFF.md`. Its launcher and hardened units remain excluded from the shadow manifest and are instead installed through the separate exact-hash handoff manifest.
 
 ## Artifacts
 
@@ -29,8 +29,8 @@ The forward-only handoff design and synthetic rehearsal are complete in `docs/NO
 - `handoff-package-manifest.json` — exact hashes for handoff-only installed artifacts
 - `handoff-plan.example.json` — public schema/path example for the private immutable floor
 - `network-log-normalizer-handoff` — forward publisher launcher
-- `systemd/network-log-normalizer-handoff.service` — no-network hardened publisher candidate
-- `systemd/network-log-normalizer-handoff.timer` — one-minute publisher schedule candidate
+- `systemd/network-log-normalizer-handoff.service` — no-network hardened publisher
+- `systemd/network-log-normalizer-handoff.timer` — one-minute publisher schedule
 
 The worker implementation is `components/normalizer/src/network_log_normalizer/shadow.py`.
 

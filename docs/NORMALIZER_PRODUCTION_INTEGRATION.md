@@ -10,7 +10,7 @@ Bounded live shadow deployment: `ACTIVE`; explicit authorization and a private t
 
 Bounded catch-up and steady-state verification: `PASS` for 11,983 files and 1,107,749 records, with exact cardinality, zero parser errors, zero incomplete ledger rows, and zero pending work after each reviewed steady-state cycle.
 
-Production cutover remains unauthorized.
+Forward-only production handoff cutover: `ACTIVE` and initial acceptance `PASS` on 2026-08-24.
 
 ## Objective
 
@@ -20,12 +20,12 @@ The design is intentionally shadow-first and fail-open with respect to evidence 
 
 ## Current production boundary
 
-Vector currently fans each parsed/raw-preserved syslog observation to:
+Vector continues to fan each parsed/raw-preserved syslog observation to:
 
 - the ClickHouse raw syslog sink
-- the compressed `/var/spool/vector-ai` backlog consumed read-only by GX10
+- the compressed `/var/spool/vector-ai` raw backlog retained for replay and rollback
 
-The production Vector/ClickHouse/GX10 path does not call Python. The collector-side normalizer runs beside it as an isolated durable-file shadow worker; its output is not consumed by GX10 or any production sink.
+The production Vector/ClickHouse path does not call Python. The collector-side normalizer runs beside it as an isolated durable-file worker. Its independently verified at/after-floor output is copied by the handoff publisher under the original transport identities and consumed read-only by GX10.
 
 ## Chosen architecture
 
@@ -44,9 +44,17 @@ ClickHouse raw syslog      /var/spool/vector-ai
                                     |
                                     v
                  /var/spool/network-log-normalizer-shadow
+                                    |
+                                    | verified at/after immutable floor
+                                    v
+                 /var/spool/network-log-normalizer-handoff
+                                    |
+                                    | restricted read-only bind/SFTP
+                                    v
+                                   GX10
 ```
 
-The worker is not inserted inline between Vector and either existing sink. This preserves the proven capture path while shadow evidence accumulates.
+The worker is not inserted inline between Vector and either existing sink. This preserved the proven capture path through shadow validation and the later bind-only handoff promotion.
 
 The design deliberately avoids a best-effort socket loop between Vector and Python. The existing file backlog already supplies a durable, replayable boundary, and file-level hashing makes completeness and idempotency independently auditable.
 
@@ -154,7 +162,7 @@ Behavior:
 
 ## Failure isolation
 
-Normalizer failures must not affect Vector, ClickHouse, `/var/spool/vector-ai`, or GX10's current raw-backlog view.
+Normalizer failures must not affect Vector, ClickHouse, or `/var/spool/vector-ai`. A handoff failure stops publication and preserves evidence; it does not rewrite GX10 history, and the exact raw-view mount rollback remains available.
 
 The service:
 
@@ -231,13 +239,14 @@ Because GX10 idempotency is keyed by source file and record number, cutover and 
 7. `DONE` — received explicit authorization, established the private inventory, staged the package, and activated it in shadow-only mode
 8. `DONE` — collected/reviewed complete historical catch-up and five normal-cadence steady-state cycles; corrected and live-proved active verifier concurrency handling
 9. `DONE` — designed and synthetically rehearsed the forward-only, file-identity-safe GX10 handoff switch and rollback without changing the live handoff
-10. `NEXT` — explicit production-cutover authorization is recorded; publish/stage the validated exact-hash handoff package and execute the documented preflight/cutover evidence gate
+10. `DONE` — staged the validated exact-hash handoff package, completed the documented immutable-floor bind-only cutover, proved collector/GX10 hash and cardinality parity, resumed schedules, and retained the exact raw-view rollback boundary
+11. `NEXT` — review a bounded multi-cadence normalized-handoff stability window, then deliberately retire transitional GX10 vendor parsing under a separate replay-safe gate
 
 ## Non-goals
 
-This phase does not:
+The completed cutover phase did not:
 
-- change live Vector inputs, raw ClickHouse delivery, or current GX10 handoff
+- change live Vector inputs or raw ClickHouse delivery
 - infer platforms from message text at runtime; the installed worker trusts only the protected private inventory
 - implement the incident engine or an Ollama caller
 - enable a GX10 AI-result producer

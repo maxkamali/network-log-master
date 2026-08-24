@@ -75,11 +75,11 @@ Defaults are intentionally capture-first:
 - `repeat_count` defaults to `1`
 - `attention_eligible` defaults to `true`
 
-The public collector-side normalizer implements this contract and has passed selected replay/parity. It is not yet wired into the production collector path. Current collector backlog records are the captured Vector JSON event representation described below.
+The public collector-side normalizer implements this contract and has passed selected replay/parity, complete live shadow verification, and the forward-only production GX10 handoff gate. Raw collector backlog records remain the captured Vector JSON event representation described below and are preserved for replay/rollback.
 
 The implemented integration package in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` first writes schema-version-1 events to a separate shadow spool. Each eligible raw backlog line maps to exactly one normalized line; file-level source/output hashes, canonical inventory hash, versions, counts, and summary classifications are retained in a durable ledger. Shadow mode is live and validated, but shadow output does not replace the current backlog until a separately authorized promotion gate passes.
 
-The selected promotion contract is forward-only. A protected plan identifies one inclusive first normalized source path. Verified shadow outputs at or after that path are copied into a separate handoff root using the original raw relative filename; pre-floor history is excluded. GX10 therefore continues to see the same strict `/spool/YYYY/MM/DD/HH/syslog-YYYYMMDD-HHMM.jsonl.zst` pattern and the same `source_files.remote_path` namespace. The design and synthetic cutover/rollback evidence are in `docs/NORMALIZER_HANDOFF.md`; no live handoff change has occurred.
+The active promotion contract is forward-only. A protected plan identifies one inclusive first normalized source path. Verified shadow outputs at or after that path are copied into a separate handoff root using the original raw relative filename; pre-floor history is excluded. GX10 therefore continues to see the same strict `/spool/YYYY/MM/DD/HH/syslog-YYYYMMDD-HHMM.jsonl.zst` pattern and the same `source_files.remote_path` namespace. The completed live cutover, exact parity evidence, and retained rollback are in `docs/NORMALIZER_HANDOFF.md`.
 
 ## Parser contract
 

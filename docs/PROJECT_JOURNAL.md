@@ -7903,3 +7903,131 @@ The pipeline timer is now disabled/inactive and its oneshot is inactive. No data
 ### Next action
 
 Publish the portable-condition correction. With the timer still disabled, replace only the two staged exact-hash artifacts affected by the correction—the handoff service unit and its handoff-only installed manifest—using old-hash preconditions and protected rollback copies. Re-run `systemd-analyze`, daemon reload, and the independent staged verifier before any publisher activation.
+
+## 2026-08-23 23:35 PDT - Forward-only normalized production handoff activated and verified
+
+### Status
+
+Execution-order item 23 is `DONE`. Item 24 is now the single `NEXT` item.
+
+The explicitly authorized production cutover completed without deleting, renaming, truncating, or rewriting raw backlog files, shadow output, ClickHouse data, or existing GX10 history. The live change was limited to the separately staged publisher/schedule, one exact `/etc/fstab` bind-entry replacement, the read-only GX10 spool remount, and normal service/timer state transitions. The protected raw-view rollback definition and operator-private evidence copy remain available.
+
+### Corrected staging precondition
+
+The portable service-unit correction from checkpoint `c7d609092164775518705e08a4c3ec672a59c364` replaced only the staged service artifact and installed handoff-only manifest under exact old-hash preconditions. Protected operator-private rollback copies were created before replacement. A clean `systemd-analyze verify`, daemon reload, core handoff verifier, and independent staged verifier passed before publisher activation.
+
+No live unit name, application path, connection value, credential, private plan location, or operator-private evidence path was added to the public repository.
+
+### Immutable floor and pause evidence
+
+The protected plan selected inclusive floor:
+
+```text
+2026/08/24/06/syslog-20260824-0612.jsonl.zst
+```
+
+Public-safe immutable hashes:
+
+- protected plan: `5cd4d29d4675b706db348845168b7f5c319004db90ed3342acb860d35e92464c`
+- installed handoff-package manifest: `26b52aa0a75318ee6c2e768bffd91a8bf37c13b836c3f5b81691c687f8bb61d7`
+- pre-cutover `/etc/fstab`: `37244f78ab8701d0375de18dda408060e1a519838a1351d8fe281e2258d07189`
+- post-cutover `/etc/fstab`: `9f42af9d43124d66c3cb02cc20b23b7ee7272e02fd1afef428dcddd0e9e98259`
+
+GX10 remained paused from the earlier zero-conflict boundary until the first eligible normalized handoff file was independently verified. Immediately before the mount switch, both collector writers were frozen and the complete stable verifiers passed:
+
+```text
+platform_entries=184
+completed_files=12082
+normalized_records=1117167
+normalizer_shadow_mode=staged
+NORMALIZER_SHADOW_RUNTIME_VERIFY=PASS
+normalizer_handoff_mode=prepared
+NORMALIZER_HANDOFF_RUNTIME_VERIFY=PASS
+```
+
+The handoff tree contained exactly the floor file, `69` records, and no pre-floor, missing, or orphaned file. Its SHA-256 was:
+
+`a9d99713de4aae447d8ad41154b3ee25332fe190a60f41f54bbb5441440275d6`
+
+### Guarded bind activation
+
+The live mount and `/etc/fstab` still matched the recorded raw-view precondition. An exclusive root-only rollback copy was created, and an atomic replacement required exactly one old bind line and zero new bind lines. Only the GX10 spool bind target was unmounted/remounted. The independent cutover verifier then passed with the handoff root as `FSROOT` and `ro,nosuid,nodev,noexec` present.
+
+If unmount, mount, or cutover verification had failed, the guarded operation would have restored the old line and raw view. No rollback was required.
+
+### Bounded GX10 normalized cycle
+
+After restarting the collector shadow/publisher schedules in order, the handoff verifier reported four files and `332` records. With the GX10 timer still disabled, one manual pipeline cycle completed:
+
+- source files: `10437 -> 10441`
+- recent events: `947064 -> 947396`
+- incoming files before/after: `0 / 0`
+- at/after-floor rows before/after: `0 / 4`
+- all source rows: `processed`
+- duplicate `(source_file, record_number)` identities: `0`
+
+Exact collector-ledger/GX10 parity for the bounded set:
+
+| Source minute | Size | SHA-256 | Records |
+| --- | ---: | --- | ---: |
+| `0612` | `4726` | `a9d99713de4aae447d8ad41154b3ee25332fe190a60f41f54bbb5441440275d6` | `69` |
+| `0613` | `5764` | `8ca2e6f6501f266decff984576035f614b3c53b22db9358f2b4abcd70a4c4efa` | `87` |
+| `0614` | `6348` | `46a3a273ec7d005cfcaedf090feb29d6bc088c95803d1958a7e62c66fad1ef15` | `100` |
+| `0615` | `5421` | `36b5981a6d73d77d2a205ffc86f324499dae7f36d75bfb24d47d44f9e096e1f9` | `76` |
+
+The GX10 timer was then enabled and started through exact recorded-hash resolution without publishing its identity-bearing live name. An initial strict postcheck sampled the oneshot during the timer's first transition and rejected that observation. A subsequent settled check showed inactive/success, exit status zero, zero restarts, and an active/enabled timer. This was an observation race, not a service or data-path failure.
+
+### Multi-cadence soak and final stable verification
+
+Twelve subsequent automatic observations passed. They included one cycle with no newly eligible file, proving the empty schedule remained idempotent, followed by normal advancement. The reviewed window ended with:
+
+- GX10 source files: `10456` total, `19` at/after floor
+- GX10 recent events: `948980` total, `1916` added since the pause
+- collector handoff: exactly `19` files and `1916` records
+- nonprocessed source rows: `0`
+- incoming files: `0`
+- duplicate event identities: `0`
+- GX10 service restarts: `0`
+
+Both collector schedules were briefly frozen once more for final stable verification. The result was:
+
+```text
+platform_entries=184
+completed_files=12099
+normalized_records=1118724
+normalizer_shadow_mode=staged
+NORMALIZER_SHADOW_RUNTIME_VERIFY=PASS
+normalizer_handoff_mode=cutover
+NORMALIZER_HANDOFF_RUNTIME_VERIFY=PASS
+```
+
+After schedule resumption, the core verifier independently reported:
+
+```json
+{"missing_files":0,"orphan_files":0,"verified_files":19,"verified_records":1916}
+```
+
+The final collector health snapshot retained:
+
+- Vector, ClickHouse, and Grafana active with zero restarts
+- shadow and handoff timers active/enabled
+- both normalizer oneshots successful with zero restarts
+- Vector configuration SHA-256 unchanged at `c6c3cfed6ff4cd30c2bba220211403d56611a966145a76004e866050ae9c1a90`
+- handoff bind source with `ro,nosuid,nodev,noexec`
+- raw backlog, shadow tree, handoff tree, both ledgers, and rollback evidence preserved
+
+### Repository validation
+
+- normalizer/parser/replay/shadow/handoff suite: `94 passed`
+- collector shadow/handoff package suite: `14 passed`
+- `NORMALIZER_SHADOW_PACKAGE_VALIDATION=PASS`
+- GX10 reconstruction suite: `42 passed`
+- `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
+- `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
+- root sanitation tests: `5 passed`
+- current-tree/history/link/ref sanitation: `PASS`
+- `git diff --check`: `PASS`
+
+### Next action
+
+Publish and independently verify this item-23 completion checkpoint. Then continue item 24 by reviewing the bounded normalized-handoff stability evidence and designing the deliberate retirement of transitional GX10 vendor parsing. Do not silently delete the historical enrichment table or conflate its current unscheduled state with the future deterministic incident engine.

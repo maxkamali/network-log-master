@@ -8,6 +8,8 @@ Public clean-machine reconstruction and operator documentation are `DONE` under 
 
 Clean-machine GX10 validation is `WAIVED BY OPERATOR` because no disposable Ubuntu 24.04 arm64 GX10-class target is available. It remains empirically unverified.
 
+The later collector-normalizer production integration completed its forward-only GX10 handoff cutover on 2026-08-24. The unchanged fetch/ingest pipeline processed the first four normalized handoff files with exact collector-ledger SHA-256 and record-count parity, zero failed/queued rows, and zero duplicate event identities before its timer resumed. Transitional deterministic enrichment remains installed and intentionally unscheduled pending the separate post-cutover stability/retirement gate.
+
 This document is the component recovery authority for the active GX10 milestone. `docs/CURRENT_STATE.md` remains the authority for project-wide execution order and the single `NEXT` item.
 
 ## Reconstruction progress

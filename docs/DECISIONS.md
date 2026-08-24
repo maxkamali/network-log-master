@@ -537,7 +537,7 @@ Consequence:
 
 ## ADR-027 - Result sending is single-file, exact-byte, and transport-acknowledged
 
-**Status:** Accepted; repository and exact GX10-staged managed-package gates complete
+**Status:** Accepted; inactive managed package installed and verified
 
 The GX10 sender transmits at most one oldest ready result per cycle under the same lock used by the no-network producer. It uploads the existing canonical file under its unchanged deterministic basename and moves it locally to delivered only after the bounded SFTP process returns success.
 
@@ -562,4 +562,4 @@ Consequence:
 - the exact-hash managed runner and hardened service/timer are packaged behind a nonactivating installer and strict staged verifier
 - the service is deliberately network-capable but has no capabilities, a strict read-only system, write scope only to the derived outbox, no database access, fixed address families, bounded resources/time, and a required private config condition
 - inactive installation creates no private config, identity, known-hosts file, or enabled schedule
-- the sender package is not installed and no credential or live transport is authorized by this decision alone
+- the sender package is installed with its timer disabled, service inactive, and all private inputs absent; no credential or live transport is authorized by this decision alone

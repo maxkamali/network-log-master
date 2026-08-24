@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 30 remains in progress. The collector-side durable acceptance ledger is active with exact predecessor rollback retained. The sender core and inactive managed package pass 178 local tests plus the filesystem contract and the same 178 tests from exact GX10-staged bytes. The package is not installed; every sender transport test was injected, and no private config, writer credential, or result transmission exists.
+Execution-order item 30 remains in progress. The collector-side durable acceptance ledger is active with exact predecessor rollback retained. The sender core/package passes 178 local and 178 exact GX10-staged tests. The exact package is installed on GX10 in its independently verified inert state: timer disabled, service inactive, configuration/identity/writer-known-hosts absent, and no transmission. Every sender transport test remains injected.
 
 ## Replay problem
 
@@ -79,6 +79,8 @@ The managed package adds:
 
 The public example contains only documentation-domain values and reserved writer filenames. It is never installed. The result-writer key is structurally required to be separate from the existing spool-reader key.
 
+The guarded working-system inactive install passed from the exact published/staged package. Independent verification rederived the historical private outbox/runtime identity without printing it, matched every installed public byte and dynamic drop-in, and required absent config/key/writer-known-hosts plus disabled/inactive sender state. The active outbox independently passed at 20 results, 20 ready, zero delivered. Correct private-runtime verification passed correlation and reasoning at zero lag, and a separate identity-withholding check proved the original pipeline timer remained enabled/active with zero service restarts.
+
 ## Passed repository/copy gates
 
 The 11 focused tests prove:
@@ -101,8 +103,8 @@ After GitHub independently matched the published candidate, the guarded upgrader
 
 ## Remaining gates
 
-1. Publish and independently verify the inactive managed-package checkpoint.
-2. Guardedly install only public sender code/units/drop-in on GX10 and independently require timer disabled, service inactive, config/key/known-hosts absent, active no-network outbox, and healthy preexisting schedules.
-3. Build private writer inputs from the operator-authorized existing access boundary, install them separately while the sender remains disabled, and verify strict host/key/config state without transmitting.
-4. Transmit a bounded first file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
+1. Publish and independently verify the inactive installed checkpoint.
+2. Implement a separate guarded configurator and configured-inactive verifier. It must generate/install a dedicated writer identity, install only its matching collector authorization, bind a separate pinned known-host file, derive endpoint/outbox values privately, retain exact rollback evidence, and leave the sender disabled.
+3. Pass repository, synthetic failure-cleanup, exact staged, and configured-inactive production verification without invoking SFTP.
+4. Publish the bounded first-live/replay plan, then transmit one file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
 5. Prove an exact replay creates no second ClickHouse row and a controlled malformed/divergent file remains isolated.

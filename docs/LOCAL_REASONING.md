@@ -158,3 +158,5 @@ GX10_ITEM28_INSTALLED_POSTCHECK=PASS
 9. `DONE` — keep collector result return outside item 28
 
 The original fetch/ingest and correlation timers remain independent of this boundary.
+
+The separate managed invocation candidate, gates, telemetry, and failure behavior are defined in `docs/MANAGED_REASONING.md`. It is not installed on the working system and has not invoked a production packet.

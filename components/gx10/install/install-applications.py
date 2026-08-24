@@ -35,6 +35,11 @@ ARTIFACTS = (
         LIBEXEC_DIR / 'run-local-reasoning.py',
         0o755,
     ),
+    (
+        GX10_DIR / 'sbin' / 'run-managed-reasoning.py',
+        LIBEXEC_DIR / 'run-managed-reasoning.py',
+        0o755,
+    ),
     (GX10_DIR / 'sbin' / 'runtime_config.py', LIBEXEC_DIR / 'runtime_config.py', 0o644),
     (
         GX10_DIR / 'config' / 'reasoning-runtime-v2.json',
@@ -69,6 +74,16 @@ ARTIFACTS = (
     (
         GX10_DIR / 'systemd' / 'network-log-gx10-correlation.timer',
         SYSTEMD_DIR / 'network-log-gx10-correlation.timer',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'systemd' / 'network-log-gx10-reasoning.service',
+        SYSTEMD_DIR / 'network-log-gx10-reasoning.service',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'systemd' / 'network-log-gx10-reasoning.timer',
+        SYSTEMD_DIR / 'network-log-gx10-reasoning.timer',
         0o644,
     ),
 )
@@ -172,6 +187,14 @@ def main():
                 str(
                     SYSTEMD_DIR
                     / 'network-log-gx10-correlation.timer'
+                ),
+                str(
+                    SYSTEMD_DIR
+                    / 'network-log-gx10-reasoning.service'
+                ),
+                str(
+                    SYSTEMD_DIR
+                    / 'network-log-gx10-reasoning.timer'
                 ),
             ],
             check=True,

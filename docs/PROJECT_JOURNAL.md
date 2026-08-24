@@ -9472,3 +9472,49 @@ No database path, unit identity, packet/result content, event content, entity id
 ### Next action
 
 Design and validate item 29 as a separately disableable managed `packet build -> local inference` boundary with exact hashes, single-cycle locking, bounded cadence work, explicit backlog/run/stale-reservation health, and failure isolation. Start with repository and protected-copy gates. Do not schedule production reasoning or return results to the collector until the separate activation evidence passes.
+
+## 2026-08-24 02:21 PDT - Item 29 managed reasoning repository candidate built
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. No item-29 artifact, unit, private configuration, packet, model/prompt registration, run, result, or schedule was installed or invoked on the working system.
+
+The repository candidate adds a third independently disableable boundary:
+
+```text
+deterministic packet builder -> at most one local-model invocation
+```
+
+The managed runner validates the exact installed item-27 builder and item-28 caller/configuration/prompt/output-schema hashes, takes a runtime-owned mode-`0600` single-cycle lock, refuses any preexisting `STARTED` reservation, runs packet construction once, permits at most one new run and one new result, and emits only aggregate packet/backlog/run/result health. It does not print packet, incident, event, or entity content.
+
+The hardened oneshot has a three-minute timeout, one-CPU quota, 1-GiB memory limit, 32-task limit, low CPU/I/O priority, write scope limited to the validated database parent, and Unix-socket plus IPv4-loopback-only network policy. Its monotonic timer waits 15 minutes after boot and five minutes after each completed cycle. Both units remain disabled until a separate activation gate.
+
+The installer verifies exact dependencies and leaves the service/timer inactive. The activator first verifies that boundary and creates a validated root-only mode-`0600` SQLite online backup, then permits one bounded service cycle while the timer is disabled. Only a passing post-cycle verifier may enable the timer. Any activation error disables/stops only managed reasoning and retains append-only state plus the protected backup.
+
+Candidate SHA-256 values:
+
+- managed runner: `54e81a5204336d7ec6d79ac5372a3a1ba5bff0e4828706e1237faa0a997e03e1`
+- installer: `75654a09471dc5ecb99672dc16c326af65fbbe83ed44963010da9e9532535fd0`
+- activator: `04d16e1c3eac68cc04a533bba7571ba5534a2f07af8da566a2f9c725d50b43d3`
+- verifier: `b80d3de36cdeac1ea268c9c12a1edfe1dce83e248e57eefff99872ec11622708`
+- service: `3559ed6a5bdfc98de3544bc6bf7f69cf6459a9cb50083cd96db632a27e52e64a`
+- timer: `0c813a9f8aa695e69e7a383d681b4d5ae9b48abc18879b908bdbb4e5da763e53`
+
+Nineteen new focused tests cover locking, no-op, one-success, one-safe-failure, two-run refusal, `STARTED` refusal, strict private configuration, installer/drop-in behavior, protected-backup-first activation ordering, activation failure isolation, bounded activation, verifier health, and hardened systemd policy.
+
+Validation:
+
+```text
+134 tests passed
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+PUBLIC_REPOSITORY_CURRENT_TREE=PASS
+PUBLIC_REPOSITORY_HISTORY=PASS
+PUBLIC_REPOSITORY_LINKS=PASS
+PUBLIC_REPOSITORY_REF_TOPOLOGY=PASS
+PUBLIC_REPOSITORY_VALIDATION=PASS
+```
+
+### Next action
+
+Publish and independently verify this exact candidate. Then stage only that checkpoint against a protected current-production-state copy and prove no-op, one-success, one-safe-failure, one interrupted `STARTED`, failure isolation, bounded advancement, and independent verifier behavior before any working-system installation.

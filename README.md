@@ -104,7 +104,7 @@ The collector public rebuild package, operator documentation, sanitation, and re
 
 GX10's complete public rebuild package is published under [`components/gx10/`](components/gx10/). It preserves the proven `timer -> fetch -> ingest` chain, exact SQLite state, unscheduled canonical normalized-field projection with historical version-3 enrichment retained, platform/dependency contract, Ollama service and six-model store, guarded activation, and the clean-machine runbook.
 
-Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 49 tests. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
+Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 134 tests. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
 
 ### Two-server rebuild
 
@@ -123,6 +123,9 @@ Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 4
 - [`docs/GRAFANA.md`](docs/GRAFANA.md) - datasource, dashboard restore, drilldown, and NOC-view behavior.
 - [`docs/NORMALIZER_MIGRATION.md`](docs/NORMALIZER_MIGRATION.md) - controlled collector-side normalization migration.
 - [`docs/NORMALIZER_PRODUCTION_INTEGRATION.md`](docs/NORMALIZER_PRODUCTION_INTEGRATION.md) - shadow-first collector integration, observability, promotion, and rollback design.
+- [`docs/REASONING_PACKETS.md`](docs/REASONING_PACKETS.md) - deterministic wake policy and compact append-only packet boundary.
+- [`docs/LOCAL_REASONING.md`](docs/LOCAL_REASONING.md) - versioned local-model caller, strict output, and safe-failure boundary.
+- [`docs/MANAGED_REASONING.md`](docs/MANAGED_REASONING.md) - bounded, observable, separately disableable reasoning invocation candidate.
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) - architecture decision log and rationale.
 - [`docs/PUBLICATION_CHECKLIST.md`](docs/PUBLICATION_CHECKLIST.md) - required public-release gates.
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) - broader milestone sequence.

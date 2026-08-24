@@ -33,6 +33,7 @@ Current state:
 - production packet invocation, local-LLM inference, and result production remain future gated phases
 - the deterministic wake-policy/compact-packet schema and exact builder are installed unscheduled under protected backup with zero packet rows, invocations, or scheduler references
 - the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; its exact artifacts are installed empty and unscheduled under protected backup with zero version/run/result rows and no production inference
+- an item-29 managed `packet build -> one inference` runner/service/timer candidate passes synthetic locking, bounded-work, health, failure-isolation, installer, activator, verifier, and systemd gates; it is not installed or scheduled on the working system
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -67,6 +68,7 @@ The three rediscovered live custom applications and deliberate post-rediscovery 
 - `incident-engine.py` — deterministic incident identity, evidence, lifecycle, repeat, and rolling-context engine
 - `build-reasoning-packets.py` — deterministic wake selection and bounded append-only packet construction; no inference
 - `run-local-reasoning.py` — exact model/prompt/run binding and strict loopback structured inference; installed but not scheduled
+- `run-managed-reasoning.py` — repository-only exact-hash packet/inference wrapper with one-inference-per-cycle locking and aggregate health; not installed or scheduled
 
 `sbin/runtime_config.py` loads the protected runtime configuration rendered by `install/render-runtime-config.py`. See `sbin/PROVENANCE.md` for live hashes and the function-level parity proof.
 
@@ -107,7 +109,7 @@ The separately managed offline chain is:
 
 `correlation timer -> canonical projection -> deterministic incident engine`
 
-`install/install-applications.py` installs the application/configuration files and four pipeline/correlation units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting correlation or local reasoning. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database. `install/migrate-incident-engine.py` provides the guarded existing-database incident extension and engine installation. `install/migrate-reasoning-packets.py` separately requires the exact base-plus-incident schema/artifact hashes, creates a protected pre-reasoning backup, installs the reasoning extension/builder unscheduled, and permits rollback only while no packet exists. `install/migrate-local-reasoning.py` requires the exact base-plus-incident-plus-packet schema, exact installed unscheduled builder, exact item-28 artifacts, protected pre-inference backup, zero caller scheduler references, atomic apply cleanup, and empty-state-only rollback. `install/install-correlation.py`, `activate-correlation.py`, and `verify-correlation.py` implement the separate managed-invocation gate documented in `docs/MANAGED_CORRELATION.md`.
+`install/install-applications.py` installs the application/configuration files and six pipeline/correlation/reasoning units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting correlation or local reasoning. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database. `install/migrate-incident-engine.py` provides the guarded existing-database incident extension and engine installation. `install/migrate-reasoning-packets.py` separately requires the exact base-plus-incident schema/artifact hashes, creates a protected pre-reasoning backup, installs the reasoning extension/builder unscheduled, and permits rollback only while no packet exists. `install/migrate-local-reasoning.py` requires the exact base-plus-incident-plus-packet schema, exact installed unscheduled builder, exact item-28 artifacts, protected pre-inference backup, zero caller scheduler references, atomic apply cleanup, and empty-state-only rollback. `install/install-correlation.py`, `activate-correlation.py`, and `verify-correlation.py` implement the deterministic managed-invocation gate documented in `docs/MANAGED_CORRELATION.md`. `install/install-managed-reasoning.py`, `activate-managed-reasoning.py`, and `verify-managed-reasoning.py` implement the separately gated bounded local-model schedule documented in `docs/MANAGED_REASONING.md`.
 
 See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boundary.
 
@@ -122,6 +124,8 @@ See `systemd/PROVENANCE.md` for live/public hashes and the exact sanitation boun
 The large model blobs are intentionally not stored in Git. `install/install-model-store.py` imports an independently obtained exact offline model store with full source/target blob hashing, no overwrite, resumable exact-file reuse, and blobs-before-manifests publication. `install/verify-ollama.py --offline` verifies the exact six-manifest inventory, manifest references and hashes, config digests, declared bytes, and every referenced blob size without calling the Ollama API. The normal mode additionally requires the service active/enabled and exactly one loopback TCP listener.
 
 The item-28 application-specific caller and supporting schema/configuration/prompt artifacts are installed empty and unscheduled under protected backup. No unit or timer invokes the caller, no production inference has run, and the active deterministic schedules remain independent of Ollama.
+
+The item-29 managed runner/service/timer exists only as a repository candidate. Its installer, activator, and verifier keep installation, protected backup plus initial bounded invocation, and timer enablement as distinct gates. See `docs/MANAGED_REASONING.md`.
 
 ## Guarded activation and runtime verification
 

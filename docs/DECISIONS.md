@@ -453,3 +453,26 @@ Consequence:
 - the caller is fixed to loopback HTTP, refuses redirects, applies request/response/time bounds, and stores no invalid model content
 - repository, migration, synthetic local-model, protected-copy, and guarded empty/unscheduled-install gates passed independently
 - the working system retains zero packet/model/prompt/run/result rows, zero caller scheduler references, and no production inference; managed invocation remains a separate gate and collector result return remains out of scope
+
+## ADR-024 - Managed reasoning is separately scheduled, bounded, and fail-closed
+
+**Status:** Accepted as repository candidate
+
+Packet construction and local inference use a third independently disableable oneshot/timer boundary after deterministic correlation. Each locked cycle runs deterministic packet construction once and permits at most one exact-version inference reservation.
+
+Why:
+
+- model latency and failure must not delay or disable fetch/ingest or deterministic correlation
+- one inference per cadence bounds local-model load and makes production advancement observable
+- an interrupted durable `STARTED` reservation must stop automatic reasoning instead of causing a hidden retry
+- backlog and run/result health must be visible without exposing packet, incident, event, or entity content
+- production activation needs a fresh protected state checkpoint before the first packet or model call
+
+Consequence:
+
+- the runner validates exact builder/caller/configuration/prompt/output hashes and owns a separate mode-`0600` cycle lock
+- any preexisting `STARTED` reservation fails the cycle before new work
+- each cycle can add at most one run and one result; terminal inference failure remains explicit and nonauthoritative
+- the service can write only beside the validated database and can connect only to IPv4 loopback plus Unix sockets
+- inactive installation, protected-copy rehearsal, protected initial production cycle, timer enablement, and multi-cadence evidence remain separate gates
+- collector result return remains outside item 29

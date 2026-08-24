@@ -17,6 +17,7 @@ APPLICATIONS = {
     'correlation': SBIN_DIR / 'run-correlation.py',
     'reasoning_packets': SBIN_DIR / 'build-reasoning-packets.py',
     'local_reasoning': SBIN_DIR / 'run-local-reasoning.py',
+    'managed_reasoning': SBIN_DIR / 'run-managed-reasoning.py',
 }
 PUBLIC_ABSOLUTE_PREFIXES = (
     '/etc/network-log-gx10/',

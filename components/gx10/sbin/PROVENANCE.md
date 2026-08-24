@@ -60,3 +60,9 @@ Item 26 later activated the exact projector only through the separate managed co
 `incident-engine.py` and `run-correlation.py` are deliberate post-rediscovery implementation artifacts. They are not represented as captured historical applications.
 
 The incident engine owns deterministic identity/lifecycle over classification-version-4 rows. The managed runner validates exact projector/engine hashes, enforces a runtime-owned single-cycle lock, invokes projection before incidents, retries bounded complete passes for cursor convergence with concurrent ingestion, and emits explicit watermark/state telemetry. Neither source imports an Ollama client or implements result return.
+
+## Deterministic packets and managed reasoning additions
+
+`build-reasoning-packets.py`, `run-local-reasoning.py`, and `run-managed-reasoning.py` are deliberate post-rediscovery implementation artifacts. They are not represented as captured historical applications.
+
+The packet builder owns deterministic wake selection and compact append-only facts. The local caller binds one immutable packet to exact model/prompt/output versions and records only strict canonical interpretation. The item-29 wrapper validates all stage hashes, holds an independent cycle lock, refuses unreconciled `STARTED` state, runs the packet builder once, permits at most one inference reservation, and emits only aggregate backlog/run/result health. It remains a repository-only candidate until protected-copy and activation gates pass.

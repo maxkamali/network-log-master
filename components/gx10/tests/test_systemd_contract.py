@@ -12,6 +12,12 @@ CORRELATION_SERVICE_PATH = (
 CORRELATION_TIMER_PATH = (
     GX10_DIR / 'systemd' / 'network-log-gx10-correlation.timer'
 )
+REASONING_SERVICE_PATH = (
+    GX10_DIR / 'systemd' / 'network-log-gx10-reasoning.service'
+)
+REASONING_TIMER_PATH = (
+    GX10_DIR / 'systemd' / 'network-log-gx10-reasoning.timer'
+)
 
 
 def parse_unit(path):
@@ -145,6 +151,53 @@ class SystemdContractTests(unittest.TestCase):
         self.assertEqual(
             dict(unit['Install'])['WantedBy'],
             'timers.target',
+        )
+
+    def test_reasoning_service_is_separate_bounded_and_loopback_only(self):
+        unit = parse_unit(REASONING_SERVICE_PATH)
+        self.assertEqual(
+            dict(unit['Unit'])['After'],
+            'network-log-gx10-correlation.service ollama.service',
+        )
+        values = defaultdict(list)
+        for key, value in unit['Service']:
+            values[key].append(value)
+        self.assertEqual(values['Type'], ['oneshot'])
+        self.assertEqual(values['User'], ['network-log-agent'])
+        self.assertEqual(values['Group'], ['network-log-agent'])
+        self.assertEqual(
+            values['ExecStart'],
+            [
+                '/usr/local/libexec/network-log-gx10/'
+                'run-managed-reasoning.py'
+            ],
+        )
+        self.assertEqual(values['TimeoutStartSec'], ['3min'])
+        self.assertEqual(values['CPUQuota'], ['100%'])
+        self.assertEqual(values['MemoryMax'], ['1G'])
+        self.assertEqual(values['TasksMax'], ['32'])
+        self.assertEqual(
+            values['ReadWritePaths'], ['/var/lib/network-log-gx10']
+        )
+        self.assertEqual(
+            values['RestrictAddressFamilies'], ['AF_UNIX AF_INET']
+        )
+        self.assertEqual(values['IPAddressDeny'], ['any'])
+        self.assertEqual(values['IPAddressAllow'], ['localhost'])
+        self.assertNotIn('Environment', values)
+        self.assertNotIn('EnvironmentFile', values)
+
+    def test_reasoning_timer_is_independently_disableable(self):
+        unit = parse_unit(REASONING_TIMER_PATH)
+        timer = dict(unit['Timer'])
+        self.assertEqual(timer['OnBootSec'], '15min')
+        self.assertEqual(timer['OnUnitInactiveSec'], '5min')
+        self.assertEqual(timer['AccuracySec'], '15s')
+        self.assertEqual(
+            timer['Unit'], 'network-log-gx10-reasoning.service'
+        )
+        self.assertEqual(
+            dict(unit['Install'])['WantedBy'], 'timers.target'
         )
 
 

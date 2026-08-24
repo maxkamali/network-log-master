@@ -53,6 +53,11 @@ ARTIFACTS = (
         LIBEXEC_DIR / 'run-local-reasoning.py',
         0o755,
     ),
+    (
+        GX10_DIR / 'sbin' / 'run-managed-reasoning.py',
+        LIBEXEC_DIR / 'run-managed-reasoning.py',
+        0o755,
+    ),
     (GX10_DIR / 'sbin' / 'runtime_config.py', LIBEXEC_DIR / 'runtime_config.py', 0o644),
     (
         GX10_DIR / 'config' / 'reasoning-runtime-v2.json',
@@ -89,6 +94,16 @@ ARTIFACTS = (
         SYSTEMD_DIR / 'network-log-gx10-correlation.timer',
         0o644,
     ),
+    (
+        GX10_DIR / 'systemd' / 'network-log-gx10-reasoning.service',
+        SYSTEMD_DIR / 'network-log-gx10-reasoning.service',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'systemd' / 'network-log-gx10-reasoning.timer',
+        SYSTEMD_DIR / 'network-log-gx10-reasoning.timer',
+        0o644,
+    ),
 )
 
 UNITS = {
@@ -99,6 +114,12 @@ UNITS = {
     ),
     'network-log-gx10-correlation.timer': (
         SYSTEMD_DIR / 'network-log-gx10-correlation.timer'
+    ),
+    'network-log-gx10-reasoning.service': (
+        SYSTEMD_DIR / 'network-log-gx10-reasoning.service'
+    ),
+    'network-log-gx10-reasoning.timer': (
+        SYSTEMD_DIR / 'network-log-gx10-reasoning.timer'
     ),
     'ollama.service': SYSTEMD_DIR / 'ollama.service',
 }
@@ -286,6 +307,8 @@ def validate_systemd_state(active):
         'network-log-gx10.timer': 'enabled' if active else 'disabled',
         'network-log-gx10-correlation.service': 'static',
         'network-log-gx10-correlation.timer': 'disabled',
+        'network-log-gx10-reasoning.service': 'static',
+        'network-log-gx10-reasoning.timer': 'disabled',
         'ollama.service': 'enabled' if active else 'disabled',
     }
     for unit, expected in expected_states.items():
@@ -303,8 +326,23 @@ def validate_systemd_state(active):
         'network-log-gx10-correlation.timer',
         'ActiveState',
     )
-    if correlation_service_state != 'inactive' or correlation_timer_state != 'inactive':
-        raise ValueError('managed correlation must remain inactive before its gate')
+    reasoning_service_state = systemctl_value(
+        'network-log-gx10-reasoning.service',
+        'ActiveState',
+    )
+    reasoning_timer_state = systemctl_value(
+        'network-log-gx10-reasoning.timer',
+        'ActiveState',
+    )
+    if (
+        correlation_service_state != 'inactive'
+        or correlation_timer_state != 'inactive'
+        or reasoning_service_state != 'inactive'
+        or reasoning_timer_state != 'inactive'
+    ):
+        raise ValueError(
+            'managed correlation/reasoning must remain inactive before its gate'
+        )
     if active:
         if ollama_state != 'active' or timer_state != 'active':
             raise ValueError('required runtime unit is not active')

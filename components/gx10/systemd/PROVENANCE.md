@@ -32,6 +32,12 @@ Deterministic enrichment remains absent from the service by design because no li
 
 The service is a hardened non-root oneshot with no network access, a private drop-in that limits write scope to the validated database parent, explicit CPU/memory/task/time limits, and no inline environment. The timer uses a monotonic one-minute inactive cadence with a five-minute boot delay. Installation does not enable either unit; the separate validated activation gate completed on the working system after initial zero-lag backfill and before multi-cadence verification.
 
+## Managed reasoning target units
+
+`network-log-gx10-reasoning.service` and `.timer` are deliberate item-29 implementation candidates, not rediscovered historical units. They preserve both active deterministic schedules unchanged and provide a third separately disableable `packet build -> one local inference` boundary.
+
+The service is a hardened non-root oneshot with a three-minute timeout, explicit CPU/memory/task limits, write access limited by a private drop-in to the validated database parent, and address-family plus IP policy limited to Unix sockets and IPv4 loopback. The timer uses a five-minute inactive cadence with a 15-minute boot delay. Repository installation does not enable it; protected-copy, inactive-install, initial bounded activation, and scheduled-cadence gates remain separate.
+
 ## Ollama service
 
 `ollama.service` reproduces the separately captured local-model runtime unit.

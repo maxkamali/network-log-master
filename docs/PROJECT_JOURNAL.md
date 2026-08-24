@@ -10319,3 +10319,38 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify this protected-resume checkpoint. Then observe at least three natural timer cadences without manual service invocation. Require packets fixed at 12, revised pending reduced by exactly one, one new success/result per cadence, exactly one historical failure, zero `STARTED` rows/restarts, deterministic zero lag, and healthy fetch/ingest plus correlation. Disable only reasoning immediately on any new failure.
+
+## 2026-08-24 03:59 PDT - Item 29 first natural r3 cadence passed
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The protected `r3` production-resume checkpoint was published and independently matched on GitHub at:
+
+`01cc9d4fd9f6bafba29475b78b35c93431cfd7e3` — `Record protected r3 reasoning resume`
+
+No service was manually invoked. The first natural `r3` cadence kept total packets fixed at 12, reduced revised-version pending from 11 to 10, and advanced total runs from seven to eight plus successes/results from six to seven. The historical failure remained exactly one. There were zero `STARTED` rows or restarts, deterministic watermarks were caught up, and fetch/ingest, correlation, and reasoning timers were all active.
+
+```text
+recent_max_id=973232
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_revised_pending=10
+reasoning_model_versions=1
+reasoning_prompt_versions=2
+reasoning_runs=8
+reasoning_started=0
+reasoning_succeeded=7
+reasoning_failures=1
+reasoning_results=7
+managed_reasoning_restarts=0
+pipeline_timer_active=yes
+correlation_timer_active=yes
+managed_reasoning_timer_active=yes
+collector_result_return_enabled=no
+GX10_MANAGED_REASONING_R3_CADENCE_1=PASS
+```
+
+### Next action
+
+Run the full public gate, publish, and independently verify this cadence. Then continue timer-only monitoring for at least two more natural cadences under the same exact invariants and immediate reasoning-only disable rule.

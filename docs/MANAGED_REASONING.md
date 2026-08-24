@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. One later terminal invalid output was safely isolated and diagnosed as action text equal to a risk label. Immutable-ID reuse was correctly refused, and prompt revision `r2` proved the local runtime does not enforce `not/enum`. Exact published `incident-assessment-v2-r3` passed 140 remote tests, same-packet protected-copy inference, and exact inactive upgrade. A fresh protected backup then preceded exactly one bounded production `r3` drain through the unchanged strict validator. Production now has 12 packets, 11 revised-version pending, two prompt registrations, seven total runs, six successful results, one preserved safe failure, and zero `STARTED` rows/restarts. Deterministic lag is zero and the reasoning timer is active for natural-cadence validation.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Exact published `incident-assessment-v2-r3` passed 140 remote tests, same-packet protected-copy inference, exact inactive upgrade, one fresh-backup protected production drain, and its first natural timer cadence through the unchanged strict validator. Production now has 12 packets, 10 revised-version pending, two prompt registrations, eight total runs, seven successful results, one preserved safe failure, and zero `STARTED` rows/restarts. Deterministic lag is zero and all independent schedules are healthy while two more natural cadences remain.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -375,4 +375,19 @@ r3_resume_backup_mode=0600
 r3_resume_reasoning_timer_active=yes
 r3_resume_restarts=0
 GX10_MANAGED_REASONING_R3_RESUME=PASS
+```
+
+The first `r3` timer-driven cadence required no manual service invocation. It kept packet count fixed, reduced revised pending by exactly one, and added exactly one successful run/result while retaining the historical failure and zero deterministic lag.
+
+```text
+r3_cadence_1_recent_max_id=973232
+r3_cadence_1_packets=12
+r3_cadence_1_revised_pending=10
+r3_cadence_1_runs=8
+r3_cadence_1_started=0
+r3_cadence_1_succeeded=7
+r3_cadence_1_failures=1
+r3_cadence_1_results=7
+r3_cadence_1_restarts=0
+GX10_MANAGED_REASONING_R3_CADENCE_1=PASS
 ```

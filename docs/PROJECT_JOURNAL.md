@@ -10354,3 +10354,38 @@ GX10_MANAGED_REASONING_R3_CADENCE_1=PASS
 ### Next action
 
 Run the full public gate, publish, and independently verify this cadence. Then continue timer-only monitoring for at least two more natural cadences under the same exact invariants and immediate reasoning-only disable rule.
+
+## 2026-08-24 04:05 PDT - Item 29 second natural r3 cadence passed
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The first natural `r3` cadence checkpoint was published and independently matched on GitHub at:
+
+`cbd4cd36520ec673ce1c78f11b104f25c9c10cc8` — `Record first natural r3 cadence`
+
+No service was manually invoked. The second natural `r3` cadence kept total packets fixed at 12, reduced revised-version pending from 10 to nine, and advanced total runs from eight to nine plus successes/results from seven to eight. The historical failure remained exactly one. There were zero `STARTED` rows or restarts, deterministic watermarks were caught up, and fetch/ingest, correlation, and reasoning timers were all active.
+
+```text
+recent_max_id=974191
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_revised_pending=9
+reasoning_model_versions=1
+reasoning_prompt_versions=2
+reasoning_runs=9
+reasoning_started=0
+reasoning_succeeded=8
+reasoning_failures=1
+reasoning_results=8
+managed_reasoning_restarts=0
+pipeline_timer_active=yes
+correlation_timer_active=yes
+managed_reasoning_timer_active=yes
+collector_result_return_enabled=no
+GX10_MANAGED_REASONING_R3_CADENCE_2=PASS
+```
+
+### Next action
+
+Run the full public gate, publish, and independently verify this cadence. Then continue timer-only monitoring for at least one more natural cadence under the same exact invariants and immediate reasoning-only disable rule.

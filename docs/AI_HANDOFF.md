@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-The final repository rebuild milestone is published. Exact `incident-assessment-v2-r3` passed 140 GX10 tests, same-packet protected-copy inference, exact inactive upgrade, one fresh-backup production drain, and its first natural timer cadence through the unchanged strict validator. The timer is active with 12 packets, 10 revised-version pending, two prompt registrations, eight total runs, seven successes/results, one preserved historical failure, zero `STARTED` rows/restarts, and zero deterministic lag. Publish this cadence and observe at least two more; disable only reasoning on any new failure. Do not add collector result production in item 29.
+The final repository rebuild milestone is published. Exact `incident-assessment-v2-r3` passed 140 GX10 tests, same-packet protected-copy inference, exact inactive upgrade, one fresh-backup production drain, and two natural timer cadences through the unchanged strict validator. The timer is active with 12 packets, nine revised-version pending, two prompt registrations, nine total runs, eight successes/results, one preserved historical failure, zero `STARTED` rows/restarts, and zero deterministic lag. Publish this cadence and observe at least one more; disable only reasoning on any new failure. Do not add collector result production in item 29.
 
 The active automatic application chains are:
 

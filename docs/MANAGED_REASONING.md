@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Exact published `incident-assessment-v2-r3` passed 140 remote tests, same-packet protected-copy inference, exact inactive upgrade, one fresh-backup protected production drain, and its first natural timer cadence through the unchanged strict validator. Production now has 12 packets, 10 revised-version pending, two prompt registrations, eight total runs, seven successful results, one preserved safe failure, and zero `STARTED` rows/restarts. Deterministic lag is zero and all independent schedules are healthy while two more natural cadences remain.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Exact published `incident-assessment-v2-r3` passed 140 remote tests, same-packet protected-copy inference, exact inactive upgrade, one fresh-backup protected production drain, and two natural timer cadences through the unchanged strict validator. Production now has 12 packets, nine revised-version pending, two prompt registrations, nine total runs, eight successful results, one preserved safe failure, and zero `STARTED` rows/restarts. Deterministic lag is zero and all independent schedules are healthy while one more natural cadence remains.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -390,4 +390,19 @@ r3_cadence_1_failures=1
 r3_cadence_1_results=7
 r3_cadence_1_restarts=0
 GX10_MANAGED_REASONING_R3_CADENCE_1=PASS
+```
+
+The second natural `r3` cadence retained the same fixed-packet and exact one-result drain invariants:
+
+```text
+r3_cadence_2_recent_max_id=974191
+r3_cadence_2_packets=12
+r3_cadence_2_revised_pending=9
+r3_cadence_2_runs=9
+r3_cadence_2_started=0
+r3_cadence_2_succeeded=8
+r3_cadence_2_failures=1
+r3_cadence_2_results=8
+r3_cadence_2_restarts=0
+GX10_MANAGED_REASONING_R3_CADENCE_2=PASS
 ```

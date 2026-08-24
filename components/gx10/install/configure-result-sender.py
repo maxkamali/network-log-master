@@ -65,12 +65,12 @@ def public_key(path):
     fields = result.stdout.strip().split()
     if (
         result.returncode != 0
-        or len(fields) != 2
+        or len(fields) < 2
         or fields[0] != 'ssh-ed25519'
         or len(fields[1]) < 32
     ):
         raise ConfigureError('result writer identity input differs')
-    return ' '.join(fields)
+    return ' '.join(fields[:2])
 
 
 def validate_identity_input(path):

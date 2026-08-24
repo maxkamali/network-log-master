@@ -225,12 +225,12 @@ def public_key(path):
     fields = result.stdout.strip().split()
     if (
         result.returncode != 0
-        or len(fields) != 2
+        or len(fields) < 2
         or fields[0] != 'ssh-ed25519'
         or len(fields[1]) < 32
     ):
         raise ValueError('managed result sender identity differs')
-    return ' '.join(fields)
+    return ' '.join(fields[:2])
 
 
 def verify_configured():

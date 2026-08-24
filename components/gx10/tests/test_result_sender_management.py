@@ -404,6 +404,24 @@ class ResultSenderManagementTests(unittest.TestCase):
         self.assertNotIn("['sftp'", source)
         self.assertIn("Path('/usr/bin/ssh-keygen')", source)
 
+    def test_writer_public_key_derivation_ignores_optional_comment(self):
+        encoded = 'x' * 40
+        result = types.SimpleNamespace(
+            returncode=0,
+            stdout=f'ssh-ed25519 {encoded} dedicated-writer-v1\n',
+            stderr='',
+        )
+        with mock.patch.object(self.configurator.subprocess, 'run', return_value=result):
+            self.assertEqual(
+                self.configurator.public_key(self.root / 'input.key'),
+                f'ssh-ed25519 {encoded}',
+            )
+        with mock.patch.object(self.verifier.subprocess, 'run', return_value=result):
+            self.assertEqual(
+                self.verifier.public_key(self.root / 'installed.key'),
+                f'ssh-ed25519 {encoded}',
+            )
+
 
 if __name__ == '__main__':
     unittest.main()

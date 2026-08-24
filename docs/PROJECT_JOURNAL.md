@@ -11214,3 +11214,38 @@ No existing key line, new key material, private runtime path, connection value, 
 ### Next action
 
 Run the full public gate, publish this authorizer candidate, and independently verify GitHub. Then generate the dedicated writer key only on GX10, transfer only its public half through protected temporary files, run the exact published collector authorizer, run the exact configured-inactive GX10 configurator, and independently verify the protected backup/one-line append plus disabled/inactive sender before any transport.
+
+## 2026-08-24 08:27 PDT - Item 30 GX10 optional-key-comment compatibility corrected before configuration
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The exact-backup collector-authorizer checkpoint was published and independently matched on GitHub at:
+
+`edbcc484f3d2d401574a25fd9189604cceadcb30` — `Guard result writer authorization`
+
+The dedicated Ed25519 writer identity was generated only on GX10 with root-owned mode-`0600` private metadata. Only its public half crossed to the collector. Cross-host fingerprints matched without key content output. The exact published collector authorizer appended that one public key, retained the exact root-only predecessor backup, and passed SSH configuration validation without restart.
+
+The first GX10 configure invocation then failed safely at identity-input validation before creating any sender config, installed identity, or writer known-hosts target. Metadata and private-key derivation were valid. This GX10 runtime's `ssh-keygen -y` emitted three fields because it retained the optional private-key comment, while the candidate incorrectly required exactly two. The key type/blob were valid and the sender remained disabled/inactive.
+
+The correction now accepts two or more derived fields but binds and compares only the Ed25519 type and base64 identity blob; comments remain nonidentity metadata. A focused regression test covers identical normalization in both configurator and verifier. All 183 GX10 tests and package/filesystem contracts pass locally, and all 183 tests plus the filesystem contract pass from exact corrected bytes on GX10.
+
+```text
+collector_writer_authorization=installed,protected-predecessor-retained
+gx10_configure_first_attempt=safe-refusal-before-target-creation
+gx10_sender_timer=disabled,inactive
+gx10_sender_service=inactive
+gx10_sender_private_targets=absent
+local_gx10_tests=183
+gx10_staged_gx10_tests=183
+corrected_configurator_sha256=7ace62e082b0b159c9596571150d29b29466cedcf2bd42230ae6dec86da07f90
+corrected_verifier_sha256=079fe20a04f8eec625afabf3129ecbdfe3c49ea369a9acb293221435d7563867
+corrected_management_tests_sha256=75e2e363de5c3965b0b9e104d03afd01f05a12e4f5d3d67dae823edaed325437
+collector_result_transmission_invoked=no
+GX10_RESULT_WRITER_COMMENT_COMPATIBILITY=PASS
+```
+
+No key content, private runtime path, connection value, result/packet/event/entity content, credential, or model output was printed or committed. No SFTP invocation or outbox movement occurred.
+
+### Next action
+
+Run the public gate, publish and independently verify the compatibility correction, then rerun the exact configured-inactive GX10 configurator. Independently verify collector authorization/backup exactness, GX10 private metadata/configuration, disabled/inactive sender, active outbox, and all existing schedule health before publishing the first-live/replay plan.

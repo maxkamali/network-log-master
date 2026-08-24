@@ -11573,3 +11573,30 @@ No credential, private filename/digest/run identity, connection value, original 
 ### Next action
 
 Publish and independently verify this divergent-isolation closure. Then define the exact activation/rollback gate for the already-installed recurring sender timer, verify current backlog and both-host health against that gate, activate only the sender timer, and require bounded natural delivery plus collector acceptance/ingestion and continued replay protection before marking item 30 complete.
+
+## 2026-08-24 09:46 PDT - Item 30 recurring-sender active verifier candidate passed locally
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The divergent live-result isolation checkpoint was published and independently matched on GitHub at:
+
+`61ff0dc073258b4d04a58e398cfc7986f1a12c8e` — `Record divergent result isolation`
+
+Before any recurring activation, the public independent sender verifier now has an explicit `--active` configured-state mode. The inactive/default mode still requires the timer disabled/inactive. Active mode instead requires the timer enabled/active while continuing to require the oneshot service idle, zero restarts, exact installed public bytes/drop-in, canonical private configuration, exact writer identity/pin metadata, active local outbox, and the same private legacy-runtime provenance checks. Active mode is refused for an unconfigured staged installation.
+
+A direct regression supplies the complete synthetic systemd property matrix, proves active mode accepts only enabled/active timer state, and proves inactive mode rejects that same state. The full GX10 suite now passes locally:
+
+```text
+gx10_tests=186
+failures=0
+errors=0
+sender_active_verifier=explicit
+live_sender_timer=disabled,inactive
+GX10_RESULT_SENDER_ACTIVE_VERIFIER_CANDIDATE=PASS
+```
+
+No live artifact, credential, private value, outbox file, schedule, service, collector state, or database was changed by this repository-only gate.
+
+### Next action
+
+Publish and independently verify this active-verifier candidate. Stage the exact published GX10 component tree on GX10, pass all 186 tests there, and run the exact inactive configured verifier before activation. Then enable/start only the sender timer. On any verification/service failure, disable/stop only that timer and preserve outbox/collector evidence for replay. Require at least one natural ready-to-delivered transition, collector durable acceptance, ClickHouse ingestion, zero sender restarts, and healthy preexisting schedules before item-30 closure.

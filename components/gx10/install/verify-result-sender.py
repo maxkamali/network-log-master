@@ -167,7 +167,7 @@ def render_dropin(state):
     ).encode('utf-8')
 
 
-def validate_units(state):
+def validate_units(state, *, active=False):
     for unit in (SERVICE, TIMER):
         if systemctl_value(unit, 'LoadState') != 'loaded':
             raise ValueError('managed result sender unit is not loaded')
@@ -179,10 +179,12 @@ def validate_units(state):
         raise ValueError('managed result sender timer drop-in differs')
     if systemctl_value(SERVICE, 'UnitFileState') != 'static':
         raise ValueError('managed result sender service state differs')
-    if systemctl_value(TIMER, 'UnitFileState') != 'disabled':
-        raise ValueError('managed result sender timer is not disabled')
-    if systemctl_value(TIMER, 'ActiveState') != 'inactive':
-        raise ValueError('managed result sender timer is not inactive')
+    expected_timer_file = 'enabled' if active else 'disabled'
+    expected_timer_state = 'active' if active else 'inactive'
+    if systemctl_value(TIMER, 'UnitFileState') != expected_timer_file:
+        raise ValueError('managed result sender timer enablement differs')
+    if systemctl_value(TIMER, 'ActiveState') != expected_timer_state:
+        raise ValueError('managed result sender timer activity differs')
     if systemctl_value(SERVICE, 'ActiveState') != 'inactive':
         raise ValueError('managed result sender service is not inactive')
     if systemctl_value(SERVICE, 'NRestarts') != '0':
@@ -193,7 +195,7 @@ def validate_units(state):
         raise ValueError('managed result sender effective group differs')
 
 
-def verify_public_package():
+def verify_public_package(*, active=False):
     state = runtime_state()
     for source, target, mode in ARTIFACTS:
         validate_file(target, mode, 0, 0, source=source)
@@ -201,7 +203,7 @@ def verify_public_package():
     if DROPIN_PATH.read_bytes() != render_dropin(state):
         raise ValueError('managed result sender drop-in differs')
     validate_file('/usr/bin/sftp', 0o755, 0, 0)
-    validate_units(state)
+    validate_units(state, active=active)
     if systemctl_value(OUTBOX_TIMER, 'UnitFileState') != 'enabled':
         raise ValueError('managed result outbox timer is not enabled')
     if systemctl_value(OUTBOX_TIMER, 'ActiveState') != 'active':
@@ -210,7 +212,7 @@ def verify_public_package():
 
 
 def verify_staged():
-    state = verify_public_package()
+    state = verify_public_package(active=False)
     for path in (SENDER_CONFIG, state['identity'], state['known_hosts']):
         if Path(path).exists() or Path(path).is_symlink():
             raise ValueError('managed result sender private state exists')
@@ -318,8 +320,13 @@ def runtime_inputs(state, runtime_config=RUNTIME_CONFIG, legacy_fetch_source=Non
     }
 
 
-def verify_configured(runtime_config=RUNTIME_CONFIG, legacy_fetch_source=None):
-    state = verify_public_package()
+def verify_configured(
+    runtime_config=RUNTIME_CONFIG,
+    legacy_fetch_source=None,
+    *,
+    active=False,
+):
+    state = verify_public_package(active=active)
     validate_file(SENDER_CONFIG, 0o640, 0, state['gid'])
     validate_file(state['identity'], 0o600, state['uid'], state['gid'])
     validate_file(state['known_hosts'], 0o600, state['uid'], state['gid'])
@@ -377,14 +384,18 @@ def main():
     source = parser.add_mutually_exclusive_group()
     source.add_argument('--runtime-config', type=Path)
     source.add_argument('--legacy-fetch-source', type=Path)
+    parser.add_argument('--active', action='store_true')
     args = parser.parse_args()
     try:
         if os.geteuid() != 0:
             raise ValueError('run the managed result sender verifier as root')
+        if args.active and not args.configured:
+            raise ValueError('active verification requires configured mode')
         if args.configured:
             verify_configured(
                 args.runtime_config or RUNTIME_CONFIG,
                 args.legacy_fetch_source,
+                active=args.active,
             )
         else:
             verify_staged()
@@ -392,7 +403,8 @@ def main():
             'MANAGED_RESULT_SENDER_VERIFY schema=1 '
             f'configured={"yes" if args.configured else "no"} '
             f'config_installed={"yes" if args.configured else "no"} '
-            'timer_enabled=no service_active=no '
+            f'timer_enabled={"yes" if args.active else "no"} '
+            'service_active=no '
             f'credentials_installed={"yes" if args.configured else "no"}'
         )
         print('GX10_MANAGED_RESULT_SENDER_VERIFY=PASS')

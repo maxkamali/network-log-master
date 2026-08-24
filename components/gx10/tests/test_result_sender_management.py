@@ -179,6 +179,38 @@ class ResultSenderManagementTests(unittest.TestCase):
         )
         self.assertNotIn('spool-reader.key', text)
 
+    def test_verifier_distinguishes_inactive_and_active_timer_state(self):
+        state = {'user': 'network-log-agent', 'group': 'network-log-agent'}
+
+        def value(unit, property_name):
+            values = {
+                (self.verifier.SERVICE, 'LoadState'): 'loaded',
+                (self.verifier.TIMER, 'LoadState'): 'loaded',
+                (self.verifier.SERVICE, 'FragmentPath'): str(
+                    self.verifier.SYSTEMD_DIR / self.verifier.SERVICE
+                ),
+                (self.verifier.TIMER, 'FragmentPath'): str(
+                    self.verifier.SYSTEMD_DIR / self.verifier.TIMER
+                ),
+                (self.verifier.SERVICE, 'DropInPaths'): str(
+                    self.verifier.DROPIN_PATH
+                ),
+                (self.verifier.TIMER, 'DropInPaths'): '',
+                (self.verifier.SERVICE, 'UnitFileState'): 'static',
+                (self.verifier.TIMER, 'UnitFileState'): 'enabled',
+                (self.verifier.TIMER, 'ActiveState'): 'active',
+                (self.verifier.SERVICE, 'ActiveState'): 'inactive',
+                (self.verifier.SERVICE, 'NRestarts'): '0',
+                (self.verifier.SERVICE, 'User'): state['user'],
+                (self.verifier.SERVICE, 'Group'): state['group'],
+            }
+            return values[(unit, property_name)]
+
+        with mock.patch.object(self.verifier, 'systemctl_value', side_effect=value):
+            self.verifier.validate_units(state, active=True)
+            with self.assertRaisesRegex(ValueError, 'enablement differs'):
+                self.verifier.validate_units(state, active=False)
+
     def test_postinstall_verification_failure_removes_created_artifacts(self):
         source_dir = self.root / 'source'
         target_dir = self.root / 'target'

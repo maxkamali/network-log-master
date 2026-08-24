@@ -64,6 +64,10 @@ class ResultOutboxTests(unittest.TestCase):
         self.database = self.root / 'events.sqlite3'
         self.outbox = self.root / 'outbox'
         self.outbox.mkdir(mode=0o700)
+        self.ready = self.outbox / 'ready'
+        self.delivered = self.outbox / 'delivered'
+        self.ready.mkdir(mode=0o700)
+        self.delivered.mkdir(mode=0o700)
         connection = sqlite3.connect(self.database)
         for schema in (
             BASE_SCHEMA,
@@ -233,11 +237,13 @@ class ResultOutboxTests(unittest.TestCase):
         self.assertEqual(result, 0)
 
     def final_files(self):
-        return sorted(self.outbox.glob('ai-result-v1-*.jsonl'))
+        return sorted(self.ready.glob('ai-result-v1-*.jsonl'))
 
     def test_success_maps_to_valid_complete_collector_record_and_reuses(self):
         self.invoke_success(self.packet_id)
-        first = self.producer.build(self.database, self.outbox)
+        first = self.producer.build(
+            self.database, self.ready, self.delivered
+        )
         self.assertEqual(first['total'], 1)
         self.assertEqual(first['created'], 1)
         path = self.final_files()[0]
@@ -260,7 +266,9 @@ class ResultOutboxTests(unittest.TestCase):
         )
         self.assertEqual(record['occurrence_count'], 3)
         self.assertNotIn(self.packet_id, path.name)
-        second = self.producer.build(self.database, self.outbox)
+        second = self.producer.build(
+            self.database, self.ready, self.delivered
+        )
         self.assertEqual(second['created'], 0)
         self.assertEqual(second['reused'], 1)
         self.assertEqual(path.read_bytes(), raw)
@@ -278,9 +286,45 @@ class ResultOutboxTests(unittest.TestCase):
                 now=lambda: '2026-08-24T08:10:00+00:00',
             )
         self.assertEqual(result, 1)
-        state = self.producer.build(self.database, self.outbox)
+        state = self.producer.build(
+            self.database, self.ready, self.delivered
+        )
         self.assertEqual(state['total'], 0)
         self.assertEqual(self.final_files(), [])
+
+    def test_exact_delivered_file_is_reused_without_recreation(self):
+        self.invoke_success(self.packet_id)
+        first = self.producer.build(
+            self.database, self.ready, self.delivered
+        )
+        self.assertEqual(first['created'], 1)
+        source = self.final_files()[0]
+        target = self.delivered / source.name
+        os.replace(source, target)
+        state = self.producer.build(
+            self.database, self.ready, self.delivered
+        )
+        self.assertEqual(state['created'], 0)
+        self.assertEqual(state['reused'], 1)
+        self.assertEqual(state['ready'], 0)
+        self.assertEqual(state['delivered'], 1)
+        self.assertEqual(self.final_files(), [])
+
+    def test_duplicate_ready_and_delivered_state_is_refused(self):
+        self.invoke_success(self.packet_id)
+        self.producer.build(
+            self.database, self.ready, self.delivered
+        )
+        source = self.final_files()[0]
+        target = self.delivered / source.name
+        target.write_bytes(source.read_bytes())
+        target.chmod(0o640)
+        with self.assertRaisesRegex(
+            self.producer.OutboxError, 'state is duplicated'
+        ):
+            self.producer.build(
+                self.database, self.ready, self.delivered
+            )
 
     def test_divergent_target_fails_before_other_publication(self):
         self.invoke_success(self.packet_id)
@@ -288,13 +332,15 @@ class ResultOutboxTests(unittest.TestCase):
         self.invoke_success(second_packet)
         records = self.producer.load_records(self.database)
         first_name = sorted(records)[0]
-        divergent = self.outbox / first_name
+        divergent = self.ready / first_name
         divergent.write_bytes(b'{}\n')
         divergent.chmod(0o640)
         with self.assertRaisesRegex(
             self.producer.OutboxError, 'target differs'
         ):
-            self.producer.build(self.database, self.outbox)
+            self.producer.build(
+                self.database, self.ready, self.delivered
+            )
         self.assertEqual(self.final_files(), [divergent])
 
     def test_crash_after_one_file_is_idempotently_resumed(self):
@@ -313,33 +359,41 @@ class ResultOutboxTests(unittest.TestCase):
 
         with mock.patch.object(self.producer, 'publish', interrupted):
             with self.assertRaisesRegex(OSError, 'synthetic interruption'):
-                self.producer.build(self.database, self.outbox)
+                self.producer.build(
+                    self.database, self.ready, self.delivered
+                )
         self.assertEqual(len(self.final_files()), 1)
-        resumed = self.producer.build(self.database, self.outbox)
+        resumed = self.producer.build(
+            self.database, self.ready, self.delivered
+        )
         self.assertEqual(resumed['total'], 2)
         self.assertEqual(resumed['reused'], 1)
         self.assertEqual(resumed['created'], 1)
 
     def test_strict_stale_partial_is_recovered(self):
         self.invoke_success(self.packet_id)
-        partial = self.outbox / (
+        partial = self.ready / (
             '.ai-result-v1-' + 'a' * 32 + '.jsonl.tmp-123-456'
         )
         partial.write_bytes(b'partial')
         partial.chmod(0o600)
-        state = self.producer.build(self.database, self.outbox)
+        state = self.producer.build(
+            self.database, self.ready, self.delivered
+        )
         self.assertEqual(state['recovered'], 1)
         self.assertFalse(partial.exists())
         self.assertEqual(len(self.final_files()), 1)
 
     def test_unknown_outbox_entry_is_refused(self):
         self.invoke_success(self.packet_id)
-        unknown = self.outbox / 'unexpected.txt'
+        unknown = self.ready / 'unexpected.txt'
         unknown.write_text('unexpected', encoding='utf-8')
         with self.assertRaisesRegex(
             self.producer.OutboxError, 'unexpected entry'
         ):
-            self.producer.build(self.database, self.outbox)
+            self.producer.build(
+                self.database, self.ready, self.delivered
+            )
         self.assertEqual(self.final_files(), [])
 
     def test_lock_contention_prevents_publication(self):
@@ -354,7 +408,9 @@ class ResultOutboxTests(unittest.TestCase):
         with self.assertRaisesRegex(
             self.producer.OutboxError, 'already running'
         ):
-            self.producer.build(self.database, self.outbox)
+            self.producer.build(
+                self.database, self.ready, self.delivered
+            )
         self.assertEqual(self.final_files(), [])
 
     def test_tampered_result_digest_is_refused(self):
@@ -369,16 +425,18 @@ class ResultOutboxTests(unittest.TestCase):
         with self.assertRaisesRegex(
             self.producer.OutboxError, 'digest differs'
         ):
-            self.producer.build(self.database, self.outbox)
+            self.producer.build(
+                self.database, self.ready, self.delivered
+            )
         self.assertEqual(self.final_files(), [])
 
     def test_symlink_outbox_is_refused(self):
-        link = self.root / 'outbox-link'
-        link.symlink_to(self.outbox, target_is_directory=True)
+        link = self.outbox / 'ready-link'
+        link.symlink_to(self.ready, target_is_directory=True)
         with self.assertRaisesRegex(
             self.producer.OutboxError, 'not a directory'
         ):
-            self.producer.build(self.database, link)
+            self.producer.build(self.database, link, self.delivered)
 
 
 if __name__ == '__main__':

@@ -419,16 +419,28 @@ def recover_partials(directory):
     return removed
 
 
-def preflight(directory, records):
-    reused = 0
+def inventory_directory(directory, records, *, allow_partials):
+    found = set()
     for path in sorted(Path(directory).iterdir(), key=lambda item: item.name):
-        if path.name == LOCK_NAME or PARTIAL_RE.fullmatch(path.name):
+        if allow_partials and PARTIAL_RE.fullmatch(path.name):
             continue
         if not FINAL_RE.fullmatch(path.name) or path.name not in records:
             raise OutboxError('result outbox contains an unexpected entry')
         validate_file(path, records[path.name])
-        reused += 1
-    return reused
+        found.add(path.name)
+    return found
+
+
+def preflight(ready, delivered, records):
+    ready_names = inventory_directory(
+        ready, records, allow_partials=True
+    )
+    delivered_names = inventory_directory(
+        delivered, records, allow_partials=False
+    )
+    if ready_names & delivered_names:
+        raise OutboxError('result outbox state is duplicated')
+    return ready_names, delivered_names
 
 
 def publish(directory, name, data):
@@ -464,25 +476,38 @@ def publish(directory, name, data):
             temporary.unlink()
 
 
-def build(database, outbox):
+def build(database, ready, delivered):
     database = Path(database)
-    outbox = Path(outbox)
+    ready = Path(ready)
+    delivered = Path(delivered)
     if database.is_symlink() or not database.is_file():
         raise OutboxError('result outbox database is not a regular file')
-    if outbox.is_symlink() or not outbox.is_dir():
-        raise OutboxError('result outbox is not a directory')
+    for directory in (ready, delivered):
+        if directory.is_symlink() or not directory.is_dir():
+            raise OutboxError('result outbox is not a directory')
     database = database.resolve(strict=True)
-    outbox = outbox.resolve(strict=True)
-    validate_directory(outbox)
-    descriptor = acquire_lock(outbox)
+    ready = ready.resolve(strict=True)
+    delivered = delivered.resolve(strict=True)
+    if ready == delivered or ready.parent != delivered.parent:
+        raise OutboxError('result outbox directory layout differs')
+    root = ready.parent
+    validate_directory(root)
+    validate_directory(ready)
+    validate_directory(delivered)
+    descriptor = acquire_lock(root)
     try:
-        recovered = recover_partials(outbox)
+        recovered = recover_partials(ready)
         records = load_records(database)
-        reused = preflight(outbox, records)
+        ready_names, delivered_names = preflight(
+            ready, delivered, records
+        )
+        reused = len(ready_names) + len(delivered_names)
         created = 0
         written_bytes = 0
         for name, data in sorted(records.items()):
-            if publish(outbox, name, data):
+            if name in ready_names or name in delivered_names:
+                continue
+            if publish(ready, name, data):
                 created += 1
                 written_bytes += len(data)
         if created + reused != len(records):
@@ -491,6 +516,8 @@ def build(database, outbox):
             'total': len(records),
             'created': created,
             'reused': reused,
+            'ready': len(ready_names) + created,
+            'delivered': len(delivered_names),
             'recovered': recovered,
             'written_bytes': written_bytes,
         }
@@ -503,18 +530,21 @@ def parse_args():
         description='Build deterministic local AI-result outbox files'
     )
     parser.add_argument('--database', type=Path, required=True)
-    parser.add_argument('--outbox', type=Path, required=True)
+    parser.add_argument('--ready', type=Path, required=True)
+    parser.add_argument('--delivered', type=Path, required=True)
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
     try:
-        result = build(args.database, args.outbox)
+        result = build(args.database, args.ready, args.delivered)
         print(
             'RESULT_OUTBOX schema=1 '
             f'total={result["total"]} created={result["created"]} '
             f'reused={result["reused"]} '
+            f'ready={result["ready"]} '
+            f'delivered={result["delivered"]} '
             f'recovered={result["recovered"]} '
             f'written_bytes={result["written_bytes"]}'
         )

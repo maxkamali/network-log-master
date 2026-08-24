@@ -10480,3 +10480,55 @@ No result/packet/event/entity content, connection value, private runtime identit
 ### Next action
 
 Run the full public gate, publish this repository/protected-copy checkpoint, and independently verify GitHub. Then design and test an inactive managed local-ready producer installation with explicit durable delivery-state semantics. Do not install a writer credential or transmit to the collector until the inactive boundary passes independently; bounded live result return and ClickHouse verification remain later gates.
+
+## 2026-08-24 04:23 PDT - Item 30 durable ready/delivered state proved
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The prior repository/protected-copy checkpoint was published and independently matched on GitHub at:
+
+`274b37ab0738e2422e2efa9f4c7c4328b07ea816` — `Add protected result outbox candidate`
+
+Before any installation or sender design, the producer now makes local delivery state explicit. `ready` and `delivered` are protected sibling directories under one shared outbox-root lock. Every successful append-only result must exist in at most one state. An exact delivered file is counted as durable local acknowledgment and suppresses ready-file recreation. Duplicate ready/delivered state, divergent bytes, unknown entries, unsafe metadata, or a non-sibling layout fails closed before new publication.
+
+Two focused tests prove exact delivered reuse without recreation and duplicate-state refusal. The complete suite now passes 151 tests locally and from the exact GX10-staged tree. The staged delivery-state candidate was bound as:
+
+```text
+staged_tree=e50583294408650bfb0ba86d4878db863c59af4f
+staged_archive_sha256=744bd9526f5422533fae41abca1e44511acc94f9cb2395fbe77d4de11c8033a1
+producer_sha256=c8ede1606cb3a37dba9875791ac33181ad09701024cc6a8d5040fda540c9abc2
+focused_test_sha256=edcf02a07fd128dd2fbca9df504dc60f4cba12e4563c529f87d8217d71ae6f2a
+local_tests=151
+remote_tests=151
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+```
+
+A fresh root-only mode-`0600` online backup captured 12 packets, 13 terminal runs, 12 successful results, and the one preserved historical failure. First execution produced exactly 12 collector-valid ready files. The protected wrapper then atomically moved one exact file into delivered to simulate a future successful transport acknowledgment. Second execution created zero, reused all 12, retained exactly 11 ready plus one delivered, and did not recreate the delivered file. The combined filename/content digest remained exact independent of state location. The copy database bytes/reasoning aggregates remained unchanged, all production schedules/services remained healthy, and no collector connection or transmission occurred.
+
+The first copy wrapper reached the simulated move and then stopped because its evidence digest iterated ready files before delivered files rather than sorting the combined set by deterministic filename. This verifier-only ordering defect changed neither database nor production and transmitted nothing. A fresh retained copy with corrected deterministic ordering passed.
+
+```text
+protected_copy_bytes=1978351616
+protected_copy_sha256=8699bab3bcad39cff6304576364bee18506debfe49d0d4ed01ba5e1aa8a01327
+copy_packets=12
+copy_runs=13
+copy_results=12
+preserved_failures=1
+outbox_files=12
+outbox_sha256=f4da77f1f1f968570ce8adb38c70e8c62874825dbd451846661d6e60ad8c362f
+first_created=12
+second_reused=12
+ready_after_simulated_delivery=11
+delivered_reused=1
+copy_source_unchanged=yes
+production_health_unchanged=yes
+collector_transmission_invoked=no
+GX10_RESULT_OUTBOX_PROTECTED_COPY=PASS
+```
+
+No result/packet/event/entity content, connection value, private runtime identity, private path, credential, or model output was printed or committed.
+
+### Next action
+
+Run the full public gate, publish this delivery-state checkpoint, and independently verify GitHub. Then package and prove an inactive managed local producer installation that preserves the exact shared-lock ready/delivered contract. Do not install writer credentials or transmit to the collector. The later sender/collector design must separately close the upload-success/local-acknowledgment crash window before live replay safety can pass.

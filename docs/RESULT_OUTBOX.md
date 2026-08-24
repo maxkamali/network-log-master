@@ -2,13 +2,13 @@
 
 ## Status
 
-Execution-order item 30 repository and protected-copy gates pass. The version-1 producer is present at `components/gx10/sbin/build-result-outbox.py` and passed 149 GX10 tests locally and from an exact GX10-staged tree. It is not installed on the working system, has no service or timer, has no result-writer credential, and cannot transmit to the collector.
+Execution-order item 30 repository and protected-copy gates pass. The version-1 producer is present at `components/gx10/sbin/build-result-outbox.py` and passed 151 GX10 tests locally and from an exact GX10-staged tree. It is not installed on the working system, has no service or timer, has no result-writer credential, and cannot transmit to the collector.
 
 ## Boundary
 
 The producer opens the SQLite working database read-only and projects only `SUCCEEDED` reasoning runs that have their required append-only result row. Terminal failures and `STARTED` reservations never produce files. The producer does not call Ollama, change reasoning state, open a network socket, or make any incident/packet decision.
 
-Every successful run maps to exactly one canonical JSON record and one newline-terminated JSONL file. The filename is versioned and derived from the SHA-256 of the run ID rather than exposing the run ID in the filesystem name. A filename collision fails closed.
+Every successful run maps to exactly one canonical JSON record and one newline-terminated JSONL file. The filename is versioned and derived from the SHA-256 of the run ID rather than exposing the run ID in the filesystem name. A filename collision fails closed. `ready` and `delivered` are protected sibling directories under one outbox root and one shared lock. Each expected file may be present in at most one state. An exact delivered file suppresses ready-file recreation; duplicate or divergent state fails closed.
 
 The thin collector fields are:
 
@@ -22,7 +22,7 @@ The complete canonical reasoning result is retained under `result`; it is not re
 
 Before publication, the producer requires:
 
-- a nonsymlink regular source database and protected nonsymlink outbox directory
+- a nonsymlink regular source database and protected nonsymlink outbox-root, ready, and delivered directories with the required sibling layout
 - SQLite `quick_check`, foreign-key integrity, required tables, and the run/result invariant
 - one read transaction so every projected row comes from one database snapshot
 - exact canonical packet/result/diagnostic JSON and matching SHA-256 digests
@@ -31,14 +31,14 @@ Before publication, the producer requires:
 - no unknown, divergent, multiply linked, symlinked, wrongly owned, or wrongly moded outbox entry
 - a single nonblocking mode-`0600` producer lock
 
-All target files are mode `0640`. Publication uses a mode-`0600` unique temporary file, file `fsync`, mode normalization, atomic same-directory replacement, directory `fsync`, and exact post-publication validation. Only strictly named producer temporary files with safe ownership/link/mode metadata may be removed during crash recovery. Existing exact files are reused; divergent files stop all new publication during preflight.
+All target files are mode `0640`. Publication into ready uses a mode-`0600` unique temporary file, file `fsync`, mode normalization, atomic same-directory replacement, directory `fsync`, and exact post-publication validation. Only strictly named producer temporary files in ready with safe ownership/link/mode metadata may be removed during crash recovery. Existing exact ready or delivered files are reused; divergent, duplicated, or unexpected state stops all new publication during preflight.
 
-Version 1 emits one record per file, so the collector's 100-record-per-file ceiling is satisfied by construction. The complete synthetic suite proves valid mapping, terminal-failure exclusion, exact reuse, divergent-target refusal before other publication, interruption after one file and idempotent resume, stale-partial recovery, unknown-entry refusal, lock contention, digest tamper refusal, and symlink refusal.
+Version 1 emits one record per file, so the collector's 100-record-per-file ceiling is satisfied by construction. The complete synthetic suite proves valid mapping, terminal-failure exclusion, exact ready/delivered reuse, delivered suppression of recreation, duplicate-state refusal, divergent-target refusal before other publication, interruption after one file and idempotent resume, stale-partial recovery, unknown-entry refusal, lock contention, digest tamper refusal, and symlink refusal.
 
 ## Protected-copy evidence
 
-The exact staged repository tree passed all 149 tests and the GX10 filesystem contract on the GX10 host. A root-only mode-`0600` SQLite online backup then contained 12 packets, 12 terminal runs, 11 successful results, and one preserved failure. The producer created exactly 11 private files. Every file contained one record, met the unchanged collector gate, and had the required metadata. A second run created zero files and exactly reused all 11. The copy byte/hash and reasoning aggregates remained unchanged, all live schedules remained healthy, and no collector transmission occurred.
+The initial exact staged repository tree passed 149 tests and created/reused 11-for-11 collector-valid files from a protected copy. The delivery-state revision passed all 151 tests locally and from a new exact GX10-staged tree. A fresh root-only mode-`0600` online backup then contained 12 packets, 13 terminal runs, 12 successful results, and one preserved failure. The producer created exactly 12 ready files. One was atomically moved to delivered to simulate a future durable acknowledgment. A second run created zero files, reused all 12, reported 11 ready plus one delivered, and did not recreate the delivered file. Every file still passed the unchanged collector gate and the combined content digest was state-location independent. The copy byte/hash and reasoning aggregates remained unchanged, all live schedules remained healthy, and no collector transmission occurred.
 
 ## Next gate
 
-Do not copy these protected files to the collector. The next item-30 sub-section is an inactive GX10 installation/managed-producer design that preserves this read-only projection and adds an independently verified local ready-directory boundary. Writer-key installation and any live collector transfer remain later explicit gates. Delivery acknowledgment/retry state must be designed before a scheduled sender can safely avoid replay after a successfully transferred local file leaves the ready directory.
+Do not copy these protected files to the collector. The next item-30 sub-section is an inactive GX10 installation/managed-producer package that preserves this proven ready/delivered state machine and shared lock. Writer-key installation and any live collector transfer remain later explicit gates. The later sender and collector gate must still close the upload-success/local-acknowledgment crash window before live replay safety can pass.

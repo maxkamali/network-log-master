@@ -34,7 +34,7 @@ Current state:
 - the deterministic wake-policy/compact-packet schema and exact builder are active only through the managed reasoning boundary
 - the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; the original exact artifacts were installed empty under protected backup before item-29 activation
 - item 29 is complete after backlog deferral, one safely diagnosed terminal invalid output, exact portable prompt revision `r3`, protected-copy replay, four-artifact upgrade, protected resume, and three natural fixed-packet drain cadences
-- item 30 repository/copy gates pass with one canonical result per atomic JSONL file, full result/provenance retention, exact reuse/crash recovery, 149 local and GX10-staged tests, and an 11-result protected-copy proof; inactive installation is next
+- item 30 repository/copy gates pass with one canonical result per atomic JSONL file, full result/provenance retention, shared-lock ready/delivered states, exact reuse/crash recovery, 151 local and GX10-staged tests, and a 12-result delivery-state protected-copy proof; inactive installation is next
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -127,7 +127,7 @@ The large model blobs are intentionally not stored in Git. `install/install-mode
 
 The item-28 application-specific caller and supporting schema/configuration/prompt artifacts were installed empty and unscheduled under protected backup. Item 29 later invoked the boundary through its separately managed schedule; deterministic schedules remain independent of Ollama.
 
-The item-29 service/timer/private binding and exact `r3` bytes are installed and active after three natural-cadence gates. The original invalid-output run remains immutable evidence. Item 30's repository/copy-only outbox candidate now passes 149 tests plus exact GX10 staging and protected-copy gates; no outbox artifact, result-writer credential, sender, or collector transmission is installed yet. See `docs/MANAGED_REASONING.md` and `docs/RESULT_OUTBOX.md`.
+The item-29 service/timer/private binding and exact `r3` bytes are installed and active after three natural-cadence gates. The original invalid-output run remains immutable evidence. Item 30's repository/copy-only outbox candidate now passes 151 tests plus exact GX10 staging and ready/delivered protected-copy gates; no outbox artifact, result-writer credential, sender, or collector transmission is installed yet. See `docs/MANAGED_REASONING.md` and `docs/RESULT_OUTBOX.md`.
 
 ## Guarded activation and runtime verification
 

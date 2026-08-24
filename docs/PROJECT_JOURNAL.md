@@ -11736,3 +11736,25 @@ This was a documentation-only correction. It made no production, credential, ser
 ### Closure action
 
 Publish and independently verify this documentation checkpoint on GitHub `main`.
+
+## 2026-08-24 14:18 PDT - Item 32 AI-results Grafana dashboard authorized and opened
+
+### Status
+
+The operator explicitly requested a new Grafana dashboard for exploring the validated GX10 result records already stored in `observability.ai_updates`. The core end-to-end system remains complete; this bounded post-closure feature reopens execution order only for presentation.
+
+Read-only preflight established:
+
+- GX10 correlation, reasoning, result-outbox, and result-sender timers are enabled and active
+- the result sender reports zero service restarts
+- the collector result-gate timer, Vector, ClickHouse, and Grafana are enabled and active
+- the result gate reports zero service restarts
+- `grafana_reader` already has `SELECT` on `observability.ai_updates`
+- none of the four captured dashboards currently queries `observability.ai_updates`
+- the supported Grafana 13 unified-resource API create/dry-run/verification tooling is already published
+
+Item 32 is now the single `NEXT` item. Its boundary is a new, non-replacing dashboard resource using the existing ClickHouse datasource. Existing dashboards, datasource identities, result production/transport, validation/ledger behavior, ClickHouse schema/data, and all service schedules must remain unchanged. The new resource must pass repository JSON/query/link/sanitation checks, Grafana `dryRun=All`, live create, and exact API reread verification before item closure.
+
+### Next action
+
+Publish and independently verify this execution-order checkpoint. Then build and test the new dashboard candidate without changing Grafana until the exact candidate has its own durable GitHub checkpoint.

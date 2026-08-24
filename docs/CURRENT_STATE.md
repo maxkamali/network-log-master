@@ -2,7 +2,7 @@
 
 Last verified project checkpoint: 2026-08-24.
 
-This file is the authority for current execution order. Exactly one item is marked `NEXT` while project execution remains; the completed end-to-end state has none.
+This file is the authority for current execution order. Exactly one item is marked `NEXT` while project execution remains; a completed state has none.
 
 ## Project acceptance criterion and disposition
 
@@ -20,7 +20,9 @@ Disposable clean-two-server execution: `WAIVED BY OPERATOR`, empirically unverif
 
 Rebuild/documentation milestone disposition: `ACCEPTED WITH RESIDUAL RISK`.
 
-End-to-end working-system target: `COMPLETE` after the item-31 production/repository closure audit.
+Core end-to-end working-system target: `COMPLETE` after the item-31 production/repository closure audit.
+
+Post-closure AI-results Grafana dashboard feature: `IN PROGRESS` under item 32.
 
 The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
@@ -303,7 +305,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, rebuild packages/runbooks, production normalizer/handoff, deterministic incident/reasoning boundaries, managed reasoning, local result production, and recurring write-only result return are active. Item 30's first-live, exact-replay, divergent-conflict, exact-stage, active-schedule, natural acceptance, and ClickHouse provenance gates pass. Item 31 is the read-only final closure audit.
+The environment transition, rebuild packages/runbooks, production normalizer/handoff, deterministic incident/reasoning boundaries, managed reasoning, local result production, and recurring write-only result return are active. Item 30's first-live, exact-replay, divergent-conflict, exact-stage, active-schedule, natural acceptance, and ClickHouse provenance gates pass. Item 31's final closure audit passes. Item 32 adds presentation only; it must not alter the result producer, transport, collector gate, acceptance ledger, ClickHouse schema/data, or any existing dashboard.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -340,8 +342,9 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 29. `DONE` — packaged bounded reasoning behind a separately disableable schedule; passed protected-copy/inactive-install/timer-correction/backlog-control gates; safely isolated and preserved one terminal invalid output; introduced immutable portable prompt revision `r3`; passed exact upgrade, protected resume, and three natural fixed-packet drain cadences with one success/result each, one unchanged historical failure, zero `STARTED` rows/restarts, deterministic zero lag, and healthy independent schedules.
 30. `DONE` — completed the separately gated GX10 result-return boundary: durable collector replay ledger and cross-owner publication; 186 local/exact-GX10-staged tests; configured-inactive private writer boundary; first live manual transport; exact ClickHouse raw/provenance proof; distinct exact-replay and same-name conflict isolation; explicit active-state verification; recurring timer activation; three natural deliveries; first natural collector acceptance and exact one-row ClickHouse ingestion; zero sender restarts and healthy zero-lag preexisting schedules.
 31. `DONE` — completed the final production/repository closure audit: exact active conservation at 10 delivered = eight durably accepted + two settling; all eight accepted results have exactly one byte/size/projection/provenance-equivalent ClickHouse row; exact-replay/conflict quarantine evidence remains one pair each; both hosts pass full active health with zero deterministic lag and zero sender restarts; 186 GX10, 30 collector, 14 shadow-package, 11 gate-package, 94 normalizer, and nine repository-validator tests pass; current-tree/history/link/ref sanitation and GitHub checkpoint parity pass; stale current-status documentation was reconciled without deleting rollback or evidence.
+32. `NEXT` — build, validate, dry-run, create, and independently verify a new non-replacing Grafana dashboard for `observability.ai_updates`; reconcile the stale AI-presentation documentation, preserve existing dashboards/datasources and all production data-path behavior, then publish closure evidence.
 
-The end-to-end target is complete. There is no remaining `NEXT` item. Future feature work must explicitly reopen execution order here before changing production behavior.
+The core end-to-end target remains complete. Item 32 is the single reopened `NEXT` item for the explicitly requested AI-results presentation feature.
 
 ## Scope constraints
 

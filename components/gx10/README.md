@@ -33,7 +33,7 @@ Current state:
 - production packet invocation, local-LLM inference, and result production remain future gated phases
 - the deterministic wake-policy/compact-packet schema and exact builder are installed unscheduled under protected backup with zero packet rows, invocations, or scheduler references
 - the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; its exact artifacts are installed empty and unscheduled under protected backup with zero version/run/result rows and no production inference
-- an item-29 managed `packet build -> one inference` runner/service/timer candidate passes synthetic plus protected current-state-copy real-success/safe-failure/interruption/retry-refusal/no-op/isolation gates; it is not installed or scheduled on the working system
+- the item-29 managed `packet build -> one inference` runner/service/timer passes synthetic plus protected current-state-copy real-success/safe-failure/interruption/retry-refusal/no-op/isolation gates and is installed exactly but remains disabled/inactive with zero production reasoning state
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -68,7 +68,7 @@ The three rediscovered live custom applications and deliberate post-rediscovery 
 - `incident-engine.py` — deterministic incident identity, evidence, lifecycle, repeat, and rolling-context engine
 - `build-reasoning-packets.py` — deterministic wake selection and bounded append-only packet construction; no inference
 - `run-local-reasoning.py` — exact model/prompt/run binding and strict loopback structured inference; installed but not scheduled
-- `run-managed-reasoning.py` — repository-only exact-hash packet/inference wrapper with one-inference-per-cycle locking and aggregate health; not installed or scheduled
+- `run-managed-reasoning.py` — exact-hash packet/inference wrapper with one-inference-per-cycle locking and aggregate health; installed but not yet activated or scheduled
 
 `sbin/runtime_config.py` loads the protected runtime configuration rendered by `install/render-runtime-config.py`. See `sbin/PROVENANCE.md` for live hashes and the function-level parity proof.
 
@@ -125,7 +125,7 @@ The large model blobs are intentionally not stored in Git. `install/install-mode
 
 The item-28 application-specific caller and supporting schema/configuration/prompt artifacts are installed empty and unscheduled under protected backup. No unit or timer invokes the caller, no production inference has run, and the active deterministic schedules remain independent of Ollama.
 
-The item-29 managed runner/service/timer exists only as a published, protected-copy-validated repository candidate. Its installer, activator, and verifier keep inactive installation, protected backup plus initial bounded invocation, and timer enablement as distinct gates. See `docs/MANAGED_REASONING.md`.
+The item-29 managed runner/service/timer/private binding is installed exactly but remains disabled and inactive with zero production reasoning state. Its activator and verifier keep protected backup plus initial bounded invocation and timer enablement as distinct gates. See `docs/MANAGED_REASONING.md`.
 
 ## Guarded activation and runtime verification
 

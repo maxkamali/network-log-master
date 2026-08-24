@@ -9608,3 +9608,42 @@ No packet/result content, event content, entity identity, database path, unit id
 ### Next action
 
 Run the full public gate, publish, and independently verify this copy checkpoint. Then use only exact published artifacts for inactive working-system installation of the managed runner/service/timer/private configuration. Do not build a production packet or enable the reasoning timer until the separately protected initial-cycle activation gate.
+
+## 2026-08-24 02:33 PDT - Item 29 exact inactive working-system boundary installed
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The protected-copy checkpoint was published and independently matched on GitHub at:
+
+`2652bfb393418755b41f378fab70a5943103d67a` — `Record managed reasoning copy rehearsal`
+
+Only the exact runner/service/timer artifacts from the published candidate were installed, together with a narrowly rendered private database/runtime-identity/ordering/write-scope configuration. The installer revalidated the exact installed item-27 builder and item-28 caller/configuration/prompt/output-schema bytes, database ownership/schema, and loaded dependencies. Real on-host `systemd-analyze verify` passed before daemon reload.
+
+The managed reasoning timer remained disabled, its service remained inactive, and neither stage was invoked. The application database was not deliberately written.
+
+The install procedure's immediate final database verifier raced with a normal incoming batch committed after its zero-lag preflight and reported transient deterministic lag. All inactive files/units had already installed successfully, production reasoning state remained empty, and the existing correlation schedule was unaffected. The installer was not repeated.
+
+A separate later-cadence postcheck revalidated exact source hashes/modes, private configuration/drop-in scope, unit state, dependency health, SQLite integrity/foreign keys, caught-up deterministic watermarks, empty reasoning state, and zero service restarts:
+
+```text
+recent_max_id=965682
+projection_lag=0
+incident_lag=0
+reasoning_packets=0
+reasoning_model_versions=0
+reasoning_prompt_versions=0
+reasoning_runs=0
+reasoning_results=0
+managed_reasoning_timer_enabled=no
+managed_reasoning_service_invocations=0
+managed_reasoning_restarts=0
+production_dependencies_active=yes
+production_inference_invoked=no
+GX10_MANAGED_REASONING_INACTIVE_INSTALL=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, or connection value was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this inactive-install checkpoint. Then use the separate activator to create a new root-only protected pre-activation backup, run exactly one bounded production cycle while the timer is still disabled, verify the resulting aggregate state, and only then enable the reasoning timer. Collector result return remains disabled.

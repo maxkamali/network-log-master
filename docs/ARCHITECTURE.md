@@ -48,7 +48,7 @@ Target ownership:
 
 GX10 is intentionally not the authoritative raw-log archive, dashboard server, or direct ClickHouse writer.
 
-Current production implementation is narrower than the target. Its automatic behavior has two independent schedules: read-only backlog fetch followed by replay-safe local SQLite ingest, and offline canonical projection followed by deterministic incident correlation. Ollama infrastructure exists. The application-specific versioned item-28 schema/caller/configuration/prompt boundary is installed empty under protected backup, but it is not invoked or scheduled and no result-return producer exists. An item-29 managed `packet build -> one local inference` schedule exists only as a repository candidate pending protected-copy and activation gates.
+Current production implementation is narrower than the target. Its automatic behavior has two independent schedules: read-only backlog fetch followed by replay-safe local SQLite ingest, and offline canonical projection followed by deterministic incident correlation. Ollama infrastructure exists. The application-specific versioned item-28 schema/caller/configuration/prompt boundary and item-29 managed `packet build -> one local inference` runner/service/timer are installed under protected gates, but reasoning remains inactive and disabled with zero production state. No result-return producer exists.
 
 ## Current data path
 

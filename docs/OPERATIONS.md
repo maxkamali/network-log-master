@@ -118,7 +118,7 @@ Historical version-3 enrichment remains in SQLite. Ollama is installed separatel
 
 The item-27 reasoning-packet schema and builder are installed but empty and unscheduled. Operators must not invoke the builder or item-28 caller ad hoc against the working database. The caller fixes loopback transport, reserves one durable run before inference, validates strict bounded output, and makes unavailability a terminal no-result state. Only the separately gated managed invocation boundary may call it. Disabling correlation or any future reasoning schedule must preserve append-only packet and result truth.
 
-The item-29 managed reasoning runner/service/timer is currently a repository-only candidate. It permits one inference reservation per locked cycle, exposes aggregate backlog/run/result health, refuses unreconciled `STARTED` state, and uses a protected-backup-first activation gate. Follow `docs/MANAGED_REASONING.md`; do not install or invoke it ad hoc.
+The item-29 managed reasoning runner/service/timer/private binding is installed exactly but remains inactive and disabled. It permits one inference reservation per locked cycle, exposes aggregate backlog/run/result health, refuses unreconciled `STARTED` state, and uses a protected-backup-first activation gate. Follow `docs/MANAGED_REASONING.md`; do not invoke it ad hoc.
 
 ## AI result return boundary
 

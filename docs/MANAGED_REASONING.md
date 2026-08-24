@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has a published repository candidate, passing synthetic tests, and passing protected current-production-state-copy rehearsal. It is not installed or scheduled on the working system. Production remains at zero reasoning packets, model versions, prompt versions, runs, and results, and no production inference has run.
+Execution-order item 29 has a published repository candidate, passing synthetic tests, passing protected current-production-state-copy rehearsal, and exact inactive working-system installation. The runner/service/timer/private binding is installed, but the timer is disabled and the service is inactive. Production remains at zero reasoning packets, model versions, prompt versions, runs, and results, and no production inference has run.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -132,6 +132,31 @@ GX10_MANAGED_REASONING_COPY_REHEARSAL=PASS
 The protected base copy is mode `0600`, `1947361280` bytes, and SHA-256 `b5583c0ece49dea857afde03b98112d901b88be24ce5b060e79dd5fd36856d85`. Its path and all packet/result content remain private.
 
 The final working-system check reached recent event ID `965309` with zero projection and incident lag, zero packet/model/prompt/run/result rows, both production timers active, and no production inference.
+
+## Inactive working-system installation
+
+Only the exact published runner/service/timer plus a narrowly rendered private database/runtime binding were installed. The installer revalidated all installed item-27/item-28 dependency bytes and database ownership/schema, ran real on-host `systemd-analyze verify`, reloaded systemd, and proved the new timer disabled and both new units inactive. It did not write the database or invoke either stage.
+
+The immediate post-install database check raced with an ordinary incoming batch and observed temporary deterministic lag after all files had safely installed. No reasoning state existed. The existing correlation cadence caught up normally; a separate later check then passed the complete exact-source/private-binding/unit/database verifier:
+
+```text
+recent_max_id=965682
+projection_lag=0
+incident_lag=0
+reasoning_packets=0
+reasoning_model_versions=0
+reasoning_prompt_versions=0
+reasoning_runs=0
+reasoning_results=0
+managed_reasoning_timer_enabled=no
+managed_reasoning_service_invocations=0
+managed_reasoning_restarts=0
+production_dependencies_active=yes
+production_inference_invoked=no
+GX10_MANAGED_REASONING_INACTIVE_INSTALL=PASS
+```
+
+The protected pre-activation backup, one bounded initial production cycle, timer enablement, and scheduled-cadence evidence remain separate later gates.
 
 ## Exact candidate artifacts
 

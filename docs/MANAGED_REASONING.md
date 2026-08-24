@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has a published repository candidate, passing synthetic tests, passing protected current-production-state-copy rehearsal, and exact inactive working-system installation. The runner/service/timer/private binding is installed, but the timer is disabled and the service is inactive. A final pre-activation review caught that the initial boot-relative timer could fire immediately when enabled on a long-running host. Activation was not attempted. The corrected candidate uses a start-relative initial delay and an exact-old-hash inactive upgrade. Production remains at zero reasoning packets, model versions, prompt versions, runs, and results, and no production inference has run.
+Execution-order item 29 has a published repository candidate, passing synthetic tests, passing protected current-production-state-copy rehearsal, and exact inactive working-system installation. A final pre-activation review caught that the initial boot-relative timer could fire immediately when enabled on a long-running host. Activation was not attempted. The published corrected candidate uses a start-relative initial delay and was atomically applied only over the exact inactive predecessor. The runner/service/timer/private binding is installed, but the timer remains disabled and the service inactive. Production remains at zero reasoning packets, model versions, prompt versions, runs, and results, and no production inference has run.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -92,7 +92,7 @@ Twenty-one focused tests currently prove:
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `136` tests. Protected current-production-state-copy rehearsal and unscheduled working-system installation have passed. The corrected timer checkpoint, exact inactive timer upgrade, initial production activation, and multiple scheduled-cadence evidence remain separate gates. Collector result return is outside item 29.
+The full GX10 suite currently passes `136` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, and the exact inactive timer correction have passed. Initial production activation and multiple scheduled-cadence evidence remain separate gates. Collector result return is outside item 29.
 
 ## Protected current-state-copy evidence
 
@@ -159,7 +159,9 @@ GX10_MANAGED_REASONING_INACTIVE_INSTALL=PASS
 
 Before activation, review found that the installed `OnBootSec` timer could become immediately due when enabled on this long-running host. No activator, backup, packet builder, model call, or reasoning unit was invoked. The timer remains disabled, the service remains inactive, and all reasoning tables remain empty. The corrected candidate replaces that boot-relative trigger with `OnActiveSec=5min` and permits only an exact-byte inactive upgrade of the published predecessor, with rollback if any later installation check fails.
 
-The corrected timer must be published, independently verified, and upgraded while still inactive before the protected pre-activation backup, one bounded initial production cycle, timer enablement, and scheduled-cadence gates.
+The correction was published at `abbaa53ad50f00d7728379b602bd064c38d4b009`, independently matched on GitHub, staged exactly on GX10, and passed all 136 tests there after repository-mode normalization. The installer accepted only the exact inactive predecessor and atomically upgraded it. Post-upgrade verification proved the corrected timer still disabled/inactive, the service inactive, zero restarts, zero reasoning rows of every type, caught-up deterministic watermarks, healthy dependencies, and no production inference.
+
+The protected pre-activation backup, one bounded initial production cycle, timer enablement, and scheduled-cadence gates remain separate.
 
 ## Exact candidate artifacts
 
@@ -170,4 +172,4 @@ The corrected timer must be published, independently verified, and upgraded whil
 - service SHA-256: `3559ed6a5bdfc98de3544bc6bf7f69cf6459a9cb50083cd96db632a27e52e64a`
 - timer SHA-256: `c284e9d8cbb71775dc6b67b7451bb024d689b4ec27b89de987443a6ff77cad34`
 
-These hashes describe the corrected pre-activation candidate. The runner, activator, verifier, and service are byte-identical to the protected-copy candidate; only the installer and timer changed. The exact corrected checkpoint must be staged and the old inactive timer upgraded before activation.
+These hashes describe the corrected pre-activation candidate. The runner, activator, verifier, and service are byte-identical to the protected-copy candidate; only the installer and timer changed. The exact corrected timer is installed inactive on the working system.

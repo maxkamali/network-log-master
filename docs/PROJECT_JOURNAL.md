@@ -9672,3 +9672,41 @@ The runner, activator, verifier, and service are byte-identical to the protected
 ### Next action
 
 Run the full repository/public gates, publish and independently verify the correction, then stage only that checkpoint. Upgrade the exact old timer while it remains inactive and disabled, reverify empty reasoning state, and publish that production correction before protected activation.
+
+## 2026-08-24 02:43 PDT - Item 29 corrected timer installed inactive
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The start-relative timer correction was published and independently matched on GitHub at:
+
+`abbaa53ad50f00d7728379b602bd064c38d4b009` — `Correct managed reasoning activation timing`
+
+Only the exact archive from that checkpoint was staged on GX10. After normalizing staging modes to the Git index, all 136 component tests and the filesystem contract passed on the target. The first test attempt had exposed archive-extraction group-write mode drift in three preexisting correlation tests; no installed artifact or application state changed, and exact repository-mode normalization resolved it.
+
+The corrected installer then accepted the installed timer only because its bytes, ownership, and mode exactly matched the published inactive predecessor. It atomically replaced that file, ran real on-host systemd analysis, reloaded systemd, and left the timer disabled/inactive and service inactive. The runner, service, private configuration, drop-in, and item-27/item-28 dependencies remained exact.
+
+Post-upgrade evidence:
+
+```text
+recent_max_id=966593
+projection_lag=0
+incident_lag=0
+reasoning_packets=0
+reasoning_model_versions=0
+reasoning_prompt_versions=0
+reasoning_runs=0
+reasoning_results=0
+managed_reasoning_timer_enabled=no
+managed_reasoning_timer_active=no
+managed_reasoning_service_active=no
+managed_reasoning_restarts=0
+production_inference_invoked=no
+production_dependencies_active=yes
+GX10_MANAGED_REASONING_TIMER_UPGRADE=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, or connection value was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this exact inactive-correction checkpoint. Then create the protected pre-activation backup and execute exactly one bounded production cycle while the corrected timer remains disabled. Enable the timer only if the separate activator and post-cycle verifier pass.

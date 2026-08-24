@@ -9233,3 +9233,52 @@ No working-system schema/artifact/run/result, production packet, Ollama API call
 ### Next action
 
 Publish and independently verify this candidate. Then add an exact-schema/exact-artifact guarded existing-system migration and pass synthetic local-model plus protected-production-state-copy gates before any unscheduled installation or production-packet inference.
+
+## 2026-08-24 01:37 PDT - Item 28 guarded unscheduled migration candidate built
+
+### Status
+
+Execution-order item 28 remains the single `NEXT` item and is in progress.
+
+The local-reasoning repository candidate was published and independently matched on GitHub at:
+
+`7e8475c2c1ca50df2d65cf99a75651dad704c6f9` — `Build versioned local reasoning candidate`
+
+The existing-system guard requires:
+
+- exact base-plus-incident-plus-packet schema before apply and exact inference schema after apply
+- the exact installed item-27 packet builder hash, root ownership/mode, and zero scheduler references
+- exact item-28 inference schema, caller, runtime configuration, prompt, and output-schema hashes
+- a new root-only mode-`0600` SQLite online backup that independently validates as exact pre-inference state
+- protected target parents and absent, distinct target files
+- zero systemd/cron scheduler references to the caller
+- preserved application-database owner/group/mode
+
+Apply installs only the inference schema and four exact artifacts. It creates no unit, timer, cron entry, packet, model registration, run, result, API call, or collector path. A partial artifact-install failure rolls back the schema and removes only exact files created by that attempt. Rollback refuses once any item-28 model, prompt, run, or result row exists and never restores the backup over newer working state.
+
+Six focused migration tests prove:
+
+- apply, independent verify, exact artifact modes, and empty-state rollback
+- exact protected pre-inference backup
+- divergent-schema refusal before backup
+- scheduler-reference refusal before backup
+- nonempty inference-state rollback refusal
+- partial artifact failure cleanup with schema rollback and retained backup
+
+Validation:
+
+```text
+110 tests passed
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+```
+
+Migration-guard SHA-256:
+
+`7a41de4f28a5d4e5060cbe2b8cdfb0a96e9cfe160d5e172550b960cdec44862c`
+
+No working-system artifact/schema/state, production packet, Ollama API call, inference, service, timer, collector result, or Grafana state changed.
+
+### Next action
+
+Run the public gate, publish, and independently verify this guard. Then use only exact published artifacts for a synthetic loopback local-model quality/failure evaluation before any production-state-copy rehearsal.

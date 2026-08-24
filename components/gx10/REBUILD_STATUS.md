@@ -16,7 +16,7 @@ Item 26 is complete. The separately managed offline `projection -> incident` ser
 
 Item 27 is complete. Initial execution over a protected current-state copy built four bounded packets for the four active incidents, immediate rerun and incident-cursor replay were exact no-ops, a second copy reproduced the exact packet digest, and synthetic threshold/lifecycle/tamper/empty-rollback behavior passed. The exact empty reasoning schema and builder are installed unscheduled on the working system under a new validated pre-reasoning backup. Production retains zero packet rows, zero builder invocations, and zero scheduler references; both original timers resumed and correlation reverified at zero lag. Fourteen focused tests pass within the 94-test GX10 suite.
 
-Item 28 has a repository-only local-reasoning candidate. It binds the captured exact `qwen3:8b` manifest/config to immutable model and prompt versions, reserves one deterministic run before any loopback Ollama request, accepts only a strict bounded structured assessment, stores append-only canonical results, and terminally records safe failure without changing incident/packet truth or automatically retrying. Ten focused tests pass within the 104-test GX10 suite. The selected manifest and active loopback-only Ollama state were revalidated without inference. No item-28 schema/artifact/run/result is installed on the working system and no production packet has been created or invoked.
+Item 28 has a published repository-only local-reasoning candidate and guarded migration candidate. It binds the captured exact `qwen3:8b` manifest/config to immutable model and prompt versions, reserves one deterministic run before any loopback Ollama request, accepts only a strict bounded structured assessment, stores append-only canonical results, and terminally records safe failure without changing incident/packet truth or automatically retrying. The guard requires exact pre/post schema and artifact hashes, the exact unscheduled item-27 builder, a protected pre-inference backup, zero caller scheduler references, atomic failure cleanup, and empty-state-only rollback. Sixteen focused tests pass within the 110-test GX10 suite. The selected manifest and active loopback-only Ollama state were revalidated without inference. No item-28 schema/artifact/run/result is installed on the working system and no production packet has been created or invoked.
 
 The private copy full backfill scanned `954790` stored events, projected `7726` canonical rows, suppressed `5830`, and produced `22` incidents, `425` evidence rows, `463` transitions, and `5` active incidents in one 4.3-second managed pass with zero cursor lag. The next pass was a complete no-op. A synthetic appended canonical event advanced both exact watermarks. Malformed projection input rolled back its batch and prevented incident execution; forced incident failure preserved the durable projection and all prior incident state. The working database remained unchanged.
 
@@ -60,7 +60,7 @@ Completed:
 - Ollama, the original fetch/ingest timer, and the separately disableable correlation timer are active; no local-reasoning caller is scheduled
 - complete clean-machine operator runbook
 - final structural, syntax, generated/private-artifact, IPv4/public-safety, unit-test, and filesystem-contract audit
-- 104 synthetic tests passing
+- 110 synthetic tests passing
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.

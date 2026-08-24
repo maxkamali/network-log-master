@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 28 has a repository-only candidate. The working GX10 system does not contain the item-28 inference schema, caller, prompt/configuration artifacts, run rows, or result rows. No production reasoning packet has been built and no model inference has been invoked by this project.
+Execution-order item 28 has a published repository candidate and a guarded existing-system migration candidate. The working GX10 system does not contain the item-28 inference schema, caller, prompt/configuration artifacts, run rows, or result rows. No production reasoning packet has been built and no model inference has been invoked by this project.
 
 The candidate consumes only immutable item-27 packets. It cannot change incidents, evidence, transitions, packets, collector state, or Grafana state.
 
@@ -29,6 +29,7 @@ Exact repository artifacts:
 - runtime version configuration: `components/gx10/config/reasoning-runtime-v1.json`
 - system prompt: `components/gx10/prompts/incident-assessment-v1.txt`
 - output schema: `components/gx10/prompts/incident-assessment-output-v1.json`
+- migration guard: `components/gx10/install/migrate-local-reasoning.py`
 
 Candidate SHA-256 values:
 
@@ -37,6 +38,7 @@ Candidate SHA-256 values:
 - runtime configuration: `8d4846c6cd2dbde9ee8bc3a7b81d8e0a2f99185f84d476adadfeb273b4121d13`
 - system prompt: `8c1fc9ab16bf819ad7884a7c45f65468e0091f7251dba1f285ab4c0859b78262`
 - output schema: `b712ad9d76bdc39a023f04cdd9c680703964ae3feab3cddfb09b152a01cf9e06`
+- migration guard: `7a41de4f28a5d4e5060cbe2b8cdfb0a96e9cfe160d5e172550b960cdec44862c`
 
 ## Durable state and idempotency
 
@@ -84,8 +86,8 @@ Unavailable, timed-out, transport-error, invalid-response, and invalid-output ou
 
 ## Item-28 gates
 
-1. publish and independently verify the repository candidate
-2. add an exact-schema/exact-artifact existing-system migration with protected backup, zero scheduler references, and empty-state-only rollback
+1. `DONE` — publish and independently verify the repository candidate
+2. `DONE` — add an exact-schema/exact-artifact existing-system migration with protected backup, zero scheduler references, and empty-state-only rollback
 3. run synthetic structured-output quality and failure-path evaluation against the loopback local model without production packet data
 4. rehearse migration, version registration, one-packet success, interruption, invalid output, unavailable runtime, and deterministic rerun on protected production-state copies
 5. install the exact inference schema/caller/configuration/prompt artifacts unscheduled under a new protected backup only after the earlier gates pass

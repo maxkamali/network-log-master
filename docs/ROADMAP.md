@@ -138,7 +138,7 @@ Status: `IN PROGRESS`
 1. `DONE` — build a versioned deterministic outbox projection from successful append-only reasoning results
 2. `DONE` — prove idempotent mapping, duplicate suppression, atomic local publication, crash recovery, strict output bounds, and protected-copy behavior
 3. `DONE` — package, rehearse, and install an independently managed inactive no-network local producer boundary
-4. activate the no-network local producer through protected initial-cycle and timer-only cadence gates
+4. `DONE` — activate the no-network local producer through protected initial-cycle, three no-op cadences, and natural one-file catch-up gates
 5. separately install the least-privilege write-only transport identity only after local producer verification passes
 6. activate one bounded live result return and prove collector validation, ClickHouse ingestion, exact provenance, replay safety, and failure isolation
 7. retain GX10 without direct ClickHouse access and keep all model results nonauthoritative

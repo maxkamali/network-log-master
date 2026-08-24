@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-Item 29 is complete. Item 30 is the single `NEXT`. Protected local outbox activation and three consecutive natural no-op cadences pass after correction: 159 tests, 15 successful results/15 collector-valid ready files, exact reuse/zero writes, zero delivered/restarts, active no-network timer, and no credential/transmission. Read `docs/RESULT_OUTBOX.md`; next prove natural one-file catch-up after reasoning advances before any sender gate.
+Item 29 is complete. Item 30 is the single `NEXT`. The no-network local producer milestone is complete: 159 tests, protected activation, three natural exact-no-op cadences, and natural reasoning/outbox 15→16 catch-up with exactly one new file, unchanged prior digest, 16 collector-valid files, zero delivered/restarts, and no credential/transmission. Read `docs/RESULT_OUTBOX.md`; next design repository/copy-only transport replay safety before any credential gate.
 
 The active automatic application chains are:
 

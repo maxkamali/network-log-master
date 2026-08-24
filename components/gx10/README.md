@@ -34,7 +34,7 @@ Current state:
 - the deterministic wake-policy/compact-packet schema and exact builder are active only through the managed reasoning boundary
 - the versioned local-reasoning caller/schema/prompt boundary passes synthetic and protected-copy idempotency, strict-output, interruption, tamper, and unavailable-runtime gates; the original exact artifacts were installed empty under protected backup before item-29 activation
 - item 29 is complete after backlog deferral, one safely diagnosed terminal invalid output, exact portable prompt revision `r3`, protected-copy replay, four-artifact upgrade, protected resume, and three natural fixed-packet drain cadences
-- item 30 local producer activation plus three consecutive natural exact-no-op cadences pass after correction: 159 tests, 15-for-15 collector-valid ready files, zero delivered/restarts/writes across the cadences, and no credential/transmission; natural catch-up after the next reasoning result is next
+- item 30 local producer is complete after protected activation, three natural exact-no-op cadences, and natural 15→16 result/file catch-up with unchanged prior digest and 16 collector-valid files; transport replay-safety design is next, with no credential/transmission yet
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 

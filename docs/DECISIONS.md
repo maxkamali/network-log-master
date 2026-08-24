@@ -507,4 +507,5 @@ Consequence:
 - exact producer/runner/service/timer/configuration plus ready/delivered directories are installed; corrected protected activation retains 15 exact collector-valid ready files, zero delivered, and an active no-network timer
 - no writer credential or sender is installed, and the boundary has not connected or transmitted to the collector
 - local activation must pause only managed reasoning, bind all five reasoning tables to one before/after digest, run exactly one producer cycle while the outbox timer is disabled, enable that timer only after cardinality verification, and restore reasoning on every path
+- local production is accepted only after multiple natural exact-no-op cadences and one natural reasoning-success/outbox-file catch-up preserve all prior file bytes
 - a later sender must define durable acknowledgment semantics before it may remove or retransmit a local ready file

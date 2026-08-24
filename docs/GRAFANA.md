@@ -23,7 +23,7 @@ The collector rebuild artifacts preserve the current datasource names, UIDs, pro
 
 ## Grafana 13 dashboard resource contract
 
-The current four dashboards are captured as native Grafana 13 unified-resource API documents using:
+The current five dashboards are captured as native Grafana 13 unified-resource API documents using:
 
 `dashboard.grafana.app/v2`
 
@@ -148,9 +148,20 @@ Raw logs remain available through drilldowns when investigation requires them.
 
 ## AI presentation
 
-AI panels should be added only after incident and AI-result contracts stabilize.
+The live `AI Incident Analysis` dashboard presents the stabilized item-30 result contract from `observability.ai_updates`. It is a separate editable dashboard so exploratory work does not crowd or destabilize the primary NOC view.
 
-The intended pattern is:
+Its default seven-day, one-minute-refresh view contains:
+
+- total validated AI updates
+- critical/high result count
+- unique deterministic incident count
+- hourly result volume
+- severity and status distributions
+- a newest-first 200-row detail table with timestamp, severity, status, title, explanation, occurrence count, tags, model, incident ID, and run ID
+
+Every query is a bounded `SELECT` through the existing read-only datasource, applies the Grafana time range, and avoids exposing the complete `raw_json` provenance object in the dashboard. The permanent redacted verifier executes all seven panels through Grafana's datasource API and reports only frame/row counts.
+
+The governing pattern remains:
 
 1. deterministic incident/evidence state remains authoritative outside Grafana
 2. validated AI result records are stored in ClickHouse
@@ -158,6 +169,8 @@ The intended pattern is:
 4. operators retain drilldown access to the underlying raw observations
 
 Grafana must not become the incident state database or a substitute for deterministic correlation.
+
+Item-32 production validation passed create-only `dryRun=All`, exact live resource reread, unchanged exact verification of the four preexisting dashboards, and all seven live datasource queries. No existing dashboard was replaced.
 
 ## Change discipline
 

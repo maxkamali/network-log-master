@@ -187,15 +187,17 @@ Current boundary status:
 - accepted files move to the ready area; invalid files move to quarantine with a reason
 - Vector ingests ready records into the ClickHouse `ai_updates` table
 - no historical GX10 producer for this contract was discovered
-- the item-30 version-1 local producer actively maps one successful append-only reasoning result to one canonical single-record ready JSONL file while retaining the full result and versioned provenance; protected activation, no-op stability, and natural catch-up pass with 16 current files, but it has no writer credential or transport
+- the reconstructed item-30 version-1 local producer maps one successful append-only reasoning result to one canonical single-record JSONL file while retaining the full result and versioned provenance
+- the dedicated recurring GX10 sender uses an independent write-only identity; exact replay and same-name divergent content are quarantined distinctly through the collector's immutable acceptance ledger
+- accepted results are inserted into ClickHouse exactly once and are available through the live `AI Incident Analysis` Grafana dashboard
 
-Therefore the collector schema remains an active capability contract. GX10 local production now passes, but no file is published or transmitted to the collector.
+The complete producer, transport, validation, replay-protection, ClickHouse-ingestion, and Grafana-presentation path is active. Historical rediscovery still correctly records that no predecessor GX10 producer was found; the current path is explicitly reconstructed behavior.
 
 ## Incident contract - deterministic implementation
 
 An incident is a durable deterministic object assembled from observations.
 
-Target lifecycle:
+Lifecycle:
 
 ```text
 CANDIDATE -> OPEN -> RECOVERING -> RESOLVED
@@ -203,8 +205,8 @@ CANDIDATE -> OPEN -> RECOVERING -> RESOLVED
 
 Incident state retains append-only evidence/transitions, first/last seen times, occurrence and canonical repeat counters, entity identity, current state, and exact 60-minute/180-minute/24-hour rolling context summaries.
 
-The local LLM may later consume an incident packet and return analysis; it does not become the canonical incident database.
+The local LLM consumes immutable incident packets and returns append-only structured analysis; it does not become the canonical incident database.
 
-The deterministic schema/engine contract is implemented, copy-rehearsed, independently reproduced, and active through the separately managed production correlation schedule. The installed but empty/unscheduled reasoning-packet extension defines append-only deterministic packet identity, wake reasons, priority, incident/evidence bases, canonical packet JSON, and digest.
+The deterministic schema/engine contract is implemented, copy-rehearsed, independently reproduced, and active through the separately managed production correlation schedule. The active reasoning-packet boundary defines append-only deterministic packet identity, wake reasons, priority, incident/evidence bases, canonical packet JSON, and digest.
 
-The installed-but-empty item-28 inference extension separately defines immutable model/prompt versions, crash-safe versioned run reservations, guarded terminal failure/success, and append-only canonical structured results. A result is model interpretation and never incident or packet truth. The caller uses exact packet/incident identity, strict enumerations and size bounds, and records no result on unavailable, timed-out, transport, response, or output failure. The working system contains the exact schema/artifacts under protected backup but zero model/prompt/run/result rows, zero scheduler references, and no production inference.
+The active inference extension separately defines immutable model/prompt versions, crash-safe versioned run reservations, guarded terminal failure/success, and append-only canonical structured results. A result is model interpretation and never incident or packet truth. The caller uses exact packet/incident identity, strict enumerations and size bounds, and records no result on unavailable, timed-out, transport, response, or output failure. Reasoning, outbox projection, and result sending remain separately managed and disableable.

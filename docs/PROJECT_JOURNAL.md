@@ -11846,3 +11846,53 @@ A reusable `verify-ai-dashboard-queries.py` candidate now transforms each captur
 ### Next action
 
 Publish and independently verify the query-verifier candidate, stage that exact script, and run all seven dashboard queries through Grafana's configured ClickHouse datasource. Correct any query-shape defect through the same repository-first gate. After every panel returns successfully, remove the private stage, recheck Grafana and data-path health, reconcile the stale AI presentation/data-contract documentation, mark item 32 complete with no remaining `NEXT`, and publish final closure.
+
+## 2026-08-24 14:32 PDT - Item 32 live AI Incident Analysis dashboard completed
+
+### Status
+
+Execution-order item 32 is complete. The project again has no remaining `NEXT` item. The redacted live-query verifier checkpoint was published at:
+
+`7f0c6e9` — `Add AI dashboard query verifier`
+
+The exact published verifier was staged under a fresh private collector boundary and executed through Grafana's configured ClickHouse datasource over a bounded 30-day range. It printed no field values or result content. All seven panels passed:
+
+```text
+panel-1 frames=1 rows=1 query=PASS
+panel-2 frames=1 rows=1 query=PASS
+panel-3 frames=1 rows=1 query=PASS
+panel-4 frames=1 rows=14 query=PASS
+panel-5 frames=1 rows=3 query=PASS
+panel-6 frames=1 rows=4 query=PASS
+panel-7 frames=1 rows=120 query=PASS
+GRAFANA_AI_DASHBOARD_QUERIES=PASS
+```
+
+The dashboard is live under the searchable title `AI Incident Analysis`, defaults to seven days with one-minute refresh, is editable for operator exploration, and leaves the primary NOC dashboard unchanged. The earlier exact five-resource API reread remains authoritative: the new resource's complete portable specification matched, and all four preexisting dashboards remained exact. No replacement flag was used.
+
+The in-app browser reached the Grafana login page during visual-only QA. No credential was entered into the browser because API resource and datasource-query verification already provided complete noninteractive evidence. This does not affect live dashboard availability; an authenticated operator can find it by title in Grafana.
+
+Clean-machine integration now requires the fifth resource and redacted query verifier, restores all five dashboards, verifies their exact contracts, and executes the seven AI queries after datasource provisioning. Current-facing README, collector status/runbook, architecture-adjacent data contracts, operations, Grafana documentation, and execution state were reconciled from pre-activation/four-dashboard wording.
+
+Final validation and health evidence:
+
+```text
+collector_tests=38
+dashboard_json_parse=PASS
+installer_shell_syntax=PASS
+collector_result_gate=active,restarts-0
+vector=active
+clickhouse=active
+grafana=active
+gx10_correlation=active
+gx10_reasoning=active
+gx10_result_outbox=active
+gx10_result_sender=active,restarts-0
+private_stage_removed=yes
+```
+
+The no-echo administrator credential was held only in an automatically removed mode-`0600` temporary stage file for each API process. No credential or private identifier/value was printed or committed. No ClickHouse schema/data, datasource, existing dashboard, GX10 artifact, result transport, service, or schedule was changed; the only live persistent mutation was creation of the explicitly requested new Grafana dashboard resource.
+
+### Closure action
+
+Run the final public-repository/link/history/ref gates, publish this item-32 completion checkpoint, and independently verify GitHub `main`. Future feature or production behavior work must explicitly reopen execution order in `docs/CURRENT_STATE.md`.

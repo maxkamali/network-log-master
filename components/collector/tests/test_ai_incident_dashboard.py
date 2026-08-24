@@ -141,6 +141,20 @@ class AiIncidentDashboardTests(unittest.TestCase):
         }
         self.assertEqual(verifier.response_counts(response, "A"), (1, 2))
 
+    def test_clean_machine_installer_restores_and_queries_dashboard(self):
+        installer = (
+            ROOT / "components/collector/install/install-runtime.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            '"$GRAFANA_DIR/dashboards/ai-incident-analysis.json"',
+            installer,
+        )
+        self.assertIn(
+            '"$GRAFANA_DIR/scripts/verify-ai-dashboard-queries.py"',
+            installer,
+        )
+        self.assertIn("=== VERIFY AI DASHBOARD QUERIES ===", installer)
+
 
 if __name__ == "__main__":
     unittest.main()

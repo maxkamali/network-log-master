@@ -201,7 +201,7 @@ Validation completed:
 
 `GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
 
-The clean-machine runtime installer now requires the dashboard API scripts and all four captured dashboard resources, restores dashboards only after normal HTTPS Grafana health and datasource provisioning are verified, then runs the independent dashboard verifier. The runtime calls use Python `-B` so installer execution does not create bytecode cache artifacts inside the repository.
+The clean-machine runtime installer now requires the dashboard API scripts, the redacted AI query verifier, and all five captured dashboard resources. It restores dashboards only after normal HTTPS Grafana health and datasource provisioning are verified, then runs the independent resource verifier and all seven `AI Incident Analysis` queries through the configured datasource. The runtime calls use Python `-B` so installer execution does not create bytecode cache artifacts inside the repository.
 
 Automatic dashboard replacement is not enabled in the installer. A missing dashboard is created, an exact match is left unchanged, and an unexpected divergent existing resource causes the rebuild to fail rather than overwrite it.
 
@@ -332,8 +332,9 @@ Grafana dashboard restore/verification is also integrated:
 4. The operator-supplied private Grafana administrator password file is reused for API authentication.
 5. Missing dashboards are created and exact matches are unchanged.
 6. Automatic replacement of divergent dashboards is deliberately disabled.
-7. `verify-dashboards.py` independently verifies all four captured resources after restore.
-8. Python `-B` prevents runtime bytecode cache files from being written into the repository.
+7. `verify-dashboards.py` independently verifies all five captured resources after restore.
+8. `verify-ai-dashboard-queries.py` executes every AI panel while reporting only frame/row counts.
+9. Python `-B` prevents runtime bytecode cache files from being written into the repository.
 
 Package no-autostart protection is integrated across package and runtime installation:
 

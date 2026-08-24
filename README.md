@@ -91,7 +91,7 @@ The published checkpoint includes:
 - AI-result gate and retention behavior
 - immutable AI-result acceptance ledger with exact-replay and divergent-conflict isolation
 - package and runtime verifiers
-- four Grafana 13 dashboard resources
+- five Grafana 13 dashboard resources, including the live `AI Incident Analysis` view
 - API-based dashboard restore and verification scripts
 
 The independent live collector verifier reached `COLLECTOR_RUNTIME_VERIFY=PASS`.

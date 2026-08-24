@@ -89,6 +89,8 @@ Every target must be either wholly absent or wholly present and independently va
 
 Four new management tests cover config-last installation, failure cleanup, partial-state refusal, and absence of an SFTP execution path. The resulting 182-test GX10 suite and filesystem/package contracts pass locally. The same exact changed bytes pass all 182 tests and the filesystem contract from the retained temporary GX10 candidate tree with exact SHA-256 parity. No live private input has been installed by this gate.
 
+The matching collector authorizer is independently guarded. It accepts exactly one root-owned public Ed25519 input, refuses key duplication, preserves the complete predecessor `authorized_keys` bytes in a root-only mode-`0600` backup, atomically appends only the new line, and runs `sshd -t` without reloading or restarting SSH. Any failure after publication restores the exact predecessor and removes attempt-created backup state. An exact already-authorized key is idempotently reusable and, when the protected backup exists, must equal the exact backup plus that single line. Five synthetic append/reuse/duplicate/private-input/rollback tests pass locally and from exact bytes staged on the collector runtime.
+
 ## Passed repository/copy gates
 
 The 11 focused tests prove:
@@ -112,6 +114,6 @@ After GitHub independently matched the published candidate, the guarded upgrader
 ## Remaining gates
 
 1. Publish and independently verify the configured-inactive candidate.
-2. Generate/install a dedicated writer identity, install only its matching collector authorization, bind the separate pinned known-host file, retain exact rollback evidence, and pass configured-inactive production verification with no SFTP invocation.
+2. Publish the exact-backup collector authorizer, then generate/install a dedicated writer identity, install only its matching collector authorization, bind the separate pinned known-host file, retain exact rollback evidence, and pass configured-inactive production verification with no SFTP invocation.
 3. Publish the bounded first-live/replay plan, then transmit one file and prove collector acceptance, Vector/ClickHouse ingestion, complete `raw_json` provenance, local delivered transition, and all preexisting schedule health.
 4. Prove an exact replay creates no second ClickHouse row and a controlled malformed/divergent file remains isolated.

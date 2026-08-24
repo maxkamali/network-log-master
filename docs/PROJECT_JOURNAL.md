@@ -11180,3 +11180,37 @@ No private runtime path, connection value, result/packet/event/entity content, c
 ### Next action
 
 Run the full public gate, publish this configured-inactive candidate, and independently verify GitHub. Then generate the dedicated writer identity, install only its matching collector authorization under an exact guarded append/rollback procedure, run the configurator and independent configured-inactive production checks, and publish that checkpoint before any SFTP invocation or outbox movement.
+
+## 2026-08-24 08:24 PDT - Item 30 exact-backup collector authorizer passed repository/staged gates
+
+### Status
+
+Execution-order item 30 remains the single `NEXT` item and is in progress. The configured-inactive sender candidate was published and independently matched on GitHub at:
+
+`8568454aee5bdaf063cfd2661b65b067cf7fdabe` — `Gate configured inactive result sender`
+
+A separate collector-side authorizer now owns the one permitted authorization change. It accepts exactly one root-owned mode-`0600` public Ed25519 input, validates the existing writer authorization metadata without printing it, refuses an already duplicated key, preserves the complete predecessor bytes in a new root-only mode-`0600` backup, and atomically appends only the new public line. It validates the final authorization and `sshd -t` without reloading or restarting SSH.
+
+Any failure after publication atomically restores the exact predecessor bytes and removes backup state created by that failed attempt. An exact already-present key is a no-op; when the protected predecessor backup exists, reusable state must equal that backup plus exactly the one dedicated line. Divergence fails closed.
+
+Five focused tests cover exact append/backup, injected SSH-validation rollback, exact reuse, duplicate refusal, and private-key-marker refusal. They pass locally and from exact bytes staged on the collector's Python runtime. The full local collector suite now passes 30 tests; the 11-test durable result-gate package, 14-test shadow package, public repository gate, and diff hygiene also pass.
+
+```text
+local_collector_tests=30
+local_result_writer_authorizer_tests=5
+collector_staged_result_writer_authorizer_tests=5
+authorizer_sha256=2ba669bb6d2c8a6ca8cdbfe829899a7ad926aca8ebbe29832084814d64df630b
+authorizer_tests_sha256=109d5828a0a5237eb4bc8b69d3332dd8169f7c5a6e975927fec1eb78c0e845d9
+collector_stage_hash_parity=yes
+collector_authorization_changed=no
+writer_identity_generated=no
+sender_private_state_installed=no
+collector_result_transmission_invoked=no
+COLLECTOR_RESULT_WRITER_AUTHORIZER_CANDIDATE=PASS
+```
+
+No existing key line, new key material, private runtime path, connection value, result/packet/event/entity content, credential, or model output was printed or committed. No production authorization or GX10 private state changed.
+
+### Next action
+
+Run the full public gate, publish this authorizer candidate, and independently verify GitHub. Then generate the dedicated writer key only on GX10, transfer only its public half through protected temporary files, run the exact published collector authorizer, run the exact configured-inactive GX10 configurator, and independently verify the protected backup/one-line append plus disabled/inactive sender before any transport.

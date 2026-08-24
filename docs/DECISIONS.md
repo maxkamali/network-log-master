@@ -566,3 +566,4 @@ Consequence:
 - the separate configurator accepts only a root-owned Ed25519 input, proves it differs from the read-only spool identity, copies the existing pinned host into a distinct writer file, and atomically installs canonical configuration last
 - partial or divergent private state is refused; postinstall verification failure removes only newly created inputs; exact existing state is reusable
 - configured verification requires exact private metadata/values/pin plus the unchanged disabled/inactive package and active outbox, and neither configuration nor verification invokes SFTP
+- collector authorization appends only the matching public Ed25519 key after preserving exact predecessor bytes in a root-only backup; duplicate/divergent state is refused, SSH configuration is validated without restart, and a later failure restores the predecessor exactly

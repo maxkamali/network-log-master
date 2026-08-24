@@ -11796,3 +11796,30 @@ No Grafana API call, dashboard mutation, ClickHouse query, production data read/
 ### Next action
 
 Publish and independently verify the exact dashboard candidate. Then stage only that published resource and supported API scripts on the collector, identify the existing protected administrator password source without printing it, run `dryRun=All`, require no persistence, create only the missing resource without `--replace`, and independently reread the exact live resource before testing panel queries.
+
+## 2026-08-24 14:26 PDT - Item 32 dry run passed; server-owned metadata verification correction passed locally
+
+### Status
+
+Item 32 remains the single `NEXT` item. The exact `a988697` Grafana tree was staged under a new mode-private collector temporary directory. Its 11-file aggregate staging digest was recorded without private values.
+
+The no-echo administrator credential path used a mode-`0600` temporary file inside that private directory and removed it automatically after each API process. The first attempted path under `/run` failed before prompting because the SSH account lacked direct create permission; no credential was read or written and no API request occurred. The corrected private-stage path succeeded.
+
+Grafana `dryRun=All` then passed:
+
+```text
+ai-incident-analysis.json action=dryrun-create persisted_change=no
+four_existing_dashboards=unchanged,exact
+GRAFANA_DASHBOARD_RESTORE_DRYRUN=PASS
+GRAFANA_AI_DASHBOARD_DRYRUN=PASS
+```
+
+The subsequent create-only POST used no `--replace`. Grafana returned the intended dashboard specification plus server-owned metadata annotations. The portable candidate intentionally omitted those annotations, but the verifier treated omission as a demand for absence and stopped with `metadata.annotations differs`. No existing dashboard was changed. The API response established a verifier portability defect; whether the successful POST persisted must be resolved by read-only GET before another create attempt.
+
+`capture_matches` now always requires exact API version, kind, name, namespace, and complete specification. It compares annotations or labels exactly when the capture declares them, preserving the four existing captured contracts, but ignores server-owned annotations/labels when a portable capture deliberately omits them. A new regression proves both the portable-omission and explicit-metadata cases. The full Python 3.13 collector suite now passes 36 tests.
+
+No ClickHouse schema/data, existing dashboard, datasource, service, schedule, result transport, or credential state changed. The temporary credential file was removed automatically; the private code/resource stage remains only for exact corrected verification.
+
+### Next action
+
+Publish the verifier correction, restage the exact published Grafana tree, and perform a read-only exact GET. If the dashboard persisted with an exact portable contract, do not POST again; run the independent five-dashboard verifier. If it is absent, repeat the create-only call once with the corrected verifier. Then validate all seven queries through Grafana's datasource API and remove the temporary stage.

@@ -1,4 +1,5 @@
 import json
+import importlib.util
 from pathlib import Path
 import unittest
 
@@ -7,6 +8,14 @@ ROOT = Path(__file__).resolve().parents[3]
 DASHBOARD_DIR = ROOT / "components/collector/grafana/dashboards"
 DASHBOARD_PATH = DASHBOARD_DIR / "ai-incident-analysis.json"
 DATASOURCE_UID = "efvaztlrk8ow0a"
+
+
+def load_dashboard_api():
+    path = ROOT / "components/collector/grafana/scripts/dashboard_api.py"
+    spec = importlib.util.spec_from_file_location("dashboard_api_test", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 class AiIncidentDashboardTests(unittest.TestCase):
@@ -78,6 +87,19 @@ class AiIncidentDashboardTests(unittest.TestCase):
             for panel in self.elements.values()
         }
         self.assertEqual(groups, {"stat", "timeseries", "piechart", "table"})
+
+    def test_server_owned_metadata_is_ignored_only_when_omitted(self):
+        api = load_dashboard_api()
+        live = json.loads(json.dumps(self.document))
+        live["metadata"]["annotations"] = {"grafana.app/createdBy": "server-owned"}
+        live["metadata"]["labels"] = {"grafana.app/deprecatedInternalID": "server-owned"}
+        self.assertEqual(api.capture_matches(live, self.document), (True, ""))
+
+        captured_with_annotations = json.loads(json.dumps(self.document))
+        captured_with_annotations["metadata"]["annotations"] = {"stable": "value"}
+        matched, reason = api.capture_matches(live, captured_with_annotations)
+        self.assertFalse(matched)
+        self.assertEqual(reason, "metadata.annotations differs")
 
 
 if __name__ == "__main__":

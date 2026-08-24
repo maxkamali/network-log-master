@@ -263,8 +263,6 @@ def capture_matches(
     for key in [
         "name",
         "namespace",
-        "annotations",
-        "labels",
     ]:
         live_value = live_metadata.get(
             key
@@ -286,6 +284,24 @@ def capture_matches(
             )
 
         if live_value != captured_value:
+            return (
+                False,
+                f"metadata.{key} differs",
+            )
+
+    # Grafana may add server-owned annotations or labels when a
+    # native resource is created. A portable capture that omits
+    # either field intentionally leaves it server-owned. Captures
+    # that include the field still require an exact match.
+    for key in [
+        "annotations",
+        "labels",
+    ]:
+        if key not in captured_metadata:
+            continue
+
+        if live_metadata.get(key) != \
+                captured_metadata.get(key):
             return (
                 False,
                 f"metadata.{key} differs",

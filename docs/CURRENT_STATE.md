@@ -72,9 +72,9 @@ Collector-side shadow integration implementation is now complete in the reposito
 - locked dedicated runtime identity and hardened no-network systemd service/timer
 - non-activating, no-overwrite staging installer and exact SHA-256 package manifest
 - pinned reference dependencies: Python `3.13.5-1` and Zstandard `1.5.7+dfsg-1`
-- 88 full normalizer/worker tests passing and 9 collector-package tests passing
+- 88 full normalizer/worker tests passing and 10 collector-package tests passing
 
-The shadow package is deployed and active on the collector under its isolated timer. Initial live evidence covers 200 completed files and 18,446 normalized records with exact cardinality, 520 parser enrichments, and zero parser errors. The live Vector, ClickHouse, raw backlog, and GX10 handoff remain unchanged.
+The shadow package is deployed and active on the collector under its isolated timer. Bounded catch-up and steady-state evidence covers 11,983 completed files and 1,107,749 normalized records with exact cardinality, 36,241 parser enrichments, zero parser errors, zero incomplete rows, and zero pending work after every reviewed steady-state cycle. The live Vector, ClickHouse, raw backlog, and GX10 handoff remain unchanged.
 
 ## Collector rebuild milestone
 
@@ -293,7 +293,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration design, repository shadow-package implementation, and authorized shadow deployment are complete. The next technical action is collection and review of catch-up and steady-state shadow evidence; production cutover remains unauthorized.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration design, repository shadow-package implementation, authorized shadow deployment, and bounded live evidence review are complete. The next technical action is design and non-production rehearsal of a file-identity-safe GX10 handoff switch and rollback; production cutover remains unauthorized.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -319,7 +319,8 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 18. `DONE` — designed collector-side production-normalizer integration with durable input/output boundaries, private platform-inventory injection, shadow observability, failure isolation, promotion gates, and rollback behavior.
 19. `DONE` — implemented and validated the repository-side durable normalizer shadow worker, private-inventory validator, idempotency ledger, packaging, and independent verifier without deploying to the live collector.
 20. `DONE` — obtained explicit live-shadow authorization, built and privately installed a conservative source-IP platform inventory, staged the package, completed two independently verified cycles, and activated only the isolated shadow timer without changing Vector, ClickHouse, or the GX10 handoff.
-21. `NEXT` — collect and review catch-up plus steady-state shadow evidence, including cardinality, inventory coverage, parser errors, backlog age, source immutability, service isolation, and continued raw-handoff health; do not promote the GX10 handoff without separate authorization.
+21. `DONE` — completed historical catch-up, five normal-cadence steady-state cycles, active-concurrency verifier correction/proof, full cardinality/output verification, source immutability checks, service isolation checks, and unchanged raw-handoff/GX10 artifact validation.
+22. `NEXT` — design and rehearse a file-identity-safe GX10 handoff switch and rollback without changing the live GX10 handoff; define explicit preflight, activation, verification, rollback, and idempotency boundaries for later operator-authorized cutover.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

@@ -19,6 +19,6 @@
     "/usr/local/lib/network-log-normalizer/network_log_normalizer/schema.py": "e32228c474a9f9bef1d83fe1deeca6801906dca6d5c49fbed30aa12b341e9c1c",
     "/usr/local/lib/network-log-normalizer/network_log_normalizer/shadow.py": "d4ca2088000c91a73501bd99bdf023fd0d21644db5b1ef01e637ade768990c0c",
     "/usr/local/sbin/network-log-normalizer-shadow": "a308bbb0924bca0b7b1316beab24d000696a817087b20b8bce1a5bb5a29344f4",
-    "/usr/local/sbin/verify-network-log-normalizer-shadow": "43eed8cb9e93921d2969eeeada1a3ebd39d0fe1f189dad124514b9c937dba21a"
+    "/usr/local/sbin/verify-network-log-normalizer-shadow": "acffb6aafc80175efd2aedc76b2d97aea38ced4264a924cd468c97adfa68534f"
   }
 }

@@ -13,6 +13,7 @@ import sqlite3
 import stat
 import subprocess
 import sys
+import time
 
 
 RUNTIME_USER = "network-log-normalizer"
@@ -29,6 +30,8 @@ MANIFEST_PATH = LIBRARY_ROOT / "package-manifest.json"
 ZSTD_PATH = Path("/usr/bin/zstd")
 TIMER_UNIT = "network-log-normalizer-shadow.timer"
 MAX_OUTPUT_LINE_BYTES = 4 * 1024 * 1024
+ACTIVE_VERIFY_TIMEOUT_SECONDS = 120
+ACTIVE_VERIFY_POLL_SECONDS = 0.1
 
 PACKAGE_FILES = {
     "__init__.py",
@@ -364,11 +367,11 @@ def count_output_records(path: Path) -> int:
     return count
 
 
-def verify_ledger_and_outputs(runtime_uid: int, runtime_gid: int) -> dict[str, int]:
+def _read_ledger_rows(runtime_uid: int, runtime_gid: int) -> list[sqlite3.Row]:
     if not LEDGER_PATH.exists() and not LEDGER_PATH.is_symlink():
         if any(OUTPUT_ROOT.iterdir()):
             raise VerifyError("output exists without ledger")
-        return {"completed_files": 0, "records": 0}
+        return []
     require_file(
         LEDGER_PATH,
         "ledger",
@@ -394,44 +397,128 @@ def verify_ledger_and_outputs(runtime_uid: int, runtime_gid: int) -> dict[str, i
         ).fetchall()
     finally:
         connection.close()
-    completed = 0
-    records = 0
-    expected_outputs = set()
-    for row in rows:
-        if row["status"] != "completed":
-            raise VerifyError("ledger contains incomplete source file")
-        relative = Path(row["output_path"])
-        if relative.is_absolute() or ".." in relative.parts:
-            raise VerifyError("ledger output path is unsafe")
-        output = OUTPUT_ROOT / relative
-        details = require_file(
-            output,
-            "normalized output",
-            mode=0o640,
-            uid=runtime_uid,
-            gid=runtime_gid,
-        )
-        if details.st_size != row["output_size"]:
-            raise VerifyError("normalized output size differs")
-        if sha256_file(output) != row["output_sha256"]:
-            raise VerifyError("normalized output hash differs")
-        zstd_test(output)
-        actual_records = count_output_records(output)
-        if actual_records != row["output_records"]:
-            raise VerifyError("normalized output record count differs")
-        if row["input_records"] != row["output_records"]:
-            raise VerifyError("ledger cardinality differs")
-        expected_outputs.add(output)
-        completed += 1
-        records += actual_records
-    actual_outputs = {
-        path
-        for path in OUTPUT_ROOT.rglob("*.normalized.jsonl.zst")
-        if path.is_file() and not path.is_symlink()
-    }
-    if actual_outputs != expected_outputs:
-        raise VerifyError("output inventory differs from ledger")
-    return {"completed_files": completed, "records": records}
+    return rows
+
+
+def _row_output(row: sqlite3.Row) -> Path:
+    relative = Path(row["output_path"])
+    if relative.is_absolute() or ".." in relative.parts:
+        raise VerifyError("ledger output path is unsafe")
+    return OUTPUT_ROOT / relative
+
+
+def _row_fingerprint(row: sqlite3.Row) -> tuple[object, ...]:
+    return tuple(row[column] for column in LEDGER_COLUMNS)
+
+
+def _verify_completed_output(
+    row: sqlite3.Row,
+    output: Path,
+    runtime_uid: int,
+    runtime_gid: int,
+) -> int:
+    details = require_file(
+        output,
+        "normalized output",
+        mode=0o640,
+        uid=runtime_uid,
+        gid=runtime_gid,
+    )
+    if details.st_size != row["output_size"]:
+        raise VerifyError("normalized output size differs")
+    if sha256_file(output) != row["output_sha256"]:
+        raise VerifyError("normalized output hash differs")
+    zstd_test(output)
+    actual_records = count_output_records(output)
+    if actual_records != row["output_records"]:
+        raise VerifyError("normalized output record count differs")
+    if row["input_records"] != row["output_records"]:
+        raise VerifyError("ledger cardinality differs")
+    return actual_records
+
+
+def verify_ledger_and_outputs(
+    runtime_uid: int,
+    runtime_gid: int,
+    *,
+    allow_concurrent: bool = False,
+) -> dict[str, int]:
+    deadline = time.monotonic() + ACTIVE_VERIFY_TIMEOUT_SECONDS
+    verified_rows: dict[str, tuple[object, ...]] = {}
+
+    while True:
+        rows = _read_ledger_rows(runtime_uid, runtime_gid)
+        current_rows = {row["source_path"]: row for row in rows}
+        if set(verified_rows) - set(current_rows):
+            raise VerifyError("verified ledger row disappeared")
+
+        expected_outputs: set[Path] = set()
+        processing_outputs: set[Path] = set()
+        completed = 0
+        records = 0
+
+        for source_path, row in current_rows.items():
+            fingerprint = _row_fingerprint(row)
+            previous = verified_rows.get(source_path)
+            if previous is not None and previous != fingerprint:
+                raise VerifyError("verified ledger row changed")
+
+            output = _row_output(row)
+            if row["status"] == "processing":
+                processing_outputs.add(output)
+                continue
+            if row["status"] != "completed":
+                raise VerifyError("ledger contains invalid source status")
+
+            expected_outputs.add(output)
+            completed += 1
+            records += row["output_records"]
+            if previous is None:
+                _verify_completed_output(
+                    row,
+                    output,
+                    runtime_uid,
+                    runtime_gid,
+                )
+                verified_rows[source_path] = fingerprint
+
+        actual_outputs = {
+            path
+            for path in OUTPUT_ROOT.rglob("*.normalized.jsonl.zst")
+            if path.is_file() and not path.is_symlink()
+        }
+        if expected_outputs - actual_outputs:
+            raise VerifyError("completed output is missing from inventory")
+        unexpected_outputs = actual_outputs - expected_outputs
+        if unexpected_outputs - processing_outputs:
+            if allow_concurrent:
+                refreshed_rows = _read_ledger_rows(runtime_uid, runtime_gid)
+                refreshed = {
+                    row["source_path"]: _row_fingerprint(row)
+                    for row in refreshed_rows
+                }
+                current = {
+                    source_path: _row_fingerprint(row)
+                    for source_path, row in current_rows.items()
+                }
+                if refreshed != current:
+                    continue
+            raise VerifyError("orphan output differs from ledger")
+
+        if (
+            not processing_outputs
+            and not unexpected_outputs
+            and len(verified_rows) == completed
+        ):
+            return {"completed_files": completed, "records": records}
+
+        if not allow_concurrent:
+            if processing_outputs:
+                raise VerifyError("ledger contains incomplete source file")
+            raise VerifyError("output inventory differs from ledger")
+        if time.monotonic() >= deadline:
+            raise VerifyError("active output inventory did not stabilize")
+        time.sleep(ACTIVE_VERIFY_POLL_SECONDS)
 
 
 def verify_unit_state(mode: str) -> None:
@@ -464,7 +551,11 @@ def main(argv: list[str] | None = None) -> int:
         verify_dependency_versions()
         runtime_uid, runtime_gid = verify_identity_and_paths()
         inventory_entries = verify_inventory(runtime_gid)
-        totals = verify_ledger_and_outputs(runtime_uid, runtime_gid)
+        totals = verify_ledger_and_outputs(
+            runtime_uid,
+            runtime_gid,
+            allow_concurrent=args.mode == "active",
+        )
         verify_unit_state(args.mode)
         print(f"platform_entries={inventory_entries}")
         print(f"completed_files={totals['completed_files']}")

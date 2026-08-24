@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-The final repository rebuild milestone is published. On 2026-08-23, the operator explicitly waived unavailable disposable clean-two-server execution and accepted the residual risk without labeling that execution passed. Collector-side production-normalizer integration design, repository implementation, and explicitly authorized shadow deployment are complete. The isolated collector timer is active with initial independent runtime verification passing. The single active item is catch-up and steady-state shadow evidence review; read `docs/CURRENT_STATE.md`, `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`, and `components/collector/normalizer/README.md` before advancing it. Production cutover remains unauthorized.
+The final repository rebuild milestone is published. On 2026-08-23, the operator explicitly waived unavailable disposable clean-two-server execution and accepted the residual risk without labeling that execution passed. Collector-side production-normalizer integration design, repository implementation, explicitly authorized shadow deployment, complete catch-up, and bounded steady-state validation are complete. The isolated collector timer remains active. The single active item is design and non-production rehearsal of the file-identity-safe GX10 handoff switch and rollback; read `docs/CURRENT_STATE.md`, `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`, and `components/collector/normalizer/README.md` before advancing it. Production cutover remains unauthorized.
 
 The proven automatic application chain is:
 

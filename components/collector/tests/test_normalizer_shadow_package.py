@@ -260,6 +260,91 @@ class NormalizerShadowPackageTests(unittest.TestCase):
                         os.getgid(),
                     )
 
+    def test_active_verifier_resnapshots_concurrent_completed_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source_root = root / "source"
+            output_root = root / "output"
+            state_root = root / "state"
+            source_root.mkdir()
+            output_root.mkdir()
+            state_root.mkdir()
+            inventory_path = root / "inventory.json"
+            inventory_path.write_text(
+                json.dumps({"schema_version": 1, "platforms": {}}),
+                encoding="utf-8",
+            )
+            inventory_path.chmod(0o600)
+            inventory = load_inventory(inventory_path, secure=False)
+            zstd = root / "zstd"
+            make_fake_zstd(zstd)
+            ledger = state_root / "state.sqlite3"
+
+            def source(minute: int) -> Path:
+                path = (
+                    source_root
+                    / f"2026/08/23/12/syslog-20260823-12{minute:02d}.jsonl.zst"
+                )
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(
+                    json.dumps(
+                        {
+                            "timestamp": f"2026-08-23T12:{minute:02d}:00Z",
+                            "source_ip": "192.0.2.10",
+                            "message": "generic observation",
+                        }
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+                return path
+
+            first = source(1)
+            second = source(2)
+            process_source_file(
+                first,
+                source_root=source_root,
+                output_root=output_root,
+                ledger_path=ledger,
+                inventory=inventory,
+                zstd_path=zstd,
+            )
+
+            original_count = VERIFIER.count_output_records
+            appended = False
+
+            def count_and_append(path):
+                nonlocal appended
+                count = original_count(path)
+                if not appended:
+                    appended = True
+                    process_source_file(
+                        second,
+                        source_root=source_root,
+                        output_root=output_root,
+                        ledger_path=ledger,
+                        inventory=inventory,
+                        zstd_path=zstd,
+                    )
+                return count
+
+            with mock.patch.object(VERIFIER, "OUTPUT_ROOT", output_root), \
+                    mock.patch.object(VERIFIER, "LEDGER_PATH", ledger), \
+                    mock.patch.object(VERIFIER, "ZSTD_PATH", zstd), \
+                    mock.patch.object(
+                        VERIFIER,
+                        "count_output_records",
+                        side_effect=count_and_append,
+                    ):
+                totals = VERIFIER.verify_ledger_and_outputs(
+                    os.getuid(),
+                    os.getgid(),
+                    allow_concurrent=True,
+                )
+
+            self.assertTrue(appended)
+            self.assertEqual(totals, {"completed_files": 2, "records": 2})
+
 
 if __name__ == "__main__":
     unittest.main()

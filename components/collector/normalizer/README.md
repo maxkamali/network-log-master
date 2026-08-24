@@ -6,6 +6,8 @@ Repository implementation and synthetic validation: complete.
 
 Live collector deployment: active in authorized shadow-only mode as of 2026-08-23; production handoff promotion is not authorized.
 
+Bounded live verification: complete for historical catch-up plus five normal-cadence steady-state cycles. The active verifier tolerates legitimate append-only worker progress by resnapshotting newly completed rows, while still failing on missing, orphaned, mutated, incomplete, or disappearing evidence.
+
 This package stages the deterministic Python normalizer as a separate collector-local shadow worker. It does not change Vector, ClickHouse, the current `/var/spool/vector-ai` backlog, the GX10 SFTP view, or any live service state unless an operator later performs a separately authorized deployment.
 
 The architecture and promotion/rollback gates are in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.

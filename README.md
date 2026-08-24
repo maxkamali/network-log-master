@@ -76,7 +76,7 @@ The active normalizer source is [`components/normalizer/`](components/normalizer
 
 The selected replay/parity milestone is complete with 73 tests passing and 0 unexpected semantic differences in the reviewed 24-sample production replay scope.
 
-The collector-side durable shadow worker, private-inventory validator, ledger, non-activating installer, hardened unit/timer, artifact manifest, and independent verifier are implemented. The expanded suite has 88 normalizer/worker tests plus 9 collector-package tests passing. The package is active on the reference collector in authorized shadow-only mode; its output is not yet consumed by GX10 or any production sink.
+The collector-side durable shadow worker, private-inventory validator, ledger, non-activating installer, hardened unit/timer, artifact manifest, and independent verifier are implemented. The expanded suite has 88 normalizer/worker tests plus 10 collector-package tests passing. The package is active on the reference collector in authorized shadow-only mode; complete catch-up and bounded steady-state validation passed, but its output is not yet consumed by GX10 or any production sink.
 
 ### Collector
 

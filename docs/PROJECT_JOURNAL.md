@@ -7570,3 +7570,109 @@ After activation:
 ### Next action
 
 Keep the isolated timer active and collect catch-up plus steady-state evidence. Review exact cardinality, inventory coverage/misses, parser errors, cursor/backlog age, source immutability, service isolation, and continued raw-handoff health before designing or rehearsing any handoff switch. Production cutover remains separately gated and unauthorized.
+
+## 2026-08-23 21:36 PDT - Shadow catch-up and steady-state evidence closed
+
+### Status
+
+Execution-order item 21 is `DONE`.
+
+Execution-order item 22 is now the single `NEXT` item.
+
+The shadow timer remains active. The GX10 handoff remains on the raw backlog, and production cutover remains unauthorized.
+
+### Historical catch-up
+
+The worker retained its configured 100-file maximum per systemd invocation. After the first deployment cycles remained within the unit's CPU/memory bounds and left Vector, ClickHouse, and Grafana healthy, bounded manual starts of the same hardened unit accelerated historical catch-up. Every invocation retained the exact unit sandbox, source-read-only boundary, one-core CPU quota, memory limit, inventory, ledger, and atomic-output behavior.
+
+Fail-fast checks after every catch-up invocation required:
+
+- Vector, ClickHouse, and Grafana active
+- zero restarts for those three services
+- zero parser-error records
+- zero incomplete ledger rows
+
+Periodic independent full-output verification passed at 1,500, 4,000, 6,500, 8,500, and 10,500 completed files. The protected 24-file source sample and existing-service state checks also passed at each reviewed checkpoint.
+
+Catch-up reached zero pending files at:
+
+- completed files: `11968`
+- normalized records: `1106379`
+
+### Active-verifier concurrency defect and correction
+
+The first all-output verification at the zero-pending boundary returned `output inventory differs from ledger`. Immediate bounded diagnosis found:
+
+- the timer had completed one newly settled file while the verifier was scanning
+- ledger outputs: `11969`
+- filesystem outputs: `11969`
+- missing outputs: `0`
+- extra outputs: `0`
+- incomplete ledger rows: `0`
+
+The worker and evidence were correct. The independent verifier had compared a pre-cycle ledger snapshot with a post-cycle filesystem inventory.
+
+The verifier now incrementally resnapshots append-only active progress. It verifies each completed row/output exactly once, rejects changes or disappearance of already verified rows, fails immediately for missing completed outputs or stable orphan outputs, waits only for legitimate in-progress publication, and retains strict no-concurrency behavior in staged mode. Active stabilization is time-bounded.
+
+A regression test adds a second completed ledger/output entry during verification and proves the active verifier incorporates it. Collector package validation now reports `10` passing tests and `NORMALIZER_SHADOW_PACKAGE_VALIDATION=PASS`.
+
+The live verifier-only correction used exact precondition hashes, a protected rollback copy, and atomic replacement while the shadow timer was disabled. Both the original verifier before replacement and the corrected verifier after replacement passed complete staged verification over `11972` files and `1106731` records.
+
+Live concurrent proof then began active verification at `11972` completed files while the normalizer processed three newly settled files. The corrected verifier completed at `11975` files and returned:
+
+```text
+NORMALIZER_SHADOW_RUNTIME_VERIFY=PASS
+LIVE_CONCURRENT_ACTIVE_VERIFY=PASS
+```
+
+### Normal-cadence steady state
+
+After the concurrency proof, no additional manual service starts were used. Five consecutive timer-driven cycles completed at the configured one-minute inactive interval.
+
+Each cycle:
+
+- selected and completed one newly settled file
+- returned pending unprocessed files to `0`
+- completed in `0.626` to `1.426` seconds
+- retained exact input/output cardinality
+- retained zero parser errors and zero incomplete rows
+- left Vector, ClickHouse, and Grafana active with zero restarts
+
+### Final cumulative evidence
+
+The final independent active verifier passed while the timer continued operating. It absorbed two further legitimate concurrent file completions and returned:
+
+- platform inventory entries: `184`
+- completed files: `11983`
+- input records: `1107749`
+- output records: `1107749`
+- generic records: `1071508`
+- parser-enriched records: `36241` (`3.27%`)
+- inventory hits: `933100` (`84.23%`)
+- inventory misses: `174649`
+- parser errors: `0`
+- incomplete files: `0`
+- source bytes: `68286219`
+- output bytes: `73120191`
+- pending files after each reviewed steady-state cycle: `0`
+
+`NORMALIZER_SHADOW_RUNTIME_VERIFY=PASS` covered every ledger row and normalized output, including file modes/ownership, Zstandard integrity, output SHA-256, schema, record count, package manifest, dependency pins, private inventory, runtime identity, and active timer state.
+
+### Unchanged-production postcheck
+
+Final postchecks established:
+
+- the protected 24-file raw source sample remained byte-identical
+- Vector configuration and `/etc/fstab` retained their predeployment hashes
+- Vector, ClickHouse, and Grafana remained active/enabled with zero restarts
+- the shadow timer remained active/enabled and its oneshot last result was success
+- no SQLite journal/WAL/shared-memory sidecars remained
+- the GX10 read-only bind mount retained `ro,nosuid,nodev,noexec`
+- exactly one live match remained for every recorded GX10 fetch, ingest, enrichment, and pipeline-service-unit hash
+- the GX10 handoff remained on `/var/spool/vector-ai`
+
+### Validation and next action
+
+The corrected package has `10` collector-package tests passing. Python syntax, `git diff --check`, and the current-tree/reachable-history/link/ref public-repository gate pass. The previously published `88` normalizer/worker tests remain the implementation baseline; the worker source did not change in this correction.
+
+Item 22 must design and rehearse a file-identity-safe GX10 handoff switch and rollback without changing the live handoff. It must resolve the GX10 `(source_file, record_number)` namespace behavior, define preflight/activation/postcheck/rollback evidence, and preserve both raw and normalized spools. Actual promotion requires a later distinct operator authorization.

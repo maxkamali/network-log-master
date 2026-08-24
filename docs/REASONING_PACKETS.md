@@ -2,7 +2,7 @@
 
 ## Status and authority boundary
 
-Execution-order item 27 has a repository-only candidate including a guarded existing-system migration. The schema, builder, migration guard, and synthetic tests pass; no reasoning schema or packet-builder artifact is installed on the working GX10 system, no packet has been built from production state, and no service or timer invokes the builder.
+Execution-order item 27 has a published repository candidate, guarded existing-system migration, and passing protected production-state-copy rehearsal. No reasoning schema or packet-builder artifact is installed on the working GX10 system, no production packet exists, and no service or timer invokes the builder.
 
 The candidate converts deterministic incident state into an append-only queue of compact reasoning packets. It does not call Ollama, select a model, define a prompt, accept model output, write to the collector, or alter incident identity/lifecycle truth.
 
@@ -79,8 +79,27 @@ The clean-machine initializer/installer/verifier include the candidate, but base
 
 1. publish and independently verify this repository candidate
 2. `DONE` — add a guarded existing-system schema/artifact migration with protected backup and no scheduler reference
-3. rehearse schema migration, first packet build, no-op, new qualifying/nonqualifying evidence, lifecycle packets, tamper failure, and deterministic independent reproduction on protected production-state copies
+3. `DONE` — rehearse schema migration, first packet build, no-op, new qualifying/nonqualifying evidence, lifecycle packets, tamper failure, and deterministic independent reproduction on protected production-state copies
 4. install schema/builder unscheduled only after exact published artifacts and copy gates pass
 5. do not schedule packet construction or inference until a later explicit managed-invocation gate
+
+## Protected production-state-copy evidence
+
+The exact published candidate was applied only to root-owned SQLite backups. The source snapshot held `30` incidents, `4` active incidents, `623` evidence rows, and `678` transitions. Initial policy execution produced exactly four packets: two `incident_opened` and two `incident_reopened`. The largest packet was `6280` bytes and the complete packet-state SHA-256 was:
+
+`2b92193dda93187257a31030a40f8606bb4a42496978444e30cc87f08cbc1afe`
+
+The following gates passed:
+
+- immediate rerun created zero packets and changed no deterministic state
+- incident-engine cursor reset/replay changed neither incident nor packet state
+- a second independent migration/build reproduced the exact packet digest
+- one nonqualifying evidence row created no packet
+- five accumulated evidence rows created exactly one `meaningful_update`
+- later recovery and quiet-period resolution created exact lifecycle packets
+- stored packet tamper caused a fail-closed builder result with no additional row
+- empty-state migration rollback removed only reasoning schema/builder and retained its backup
+- all packets excluded forbidden raw/source keys and remained beneath 32 KiB
+- the working database/artifact paths and both production timers remained unchanged
 
 Model selection, prompt versioning, structured output, inference failure handling, and collector result return remain separate later items.

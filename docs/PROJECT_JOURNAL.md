@@ -9052,3 +9052,64 @@ Corrected SHA-256 values:
 ### Next action
 
 Run all package/public gates, publish and independently verify the correction, then use only that public checkpoint for production-state-copy rehearsal.
+
+## 2026-08-24 01:17 PDT - Item 27 protected production-state-copy rehearsal passed
+
+### Status
+
+Execution-order item 27 remains the single `NEXT` item and is in progress. The working GX10 database, installed artifacts, services, and schedules remained unchanged.
+
+The recursive raw/source exclusion correction was published and independently matched on GitHub at:
+
+`03ea32c271f29323bb9b0f3d25a7f399fca4d1d8` — `Exclude raw attributes from reasoning packets`
+
+Only exact artifacts from that checkpoint were staged under a root-only temporary boundary. A SQLite online backup captured current production deterministic state without pausing either timer:
+
+```text
+snapshot_incidents=30
+snapshot_active_incidents=4
+snapshot_evidence=623
+snapshot_transitions=678
+```
+
+### Initial packet build and determinism
+
+The guard applied exact reasoning schema/builder bytes to the first copy and produced a separate exact pre-reasoning backup. Initial policy execution created exactly four packets for active state:
+
+```text
+initial_packets=4
+initial_packet_max_bytes=6280
+initial_reason_counts=incident_opened:2,incident_reopened:2
+initial_packet_state_sha256=2b92193dda93187257a31030a40f8606bb4a42496978444e30cc87f08cbc1afe
+```
+
+No historical resolved incident was packeted. Every packet passed canonical JSON/digest, reason/version/priority, forbidden-key, foreign-key, and 32-KiB validation.
+
+The immediate second build created zero rows and changed no incident/evidence/transition/packet state. Deleting only the copy's incident cursor and replaying the exact incident engine also changed no deterministic state or packet. A second independent migration/build from the original snapshot reproduced the exact packet digest.
+
+### Threshold, lifecycle, failure, and rollback gates
+
+On the first copy only, a synthetic adverse event opened a distinct incident and created one open packet. One later supporting evidence row created no packet. Once five supporting rows accumulated, exactly one `meaningful_update` packet was created. Recovery and the later deterministic quiet-period resolution each created the exact lifecycle packet.
+
+After all positive gates, one separate tamper case removed the copy's update trigger and changed stored packet JSON. The builder failed closed before adding a row. A third copy proved that empty-state migration rollback removes reasoning schema and builder while retaining the protected backup.
+
+Markers:
+
+```text
+initial_build_and_noop=yes
+incident_cursor_reset_replay_exact=yes
+independent_packet_reproduction_exact=yes
+nonqualifying_evidence_deferred=yes
+meaningful_update_threshold_exact=yes
+recovery_and_resolution_packets_exact=yes
+stored_packet_tamper_failed_closed=yes
+empty_state_rollback_exact=yes
+working_system_unchanged=yes
+GX10_REASONING_PACKET_COPY_REHEARSAL=PASS
+```
+
+No production event content, packet JSON, entity identity, database path, runtime identity, or connection value was printed or committed. No Ollama API/model/prompt or collector result path was used.
+
+### Next action
+
+Publish and independently verify this rehearsal checkpoint. Then use only published exact artifacts to perform the guarded working-system schema/builder installation under a new protected backup, verify zero packet rows and zero scheduler references, and leave the builder unscheduled.

@@ -9936,3 +9936,45 @@ No packet/result content, event content, entity identity, database path, private
 ### Next action
 
 Run the full public gate, publish, and independently verify this inactive-upgrade checkpoint. Then create a fresh protected pre-resume backup and use the unchanged fail-closed activator for exactly one corrected production drain while the timer is disabled. Enable the timer only after aggregate verification proves packets fixed at 12, pending 9→8, and runs/results 3→4.
+
+## 2026-08-24 03:09 PDT - Item 29 protected corrected production resume passed
+
+### Status
+
+Execution-order item 29 remains the single `NEXT` item and is in progress. The exact inactive runner-upgrade checkpoint was published and independently matched on GitHub at:
+
+`94e9686e804b1eeade5349acb355f1a6940a4367` — `Record inactive backlog runner upgrade`
+
+A fresh root-only recovery boundary was created. The private wrapper paused only the fetch/ingest timer, waited for its oneshot to settle, and ran deterministic correlation to exact zero lag. The unchanged published activator validated the corrected installed bytes and disabled unit state, then created a new mode-`0600` SQLite online backup.
+
+With the reasoning timer still disabled, exactly one corrected production cycle deferred packet construction, kept total packets fixed at 12, reduced pending from nine to eight, and advanced successful runs/results from three to four. There were no failures or `STARTED` reservations. Only after the installed-state verifier passed did the activator enable the corrected timer and pass active verification. The private wrapper restored the fetch/ingest timer unconditionally.
+
+```text
+recent_max_id=968943
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_pending=8
+reasoning_model_versions=1
+reasoning_prompt_versions=1
+reasoning_runs=4
+reasoning_succeeded=4
+reasoning_failures=0
+reasoning_results=4
+reasoning_started=0
+protected_backup_bytes=1957724160
+protected_backup_sha256=3c2ee6430eb16c8b8ee04b421bbca71ded855e22565b56a4f61e602257139696
+protected_backup_mode=0600
+pipeline_timer_resumed=yes
+correlation_timer_active=yes
+managed_reasoning_timer_active=yes
+managed_reasoning_restarts=0
+collector_result_return_enabled=no
+GX10_MANAGED_REASONING_BACKLOG_RESUME=PASS
+```
+
+No packet/result content, event content, entity identity, database path, private runtime identity, or connection value was printed or committed.
+
+### Next action
+
+Run the full public gate, publish, and independently verify this corrected-resume checkpoint. Then observe multiple natural five-minute cadences. Every reviewed cycle must keep packets fixed at 12, reduce pending by exactly one, add exactly one successful run/result, retain zero failure/`STARTED` rows/restarts and deterministic zero lag, and keep all independent production schedules healthy.

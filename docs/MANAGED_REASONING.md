@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Two natural cadences each completed exactly one successful inference, but each also built four new packets; pending backlog grew from three to six to nine. This failed the stability gate, and the reasoning timer was disabled with all append-only state preserved. The published 138-test bounded-backlog correction defers packet construction whenever any selected-version packet is pending and requires the one allowed inference attempt to reduce pending count by exactly one. It passed a protected current-production-state-copy real-model drain and is now installed exactly while the timer remains disabled. Production reasoning state is unchanged at 12 packets, nine pending, and three successful runs/results. Protected resume and new natural drain cadences remain.
+Execution-order item 29 has passed protected-copy, inactive-install/correction, and protected initial-activation gates. Two natural cadences exposed unbounded admission, growing pending from three to six to nine, so reasoning was disabled with append-only state preserved. The published 138-test correction defers construction whenever pending exists and requires an exact one-packet drain. It passed protected-copy rehearsal, exact inactive installation, and protected production resume. The corrected resume cycle kept packets fixed at 12, reduced pending 9→8, advanced successful runs/results 3→4, and enabled the timer only after verification. New natural drain cadences remain.
 
 The candidate manages exactly this separately disableable chain:
 
@@ -95,7 +95,7 @@ Twenty-three focused tests currently prove:
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `138` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, the bounded-backlog current-state-copy rehearsal, and exact inactive runner upgrade have passed. The corrected runner must pass a protected resume cycle and new production drain cadences. Collector result return is outside item 29.
+The full GX10 suite currently passes `138` tests. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, bounded-backlog current-state-copy rehearsal, exact inactive runner upgrade, and protected corrected resume have passed. Multiple natural production drain cadences remain. Collector result return is outside item 29.
 
 ## Protected current-state-copy evidence
 
@@ -265,6 +265,34 @@ pipeline_timer_active=yes
 correlation_timer_active=yes
 GX10_MANAGED_REASONING_RUNNER_UPGRADE=PASS
 ```
+
+The unchanged published activator then created a fresh root-only backup and ran one corrected production drain while the timer was still disabled. The builder was deferred by the installed runner, packet count stayed fixed, and exactly one successful run/result reduced pending by one. Only then was the timer enabled; the fetch/ingest schedule was restored unconditionally.
+
+```text
+recent_max_id=968943
+projection_lag=0
+incident_lag=0
+reasoning_packets=12
+reasoning_pending=8
+reasoning_model_versions=1
+reasoning_prompt_versions=1
+reasoning_runs=4
+reasoning_succeeded=4
+reasoning_failures=0
+reasoning_results=4
+reasoning_started=0
+protected_backup_bytes=1957724160
+protected_backup_sha256=3c2ee6430eb16c8b8ee04b421bbca71ded855e22565b56a4f61e602257139696
+protected_backup_mode=0600
+pipeline_timer_resumed=yes
+correlation_timer_active=yes
+managed_reasoning_timer_active=yes
+managed_reasoning_restarts=0
+collector_result_return_enabled=no
+GX10_MANAGED_REASONING_BACKLOG_RESUME=PASS
+```
+
+The protected backup path and all packet/result content remain private.
 
 ## Exact candidate artifacts
 

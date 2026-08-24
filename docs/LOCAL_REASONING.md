@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 28 has a published initial repository/guard candidate and a validated calibration correction ready for publication. The working GX10 system does not contain the item-28 inference schema, caller, prompt/configuration artifacts, run rows, or result rows. No production reasoning packet has been built and no production-data inference has been invoked. Synthetic loopback inference ran only against isolated temporary databases.
+Execution-order item 28 has a published calibrated repository/guard candidate and passing protected production-state-copy rehearsal. The working GX10 system does not contain the item-28 inference schema, caller, prompt/configuration artifacts, run rows, or result rows. No production reasoning packet has been built. Synthetic inference and one sanitized production-derived packet inference ran only against isolated temporary databases; no raw/source content or working-state write reached the model path.
 
 The candidate consumes only immutable item-27 packets. It cannot change incidents, evidence, transitions, packets, collector state, or Grafana state.
 
@@ -84,15 +84,48 @@ The endpoint is fixed to `http://127.0.0.1:11434/api/chat`. Redirects are refuse
 
 Unavailable, timed-out, transport-error, invalid-response, and invalid-output outcomes become explicit terminal run statuses with bounded canonical diagnostics. They produce no result and do not affect packet or incident truth. An immediate rerun makes no second inference call for that versioned reservation.
 
+## Protected production-state-copy evidence
+
+Only exact artifacts from the published calibrated checkpoint were staged. A SQLite online backup captured current production deterministic state while both production timers continued running:
+
+```text
+snapshot_incidents=51
+snapshot_active_incidents=4
+snapshot_evidence=893
+snapshot_transitions=986
+```
+
+The guard applied, independently verified, rolled back while all inference tables were empty, and then reapplied from the same exact pre-inference copy. The deterministic item-27 builder created four sanitized packets only in that copy.
+
+One packet completed real loopback Gemma inference and stored one strict canonical result. Three other packet reservations independently proved invalid output, inference unavailability, and interruption-after-reservation. The final invocation made no model call. Incident/evidence/transition/packet state had the same digest before and after all inference cases.
+
+```text
+copy_packets=4
+copy_successful_runs=1
+copy_invalid_output_runs=1
+copy_unavailable_runs=1
+copy_interrupted_runs=1
+copy_results=1
+copy_final_noop=yes
+deterministic_copy_truth_unchanged=yes
+copy_inference_state_sha256=6013c173f393737357b1fb26327dcddc639c546027e15b5b16d23520dfdf44ac
+GX10_LOCAL_REASONING_COPY_REHEARSAL=PASS
+```
+
+The rehearsal guard backup is mode `0600`, `1939898368` bytes, and SHA-256 `07fc164ab8cc21b145b8acd967c1d95d571e9256ae2c567cad04f22031cc7f66`. Its path and all packet/result content remain private.
+
+The post-rehearsal working system remained at zero packet rows and zero item-28 schema objects. Both deterministic cursors were at event ID `962636` with zero lag, `53` incidents, `5` active incidents, `899` evidence rows, `995` transitions, zero correlation restarts, and both production timers active.
+
 ## Item-28 gates
 
 1. `DONE` — publish and independently verify the repository candidate
 2. `DONE` — add an exact-schema/exact-artifact existing-system migration with protected backup, zero scheduler references, and empty-state-only rollback
 3. `DONE` — run synthetic structured-output quality and failure-path evaluation against loopback local models without production packet data; reject the under-calibrated smallest model and select the exact passing Gemma candidate
-4. publish and independently verify the calibrated artifact/guard correction
-5. rehearse migration, version registration, one-packet success, interruption, invalid output, unavailable runtime, and deterministic rerun on protected production-state copies
-6. install the exact inference schema/caller/configuration/prompt artifacts unscheduled under a new protected backup only after the earlier gates pass
-7. do not invoke a production packet or create a reasoning schedule until a separate managed-invocation gate passes
-8. keep collector result return outside item 28
+4. `DONE` — publish and independently verify the calibrated artifact/guard correction
+5. `DONE` — rehearse migration, version registration, one-packet success, interruption, invalid output, unavailable runtime, and deterministic rerun on a protected production-state copy
+6. publish and independently verify the protected-copy evidence
+7. install the exact inference schema/caller/configuration/prompt artifacts unscheduled under a new protected backup only after the earlier gates pass
+8. do not invoke a production packet or create a reasoning schedule until a separate managed-invocation gate passes
+9. keep collector result return outside item 28
 
 The original fetch/ingest and correlation timers remain independent of this candidate.

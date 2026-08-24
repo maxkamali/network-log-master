@@ -9347,3 +9347,77 @@ The original fetch/ingest and correlation timers stayed active. No production da
 ### Next action
 
 Run the full public gate, publish, and independently verify this calibrated correction. Then use only that exact checkpoint for protected production-state-copy migration/success/failure/idempotency rehearsal before any unscheduled working-system installation.
+
+## 2026-08-24 02:01 PDT - Item 28 protected production-state-copy rehearsal passed
+
+### Status
+
+Execution-order item 28 remains the single `NEXT` item and is in progress. The working database, installed item-27 builder, production services/timers, collector, and Grafana remained unchanged.
+
+The calibrated candidate was published and independently matched on GitHub at:
+
+`dd378f61518dc2f3a88977b553245552ff1e1f24` — `Calibrate strict local reasoning output`
+
+Only exact artifacts from that checkpoint were staged under a root-only temporary boundary. A SQLite online backup captured current production deterministic state without pausing either production timer:
+
+```text
+snapshot_incidents=51
+snapshot_active_incidents=4
+snapshot_evidence=893
+snapshot_transitions=986
+```
+
+### Migration and rollback gates
+
+The guard applied and independently verified the item-28 schema and exact artifacts against the copy, with all four inference tables empty and zero caller scheduler references. Empty-state rollback removed only the inference schema/artifacts and retained its backup. The rehearsal backup was then removed inside the isolated rehearsal boundary, and the guard reapplied from the unchanged base copy to prove a fresh exact installation path.
+
+The final protected rehearsal backup is:
+
+- bytes: `1939898368`
+- SHA-256: `07fc164ab8cc21b145b8acd967c1d95d571e9256ae2c567cad04f22031cc7f66`
+- mode: `0600`
+
+Its path remains private.
+
+### Inference state gates
+
+The exact deterministic builder created four sanitized reasoning packets only in the copy. One highest-priority copied packet completed real loopback Gemma inference and stored one strict canonical result. Three separate copied packets exercised invalid output, inference unavailability, and interruption after durable reservation. The invalid/unavailable cases stored no result; the interruption retained exactly one `STARTED` reservation; a final invocation made no model call.
+
+```text
+copy_packets=4
+copy_successful_runs=1
+copy_invalid_output_runs=1
+copy_unavailable_runs=1
+copy_interrupted_runs=1
+copy_results=1
+copy_final_noop=yes
+deterministic_copy_truth_unchanged=yes
+copy_inference_state_sha256=6013c173f393737357b1fb26327dcddc639c546027e15b5b16d23520dfdf44ac
+GX10_LOCAL_REASONING_COPY_REHEARSAL=PASS
+```
+
+No packet/result JSON, event content, entity identity, database path, or connection value was printed or committed.
+
+### Working-system postcheck
+
+The ordinary production schedules advanced during the rehearsal. The final postcheck showed:
+
+```text
+recent_max_id=962636
+projection_lag=0
+incident_lag=0
+incidents=53
+active=5
+evidence=899
+transitions=995
+working_reasoning_packets=0
+working_inference_objects=0
+GX10_ITEM28_LIVE_POSTCHECK=PASS
+ITEM28_PRODUCTION_TIMERS_ACTIVE=YES
+ITEM28_CORRELATION_RESTARTS=0
+ITEM28_OLLAMA_ACTIVE=YES
+```
+
+### Next action
+
+Publish and independently verify this rehearsal checkpoint. Then use only the published exact artifacts for guarded working-system installation of the empty inference schema/caller/configuration/prompt/output-schema under a new protected backup. Leave it unscheduled and do not invoke any production packet.

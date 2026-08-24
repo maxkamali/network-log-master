@@ -26,6 +26,7 @@ DROPIN_DIR = SYSTEMD_DIR / f'{SERVICE}.d'
 DROPIN_PATH = DROPIN_DIR / '10-runtime.conf'
 CONFIRMATION = 'INSTALL-UNSCHEDULED-CORRELATION'
 SAFE_NAME_RE = re.compile(r'^[A-Za-z0-9_.@-]+$')
+SAFE_PATH_RE = re.compile(r'^/[A-Za-z0-9_./@+-]+$')
 ARTIFACTS = (
     (
         GX10_DIR / 'sbin' / 'enrich-events.py',
@@ -145,10 +146,19 @@ def render_config(database):
     ).encode()
 
 
-def render_dropin(runtime_user, runtime_group, pipeline_unit):
+def render_dropin(runtime_user, runtime_group, pipeline_unit, database=None):
     for value in (runtime_user, runtime_group, pipeline_unit):
         if not isinstance(value, str) or not SAFE_NAME_RE.fullmatch(value):
             raise InstallError('managed correlation runtime identity is invalid')
+    writable_lines = ''
+    if database is not None:
+        writable_directory = str(Path(database).parent)
+        if not SAFE_PATH_RE.fullmatch(writable_directory):
+            raise InstallError('managed correlation writable path is invalid')
+        writable_lines = (
+            'ReadWritePaths=\n'
+            f'ReadWritePaths={writable_directory}\n'
+        )
     return (
         '[Unit]\n'
         'After=\n'
@@ -156,7 +166,52 @@ def render_dropin(runtime_user, runtime_group, pipeline_unit):
         '\n[Service]\n'
         f'User={runtime_user}\n'
         f'Group={runtime_group}\n'
+        f'{writable_lines}'
     ).encode()
+
+
+def install_or_upgrade_bytes(
+    target,
+    data,
+    previous_data,
+    mode,
+    uid=0,
+    gid=0,
+):
+    target = Path(target)
+    if not target.exists() and not target.is_symlink():
+        install_bytes(target, data, mode, uid, gid)
+        return 'created'
+    details = validate_regular(target, 'existing managed correlation artifact')
+    if (
+        details.st_uid != uid
+        or details.st_gid != gid
+        or stat.S_IMODE(details.st_mode) != mode
+    ):
+        raise InstallError('existing managed correlation metadata differs')
+    current = target.read_bytes()
+    if current == data:
+        return 'reused'
+    if current != previous_data:
+        raise InstallError('existing managed correlation artifact differs')
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f'.{target.name}.',
+        dir=target.parent,
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, 'wb') as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chown(temporary, uid, gid)
+        os.chmod(temporary, mode)
+        os.replace(temporary, target)
+        fsync_directory(target.parent)
+        return 'upgraded'
+    finally:
+        if temporary.exists():
+            temporary.unlink()
 
 
 def validate_runtime_inputs(database, runtime_user, runtime_group, pipeline_unit):
@@ -205,7 +260,13 @@ def apply_install(database, runtime_user, runtime_group, pipeline_unit):
     for source, _, _ in ARTIFACTS:
         validate_regular(source, 'repository managed correlation artifact')
     config = render_config(database)
-    dropin = render_dropin(runtime_user, runtime_group, pipeline_unit)
+    legacy_dropin = render_dropin(runtime_user, runtime_group, pipeline_unit)
+    dropin = render_dropin(
+        runtime_user,
+        runtime_group,
+        pipeline_unit,
+        database,
+    )
     for source, target, _ in ARTIFACTS:
         if target.parent in (LIBEXEC_DIR, SYSTEMD_DIR):
             continue
@@ -215,6 +276,7 @@ def apply_install(database, runtime_user, runtime_group, pipeline_unit):
 
     created_directories = []
     created_files = []
+    upgraded_files = []
     try:
         ensure_directory(
             LIBEXEC_DIR.parent,
@@ -231,8 +293,16 @@ def apply_install(database, runtime_user, runtime_group, pipeline_unit):
                 created_files.append(target)
         if install_bytes(CONFIG_PATH, config, 0o640, gid=group.gr_gid):
             created_files.append(CONFIG_PATH)
-        if install_bytes(DROPIN_PATH, dropin, 0o644):
+        dropin_action = install_or_upgrade_bytes(
+            DROPIN_PATH,
+            dropin,
+            legacy_dropin,
+            0o644,
+        )
+        if dropin_action == 'created':
             created_files.append(DROPIN_PATH)
+        elif dropin_action == 'upgraded':
+            upgraded_files.append((DROPIN_PATH, legacy_dropin, 0o644, 0, 0))
         subprocess.run(
             [
                 'systemd-analyze',
@@ -259,6 +329,11 @@ def apply_install(database, runtime_user, runtime_group, pipeline_unit):
             if state not in {'inactive', 'unknown'}:
                 raise InstallError('managed correlation unit is already active')
     except Exception:
+        for path, data, mode, uid, gid in reversed(upgraded_files):
+            try:
+                install_or_upgrade_bytes(path, data, dropin, mode, uid, gid)
+            except (InstallError, OSError):
+                pass
         for path in reversed(created_files):
             try:
                 path.unlink()

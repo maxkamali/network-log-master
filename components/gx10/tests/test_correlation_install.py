@@ -40,11 +40,13 @@ class CorrelationInstallTests(unittest.TestCase):
         with self.assertRaisesRegex(INSTALLER.InstallError, 'path is invalid'):
             INSTALLER.render_config(Path('relative.sqlite3'))
 
-    def test_dropin_is_strict_and_resets_only_ordering(self):
+    def test_dropin_is_strict_and_binds_only_runtime_state_directory(self):
+        database = self.root / 'state' / 'events.sqlite3'
         rendered = INSTALLER.render_dropin(
             'runtime-user',
             'runtime-group',
             'private-pipeline.service',
+            database,
         ).decode()
         self.assertEqual(
             rendered,
@@ -53,7 +55,9 @@ class CorrelationInstallTests(unittest.TestCase):
             'After=private-pipeline.service\n'
             '\n[Service]\n'
             'User=runtime-user\n'
-            'Group=runtime-group\n',
+            'Group=runtime-group\n'
+            'ReadWritePaths=\n'
+            f'ReadWritePaths={database.parent}\n',
         )
         with self.assertRaisesRegex(
             INSTALLER.InstallError,
@@ -63,6 +67,50 @@ class CorrelationInstallTests(unittest.TestCase):
                 'runtime-user\nRootDirectory=/',
                 'runtime-group',
                 'private-pipeline.service',
+                database,
+            )
+
+    def test_dropin_upgrade_accepts_only_exact_prior_version(self):
+        target = self.root / '10-runtime.conf'
+        previous = b'prior\n'
+        current = b'current\n'
+        target.write_bytes(previous)
+        target.chmod(0o644)
+        self.assertEqual(
+            INSTALLER.install_or_upgrade_bytes(
+                target,
+                current,
+                previous,
+                0o644,
+                os.getuid(),
+                os.getgid(),
+            ),
+            'upgraded',
+        )
+        self.assertEqual(target.read_bytes(), current)
+        self.assertEqual(
+            INSTALLER.install_or_upgrade_bytes(
+                target,
+                current,
+                previous,
+                0o644,
+                os.getuid(),
+                os.getgid(),
+            ),
+            'reused',
+        )
+        target.write_bytes(b'divergent\n')
+        with self.assertRaisesRegex(
+            INSTALLER.InstallError,
+            'artifact differs',
+        ):
+            INSTALLER.install_or_upgrade_bytes(
+                target,
+                current,
+                previous,
+                0o644,
+                os.getuid(),
+                os.getgid(),
             )
 
     def test_atomic_file_install_reuses_exact_and_refuses_divergence(self):

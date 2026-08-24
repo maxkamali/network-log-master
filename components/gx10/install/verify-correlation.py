@@ -216,8 +216,9 @@ def validate_private_runtime(database):
     if config != {'database_path': str(Path(database))}:
         raise ValueError('private correlation configuration differs')
     lines = DROPIN_PATH.read_text(encoding='utf-8').splitlines()
+    writable_directory = str(Path(database).parent)
     if (
-        len(lines) != 7
+        len(lines) != 9
         or lines[0] != '[Unit]'
         or lines[1] != 'After='
         or not lines[2].startswith('After=')
@@ -225,6 +226,8 @@ def validate_private_runtime(database):
         or lines[4] != '[Service]'
         or lines[5] != f'User={service_user}'
         or lines[6] != f'Group={service_group}'
+        or lines[7] != 'ReadWritePaths='
+        or lines[8] != f'ReadWritePaths={writable_directory}'
     ):
         raise ValueError('private correlation drop-in content differs')
     pipeline_unit = lines[2].removeprefix('After=')

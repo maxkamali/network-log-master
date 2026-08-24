@@ -14,7 +14,7 @@ It does not call Ollama, implement a model wake policy, produce AI results, writ
 
 ## Isolation and concurrency
 
-Correlation uses a separate oneshot service and monotonic timer. A failure in this service cannot stop or disable the existing fetch/ingest timer. The service has no network address family, no spool write access, no capabilities, and only the GX10 application-state root is writable.
+Correlation uses a separate oneshot service and monotonic timer. A failure in this service cannot stop or disable the existing fetch/ingest timer. The service has no network address family, no spool write access, and no capabilities. Its private working-system drop-in resets the clean-rebuild write path and grants write access only to the parent directory of the already validated database.
 
 The runner opens a single-link mode-`0600` advisory lock owned by the runtime identity. This prevents overlapping timer/manual correlation cycles. Projection and incident batches retain their existing SQLite `BEGIN IMMEDIATE` transactions and five-second busy timeouts, which serialize them against any concurrent ingest writer.
 
@@ -40,7 +40,7 @@ The service resource boundary is:
 - `Nice=5`
 - best-effort I/O priority 6
 - network families: Unix sockets only
-- write scope: GX10 application-state root only
+- write scope: validated database parent only
 
 ## Telemetry and health
 
@@ -70,7 +70,7 @@ Success ends with `GX10_MANAGED_CORRELATION=PASS`. Failure includes a UTC timest
 
 ## Installation, activation, and disable gates
 
-`install/install-correlation.py` installs exact projector, incident engine, runner, service, timer, private database-path configuration, and a narrowly rendered runtime-identity/ordering drop-in. It refuses divergent targets, unsafe names/paths, incorrect database ownership/mode, missing pipeline unit, pre-enabled correlation state, or unsafe filesystem metadata. Installation does not run a stage or enable a timer.
+`install/install-correlation.py` installs exact projector, incident engine, runner, service, timer, private database-path configuration, and a narrowly rendered runtime-identity/ordering/write-scope drop-in. The write-scope override is required when an existing system's validated database is outside the clean-rebuild state root. The installer permits only the exact known inactive pre-write-scope drop-in to be upgraded atomically; every other divergent target remains a hard failure. It refuses unsafe names/paths, incorrect database ownership/mode, missing pipeline unit, pre-enabled correlation state, or unsafe filesystem metadata. Installation does not run a stage or enable a timer.
 
 `install/activate-correlation.py` requires a separate explicit confirmation. It:
 

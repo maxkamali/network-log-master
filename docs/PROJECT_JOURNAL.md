@@ -8769,3 +8769,50 @@ Projection lag equals the highest stored event ID because no production projecti
 ### Next action
 
 Publish and independently verify this inactive-install checkpoint. Then use the explicit activator to reverify installed state, run exactly one timer-disabled initial managed backfill, verify service success/state, enable only the correlation timer, and require active zero-lag verification. On any failure, disable correlation while preserving deterministic state and the existing fetch/ingest timer.
+
+## 2026-08-24 00:47 PDT - Live activation failed closed on nonstandard state root; sandbox portability corrected
+
+### Status
+
+Execution-order item 26 remains the single `NEXT` item and is in progress.
+
+The inactive-install checkpoint was published and independently verified at `a6d0bb26493d833a3984d2367a3412b9aff84b34`. The explicit activator then passed its complete inactive verifier but the initial service start failed before invoking the runner:
+
+```text
+service_result=exit-code
+service_exit_status=226/NAMESPACE
+correlation_timer_disabled_inactive=yes
+GX10_MANAGED_CORRELATION_LIVE_ACTIVATION=FAIL_CLOSED
+```
+
+The clean-rebuild service fragment allowed writes only under the standard application-state root. This existing system's already validated database uses a different historical state root, and the standard root is absent. Systemd therefore rejected mount-namespace setup before application execution.
+
+No projection row, incident row, evidence row, transition, or cursor was created. The activator disabled/stopped only correlation. The existing fetch/ingest timer remained active and unchanged.
+
+### Narrow portability correction
+
+The private runtime drop-in now resets the fragment's clean-rebuild write path and grants write access only to the parent directory of the exact validated database. The verifier requires this exact derived line and rejects any broader or different drop-in.
+
+The installer supports an atomic upgrade only when the existing drop-in exactly matches the previously published inactive form. It still refuses every other divergent target. A failed post-upgrade installation restores the exact prior drop-in and reloads systemd.
+
+Corrected artifact SHA-256 values:
+
+- inactive installer: `16b96d9c3d084ce89cf7f2a5e18aa52e427fdfd26b23159859bd3defe0c75972`
+- verifier: `1e074560abf613075481e96f6af217896782cf65fad7bd48e03ce1df46e55719`
+
+Validation:
+
+```text
+80 tests passed
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+GX10_REBUILD_PACKAGE_VALIDATION=PASS
+PUBLIC_REPOSITORY_CURRENT_TREE=PASS
+PUBLIC_REPOSITORY_HISTORY=PASS
+PUBLIC_REPOSITORY_LINKS=PASS
+PUBLIC_REPOSITORY_REF_TOPOLOGY=PASS
+PUBLIC_REPOSITORY_VALIDATION=PASS
+```
+
+### Next action
+
+Publish and independently verify this correction. Stage only those published exact installer/verifier bytes, atomically upgrade the inactive private drop-in, reverify unchanged database and inactive scheduling, then retry the explicit fail-closed activation.

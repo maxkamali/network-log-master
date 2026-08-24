@@ -664,7 +664,7 @@
                         },
                         "pluginVersion": "4.20.0",
                         "queryType": "table",
-                        "rawSql": "SELECT\n    max(timestamp) AS \"Time\",\n    argMax(severity, tuple(timestamp, run_id)) AS \"Severity\",\n    argMax(status, tuple(timestamp, run_id)) AS \"Assessment\",\n    argMax(title, tuple(timestamp, run_id)) AS \"Title\",\n    argMax(occurrence_count, tuple(timestamp, run_id)) AS \"Occurrences\",\n    arrayStringConcat(argMax(tags, tuple(timestamp, run_id)), \",\") AS \"Tags\",\n    incident_id AS \"Incident ID\"\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nGROUP BY incident_id\nORDER BY \"Time\" DESC\nLIMIT 100"
+                        "rawSql": "SELECT\n    max(timestamp) AS \"Time\",\n    argMax(severity, tuple(timestamp, run_id)) AS \"Severity\",\n    argMax(status, tuple(timestamp, run_id)) AS \"Assessment\",\n    argMax(title, tuple(timestamp, run_id)) AS \"Title\",\n    argMax(occurrence_count, tuple(timestamp, run_id)) AS \"Occurrences\",\n    arrayStringConcat(argMax(tags, tuple(timestamp, run_id)), ',') AS \"Tags\",\n    incident_id AS \"Incident ID\"\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nGROUP BY incident_id\nORDER BY \"Time\" DESC\nLIMIT 100"
                       }
                     },
                     "refId": "A",

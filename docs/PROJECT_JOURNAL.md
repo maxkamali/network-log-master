@@ -11975,3 +11975,21 @@ No Grafana API request, ClickHouse mutation, dashboard creation/replacement, dat
 ### Next action
 
 Run the public repository gates, publish and independently verify the candidate checkpoint, then stage only those exact published public artifacts on the collector. Perform create-only `dryRun=All`; if it passes and all existing resources remain exact, create the distinct enhanced resource without `--replace`, verify all six resources, execute all eight enhanced queries plus the original seven through Grafana's read-only datasource, and reconcile closure documentation.
+
+## 2026-08-24 16:13 PDT - Item 33 enhanced resource created; event-feed SQL correction opened
+
+### Status
+
+Item 33 remains the single `NEXT` item and is in progress. GitHub `main` independently matched published candidate `f10722e24dc68287d1937e6870372fca32d91f3c`.
+
+The exact published Grafana tree was staged under a new mode-private collector temporary directory. Grafana `dryRun=All` classified the enhanced capture as a create and all five existing captures as exact and unchanged. The subsequent call used no `--replace`; it created only `ai-incident-analysis-enhanced`. An immediate API reread proved all six complete specifications exact, including the original AI dashboard.
+
+The original seven panel queries and the first six enhanced queries passed through Grafana's configured read-only ClickHouse datasource. Enhanced panel 7 then failed closed with datasource HTTP 400, so item closure and documentation reconciliation stopped. Panel 8 was not run after that fail-fast boundary.
+
+The defect is confined to panel 7's tag separator literal. Its ClickHouse SQL used double quotes, which identify a column rather than a string. The local candidate now uses the proper single-quoted comma literal, and its regression requires that exact expression. No event content or credential was printed. The mode-private temporary administrator credential was removed automatically after every API process.
+
+No existing dashboard, datasource, ClickHouse schema/data, service, schedule, GX10 output, result transport, or ingestion path changed. The distinct enhanced dashboard exists but is not yet validated complete.
+
+### Next action
+
+Run the complete local/public gates for the one-line SQL correction, publish and independently verify it, replace only the distinct enhanced dashboard from that exact checkpoint, reread all six specifications, and require all fifteen AI queries to pass before reconciling closure documentation.

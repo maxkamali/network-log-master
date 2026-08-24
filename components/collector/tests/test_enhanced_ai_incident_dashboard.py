@@ -93,6 +93,10 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         sql = query(panel)["spec"]["rawSql"]
         self.assertEqual(panel["spec"]["title"], "Latest AI Assessment per Incident")
         self.assertIn("argMax(severity, tuple(timestamp, run_id))", sql)
+        self.assertIn(
+            "arrayStringConcat(argMax(tags, tuple(timestamp, run_id)), ',')",
+            sql,
+        )
         self.assertIn("GROUP BY incident_id", sql)
         self.assertIn('ORDER BY "Time" DESC', sql)
         self.assertIn("LIMIT 100", sql)

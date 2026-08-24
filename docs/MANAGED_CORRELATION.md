@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order item 26 has a repository candidate. It is not installed or active on the working GX10 system at this checkpoint. The existing automatic chain remains exactly `timer -> fetch -> ingest`.
+Execution-order item 26 has a published repository candidate and passing private working-database-copy rehearsal. It is not installed or active on the working GX10 system at this checkpoint. The existing automatic chain remains exactly `timer -> fetch -> ingest`.
 
 The candidate manages only two deterministic stages in this exact order:
 
@@ -89,7 +89,7 @@ Disabling correlation stops/disables its timer and stops its oneshot without rem
 Before live activation:
 
 1. publish and independently verify exact candidate hashes
-2. rehearse install/backfill/no-op/new-input/failure/disable behavior on protected working-database copies
+2. `DONE` — rehearse backfill/no-op/new-input/projection-failure/incident-failure behavior on a protected working-database copy
 3. verify `systemd-analyze`, unit security/resource properties, and no network access
 4. confirm working-system item-25 state and protected backup still match
 5. install inactive first, verify, then run one explicitly observed backfill

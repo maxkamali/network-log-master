@@ -8626,3 +8626,68 @@ Candidate SHA-256 values:
 ### Next action
 
 Complete the full public-repository gate, publish, and independently verify this item-26 candidate. Then use only published exact artifacts for protected working-database-copy rehearsals of inactive install, initial backfill, no-op, newly appended input, failure isolation, verifier behavior, disable, and state preservation before any working-system install.
+
+## 2026-08-24 00:39 PDT - Managed correlation private-copy gate passed
+
+### Status
+
+Execution-order item 26 remains the single `NEXT` item and is in progress.
+
+The managed-correlation candidate was published and independently verified on GitHub at:
+
+`b4c1681ad2ec5286c0fda8082a803ab0288e3031` — `Build managed deterministic correlation candidate`
+
+Only exact artifacts from that checkpoint were staged under a root-only temporary boundary. The current item-25 working database was opened read-only to create the rehearsal copy. Production files, units, schedules, projection rows, incident rows, and cursors remained unchanged.
+
+### Full managed backfill and no-op
+
+The exact published runner completed the full copy backfill in one ordered pass:
+
+```text
+NORMALIZED_PROJECTION scanned=954790 projected=7726 suppressed=5830 version=4
+GX10_NORMALIZED_PROJECTION=PASS
+INCIDENT_ENGINE scanned=7726 created=22 transitions=463 incidents=22 active=5 evidence=425 watermark_ms=1787556833909 version=1
+GX10_INCIDENT_ENGINE=PASS
+MANAGED_CORRELATION schema=1 result=pass passes=1 duration_ms=4318 recent_max_id=954888 projection_cursor=954888 projection_lag=0 canonical_rows=7726 incident_cursor=954888 incident_lag=0 incidents=22 active=5 evidence=425 transitions=463
+GX10_MANAGED_CORRELATION=PASS
+```
+
+The distinction between scanned count `954790` and maximum event ID `954888` is normal SQLite identity history; success is governed by the exact cursor/max-ID watermark, not row-count equality.
+
+The immediate second run produced:
+
+```text
+NORMALIZED_PROJECTION scanned=0 projected=0 suppressed=0 version=4
+INCIDENT_ENGINE scanned=0 created=0 transitions=0 incidents=22 active=5 evidence=425 watermark_ms=0 version=1
+MANAGED_CORRELATION schema=1 result=pass passes=1 duration_ms=656 recent_max_id=954888 projection_cursor=954888 projection_lag=0 canonical_rows=7726 incident_cursor=954888 incident_lag=0 incidents=22 active=5 evidence=425 transitions=463
+GX10_MANAGED_CORRELATION=PASS
+```
+
+Initial deterministic incident state SHA-256:
+
+`cc3bcd7f0fd29d6300fa1ed9ab4909489efba8a41c9462b0c7f9c5a9997e4dd0`
+
+### New input and failure isolation
+
+A synthetic normalized event was appended only to the copy. One managed pass projected and processed exactly one row, advanced both cursors from `954888` to `954889`, and created one distinct synthetic incident with two initial transitions. Both lags returned to zero.
+
+Two separate copied failure states then proved:
+
+- malformed normalized input caused the projection stage to fail and roll back its batch/cursor; incident processing was not invoked and prior deterministic state remained exact
+- a valid new projection was committed, then an intentionally invalid incident cursor caused incident processing to fail; the projection remained durable and all prior incident/evidence/transition state remained exact
+
+Markers:
+
+```text
+new_input_both_watermarks_exact=yes
+projection_failure_rolled_back_and_blocked_incident=yes
+incident_failure_preserved_projection_and_incident_state=yes
+working_database_unchanged=yes
+GX10_MANAGED_CORRELATION_COPY_REHEARSAL=PASS
+```
+
+No production event content or identity-bearing path was printed or persisted publicly.
+
+### Next action
+
+Publish and independently verify this copy-rehearsal checkpoint. Then stage only those published exact artifacts for the guarded inactive working-system install. Verify exact installed bytes, rendered private database/identity boundary, systemd analysis, disabled/inactive units, and unchanged database before separately invoking the explicit backfill activator.

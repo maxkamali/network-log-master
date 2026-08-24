@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "platforms": {
+    "192.0.2.10": {
+      "vendor_hint": "cisco",
+      "os_family_hint": "nxos"
+    },
+    "192.0.2.20": {
+      "vendor_hint": "arista",
+      "os_family_hint": "eos"
+    }
+  }
+}

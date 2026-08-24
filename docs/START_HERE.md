@@ -12,7 +12,7 @@ Read and verify in this order before changing implementation:
 4. The latest entries in `docs/PROJECT_JOURNAL.md` — understand recent decisions, failed approaches, validation evidence, and checkpoint history.
 5. `docs/DECISIONS.md` — review durable architecture decisions that constrain implementation choices.
 6. `docs/DATA_CONTRACTS.md`, `docs/OPERATIONS.md`, and `docs/TWO_SERVER_REBUILD.md` — confirm data, operational, and cross-host rebuild contracts.
-7. `docs/ACCEPTANCE.md` — confirm what passed and which disposable-host executions remain deferred.
+7. `docs/ACCEPTANCE.md` — confirm what passed and which unavailable disposable-host executions were waived with residual risk.
 8. Component-specific documentation for the active task.
 9. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
 

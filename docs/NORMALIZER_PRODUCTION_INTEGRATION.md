@@ -4,9 +4,11 @@
 
 Design: `DONE`.
 
-Repository implementation: `NEXT`.
+Repository implementation and synthetic validation: `DONE`.
 
-Live shadow deployment and production cutover are not authorized by this document.
+Bounded live shadow deployment: `NEXT`, requiring explicit authorization and a private trusted platform inventory.
+
+Production cutover remains unauthorized.
 
 ## Objective
 
@@ -218,13 +220,13 @@ Because GX10 idempotency is keyed by source file and record number, cutover and 
 
 ## Implementation sequence
 
-1. build the inventory validator and atomic durable-file worker
-2. build the ledger schema/verifier and synthetic replay fixtures
-3. package the dedicated account, directories, service, timer, and hardening
-4. add a repository-only installer/verifier that does not activate the worker by default
-5. prove source immutability, exact record cardinality, deterministic output, resume, mutation refusal, and failure isolation
-6. publish the repository implementation checkpoint
-7. request explicit authorization for bounded deployment in shadow-only mode
+1. `DONE` — build the inventory validator and atomic durable-file worker
+2. `DONE` — build the ledger schema/verifier and synthetic replay fixtures
+3. `DONE` — package the dedicated account, directories, service, timer, and hardening
+4. `DONE` — add a repository-only installer/verifier that does not activate the worker by default
+5. `DONE` — prove source immutability, exact record cardinality, deterministic output, resume, mutation refusal, and failure isolation
+6. `DONE` — publish the repository implementation checkpoint
+7. `NEXT` — request explicit authorization and a trusted private inventory for bounded deployment in shadow-only mode
 8. collect/review shadow evidence
 9. design and rehearse the file-identity-safe GX10 handoff switch and rollback
 10. request explicit production-cutover authorization

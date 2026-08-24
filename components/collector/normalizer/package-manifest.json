@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "artifacts": {
+    "/etc/systemd/system/network-log-normalizer-shadow.service": "68415ed11d633d0f889426e2adf4d20dc28845f6a7328f188d2fc1cea685faab",
+    "/etc/systemd/system/network-log-normalizer-shadow.timer": "257bc637f54c22ea9809939ff1fa173fe892e5ac3bafd31b75ad0901565a1721",
+    "/usr/local/lib/network-log-normalizer/versions.env": "7c65e200df92704c7676223c49de8029fcca96e7f2d56a565004c3af550bcce6",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/__init__.py": "0dfbbdeee84d28a5506191a102c5d990436634d5ae2207f6ac40441a022c3fa9",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/envelope.py": "05650ef7b04a3ac97f08cb92377edd343964860db3cc3db1fb253eb8a838f336",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/normalizer.py": "240603e73a06de89f9da91955b1ed864ae3e225b37ead8a9cf2a9a03f2b2bb53",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/parsers/__init__.py": "327175639cf558679ff9e8c24760f7ca4c47c66a7dc57dea829d20da529e1d83",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/parsers/base.py": "6bdca5912164544780c3fc92433b8fb1bc46c97982971c8198b622839dae18aa",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/parsers/dispatcher.py": "86d5e14612961c2384b0c6ea8ff3f575dbfc1d2730861ba73fa228394dc5322e",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/parsers/eos_bgp.py": "3ed5a6ddf9254d59eccfb14b1104e6b514d9b741f5f6730e6eb6a9a915762c12",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/parsers/iosxr_bgp.py": "787c70871c58b4edc45af6062c9f51ad174b29f8d8edc104982758bdc36c3fb2",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/parsers/nxos_ethport.py": "f02c4422b7db6269248af7712f9cad355594142e898e8e21e31b4827c6cf02c1",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/parsers/nxos_ospf.py": "c07f939eb52e41defabd33221dcc68b20c36fb85a31481a042ad2309d60114eb",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/platform.py": "191d0e6792442a73e48da7d6fb305c3ac790a53b55bd97de93f9601eac69ee47",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/rules/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/schema.py": "e32228c474a9f9bef1d83fe1deeca6801906dca6d5c49fbed30aa12b341e9c1c",
+    "/usr/local/lib/network-log-normalizer/network_log_normalizer/shadow.py": "d4ca2088000c91a73501bd99bdf023fd0d21644db5b1ef01e637ade768990c0c",
+    "/usr/local/sbin/network-log-normalizer-shadow": "a308bbb0924bca0b7b1316beab24d000696a817087b20b8bce1a5bb5a29344f4",
+    "/usr/local/sbin/verify-network-log-normalizer-shadow": "43eed8cb9e93921d2969eeeada1a3ebd39d0fe1f189dad124514b9c937dba21a"
+  }
+}

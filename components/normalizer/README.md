@@ -38,6 +38,10 @@ The NX-OS OSPF parser supports the exact retransmission event codes and preserve
 
 The former standalone normalizer repository is retained for historical provenance only. New normalizer feature development occurs here.
 
-## Next engineering gate
+## Production integration status
 
-Do not add parser breadth by default. The next step is replay/parity validation against stored observations and the transitional GX10 enrichment path for the currently implemented migration scope.
+Selected replay/parity is complete: 24 representative observations produced 21 strict semantic matches, 3 intentional OSPFv3 improvements, and 0 unexpected differences. The full suite now includes durable shadow-worker tests in addition to parser/replay coverage.
+
+The approved collector integration is a separate durable-file shadow worker implemented in `src/network_log_normalizer/shadow.py`. Packaging, systemd hardening, a non-activating installer, and an independent verifier are under `components/collector/normalizer/`.
+
+Do not add parser breadth by default. Live shadow deployment and production promotion remain separate authorization/evidence gates in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.

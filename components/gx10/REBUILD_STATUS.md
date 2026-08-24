@@ -6,7 +6,7 @@ Live-system rediscovery is `DONE`.
 
 Public clean-machine reconstruction and operator documentation are `DONE` under execution-order item 12.
 
-Clean-machine GX10 validation is `DEFERRED` because no disposable Ubuntu 24.04 arm64 GX10-class target is currently available.
+Clean-machine GX10 validation is `WAIVED BY OPERATOR` because no disposable Ubuntu 24.04 arm64 GX10-class target is available. It remains empirically unverified.
 
 This document is the component recovery authority for the active GX10 milestone. `docs/CURRENT_STATE.md` remains the authority for project-wide execution order and the single `NEXT` item.
 
@@ -231,7 +231,7 @@ Completed in bounded, journaled subsections:
 5. `DONE` — provide Ollama installation/model verification without claiming application orchestration
 6. `DONE` — add package, structural, public-safety, and runtime verifiers
 7. `DONE` — write the clean-machine operator runbook
-8. `DEFERRED` — run clean-machine GX10 validation when a disposable target is available
+8. `WAIVED BY OPERATOR` — clean-machine GX10 validation remains empirically unverified; run it if a disposable target later becomes available
 
 Every completed subsection is durably journaled. The component milestone is closed without laundering unavailable disposable-host validation into a pass.
 

@@ -155,7 +155,7 @@ Record only public-safe outcomes and hashes. Never record private addresses, por
 
 Repository reconstruction, synthetic tests, live read-only parity checks, and operator documentation are complete.
 
-Disposable-host execution remains deferred for both components because suitable clean validation systems are not currently available. Therefore the project must not claim that the full two-server clean rebuild has already passed.
+Disposable-host execution remains empirically unverified for both components because suitable clean validation systems are not available. The operator waived that gate for project sequencing with residual risk retained. Therefore the project must not claim that the full two-server clean rebuild passed.
 
 ## Failure rule
 

@@ -44,6 +44,8 @@ set +a
 : "${GRAFANA_VERSION:?}"
 : "${GRAFANA_CLICKHOUSE_PLUGIN_VERSION:?}"
 : "${CERTBOT_VERSION:?}"
+: "${PYTHON3_VERSION:?}"
+: "${ZSTD_VERSION:?}"
 
 if [ ! -r /etc/os-release ]; then
     die "/etc/os-release is unavailable"

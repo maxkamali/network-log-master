@@ -76,6 +76,8 @@ The active normalizer source is [`components/normalizer/`](components/normalizer
 
 The selected replay/parity milestone is complete with 73 tests passing and 0 unexpected semantic differences in the reviewed 24-sample production replay scope.
 
+The collector-side durable shadow worker, private-inventory validator, ledger, non-activating installer, hardened unit/timer, artifact manifest, and independent verifier are now implemented. The expanded suite has 88 normalizer/worker tests plus 9 collector-package tests passing. The package has not been deployed to the live collector.
+
 ### Collector
 
 The collector rebuild capture is published under [`components/collector/`](components/collector/).
@@ -96,13 +98,13 @@ The published checkpoint includes:
 
 The independent live collector verifier reached `COLLECTOR_RUNTIME_VERIFY=PASS`.
 
-The collector public rebuild package, operator documentation, sanitation, and repository-only validation gates are complete. Clean-machine execution is deferred because no disposable Debian 13 amd64 target is available.
+The collector public rebuild package, operator documentation, sanitation, and repository-only validation gates are complete. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Debian 13 amd64 target is available.
 
 ### GX10
 
 GX10's complete public rebuild package is published under [`components/gx10/`](components/gx10/). It captures the proven `timer -> fetch -> ingest` chain, exact SQLite state, unscheduled deterministic enrichment, platform/dependency contract, Ollama service and six-model store, guarded activation, and the clean-machine runbook.
 
-Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 42 tests. Clean-machine execution is deferred because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
+Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 42 tests. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
 
 ### Two-server rebuild
 
@@ -116,7 +118,7 @@ Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 4
 - [`docs/DATA_CONTRACTS.md`](docs/DATA_CONTRACTS.md) - raw, normalized, incident, and AI-result contracts.
 - [`docs/OPERATIONS.md`](docs/OPERATIONS.md) - ingest, backlog, validation, replay, failure, and rebuild behavior.
 - [`docs/TWO_SERVER_REBUILD.md`](docs/TWO_SERVER_REBUILD.md) - collector-first two-host reconstruction and acceptance order.
-- [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) - final repository/reference acceptance evidence and deferred clean-host boundary.
+- [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) - final repository/reference acceptance evidence and waived clean-host boundary.
 - [`docs/CLICKHOUSE.md`](docs/CLICKHOUSE.md) - durable table and sink contracts.
 - [`docs/GRAFANA.md`](docs/GRAFANA.md) - datasource, dashboard restore, drilldown, and NOC-view behavior.
 - [`docs/NORMALIZER_MIGRATION.md`](docs/NORMALIZER_MIGRATION.md) - controlled collector-side normalization migration.
@@ -129,6 +131,7 @@ Repository-only validation reports `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 4
 - [`SECURITY.md`](SECURITY.md) - public-repository publication rules.
 - [`components/normalizer/`](components/normalizer/) - active deterministic normalizer source and tests.
 - [`components/collector/`](components/collector/) - collector rebuild artifacts, verifiers, and component state.
+- [`components/collector/normalizer/`](components/collector/normalizer/) - non-activating collector-side normalizer shadow package and verifier.
 - [`components/gx10/`](components/gx10/) - complete GX10 rebuild artifacts, verifiers, tests, and clean-machine runbook.
 - [`scripts/validate-public-repository.py`](scripts/validate-public-repository.py) - current-tree, reachable-history, link, and ref-topology public gate.
 

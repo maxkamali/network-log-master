@@ -7400,3 +7400,79 @@ No live collector/GX10 configuration, file, process, service, or data was change
 ### Next action
 
 Implement item 19 entirely in the repository: the worker, private-inventory validator, ledger, package/service artifacts, synthetic tests, and independent verifier. Do not deploy it to the live collector during item 19.
+
+## 2026-08-23 17:24 PDT - Normalizer shadow package implemented
+
+### Status
+
+Execution-order item 19 is `DONE`.
+
+Execution-order item 20 is now the single `NEXT` item.
+
+### Implementation
+
+Implemented the collector-side normalizer shadow package without deploying it:
+
+- `network_log_normalizer.shadow` durable-file worker and command interface
+- strict versioned private platform-inventory parser with duplicate-key, canonical-IP, supported-pair, owner/group/mode, symlink, hardlink, and size refusal
+- removal of untrusted per-record platform hints before trusted inventory injection
+- exact backlog relative-path/date validation and 120-second settle boundary
+- regular/nonsymlink/single-link source checks plus pre/post size, modification-time, inode, device, and SHA-256 closure
+- external `/usr/bin/zstd` integrity/decode/encode boundary using the reference host's existing package
+- stable schema-version-1 JSON serialization with one input line mapped to one output line
+- atomic no-overwrite output publication with synchronized contents and directory entry
+- version-1 SQLite ledger with `processing`/`completed` recovery state, source/output/inventory/version hashes, counts, and strict constraints
+- exact completed-output reuse and mutation refusal
+- locked `network-log-normalizer` runtime identity with only the `vector` supplementary group required by the captured `0750 vector:vector` source root
+- systemd read-only source view, isolated writable output/state paths, no network, no capabilities, and no Vector-start coupling
+- guarded non-activating staging installer and independent staged/active runtime verifier
+- exact installed-artifact SHA-256 manifest and no-overwrite installation behavior
+- reference package pins for Python `3.13.5-1` and Zstandard `1.5.7+dfsg-1`
+
+### Corrections during validation
+
+The first package-test run found two test defects, not product defects:
+
+- a string assertion accidentally retained a literal patch marker
+- a corruption test attempted an invalid ledger update that SQLite correctly rejected through the new cardinality constraint
+
+The test was corrected to inspect the real package text and mutate an output artifact so the independent verifier detects the inconsistency without bypassing ledger protection.
+
+Additional review tightened three contracts before closure:
+
+- an exact eligible-path symlink now fails visibly rather than being silently skipped
+- the service no longer has `Wants=vector.service`, so shadow execution cannot pull Vector up
+- both staging and runtime verification enforce the captured Python/Zstandard package versions and executable presence
+
+A final bounded-backlog review found and corrected one product defect before publication: applying `max-files` before completed-file skipping could repeatedly revisit the oldest retained files and prevent the cursor from advancing. The cycle now starts strictly after the greatest completed source path recorded in the durable ledger, retries an interrupted next file, limits only unprocessed work, and reports pending/oldest-backlog metrics without running the expensive full-output verifier every minute. A regression test proves cursor advancement to the next settled file.
+
+### Validation
+
+Completed results:
+
+- full normalizer/parser/replay/shadow suite: `88 passed`
+- collector normalizer-shadow package suite: `9 passed`
+- `NORMALIZER_SHADOW_PACKAGE_VALIDATION=PASS`
+- collector shell syntax: `PASS`
+- `git diff --check`: `PASS`
+- current-tree/reachable-history/link/ref public gate: `PASS`
+
+The worker tests prove strict inventory behavior, settle/path selection, visible symlink refusal, source immutability, trusted enrichment, untrusted-hint removal, exact cardinality, idempotent skip, source-mutation refusal, malformed-input nonpublication, output-mutation detection, and exact ledger schema/mode.
+
+The package tests prove manifest/source hashes, exact installed inventory, no-overwrite installation, private input modes, service isolation, non-activation, package-version pins/drift refusal, and independent output/cardinality verification.
+
+### Reference-only dependency check
+
+A bounded read-only collector package-metadata check established:
+
+- Python runtime: `3.13.5` / Debian package `3.13.5-1`
+- Zstandard executable present / Debian package `1.5.7+dfsg-1`
+- source root metadata: `0750 vector:vector`
+
+No production log, inventory content, credential, or private connection value was read or persisted.
+
+### Safety boundary and next action
+
+No file, account, unit, configuration, service state, Vector path, ClickHouse path, or GX10 handoff was changed on either reference system.
+
+Item 20 requires a distinct authorization because it will stage new isolated files/account/units and generate new shadow output on the working collector. It also requires a trusted private source-IP platform inventory; runtime platform authority must not be inferred solely from messages.

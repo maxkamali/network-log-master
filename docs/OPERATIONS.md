@@ -66,9 +66,11 @@ The fetch path is designed so interruption can be retried without corrupting or 
 
 ## Collector-side normalizer shadow boundary
 
-The approved production-integration design adds a separate collector-local worker after the durable raw backlog boundary. It reads only settled `/var/spool/vector-ai` files, injects trusted hints from a private operator inventory, and writes atomic normalized output beneath `/var/spool/network-log-normalizer-shadow` with a SQLite file ledger.
+The implemented production-integration package adds a separate collector-local worker after the durable raw backlog boundary. It reads only settled `/var/spool/vector-ai` files, injects trusted hints from a private operator inventory, and writes atomic normalized output beneath `/var/spool/network-log-normalizer-shadow` with a SQLite file ledger.
 
 The worker is not inline with Vector. Failure cannot block the existing raw ClickHouse sink or raw GX10 backlog. It has no network or ClickHouse credentials and cannot modify source files. The complete design, acceptance metrics, promotion boundary, and rollback rules are in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
+
+Repository implementation, packaging, and synthetic validation are complete. The live collector does not yet have this worker staged or active.
 
 ## GX10 local ingest
 

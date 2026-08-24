@@ -81,7 +81,7 @@ Key validated gates include:
 
 Detailed state is in `components/collector/REBUILD_STATUS.md`.
 
-Collector public rebuild/package documentation is complete. Disposable Debian 13 amd64 clean-host execution is deferred.
+Collector public rebuild/package documentation is complete. Disposable Debian 13 amd64 clean-host execution was unavailable and waived by the operator; it remains empirically unverified.
 
 ### GX10
 
@@ -98,7 +98,7 @@ Published artifacts include:
 - complete clean-machine runbook
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS` with 42 tests
 
-Detailed state is in `components/gx10/REBUILD_STATUS.md`. Disposable Ubuntu 24.04 arm64 GX10-class clean-host execution is deferred.
+Detailed state is in `components/gx10/REBUILD_STATUS.md`. Disposable Ubuntu 24.04 arm64 GX10-class clean-host execution was unavailable and waived by the operator; it remains empirically unverified.
 
 Reference public GX10 package-closure commit:
 
@@ -129,7 +129,7 @@ Read `docs/CURRENT_STATE.md` for the single `NEXT` item.
 
 Collector and GX10 public rebuild-package milestones are closed. Cross-system reconciliation is documented in `docs/TWO_SERVER_REBUILD.md`.
 
-The final repository rebuild milestone is published. On 2026-08-23, the operator explicitly waived unavailable disposable clean-two-server execution and accepted the residual risk without labeling that execution passed. Collector-side production-normalizer integration design is complete. The single active item is repository implementation of the durable shadow worker and independent verifier; read `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` before advancing it. Live deployment is not authorized by the design checkpoint.
+The final repository rebuild milestone is published. On 2026-08-23, the operator explicitly waived unavailable disposable clean-two-server execution and accepted the residual risk without labeling that execution passed. Collector-side production-normalizer integration design and repository implementation are complete. The single active item is an explicitly authorized bounded collector deployment in shadow-only mode using a trusted private platform inventory; read `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` and `components/collector/normalizer/README.md` before advancing it. Production cutover remains unauthorized.
 
 The proven automatic application chain is:
 
@@ -180,5 +180,5 @@ Use RFC documentation address space and synthetic hostnames in examples.
 ## Scope notes
 
 - Firewall/nftables reconstruction is intentionally out of scope for the current rebuild milestone.
-- Collector and GX10 component rebuild packages are complete; disposable-host validation remains deferred.
+- Collector and GX10 component rebuild packages are complete; unavailable disposable-host validation was waived by the operator and remains empirically unverified.
 - Long-lived deterministic incident correlation and production LLM orchestration are not yet complete. They remain later implementation milestones after final repository acceptance.

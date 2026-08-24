@@ -281,6 +281,14 @@ Do not execute `install-runtime.sh` against the working reference collector. It 
 
 `vector/vector.yaml` captures the current Vector behavior with environment-specific values abstracted.
 
+## Normalizer shadow extension
+
+`normalizer/` contains the separately gated production-normalizer shadow package. It reads settled `/var/spool/vector-ai` files without modifying them and writes atomic schema-version-1 normalized files plus a durable ledger under separate paths.
+
+This extension is not invoked by the clean-machine collector rebuild installer because the rebuild package preserves the reconstructed current behavior. Its own staging installer is guarded, verifies exact artifacts/dependencies, installs a hardened oneshot/timer, and deliberately leaves the timer disabled and inactive.
+
+See `normalizer/README.md` and `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`. Do not deploy it to the working collector without a later explicit shadow-deployment authorization.
+
 Preserved behavior includes:
 
 - UDP and TCP syslog ingestion
@@ -391,7 +399,7 @@ The operator-facing clean-machine rebuild runbook is complete and validated.
 
 The public collector rebuild-package and documentation milestone is closed after final current-state and public-history sanitation.
 
-Clean-machine end-to-end collector rebuild validation is explicitly deferred because a disposable clean Debian 13 amd64 system is not currently available. This validation remains outstanding and is not claimed as complete.
+Clean-machine end-to-end collector rebuild validation was unavailable and explicitly waived by the operator for project sequencing because a disposable clean Debian 13 amd64 system is not available. This validation remains empirically unverified and is not claimed as passed.
 
 Collector and GX10 public reconstruction milestones are closed. Project-wide two-server documentation and acceptance reconciliation follows under `docs/CURRENT_STATE.md`.
 

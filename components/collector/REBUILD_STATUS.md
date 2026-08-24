@@ -1,10 +1,12 @@
 # Collector rebuild checkpoint
 
-Status: public collector rebuild package, sanitation, and operator documentation complete. Clean-machine end-to-end validation is deferred pending a disposable Debian 13 amd64 validation system.
+Status: public collector rebuild package, sanitation, and operator documentation complete. Clean-machine end-to-end validation was unavailable and waived by the operator; it remains empirically unverified.
 
 ## Execution authority
 
 This file records detailed collector-specific rebuild evidence and remaining technical work. `docs/CURRENT_STATE.md` at the repository root is the authority for project execution order and the single `NEXT` item.
+
+The later production-normalizer shadow extension is implemented separately under `components/collector/normalizer/`. It is not part of reconstructed current behavior and is not invoked by the clean-machine rebuild installer. Its design and later deployment gates are controlled by `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
 
 After each completed validated collector sub-section, append and push a `docs/PROJECT_JOURNAL.md` entry before materially proceeding into the next sub-section.
 
@@ -457,7 +459,7 @@ Clean-machine end-to-end collector rebuild execution remains a separate validati
 
 Use `docs/CURRENT_STATE.md` for the authoritative ordering/status. The remaining collector work currently consists of:
 
-- deferred: clean-machine end-to-end collector rebuild validation when a disposable Debian 13 amd64 system becomes available
+- waived by operator: clean-machine end-to-end collector rebuild validation remains empirically unverified; execute it if a disposable Debian 13 amd64 system later becomes available
 
 ## GX10 remaining milestone
 

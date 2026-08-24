@@ -1,0 +1,12 @@
+[Unit]
+Description=Schedule network log normalizer durable shadow cycles
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=1min
+AccuracySec=5s
+RandomizedDelaySec=5s
+Unit=network-log-normalizer-shadow.service
+
+[Install]
+WantedBy=timers.target

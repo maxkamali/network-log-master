@@ -119,6 +119,14 @@ require_version \
     grafana \
     "$GRAFANA_VERSION"
 
+require_version \
+    python3 \
+    "$PYTHON3_VERSION"
+
+require_version \
+    zstd \
+    "$ZSTD_VERSION"
+
 actual_certbot="$(
     /usr/local/bin/certbot --version \
         | awk '{print $2}'

@@ -62,9 +62,23 @@ Reference milestone commit:
 
 The production collector path has not yet been switched to the new normalizer. Production cutover remains a later controlled migration task and is not required to finish the current rebuild-documentation milestone.
 
+Collector-side shadow integration implementation is now complete in the repository:
+
+- durable settled-file worker with strict source containment and unchanged postcheck
+- trusted private platform-inventory validator that rejects untrusted record hints
+- atomic normalized Zstandard output with exact input/output cardinality
+- SQLite processing/completion ledger with source/output/inventory/version evidence
+- mutation refusal, interrupted-publication recovery, and independent full-output verification
+- locked dedicated runtime identity and hardened no-network systemd service/timer
+- non-activating, no-overwrite staging installer and exact SHA-256 package manifest
+- pinned reference dependencies: Python `3.13.5-1` and Zstandard `1.5.7+dfsg-1`
+- 88 full normalizer/worker tests passing and 9 collector-package tests passing
+
+The shadow package is not deployed. The live Vector, ClickHouse, raw backlog, GX10 handoff, and service state remain unchanged.
+
 ## Collector rebuild milestone
 
-Status: `DONE` for the public collector rebuild package, operator documentation, and public sanitation; clean-machine end-to-end validation is `DEFERRED` pending a disposable Debian 13 amd64 validation system.
+Status: `DONE` for the public collector rebuild package, operator documentation, and public sanitation; clean-machine end-to-end validation is `WAIVED BY OPERATOR` and remains empirically unverified because no disposable Debian 13 amd64 validation system is available.
 
 A durable public collector checkpoint was published at:
 
@@ -208,7 +222,7 @@ Completed validation includes:
 
 ## GX10 state
 
-Status: `DONE` for live-system rediscovery, public rebuild implementation, guarded activation, operator documentation, and repository-only validation. Clean-machine end-to-end execution is `DEFERRED` pending a disposable Ubuntu 24.04 arm64 GX10-class validation system.
+Status: `DONE` for live-system rediscovery, public rebuild implementation, guarded activation, operator documentation, and repository-only validation. Clean-machine end-to-end execution is `WAIVED BY OPERATOR` and remains empirically unverified because no disposable Ubuntu 24.04 arm64 GX10-class validation system is available.
 
 Durably journaled rediscovery through item 12N and the final closure audit has established:
 
@@ -279,7 +293,7 @@ The project is running from the operator-controlled VM. Public GitHub `main` and
 
 Both reference-system SSH aliases now work directly through the operator VM's existing key configuration. Private connection values are not published.
 
-The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, and collector-side production-normalizer integration design are complete. The next technical action is repository implementation of the durable shadow worker and its verifier; no live deployment is authorized by this state transition.
+The environment transition, both component rebuild packages, guarded activation, component/cross-system runbooks, architecture reconciliation, final repository sanitation, repository/read-only-reference acceptance validation, final public milestone publication, clean-host risk disposition, collector-side production-normalizer integration design, and repository shadow-package implementation are complete. The next technical action is a separately authorized bounded live shadow deployment using a trusted private platform inventory; production cutover remains unauthorized.
 
 Direct credentials must not be interpreted as blanket authorization for destructive changes. Human intervention remains required for destructive/high-risk actions, architecture/scope decisions, or ambiguity requiring operator intent.
 
@@ -299,11 +313,12 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 12. `DONE` — reconstructed the captured GX10 implementation as a public clean-machine rebuild package with guarded activation, offline model import, operator runbook, and final package audit.
 13. `WAIVED BY OPERATOR` — clean-machine GX10 end-to-end validation remains empirically unverified because no disposable Ubuntu 24.04 arm64 GX10-class validation system is available; repository-only package/documentation validation passes.
 14. `DONE` — reconciled full two-server architecture, current/target data contracts, operations, key-role boundaries, rebuild order, and acceptance documentation.
-15. `DONE` — final current-tree/reachable-history sanitation, component tests, collector synthetic validation, Git/ref/link checks, private-identifier audit, and read-only two-server revalidation passed; disposable-host execution remains deferred.
+15. `DONE` — final current-tree/reachable-history sanitation, component tests, collector synthetic validation, Git/ref/link checks, private-identifier audit, and read-only two-server revalidation passed; the later unavailable disposable-host execution was waived with residual risk.
 16. `DONE` — published the final public rebuild milestone with complete repository/reference-read-only evidence and explicit clean-host deferrals.
 17. `WAIVED BY OPERATOR` — disposable collector, GX10, and two-server execution was unavailable; the operator accepted the residual risk and authorized advancement without representing this gate as passed.
 18. `DONE` — designed collector-side production-normalizer integration with durable input/output boundaries, private platform-inventory injection, shadow observability, failure isolation, promotion gates, and rollback behavior.
-19. `NEXT` — implement and validate the repository-side durable normalizer shadow worker, private-inventory validator, idempotency ledger, packaging, and independent verifier without deploying to the live collector.
+19. `DONE` — implemented and validated the repository-side durable normalizer shadow worker, private-inventory validator, idempotency ledger, packaging, and independent verifier without deploying to the live collector.
+20. `NEXT` — obtain explicit live-shadow authorization and a trusted private source-IP platform inventory, then stage and run the normalizer on the collector in bounded shadow-only mode without changing Vector, ClickHouse, or the GX10 handoff.
 
 Do not skip ahead unless this execution order is explicitly updated first. Only one item may be marked `NEXT`.
 

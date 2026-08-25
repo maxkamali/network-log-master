@@ -12257,3 +12257,11 @@ Documentation now includes the lifecycle branch in the main application diagram,
 ### Next action
 
 None. Publish and independently verify this closure/documentation checkpoint, remove only temporary validation stages, and continue normal operator evaluation of the enhanced NOC dashboard. The original dashboard and protected predecessor copies remain available.
+
+## 2026-08-25 12:38 PDT - Item 34 closure publication independently verified
+
+Closure/documentation commit `45c336942071dccc4af37fe7b572ab14f86caf2c` was published to GitHub and an independent `ls-remote` comparison matched local and remote `main` exactly.
+
+The two named host-local validation directories and the local no-disk credential-runner helper were removed. No temporary credential file existed. Protected root-only predecessor/rollback copies were deliberately retained.
+
+Post-cleanup health remained green: both GX10 outbox/sender timers are enabled and waiting with zero ready files; the collector gate timer is waiting; Vector, ClickHouse, and Grafana are active/running with zero restarts. There is no remaining `NEXT` item.

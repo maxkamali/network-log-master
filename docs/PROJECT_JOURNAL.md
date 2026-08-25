@@ -12452,3 +12452,9 @@ No ClickHouse data/schema, Vector configuration, GX10 artifact, transport file, 
 ### Next action
 
 None. Publish and independently verify this closure/documentation checkpoint, remove only the exact temporary validation stages and local helpers, retain the root-only rollback boundary, and continue normal NOC evaluation. Exact custom per-user navigation would require a separately authorized Grafana edition/customization change.
+
+## 2026-08-25 15:19 PDT - Item 37 closure publication and cleanup independently verified
+
+Closure/documentation commit `4413a63bca780da35c2d4fd6581a1de7ec4c3e0c` was published to GitHub, and an independent `ls-remote` comparison matched local and remote `main` exactly.
+
+The exact collector-side NOC staging directories/scripts and all local no-disk credential/validation helpers are absent. The root-only rollback directory remains retained with only its mode-`0600` Grafana configuration and online database backup. Post-cleanup Grafana HTTPS/database health passed; Grafana, ClickHouse, Vector, and the collector result-gate timer are active; the relevant service results remain successful with zero restarts. Item 37 is `DONE`, the end-to-end target is complete through item 37, and there is no remaining `NEXT` item.

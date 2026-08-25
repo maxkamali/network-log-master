@@ -12363,3 +12363,49 @@ diff_check=PASS
 ### Next action
 
 Run final public gates, publish and independently verify the exact candidate, then use protected collector-first deployment: add/verify the recurrence column and version-2 gate before any new record can arrive; validate all thirteen Grafana queries against the additive column; protect and atomically upgrade the exact GX10 engine/outbox/sender chain; allow bounded version-2 lifecycle export/delivery/acceptance; verify legacy version-1 inventory, new recurrence values, protocol-monitoring state, and all schedules; then dry-run and replace only the enhanced dashboard before final documentation closure.
+
+## 2026-08-25 14:29 PDT - Item 36 OSPF/BGP 24-hour monitoring production closure passed
+
+### Status
+
+Item 36 is `DONE`. There is no remaining numbered `NEXT` item.
+
+Candidate checkpoint `afe7069b5d55a9ef104455de49005f729a80fe37` was published and independently matched GitHub `main` before production mutation. Deployment followed the collector-first order. The idempotent migration first added `recurrence_count UInt32 DEFAULT 0` to `observability.incident_updates`; all preexisting rows remained valid. The strict dual-version collector gate was then installed under a root-only predecessor copy and passed an immediate service run before any version-2 record could arrive.
+
+GX10's four managed schedules were paused only for exact backup and atomic replacement. Eight installed artifacts matched the published candidate hashes after activation:
+
+```text
+incident-engine.py=b45aa4f723f0f8caa81201ac47a302d45f3da4827a19090ab5d241a0be31009d
+run-correlation.py=faf75f3f0f8dd1868a173d0e7a5f6acecd046069c181f51a5641c3c6426d055e
+build-result-outbox.py=c9e7ecb110f691a0c29fafc9b35ea42573fe2bec352d4aad8ad47a924c4c9a5a
+run-result-outbox.py=a2e831847e6273e64d00b1da4368185b1c7d99d131d484e928a3c190a470ad63
+build-incident-outbox.py=96a13c7c8db6f80c034372d2d1f21998912fd6e6c83ff17e2028403667e82180
+run-incident-outbox.py=83aa7f80324104d887561cf366d88fdf51f3a267d6b62498a7fa2108d2c8fda8
+send-result-outbox.py=7923c585c5d3bcda47f83e3e0bfabf508687600ffb738076454a605993d15453
+run-result-sender.py=9c2f38faf8abcd83baa24d32e90591614b615887c03ee27dc6acb243b30fb460
+```
+
+The first installed correlation cycle passed, SQLite integrity remained `ok`, and existing resolved protocol history was not reopened or rewritten: eight BGP, 144 OSPF, and two OSPFv3 incidents remained `RESOLVED`. The initial producer-version-2 inventory used nine bounded immutable files; normal live advancement and the final closure snapshot brought the accepted version-2 file count to sixteen. Sender starts were paced within its configured five-per-ten-second guard. At the closure snapshot, GX10's outbox was empty and the delivered inventory contained 423 files.
+
+A brief bounded correlation/reasoning pause created an exact cross-host comparison point. The final GX10 SQLite and ClickHouse latest-state aggregates matched exactly:
+
+```text
+authoritative_incidents=853
+clickhouse_latest_incidents=853
+clickhouse_latest_producer_v2=853
+recurrence_sum=3037
+recurrence_bearing_incidents=526
+gx10_sqlite_quick_check=ok
+```
+
+The closure snapshot contained one unconfirmed OSPF `CANDIDATE`, eight resolved BGP incidents, 144 resolved OSPF incidents, and two resolved OSPFv3 incidents. No confirmed protocol incident entered recovery during activation, so no live row could honestly demonstrate a full 24-hour `MONITORING` interval. Deterministic engine tests prove the deadline anchor, supporting-health no-extension rule, same-incident adverse relapse, incremented recurrence, fresh post-relapse monitoring window, and final resolution. No synthetic production incident was created.
+
+All seven original and six enhanced panel queries passed through Grafana's configured read-only datasource before replacement. Grafana `dryRun=All` selected only `ai-incident-analysis-enhanced.json`; the other five resources were exact. The protected call replaced only the enhanced resource, immediate reread proved all six complete specifications exact, and all thirteen queries passed again after the full version-2 reconciliation. The original dashboard remained byte-exact at SHA-256 `794719f7cf112babb37c716df16959e631b0f63b81bbe9e503d243ffb36b83e5`.
+
+The enhanced dashboard now maps confirmed BGP/OSPF/OSPFv3 `RECOVERING` to operator-facing `MONITORING` and displays Occurrences as `recurrence_count + 1`, representing distinct issue episodes rather than raw supporting evidence. The existing Active Events/Interface Flaps exclusive split, Event Details, search controls, severity filtering, resolved-time range, and original fallback dashboard remain intact.
+
+All four GX10 timers were restored enabled/active after reconciliation; the outbox was empty and correlation, reasoning, result-outbox, and sender services reported success with zero restarts. ClickHouse, Vector, Grafana, and the collector gate timer remained active with zero relevant restarts. Exact root-only predecessor copies remain on both hosts. Administrator/database credentials were supplied only through no-echo processes and process-memory file descriptors; no credential was printed or retained in repository or stage files.
+
+### Next action
+
+None. Remove only the two named temporary staging directories and the local memory-only credential helper, run the final public repository gates, publish and independently verify this closure/documentation checkpoint, and retain protected root-only rollback copies.

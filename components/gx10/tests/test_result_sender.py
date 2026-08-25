@@ -88,6 +88,49 @@ class ResultSenderTests(unittest.TestCase):
         path.chmod(0o640)
         return path, data
 
+    def incident_record(self, incident_id, timestamp):
+        return {
+            'body': 'Deterministic incident lifecycle state.',
+            'device': 'router.example.invalid',
+            'engine_version': 1,
+            'entity_name': 'Ethernet1',
+            'entity_type': 'interface',
+            'event_family': 'ethport',
+            'first_seen': '2026-08-24T08:00:00Z',
+            'incident_id': incident_id,
+            'interface_flap': True,
+            'last_observation_state': 'down',
+            'last_seen': timestamp,
+            'lifecycle_status': 'OPEN',
+            'occurrence_count': 3,
+            'opened_at': '2026-08-24T08:00:00Z',
+            'producer_schema': 'network-log-incident-state',
+            'producer_version': 1,
+            'protocol': 'ethernet',
+            'recovering_at': None,
+            'repeat_count_total': 3,
+            'resolved_at': None,
+            'severity': 'warning',
+            'snapshot_id': 'state-v1-' + 'a' * 32,
+            'snapshot_version': 1787559000000,
+            'state_change_count': 2,
+            'timestamp': timestamp,
+            'title': 'ethport: Ethernet1',
+            'type': 'incident_lifecycle',
+        }
+
+    def add_incident_batch(self):
+        records = [
+            self.incident_record('inc-v1-a', '2026-08-24T08:09:00Z'),
+            self.incident_record('inc-v1-b', '2026-08-24T08:10:00Z'),
+        ]
+        data = ''.join(canonical_json(row) + '\n' for row in records).encode()
+        name = SENDER.incident_output_name(data)
+        path = self.ready / name
+        path.write_bytes(data)
+        path.chmod(0o640)
+        return path, data
+
     def transport(self, command, batch, timeout):
         self.transport_calls.append((command, batch, timeout))
         return types.SimpleNamespace(returncode=0, stdout='', stderr='')
@@ -150,6 +193,22 @@ class ResultSenderTests(unittest.TestCase):
 
         self.assertEqual(result['sent'], 1)
         self.assertEqual((self.delivered / name).read_bytes(), data)
+
+    def test_canonical_incident_batch_is_sent_unchanged(self):
+        path, data = self.add_incident_batch()
+
+        state = self.send()
+
+        self.assertEqual(state['sent'], 1)
+        self.assertEqual((self.delivered / path.name).read_bytes(), data)
+
+    def test_tampered_incident_batch_is_refused(self):
+        path, _ = self.add_incident_batch()
+        path.write_bytes(path.read_bytes().replace(b'warning', b'critical'))
+
+        with self.assertRaisesRegex(SENDER.SenderError, 'filename differs'):
+            self.send()
+        self.assertEqual(self.transport_calls, [])
 
     def test_each_cycle_sends_exactly_one_file(self):
         paths = [self.add_ready(f'run-v1-synthetic-{value}')[0] for value in range(3)]

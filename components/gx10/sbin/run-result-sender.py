@@ -13,7 +13,7 @@ import sys
 
 CONFIG_PATH = Path('/etc/network-log-gx10/result-sender.json')
 SENDER_PATH = Path('/usr/local/libexec/network-log-gx10/send-result-outbox.py')
-SENDER_SHA256 = 'e34bde1c3c02fb825137237e67d40c63cbca47e93791a48531ff17c9dce0a36f'
+SENDER_SHA256 = '7895e1fa43f4cb796ac50d8b7f2c2beea8489a392d37a85d20280eb8cfbcbf4d'
 HOST_RE = re.compile(r'^[A-Za-z0-9.-]+$')
 USER_RE = re.compile(r'^[A-Za-z0-9._-]+$')
 EXPECTED_KEYS = {

@@ -409,6 +409,7 @@ expected = {
     "syslog": "MergeTree",
     "ai_updates": "MergeTree",
     "ai_result_devices": "MergeTree",
+    "incident_updates": "ReplacingMergeTree",
     "grafana_logs": "View",
 }
 
@@ -533,6 +534,36 @@ expected = {
         "run_id": "String",
         "device": "String",
         "mapped_at": "DateTime64(3, 'UTC')",
+    },
+    "incident_updates": {
+        "timestamp": "DateTime64(3, 'UTC')",
+        "snapshot_id": "String",
+        "snapshot_version": "UInt64",
+        "incident_id": "String",
+        "device": "String",
+        "entity_type": "LowCardinality(String)",
+        "entity_name": "String",
+        "event_family": "LowCardinality(String)",
+        "protocol": "LowCardinality(String)",
+        "lifecycle_status": "LowCardinality(String)",
+        "severity": "LowCardinality(String)",
+        "first_seen": "DateTime64(3, 'UTC')",
+        "last_seen": "DateTime64(3, 'UTC')",
+        "opened_at": "Nullable(DateTime64(3, 'UTC'))",
+        "recovering_at": "Nullable(DateTime64(3, 'UTC'))",
+        "resolved_at": "Nullable(DateTime64(3, 'UTC'))",
+        "occurrence_count": "UInt32",
+        "repeat_count_total": "UInt64",
+        "state_change_count": "UInt32",
+        "last_observation_state": "LowCardinality(String)",
+        "interface_flap": "Bool",
+        "engine_version": "UInt16",
+        "title": "String",
+        "body": "String",
+        "type": "LowCardinality(String)",
+        "producer_schema": "LowCardinality(String)",
+        "producer_version": "UInt16",
+        "raw_json": "String",
     },
     "grafana_logs": {
         "timestamp": "DateTime64(9, 'UTC')",
@@ -737,6 +768,7 @@ vector = {
 expected_grafana = {
     "GRANT SELECT ON observability.ai_result_devices TO grafana_reader",
     "GRANT SELECT ON observability.ai_updates TO grafana_reader",
+    "GRANT SELECT ON observability.incident_updates TO grafana_reader",
     "GRANT SELECT ON observability.grafana_logs TO grafana_reader",
     "GRANT SELECT ON observability.syslog TO grafana_reader",
     "GRANT SELECT ON system.columns TO grafana_reader",
@@ -746,6 +778,7 @@ expected_grafana = {
 
 expected_vector = {
     "GRANT INSERT ON observability.ai_updates TO vector_ingest",
+    "GRANT INSERT ON observability.incident_updates TO vector_ingest",
     "GRANT INSERT ON observability.syslog TO vector_ingest",
 }
 
@@ -911,6 +944,7 @@ for block in [
 required_literals = [
     "ai_results_ready:",
     "clickhouse_ai_updates:",
+    "clickhouse_incident_updates:",
     "clickhouse_syslog:",
     "/var/spool/vector-ai/%Y/%m/%d/%H/syslog-%Y%m%d-%H%M.jsonl.zst",
     "SECRET[clickhouse_secrets.clickhouse_password]",
@@ -930,9 +964,9 @@ healthchecks = re.findall(
     live,
 )
 
-if len(healthchecks) != 2:
+if len(healthchecks) != 3:
     raise SystemExit(
-        "FAIL: expected two disabled ClickHouse healthchecks"
+        "FAIL: expected three disabled ClickHouse healthchecks"
     )
 
 print("VECTOR_CRITICAL_CONFIG_PARITY=PASS")

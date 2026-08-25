@@ -13,14 +13,14 @@ import sys
 
 CONFIG_PATH = Path('/etc/network-log-gx10/result-outbox.json')
 PRODUCER_PATH = Path(
-    '/usr/local/libexec/network-log-gx10/build-result-outbox.py'
+    '/usr/local/libexec/network-log-gx10/build-incident-outbox.py'
 )
 PRODUCER_SHA256 = (
-    '7f4b55bbe7a8ad9c833c4e3a227851854f97ead9e3769bcb7f6bba270be2c30e'
+    '12c354b3723434b94f87118d65919fff8f02d38f43e4add444531752f6f6a1f9'
 )
 
 
-class ManagedOutboxError(ValueError):
+class ManagedIncidentOutboxError(ValueError):
     pass
 
 
@@ -35,8 +35,8 @@ def sha256_file(path):
 def validate_regular(path, mode):
     path = Path(path)
     if path.is_symlink() or not path.is_file():
-        raise ManagedOutboxError(
-            'managed result outbox artifact is not a regular file'
+        raise ManagedIncidentOutboxError(
+            'managed incident outbox artifact is not a regular file'
         )
     details = path.stat()
     if (
@@ -44,8 +44,8 @@ def validate_regular(path, mode):
         or details.st_uid != 0
         or stat.S_IMODE(details.st_mode) != mode
     ):
-        raise ManagedOutboxError(
-            'managed result outbox artifact metadata differs'
+        raise ManagedIncidentOutboxError(
+            'managed incident outbox artifact metadata differs'
         )
 
 
@@ -53,41 +53,41 @@ def load_config(path=CONFIG_PATH):
     validate_regular(path, 0o640)
     path = Path(path)
     if path.stat().st_size > 4096:
-        raise ManagedOutboxError(
-            'managed result outbox configuration is too large'
+        raise ManagedIncidentOutboxError(
+            'managed incident outbox configuration is too large'
         )
     try:
         data = json.loads(path.read_text(encoding='utf-8'))
     except (OSError, json.JSONDecodeError) as exc:
-        raise ManagedOutboxError(
-            'managed result outbox configuration is invalid'
+        raise ManagedIncidentOutboxError(
+            'managed incident outbox configuration is invalid'
         ) from exc
     if not isinstance(data, dict) or set(data) != {
         'database_path',
         'ready_path',
         'delivered_path',
     }:
-        raise ManagedOutboxError(
-            'managed result outbox configuration keys differ'
+        raise ManagedIncidentOutboxError(
+            'managed incident outbox configuration keys differ'
         )
     paths = {}
     for key, value in data.items():
         if not isinstance(value, str) or not value.startswith('/'):
-            raise ManagedOutboxError(
-                'managed result outbox configuration path differs'
+            raise ManagedIncidentOutboxError(
+                'managed incident outbox configuration path differs'
             )
         candidate = Path(value)
         if '..' in candidate.parts:
-            raise ManagedOutboxError(
-                'managed result outbox configuration path differs'
+            raise ManagedIncidentOutboxError(
+                'managed incident outbox configuration path differs'
             )
         paths[key] = candidate
     if (
         paths['ready_path'] == paths['delivered_path']
         or paths['ready_path'].parent != paths['delivered_path'].parent
     ):
-        raise ManagedOutboxError(
-            'managed result outbox configuration layout differs'
+        raise ManagedIncidentOutboxError(
+            'managed incident outbox configuration layout differs'
         )
     return paths
 
@@ -95,15 +95,15 @@ def load_config(path=CONFIG_PATH):
 def load_producer(path=PRODUCER_PATH):
     validate_regular(path, 0o755)
     if sha256_file(path) != PRODUCER_SHA256:
-        raise ManagedOutboxError(
-            'managed result outbox producer hash differs'
+        raise ManagedIncidentOutboxError(
+            'managed incident outbox producer hash differs'
         )
     specification = importlib.util.spec_from_file_location(
-        'installed_result_outbox_producer', path
+        'installed_incident_outbox_producer', path
     )
     if specification is None or specification.loader is None:
-        raise ManagedOutboxError(
-            'managed result outbox producer cannot be loaded'
+        raise ManagedIncidentOutboxError(
+            'managed incident outbox producer cannot be loaded'
         )
     module = importlib.util.module_from_spec(specification)
     specification.loader.exec_module(module)
@@ -114,31 +114,37 @@ def run(config_path=CONFIG_PATH, producer_path=PRODUCER_PATH):
     try:
         config = load_config(config_path)
         producer = load_producer(producer_path)
-        result = producer.build(
+        state = producer.build(
             config['database_path'],
             config['ready_path'],
             config['delivered_path'],
         )
         print(
-            'MANAGED_RESULT_OUTBOX schema=1 '
-            f'total={result["total"]} created={result["created"]} '
-            f'reused={result["reused"]} ready={result["ready"]} '
-            f'delivered={result["delivered"]} '
-            f'recovered={result["recovered"]} '
-            f'written_bytes={result["written_bytes"]}'
+            'MANAGED_INCIDENT_OUTBOX schema=1 '
+            f'incidents={state["incidents"]} changed={state["changed"]} '
+            f'batches={state["batches"]} created={state["created"]} '
+            f'reused={state["reused"]} ready={state["ready"]} '
+            f'delivered={state["delivered"]} '
+            f'recovered={state["recovered"]} '
+            f'written_bytes={state["written_bytes"]}'
         )
-        print('GX10_MANAGED_RESULT_OUTBOX=PASS')
+        print('GX10_MANAGED_INCIDENT_OUTBOX=PASS')
         return 0
-    except (OSError, sqlite3.Error, ManagedOutboxError, ValueError) as exc:
+    except (
+        OSError,
+        sqlite3.Error,
+        ManagedIncidentOutboxError,
+        ValueError,
+    ) as exc:
         print(f'ERROR: {exc}', file=sys.stderr)
-        print('GX10_MANAGED_RESULT_OUTBOX=FAIL', file=sys.stderr)
+        print('GX10_MANAGED_INCIDENT_OUTBOX=FAIL', file=sys.stderr)
         return 1
 
 
 if __name__ == '__main__':
     if os.geteuid() == 0:
         print(
-            'ERROR: managed result outbox must run as its service user',
+            'ERROR: managed incident outbox must run as its service user',
             file=sys.stderr,
         )
         sys.exit(1)

@@ -269,6 +269,18 @@ transforms:
       . = parse_json!(raw)
       .raw_json = raw
 
+  select_ai_assessments:
+    type: filter
+    inputs:
+      - prepare_ai_updates
+    condition: '.type != "incident_lifecycle"'
+
+  select_incident_updates:
+    type: filter
+    inputs:
+      - prepare_ai_updates
+    condition: '.type == "incident_lifecycle"'
+
 sinks:
 
   ai_spool:
@@ -320,13 +332,47 @@ sinks:
   clickhouse_ai_updates:
     type: clickhouse
     inputs:
-      - prepare_ai_updates
+      - select_ai_assessments
 
     endpoint: "${CLICKHOUSE_ENDPOINT}"
     healthcheck:
       enabled: false
     database: observability
     table: ai_updates
+
+    format: json_each_row
+    skip_unknown_fields: true
+    date_time_best_effort: true
+
+    auth:
+      strategy: basic
+      user: "${CLICKHOUSE_USER}"
+      password: "SECRET[clickhouse_secrets.clickhouse_password]"
+
+    encoding:
+      timestamp_format: rfc3339
+
+    acknowledgements:
+      enabled: true
+
+    buffer:
+      type: disk
+      max_size: 536870912
+
+    batch:
+      max_events: 100
+      timeout_secs: 1
+
+  clickhouse_incident_updates:
+    type: clickhouse
+    inputs:
+      - select_incident_updates
+
+    endpoint: "${CLICKHOUSE_ENDPOINT}"
+    healthcheck:
+      enabled: false
+    database: observability
+    table: incident_updates
 
     format: json_each_row
     skip_unknown_fields: true

@@ -19,11 +19,24 @@ def query_payload(
     panel_query: dict[str, Any],
     start_ms: int,
     end_ms: int,
+    variables: dict[str, str] | None = None,
 ) -> tuple[str, dict[str, Any]]:
     query = panel_query["spec"]["query"]
     datasource_uid = query["datasource"]["name"]
     ref_id = panel_query["spec"]["refId"]
     plugin_spec = dict(query["spec"])
+    raw_sql = plugin_spec.get("rawSql")
+    if variables and isinstance(raw_sql, str):
+        for name, value in variables.items():
+            literal = "'" + value.replace("'", "''") + "'"
+            raw_sql = raw_sql.replace(
+                "${" + name + ":sqlstring}", literal
+            )
+        if "${" in raw_sql:
+            raise DashboardApiError(
+                "dashboard query has an unresolved template variable"
+            )
+        plugin_spec["rawSql"] = raw_sql
     plugin_spec.update(
         {
             "datasource": {
@@ -104,6 +117,14 @@ def main() -> int:
     ]
     for dashboard in dashboards:
         document = json.loads(dashboard.read_text(encoding="utf-8"))
+        variables = {}
+        for variable in (document.get("spec") or {}).get("variables") or []:
+            spec = variable.get("spec") or {}
+            name = spec.get("name")
+            current = spec.get("current") or {}
+            value = current.get("value")
+            if isinstance(name, str) and isinstance(value, str):
+                variables[name] = value
         elements = (document.get("spec") or {}).get("elements")
         if not isinstance(elements, dict) or not elements:
             raise DashboardApiError(f"{dashboard.name}: dashboard has no panels")
@@ -113,7 +134,9 @@ def main() -> int:
                 raise DashboardApiError(
                     f"{dashboard.name}/{panel_name}: expected one query"
                 )
-            ref_id, payload = query_payload(queries[0], start_ms, end_ms)
+            ref_id, payload = query_payload(
+                queries[0], start_ms, end_ms, variables
+            )
             status, response = api.request("POST", "/api/ds/query", payload)
             if status != 200:
                 raise DashboardApiError(

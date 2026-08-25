@@ -1,171 +1,136 @@
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import unittest
 
 
 ROOT = Path(__file__).resolve().parents[3]
-DASHBOARD_DIR = ROOT / "components/collector/grafana/dashboards"
-ORIGINAL_PATH = DASHBOARD_DIR / "ai-incident-analysis.json"
-ENHANCED_PATH = DASHBOARD_DIR / "ai-incident-analysis-enhanced.json"
-DATASOURCE_UID = "efvaztlrk8ow0a"
-ORIGINAL_SHA256 = "794719f7cf112babb37c716df16959e631b0f63b81bbe9e503d243ffb36b83e5"
+DASHBOARD_DIR = ROOT / 'components/collector/grafana/dashboards'
+ORIGINAL_PATH = DASHBOARD_DIR / 'ai-incident-analysis.json'
+ENHANCED_PATH = DASHBOARD_DIR / 'ai-incident-analysis-enhanced.json'
+BUILDER_PATH = ROOT / 'components/collector/grafana/scripts/build-noc-lifecycle-dashboard.py'
+DATASOURCE_UID = 'efvaztlrk8ow0a'
+ORIGINAL_SHA256 = '794719f7cf112babb37c716df16959e631b0f63b81bbe9e503d243ffb36b83e5'
 
 
-def query(panel):
-    return panel["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]
+def load_builder():
+    specification = importlib.util.spec_from_file_location(
+        'noc_lifecycle_dashboard_builder_test', BUILDER_PATH
+    )
+    module = importlib.util.module_from_spec(specification)
+    specification.loader.exec_module(module)
+    return module
+
+
+def panel_query(panel):
+    return panel['spec']['data']['spec']['queries'][0]['spec']['query']
 
 
 def override(panel, field):
-    overrides = panel["spec"]["vizConfig"]["spec"]["fieldConfig"]["overrides"]
-    return next(item for item in overrides if item["matcher"]["options"] == field)
-
-
-def property_value(panel, field, property_id):
-    properties = override(panel, field)["properties"]
-    return next(item["value"] for item in properties if item["id"] == property_id)
+    overrides = panel['spec']['vizConfig']['spec']['fieldConfig']['overrides']
+    return next(item for item in overrides if item['matcher']['options'] == field)
 
 
 class EnhancedAiIncidentDashboardTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.original = json.loads(ORIGINAL_PATH.read_text(encoding="utf-8"))
-        cls.document = json.loads(ENHANCED_PATH.read_text(encoding="utf-8"))
-        cls.spec = cls.document["spec"]
-        cls.elements = cls.spec["elements"]
+        cls.original = json.loads(ORIGINAL_PATH.read_text(encoding='utf-8'))
+        cls.document = json.loads(ENHANCED_PATH.read_text(encoding='utf-8'))
+        cls.spec = cls.document['spec']
+        cls.elements = cls.spec['elements']
 
     def test_original_dashboard_remains_exact(self):
         self.assertEqual(
             hashlib.sha256(ORIGINAL_PATH.read_bytes()).hexdigest(),
             ORIGINAL_SHA256,
         )
-        self.assertEqual(self.original["metadata"]["name"], "ai-incident-analysis")
-        self.assertEqual(self.original["spec"]["title"], "AI Incident Analysis")
+        self.assertEqual(self.original['spec']['title'], 'AI Incident Analysis')
 
-    def test_enhanced_resource_is_a_distinct_editable_copy(self):
-        self.assertEqual(self.document["kind"], "Dashboard")
-        self.assertEqual(self.document["apiVersion"], "dashboard.grafana.app/v2")
-        self.assertEqual(self.document["metadata"], {
-            "name": "ai-incident-analysis-enhanced",
-            "namespace": "default",
-        })
-        self.assertEqual(self.spec["title"], "AI Incident Analysis - Enhanced")
-        self.assertIn("original dashboard remains available", self.spec["description"])
-        self.assertTrue(self.spec["editable"])
-        self.assertEqual(self.spec["timeSettings"], self.original["spec"]["timeSettings"])
+    def test_enhanced_resource_is_distinct_and_reproducible(self):
+        self.assertEqual(
+            self.document['metadata'],
+            {'name': 'ai-incident-analysis-enhanced', 'namespace': 'default'},
+        )
+        self.assertEqual(self.spec['title'], 'AI Incident Analysis - Enhanced')
+        self.assertTrue(self.spec['editable'])
+        self.assertIn('original AI dashboard remains', self.spec['description'])
+        self.assertEqual(load_builder().build_document(), self.document)
 
-    def test_summary_panels_preserve_original_queries(self):
-        for panel_name in ("panel-1", "panel-2", "panel-3", "panel-4", "panel-5", "panel-6"):
-            self.assertEqual(
-                query(self.elements[panel_name])["spec"]["rawSql"],
-                query(self.original["spec"]["elements"][panel_name])["spec"]["rawSql"],
-            )
+    def test_search_and_severity_controls_are_server_side_variables(self):
+        variables = {item['spec']['name']: item for item in self.spec['variables']}
+        self.assertEqual(
+            set(variables),
+            {'active_search', 'flap_search', 'resolved_search', 'severity_filter'},
+        )
+        for name in ('active_search', 'flap_search', 'resolved_search'):
+            self.assertEqual(variables[name]['kind'], 'TextVariable')
+            self.assertEqual(variables[name]['spec']['current']['value'], '')
+        self.assertEqual(variables['severity_filter']['kind'], 'CustomVariable')
+        self.assertEqual(variables['severity_filter']['spec']['current']['value'], 'all')
 
-    def test_layout_references_all_eight_panels(self):
-        self.assertEqual(len(self.elements), 8)
+    def test_layout_has_three_counts_and_three_operational_windows(self):
+        self.assertEqual(len(self.elements), 6)
+        self.assertEqual(
+            [self.elements[f'panel-{number}']['spec']['title'] for number in range(1, 7)],
+            ['Active Events', 'Interface Flaps', 'Resolved', 'Active Events', 'Interface Flaps', 'Resolved Events'],
+        )
         references = {
-            item["spec"]["element"]["name"]
-            for item in self.spec["layout"]["spec"]["items"]
+            item['spec']['element']['name']
+            for item in self.spec['layout']['spec']['items']
         }
         self.assertEqual(references, set(self.elements))
-        detail = next(
-            item for item in self.spec["layout"]["spec"]["items"]
-            if item["spec"]["element"]["name"] == "panel-8"
-        )
-        self.assertEqual(detail["spec"]["width"], 24)
 
-    def test_every_query_is_bounded_read_only_ai_data(self):
+    def test_every_query_is_read_only_deterministic_lifecycle_data(self):
         for panel in self.elements.values():
-            panel_query = query(panel)
-            self.assertEqual(panel_query["datasource"]["name"], DATASOURCE_UID)
-            sql = panel_query["spec"]["rawSql"]
-            self.assertIn("FROM observability.ai_updates", sql)
-            self.assertIn("$__fromTime", sql)
-            self.assertIn("$__toTime", sql)
-            self.assertNotIn("raw_json", sql)
-            self.assertNotRegex(
-                sql,
-                r"(?i)\b(INSERT|UPDATE|DELETE|ALTER|DROP|TRUNCATE)\b",
-            )
+            query = panel_query(panel)
+            self.assertEqual(query['datasource']['name'], DATASOURCE_UID)
+            sql = query['spec']['rawSql']
+            self.assertIn('FROM observability.incident_updates', sql)
+            self.assertIn('argMax(', sql)
+            self.assertNotIn('observability.ai_updates', sql)
+            self.assertNotIn('recommended_actions', sql)
+            self.assertNotRegex(sql, r'(?i)\b(INSERT|UPDATE|DELETE|ALTER|DROP|TRUNCATE)\b')
 
-    def test_latest_feed_is_one_deterministic_latest_row_per_incident(self):
-        panel = self.elements["panel-7"]
-        sql = query(panel)["spec"]["rawSql"]
-        self.assertEqual(panel["spec"]["title"], "Latest AI Assessment per Incident")
-        self.assertIn(
-            "argMax(updates.severity, tuple(updates.timestamp, updates.run_id))",
-            sql,
-        )
-        self.assertIn("LEFT ANY JOIN observability.ai_result_devices", sql)
-        self.assertIn(
-            "multiIf(length(updates.device) > 0, updates.device, length(devices.device) > 0, devices.device, 'unavailable - legacy record')",
-            sql,
-        )
-        self.assertIn(
-            "arrayStringConcat(argMax(updates.tags, tuple(updates.timestamp, updates.run_id)), ',')",
-            sql,
-        )
-        self.assertIn("GROUP BY updates.incident_id", sql)
-        self.assertIn('ORDER BY "Time" DESC', sql)
-        self.assertIn("LIMIT 100", sql)
-        self.assertNotIn("body", sql)
-        self.assertNotIn("model AS", sql)
-        self.assertNotIn("run_id AS", sql)
+    def test_active_queue_persists_and_excludes_flaps(self):
+        sql = panel_query(self.elements['panel-4'])['spec']['rawSql']
+        self.assertIn("lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')", sql)
+        self.assertIn('interface_flap = false', sql)
+        self.assertIn('${active_search:sqlstring}', sql)
+        self.assertIn('${severity_filter:sqlstring}', sql)
+        self.assertNotIn('$__fromTime', sql)
+        self.assertNotIn('$__toTime', sql)
+        self.assertNotIn('Model', sql)
+        self.assertNotIn('Recommendation', sql)
 
-    def test_feed_uses_operator_focused_table_styling(self):
-        panel = self.elements["panel-7"]
-        options = panel["spec"]["vizConfig"]["spec"]["options"]
-        defaults = panel["spec"]["vizConfig"]["spec"]["fieldConfig"]["defaults"]
-        self.assertEqual(options["cellHeight"], "md")
-        self.assertTrue(options["enablePagination"])
-        self.assertEqual(options["frozenColumns"], {"left": 2})
-        self.assertTrue(defaults["custom"]["filterable"])
-        self.assertEqual(property_value(panel, "Time", "unit"), "dateTimeFromNow")
-        self.assertEqual(property_value(panel, "Device", "custom.width"), 190)
-        self.assertEqual(
-            property_value(panel, "Tags", "custom.cellOptions"),
-            {"type": "pill"},
-        )
-        for field in ("Severity", "Assessment"):
-            self.assertEqual(
-                property_value(panel, field, "custom.cellOptions")["type"],
-                "color-background",
-            )
-            mappings = property_value(panel, field, "mappings")[0]["options"]
-            self.assertGreaterEqual(len(mappings), 5)
+    def test_flap_queue_is_exclusive_and_searchable(self):
+        sql = panel_query(self.elements['panel-5'])['spec']['rawSql']
+        self.assertIn('interface_flap = true', sql)
+        self.assertIn('${flap_search:sqlstring}', sql)
+        self.assertIn('state_change_count AS "Flaps"', sql)
+        self.assertNotIn('$__fromTime', sql)
+        self.assertNotIn('$__toTime', sql)
 
-    def test_full_detail_panel_retains_explanation_and_provenance(self):
-        panel = self.elements["panel-8"]
-        sql = query(panel)["spec"]["rawSql"]
-        self.assertEqual(panel["spec"]["title"], "Full Assessment Details")
-        for field in (
-            "body",
-            "model",
-            "incident_id",
-            "run_id",
-            "occurrence_count",
-            "tags",
-            "device",
-        ):
-            self.assertIn(field, sql)
-        self.assertIn("ORDER BY updates.timestamp DESC", sql)
-        self.assertIn("LIMIT 200", sql)
-        self.assertIn("arrayStringConcat(updates.tags, ',')", sql)
-        self.assertIn("LEFT ANY JOIN observability.ai_result_devices", sql)
-        self.assertIn("'unavailable - legacy record'", sql)
-        self.assertEqual(
-            panel["spec"]["vizConfig"]["spec"]["options"]["frozenColumns"],
-            {"left": 2},
-        )
-        self.assertEqual(property_value(panel, "Device", "custom.width"), 190)
-        self.assertTrue(
-            property_value(panel, "Explanation", "custom.wrapText")
-        )
-        self.assertEqual(
-            property_value(panel, "Tags", "custom.cellOptions"),
-            {"type": "pill"},
-        )
+    def test_resolved_queue_uses_resolved_time_range_and_search(self):
+        sql = panel_query(self.elements['panel-6'])['spec']['rawSql']
+        self.assertIn("lifecycle_status = 'RESOLVED'", sql)
+        self.assertIn('resolved_at >= $__fromTime', sql)
+        self.assertIn('resolved_at <= $__toTime', sql)
+        self.assertIn('${resolved_search:sqlstring}', sql)
+        self.assertIn('${severity_filter:sqlstring}', sql)
+
+    def test_tables_keep_operator_focused_theme_and_filters(self):
+        for name in ('panel-4', 'panel-5', 'panel-6'):
+            panel = self.elements[name]
+            options = panel['spec']['vizConfig']['spec']['options']
+            defaults = panel['spec']['vizConfig']['spec']['fieldConfig']['defaults']
+            self.assertEqual(options['cellHeight'], 'md')
+            self.assertTrue(options['enablePagination'])
+            self.assertEqual(options['frozenColumns'], {'left': 2})
+            self.assertTrue(defaults['custom']['filterable'])
+        severity = override(self.elements['panel-4'], 'Severity')['properties']
+        self.assertTrue(any(item['id'] == 'mappings' for item in severity))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

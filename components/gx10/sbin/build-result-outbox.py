@@ -21,6 +21,12 @@ RESULT_TYPE = 'incident_assessment'
 MAX_FILE_BYTES = 256 * 1024
 LOCK_NAME = '.result-outbox.lock'
 FINAL_RE = re.compile(r'^ai-result-v1-[0-9a-f]{32}\.jsonl$')
+INCIDENT_FINAL_RE = re.compile(
+    r'^incident-state-v1-[0-9a-f]{32}\.jsonl$'
+)
+INCIDENT_PARTIAL_RE = re.compile(
+    r'^\.incident-state-v1-[0-9a-f]{32}\.jsonl\.tmp-[1-9][0-9]*-[0-9]+$'
+)
 PARTIAL_RE = re.compile(
     r'^\.ai-result-v1-[0-9a-f]{32}\.jsonl\.tmp-[1-9][0-9]*-[0-9]+$'
 )
@@ -438,6 +444,10 @@ def recover_partials(directory):
 def inventory_directory(directory, records, *, allow_partials):
     found = set()
     for path in sorted(Path(directory).iterdir(), key=lambda item: item.name):
+        if INCIDENT_FINAL_RE.fullmatch(path.name):
+            continue
+        if allow_partials and INCIDENT_PARTIAL_RE.fullmatch(path.name):
+            continue
         if allow_partials and PARTIAL_RE.fullmatch(path.name):
             continue
         if not FINAL_RE.fullmatch(path.name) or path.name not in records:

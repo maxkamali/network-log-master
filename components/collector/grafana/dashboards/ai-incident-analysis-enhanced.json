@@ -6,36 +6,17 @@
     "namespace": "default"
   },
   "spec": {
-    "annotations": [
-      {
-        "kind": "AnnotationQuery",
-        "spec": {
-          "query": {
-            "kind": "DataQuery",
-            "group": "grafana",
-            "version": "v0",
-            "datasource": {
-              "name": "-- Grafana --"
-            },
-            "spec": {}
-          },
-          "enable": true,
-          "hide": true,
-          "iconColor": "rgba(0, 211, 255, 1)",
-          "name": "Annotations & Alerts",
-          "builtIn": true
-        }
-      }
-    ],
+    "annotations": [],
     "cursorSync": "Off",
+    "description": "Deterministic NOC incident workflow. The original AI dashboard remains available as an unchanged fallback.",
     "editable": true,
     "elements": {
       "panel-1": {
         "kind": "Panel",
         "spec": {
           "id": 1,
-          "title": "AI Updates",
-          "description": "Validated GX10 reasoning results stored in ClickHouse during the selected time range.",
+          "title": "Active Events",
+          "description": "Current non-flap incidents; active state is never hidden by the dashboard time range.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -59,19 +40,19 @@
                             "columns": [],
                             "database": "observability",
                             "filters": [],
-                            "limit": 200,
+                            "limit": 500,
                             "meta": {
                               "otelEnabled": false
                             },
                             "mode": "list",
                             "orderBy": [],
                             "queryType": "table",
-                            "table": "ai_updates"
+                            "table": "incident_updates"
                           }
                         },
                         "pluginVersion": "4.20.0",
                         "queryType": "table",
-                        "rawSql": "SELECT count() AS ai_updates\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime"
+                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT count() AS \"Active Events\"\nFROM latest\nWHERE lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')\n  AND interface_flap = false"
                       }
                     },
                     "refId": "A",
@@ -89,9 +70,9 @@
             "version": "13.1.1",
             "spec": {
               "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center",
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
                 "reduceOptions": {
@@ -102,104 +83,7 @@
                   "values": false
                 },
                 "showPercentChange": false,
-                "textMode": "auto",
-                "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "color": {
-                    "mode": "fixed",
-                    "fixedColor": "blue"
-                  },
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "blue"
-                      }
-                    ]
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "panel-2": {
-        "kind": "Panel",
-        "spec": {
-          "id": 2,
-          "title": "Critical / High Assessments",
-          "description": "Results whose validated model severity is critical or high.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "grafana-clickhouse-datasource",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "efvaztlrk8ow0a"
-                      },
-                      "spec": {
-                        "editorType": "sql",
-                        "format": 1,
-                        "meta": {
-                          "builderOptions": {
-                            "columns": [],
-                            "database": "observability",
-                            "filters": [],
-                            "limit": 200,
-                            "meta": {
-                              "otelEnabled": false
-                            },
-                            "mode": "list",
-                            "orderBy": [],
-                            "queryType": "table",
-                            "table": "ai_updates"
-                          }
-                        },
-                        "pluginVersion": "4.20.0",
-                        "queryType": "table",
-                        "rawSql": "SELECT count() AS critical_or_high\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\n  AND severity IN ('critical', 'high')"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "stat",
-            "version": "13.1.1",
-            "spec": {
-              "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "percentChangeColorMode": "standard",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "showPercentChange": false,
-                "textMode": "auto",
+                "textMode": "value_and_name",
                 "wideLayout": true
               },
               "fieldConfig": {
@@ -224,12 +108,12 @@
           }
         }
       },
-      "panel-3": {
+      "panel-2": {
         "kind": "Panel",
         "spec": {
-          "id": 3,
-          "title": "Unique Incidents",
-          "description": "Distinct deterministic incident identities represented by AI results.",
+          "id": 2,
+          "title": "Interface Flaps",
+          "description": "Current interface-flap incidents kept in their own operational queue.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -253,19 +137,19 @@
                             "columns": [],
                             "database": "observability",
                             "filters": [],
-                            "limit": 200,
+                            "limit": 500,
                             "meta": {
                               "otelEnabled": false
                             },
                             "mode": "list",
                             "orderBy": [],
                             "queryType": "table",
-                            "table": "ai_updates"
+                            "table": "incident_updates"
                           }
                         },
                         "pluginVersion": "4.20.0",
                         "queryType": "table",
-                        "rawSql": "SELECT uniqExact(incident_id) AS unique_incidents\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime"
+                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT count() AS \"Active Flaps\"\nFROM latest\nWHERE lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')\n  AND interface_flap = true"
                       }
                     },
                     "refId": "A",
@@ -283,9 +167,9 @@
             "version": "13.1.1",
             "spec": {
               "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center",
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
                 "reduceOptions": {
@@ -296,21 +180,118 @@
                   "values": false
                 },
                 "showPercentChange": false,
-                "textMode": "auto",
+                "textMode": "value_and_name",
                 "wideLayout": true
               },
               "fieldConfig": {
                 "defaults": {
                   "color": {
                     "mode": "fixed",
-                    "fixedColor": "purple"
+                    "fixedColor": "orange"
                   },
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
                       {
                         "value": 0,
-                        "color": "purple"
+                        "color": "orange"
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-3": {
+        "kind": "Panel",
+        "spec": {
+          "id": 3,
+          "title": "Resolved",
+          "description": "Incidents resolved during the selected dashboard time range.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-clickhouse-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "efvaztlrk8ow0a"
+                      },
+                      "spec": {
+                        "editorType": "sql",
+                        "format": 1,
+                        "meta": {
+                          "builderOptions": {
+                            "columns": [],
+                            "database": "observability",
+                            "filters": [],
+                            "limit": 500,
+                            "meta": {
+                              "otelEnabled": false
+                            },
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "incident_updates"
+                          }
+                        },
+                        "pluginVersion": "4.20.0",
+                        "queryType": "table",
+                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT count() AS \"Resolved in Range\"\nFROM latest\nWHERE lifecycle_status = 'RESOLVED'\n  AND resolved_at >= $__fromTime\n  AND resolved_at <= $__toTime"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.1.1",
+            "spec": {
+              "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "value_and_name",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "fixed",
+                    "fixedColor": "green"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
                       }
                     ]
                   }
@@ -325,110 +306,8 @@
         "kind": "Panel",
         "spec": {
           "id": 4,
-          "title": "AI Updates Over Time",
-          "description": "Validated result volume by hour. Use the dashboard time picker to zoom.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "grafana-clickhouse-datasource",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "efvaztlrk8ow0a"
-                      },
-                      "spec": {
-                        "editorType": "sql",
-                        "format": 2,
-                        "meta": {
-                          "builderOptions": {
-                            "columns": [],
-                            "database": "observability",
-                            "filters": [],
-                            "limit": 200,
-                            "meta": {
-                              "otelEnabled": false
-                            },
-                            "mode": "list",
-                            "orderBy": [],
-                            "queryType": "time_series",
-                            "table": "ai_updates"
-                          }
-                        },
-                        "pluginVersion": "4.20.0",
-                        "queryType": "time_series",
-                        "rawSql": "SELECT\n    toStartOfInterval(timestamp, INTERVAL 1 HOUR) AS time,\n    count() AS ai_updates\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nGROUP BY time\nORDER BY time"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "13.1.1",
-            "spec": {
-              "options": {
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "enableFacetedFilter": false,
-                  "overflow": "ellipsis",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisBorderShow": false,
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "fillOpacity": 25,
-                    "gradientMode": "none",
-                    "lineInterpolation": "linear",
-                    "lineWidth": 2,
-                    "pointSize": 5,
-                    "showPoints": "auto",
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    }
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "panel-5": {
-        "kind": "Panel",
-        "spec": {
-          "id": 5,
-          "title": "Severity",
-          "description": "Distribution of validated AI-result severity.",
+          "title": "Active Events",
+          "description": "One current row per unresolved non-flap incident. Search is server-side and the time picker does not hide persistent incidents.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -452,219 +331,19 @@
                             "columns": [],
                             "database": "observability",
                             "filters": [],
-                            "limit": 200,
+                            "limit": 500,
                             "meta": {
                               "otelEnabled": false
                             },
                             "mode": "list",
                             "orderBy": [],
                             "queryType": "table",
-                            "table": "ai_updates"
+                            "table": "incident_updates"
                           }
                         },
                         "pluginVersion": "4.20.0",
                         "queryType": "table",
-                        "rawSql": "SELECT\n    if(severity = '', 'unspecified', severity) AS severity,\n    count() AS ai_updates\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nGROUP BY severity\nORDER BY ai_updates DESC"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "piechart",
-            "version": "13.1.1",
-            "spec": {
-              "options": {
-                "displayLabels": [
-                  "name",
-                  "percent"
-                ],
-                "legend": {
-                  "displayMode": "list",
-                  "overflow": "ellipsis",
-                  "placement": "right",
-                  "showLegend": true,
-                  "values": [
-                    "percent",
-                    "value"
-                  ]
-                },
-                "pieType": "donut",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": true
-                },
-                "sort": "desc",
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "color": {
-                    "mode": "palette-classic"
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "panel-6": {
-        "kind": "Panel",
-        "spec": {
-          "id": 6,
-          "title": "Disposition",
-          "description": "Distribution of nonauthoritative AI triage disposition.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "grafana-clickhouse-datasource",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "efvaztlrk8ow0a"
-                      },
-                      "spec": {
-                        "editorType": "sql",
-                        "format": 1,
-                        "meta": {
-                          "builderOptions": {
-                            "columns": [],
-                            "database": "observability",
-                            "filters": [],
-                            "limit": 200,
-                            "meta": {
-                              "otelEnabled": false
-                            },
-                            "mode": "list",
-                            "orderBy": [],
-                            "queryType": "table",
-                            "table": "ai_updates"
-                          }
-                        },
-                        "pluginVersion": "4.20.0",
-                        "queryType": "table",
-                        "rawSql": "SELECT\n    if(status = '', 'unspecified', status) AS status,\n    count() AS ai_updates\nFROM observability.ai_updates\nWHERE timestamp >= $__fromTime\n  AND timestamp <= $__toTime\nGROUP BY status\nORDER BY ai_updates DESC"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "piechart",
-            "version": "13.1.1",
-            "spec": {
-              "options": {
-                "displayLabels": [
-                  "name",
-                  "percent"
-                ],
-                "legend": {
-                  "displayMode": "list",
-                  "overflow": "ellipsis",
-                  "placement": "right",
-                  "showLegend": true,
-                  "values": [
-                    "percent",
-                    "value"
-                  ]
-                },
-                "pieType": "donut",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": true
-                },
-                "sort": "desc",
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "color": {
-                    "mode": "palette-classic"
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "panel-7": {
-        "kind": "Panel",
-        "spec": {
-          "id": 7,
-          "title": "Latest AI Assessment per Incident",
-          "description": "One latest nonauthoritative AI assessment per deterministic incident in the selected range. This is not authoritative lifecycle state.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "grafana-clickhouse-datasource",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "efvaztlrk8ow0a"
-                      },
-                      "spec": {
-                        "editorType": "sql",
-                        "format": 1,
-                        "meta": {
-                          "builderOptions": {
-                            "columns": [],
-                            "database": "observability",
-                            "filters": [],
-                            "limit": 200,
-                            "meta": {
-                              "otelEnabled": false
-                            },
-                            "mode": "list",
-                            "orderBy": [],
-                            "queryType": "table",
-                            "table": "ai_updates"
-                          }
-                        },
-                        "pluginVersion": "4.20.0",
-                        "queryType": "table",
-                        "rawSql": "SELECT\n    max(updates.timestamp) AS \"Time\",\n    argMax(multiIf(length(updates.device) > 0, updates.device, length(devices.device) > 0, devices.device, 'unavailable - legacy record'), tuple(updates.timestamp, updates.run_id)) AS \"Device\",\n    argMax(updates.severity, tuple(updates.timestamp, updates.run_id)) AS \"Severity\",\n    argMax(updates.status, tuple(updates.timestamp, updates.run_id)) AS \"Assessment\",\n    argMax(updates.title, tuple(updates.timestamp, updates.run_id)) AS \"Title\",\n    argMax(updates.occurrence_count, tuple(updates.timestamp, updates.run_id)) AS \"Occurrences\",\n    arrayStringConcat(argMax(updates.tags, tuple(updates.timestamp, updates.run_id)), ',') AS \"Tags\",\n    updates.incident_id AS \"Incident ID\"\nFROM observability.ai_updates AS updates\nLEFT ANY JOIN observability.ai_result_devices AS devices USING (run_id)\nWHERE updates.timestamp >= $__fromTime\n  AND updates.timestamp <= $__toTime\nGROUP BY updates.incident_id\nORDER BY \"Time\" DESC\nLIMIT 100"
+                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT\n    severity AS \"Severity\",\n    device AS \"Device\",\n    title AS \"Event\",\n    lifecycle_status AS \"State\",\n    first_seen AS \"First Seen\",\n    last_seen AS \"Last Activity\",\n    dateDiff('minute', first_seen, now()) AS \"Age (min)\",\n    occurrence_count AS \"Occurrences\",\n    event_family AS \"Category\",\n    incident_id AS \"Incident ID\"\nFROM latest\nWHERE lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')\n  AND interface_flap = false\n  AND (${severity_filter:sqlstring} = 'all' OR lowerUTF8(severity) = ${severity_filter:sqlstring})\n  AND (${active_search:sqlstring} = '' OR positionCaseInsensitiveUTF8(concat(device, ' ', entity_name, ' ', event_family, ' ', protocol, ' ', title, ' ', incident_id), ${active_search:sqlstring}) > 0)\nORDER BY multiIf(severity IN ('emergency', 'alert'), 0, severity = 'critical', 1, severity = 'error', 2, severity = 'warning', 3, 4), last_seen DESC\nLIMIT 500"
                       }
                     },
                     "refId": "A",
@@ -715,16 +394,69 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Time"
+                      "options": "Severity"
                     },
                     "properties": [
                       {
-                        "id": "unit",
-                        "value": "dateTimeFromNow"
+                        "id": "custom.width",
+                        "value": 105
                       },
                       {
-                        "id": "custom.width",
-                        "value": 140
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-background",
+                          "mode": "basic"
+                        }
+                      },
+                      {
+                        "id": "mappings",
+                        "value": [
+                          {
+                            "type": "value",
+                            "options": {
+                              "emergency": {
+                                "color": "dark-red",
+                                "index": 0,
+                                "text": "EMERGENCY"
+                              },
+                              "alert": {
+                                "color": "dark-red",
+                                "index": 1,
+                                "text": "ALERT"
+                              },
+                              "critical": {
+                                "color": "red",
+                                "index": 2,
+                                "text": "CRITICAL"
+                              },
+                              "error": {
+                                "color": "orange",
+                                "index": 3,
+                                "text": "ERROR"
+                              },
+                              "warning": {
+                                "color": "yellow",
+                                "index": 4,
+                                "text": "WARNING"
+                              },
+                              "notice": {
+                                "color": "blue",
+                                "index": 5,
+                                "text": "NOTICE"
+                              },
+                              "informational": {
+                                "color": "green",
+                                "index": 6,
+                                "text": "INFO"
+                              },
+                              "unknown": {
+                                "color": "gray",
+                                "index": 7,
+                                "text": "UNKNOWN"
+                              }
+                            }
+                          }
+                        ]
                       }
                     ]
                   },
@@ -743,125 +475,12 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Severity"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "type": "color-background",
-                          "mode": "basic"
-                        }
-                      },
-                      {
-                        "id": "custom.width",
-                        "value": 105
-                      },
-                      {
-                        "id": "mappings",
-                        "value": [
-                          {
-                            "type": "value",
-                            "options": {
-                              "critical": {
-                                "color": "red",
-                                "index": 0,
-                                "text": "CRITICAL"
-                              },
-                              "high": {
-                                "color": "orange",
-                                "index": 1,
-                                "text": "HIGH"
-                              },
-                              "medium": {
-                                "color": "yellow",
-                                "index": 2,
-                                "text": "MEDIUM"
-                              },
-                              "low": {
-                                "color": "blue",
-                                "index": 3,
-                                "text": "LOW"
-                              },
-                              "informational": {
-                                "color": "green",
-                                "index": 4,
-                                "text": "INFO"
-                              },
-                              "": {
-                                "color": "gray",
-                                "index": 5,
-                                "text": "UNSPECIFIED"
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Assessment"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "type": "color-background",
-                          "mode": "basic"
-                        }
-                      },
-                      {
-                        "id": "custom.width",
-                        "value": 170
-                      },
-                      {
-                        "id": "mappings",
-                        "value": [
-                          {
-                            "type": "value",
-                            "options": {
-                              "action_required": {
-                                "color": "red",
-                                "index": 0,
-                                "text": "ACTION REQUIRED"
-                              },
-                              "monitor": {
-                                "color": "blue",
-                                "index": 1,
-                                "text": "MONITOR"
-                              },
-                              "resolved_no_action": {
-                                "color": "green",
-                                "index": 2,
-                                "text": "RESOLVED / NO ACTION"
-                              },
-                              "insufficient_evidence": {
-                                "color": "gray",
-                                "index": 3,
-                                "text": "INSUFFICIENT EVIDENCE"
-                              },
-                              "": {
-                                "color": "gray",
-                                "index": 4,
-                                "text": "UNSPECIFIED"
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Title"
+                      "options": "Event"
                     },
                     "properties": [
                       {
                         "id": "custom.width",
-                        "value": 420
+                        "value": 330
                       },
                       {
                         "id": "custom.wrapText",
@@ -872,34 +491,117 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Occurrences"
+                      "options": "State"
                     },
                     "properties": [
                       {
-                        "id": "custom.align",
-                        "value": "center"
+                        "id": "custom.width",
+                        "value": 125
                       },
                       {
-                        "id": "custom.width",
-                        "value": 105
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-background",
+                          "mode": "basic"
+                        }
+                      },
+                      {
+                        "id": "mappings",
+                        "value": [
+                          {
+                            "type": "value",
+                            "options": {
+                              "CANDIDATE": {
+                                "color": "purple",
+                                "index": 0,
+                                "text": "NEW"
+                              },
+                              "OPEN": {
+                                "color": "red",
+                                "index": 1,
+                                "text": "OPEN"
+                              },
+                              "RECOVERING": {
+                                "color": "yellow",
+                                "index": 2,
+                                "text": "RECOVERING"
+                              },
+                              "RESOLVED": {
+                                "color": "green",
+                                "index": 3,
+                                "text": "RESOLVED"
+                              }
+                            }
+                          }
+                        ]
                       }
                     ]
                   },
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Tags"
+                      "options": "First Seen"
                     },
                     "properties": [
                       {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "type": "pill"
-                        }
+                        "id": "unit",
+                        "value": "dateTimeFromNow"
                       },
                       {
                         "id": "custom.width",
-                        "value": 300
+                        "value": 135
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Last Activity"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "dateTimeFromNow"
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 135
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Age (min)"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 95
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Occurrences"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 95
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Category"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 120
                       }
                     ]
                   },
@@ -921,12 +623,12 @@
           }
         }
       },
-      "panel-8": {
+      "panel-5": {
         "kind": "Panel",
         "spec": {
-          "id": 8,
-          "title": "Full Assessment Details",
-          "description": "Complete newest-first AI assessment history with explanations and provenance. Use the column filters for focused investigation.",
+          "id": 5,
+          "title": "Interface Flaps",
+          "description": "One current row per device/interface while deterministic state changes continue; recovery moves it to Resolved after the quiet-period gate.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -950,19 +652,19 @@
                             "columns": [],
                             "database": "observability",
                             "filters": [],
-                            "limit": 200,
+                            "limit": 500,
                             "meta": {
                               "otelEnabled": false
                             },
                             "mode": "list",
                             "orderBy": [],
                             "queryType": "table",
-                            "table": "ai_updates"
+                            "table": "incident_updates"
                           }
                         },
                         "pluginVersion": "4.20.0",
                         "queryType": "table",
-                        "rawSql": "SELECT\n    updates.timestamp AS \"Time\",\n    multiIf(length(updates.device) > 0, updates.device, length(devices.device) > 0, devices.device, 'unavailable - legacy record') AS \"Device\",\n    updates.severity AS \"Severity\",\n    updates.status AS \"Assessment\",\n    updates.title AS \"Title\",\n    updates.body AS \"Explanation\",\n    updates.occurrence_count AS \"Occurrences\",\n    arrayStringConcat(updates.tags, ',') AS \"Tags\",\n    updates.model AS \"Model\",\n    updates.incident_id AS \"Incident ID\",\n    updates.run_id AS \"Run ID\"\nFROM observability.ai_updates AS updates\nLEFT ANY JOIN observability.ai_result_devices AS devices USING (run_id)\nWHERE updates.timestamp >= $__fromTime\n  AND updates.timestamp <= $__toTime\nORDER BY updates.timestamp DESC\nLIMIT 200"
+                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT\n    device AS \"Device\",\n    entity_name AS \"Interface\",\n    last_observation_state AS \"Current State\",\n    lifecycle_status AS \"State\",\n    first_seen AS \"First Seen\",\n    last_seen AS \"Last Activity\",\n    state_change_count AS \"Flaps\",\n    occurrence_count AS \"Occurrences\",\n    dateDiff('minute', first_seen, now()) AS \"Age (min)\",\n    incident_id AS \"Incident ID\"\nFROM latest\nWHERE lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')\n  AND interface_flap = true\n  AND (${flap_search:sqlstring} = '' OR positionCaseInsensitiveUTF8(concat(device, ' ', entity_name, ' ', event_family, ' ', protocol, ' ', title, ' ', incident_id), ${flap_search:sqlstring}) > 0)\nORDER BY last_seen DESC, state_change_count DESC\nLIMIT 500"
                       }
                     },
                     "refId": "A",
@@ -1013,7 +715,92 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Time"
+                      "options": "Device"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 190
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Interface"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 220
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Current State"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 120
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "State"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 125
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-background",
+                          "mode": "basic"
+                        }
+                      },
+                      {
+                        "id": "mappings",
+                        "value": [
+                          {
+                            "type": "value",
+                            "options": {
+                              "CANDIDATE": {
+                                "color": "purple",
+                                "index": 0,
+                                "text": "NEW"
+                              },
+                              "OPEN": {
+                                "color": "red",
+                                "index": 1,
+                                "text": "OPEN"
+                              },
+                              "RECOVERING": {
+                                "color": "yellow",
+                                "index": 2,
+                                "text": "RECOVERING"
+                              },
+                              "RESOLVED": {
+                                "color": "green",
+                                "index": 3,
+                                "text": "RESOLVED"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "First Seen"
                     },
                     "properties": [
                       {
@@ -1022,7 +809,235 @@
                       },
                       {
                         "id": "custom.width",
-                        "value": 140
+                        "value": 135
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Last Activity"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "dateTimeFromNow"
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 135
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Flaps"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 85
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Occurrences"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 95
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Age (min)"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 95
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Incident ID"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 220
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "panel-6": {
+        "kind": "Panel",
+        "spec": {
+          "id": 6,
+          "title": "Resolved Events",
+          "description": "Resolved incident episodes in the selected time range. Records remain searchable history and are not deleted by dashboard actions.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-clickhouse-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "efvaztlrk8ow0a"
+                      },
+                      "spec": {
+                        "editorType": "sql",
+                        "format": 1,
+                        "meta": {
+                          "builderOptions": {
+                            "columns": [],
+                            "database": "observability",
+                            "filters": [],
+                            "limit": 500,
+                            "meta": {
+                              "otelEnabled": false
+                            },
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "incident_updates"
+                          }
+                        },
+                        "pluginVersion": "4.20.0",
+                        "queryType": "table",
+                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT\n    severity AS \"Severity\",\n    device AS \"Device\",\n    title AS \"Event\",\n    lifecycle_status AS \"Resolution\",\n    first_seen AS \"First Seen\",\n    resolved_at AS \"Resolved\",\n    dateDiff('minute', first_seen, assumeNotNull(resolved_at)) AS \"Duration (min)\",\n    occurrence_count AS \"Occurrences\",\n    event_family AS \"Category\",\n    if(interface_flap, 'yes', 'no') AS \"Interface Flap\",\n    incident_id AS \"Incident ID\"\nFROM latest\nWHERE lifecycle_status = 'RESOLVED'\n  AND resolved_at >= $__fromTime\n  AND resolved_at <= $__toTime\n  AND (${severity_filter:sqlstring} = 'all' OR lowerUTF8(severity) = ${severity_filter:sqlstring})\n  AND (${resolved_search:sqlstring} = '' OR positionCaseInsensitiveUTF8(concat(device, ' ', entity_name, ' ', event_family, ' ', protocol, ' ', title, ' ', incident_id), ${resolved_search:sqlstring}) > 0)\nORDER BY resolved_at DESC\nLIMIT 500"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "table",
+            "version": "13.1.1",
+            "spec": {
+              "options": {
+                "cellHeight": "md",
+                "showHeader": true,
+                "enablePagination": true,
+                "frozenColumns": {
+                  "left": 2
+                },
+                "footer": {
+                  "countRows": false,
+                  "enablePagination": true,
+                  "fields": "",
+                  "reducer": [
+                    "sum"
+                  ],
+                  "show": false
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {
+                    "align": "left",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "filterable": true,
+                    "inspect": false,
+                    "minWidth": 70,
+                    "wrapHeaderText": true
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Severity"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 105
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-background",
+                          "mode": "basic"
+                        }
+                      },
+                      {
+                        "id": "mappings",
+                        "value": [
+                          {
+                            "type": "value",
+                            "options": {
+                              "emergency": {
+                                "color": "dark-red",
+                                "index": 0,
+                                "text": "EMERGENCY"
+                              },
+                              "alert": {
+                                "color": "dark-red",
+                                "index": 1,
+                                "text": "ALERT"
+                              },
+                              "critical": {
+                                "color": "red",
+                                "index": 2,
+                                "text": "CRITICAL"
+                              },
+                              "error": {
+                                "color": "orange",
+                                "index": 3,
+                                "text": "ERROR"
+                              },
+                              "warning": {
+                                "color": "yellow",
+                                "index": 4,
+                                "text": "WARNING"
+                              },
+                              "notice": {
+                                "color": "blue",
+                                "index": 5,
+                                "text": "NOTICE"
+                              },
+                              "informational": {
+                                "color": "green",
+                                "index": 6,
+                                "text": "INFO"
+                              },
+                              "unknown": {
+                                "color": "gray",
+                                "index": 7,
+                                "text": "UNKNOWN"
+                              }
+                            }
+                          }
+                        ]
                       }
                     ]
                   },
@@ -1041,9 +1056,29 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Severity"
+                      "options": "Event"
                     },
                     "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 330
+                      },
+                      {
+                        "id": "custom.wrapText",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Resolution"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 125
+                      },
                       {
                         "id": "custom.cellOptions",
                         "value": {
@@ -1052,44 +1087,30 @@
                         }
                       },
                       {
-                        "id": "custom.width",
-                        "value": 105
-                      },
-                      {
                         "id": "mappings",
                         "value": [
                           {
                             "type": "value",
                             "options": {
-                              "critical": {
-                                "color": "red",
+                              "CANDIDATE": {
+                                "color": "purple",
                                 "index": 0,
-                                "text": "CRITICAL"
+                                "text": "NEW"
                               },
-                              "high": {
-                                "color": "orange",
+                              "OPEN": {
+                                "color": "red",
                                 "index": 1,
-                                "text": "HIGH"
+                                "text": "OPEN"
                               },
-                              "medium": {
+                              "RECOVERING": {
                                 "color": "yellow",
                                 "index": 2,
-                                "text": "MEDIUM"
+                                "text": "RECOVERING"
                               },
-                              "low": {
-                                "color": "blue",
-                                "index": 3,
-                                "text": "LOW"
-                              },
-                              "informational": {
+                              "RESOLVED": {
                                 "color": "green",
-                                "index": 4,
-                                "text": "INFO"
-                              },
-                              "": {
-                                "color": "gray",
-                                "index": 5,
-                                "text": "UNSPECIFIED"
+                                "index": 3,
+                                "text": "RESOLVED"
                               }
                             }
                           }
@@ -1100,86 +1121,44 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Assessment"
+                      "options": "First Seen"
                     },
                     "properties": [
                       {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "type": "color-background",
-                          "mode": "basic"
-                        }
+                        "id": "unit",
+                        "value": "dateTimeFromNow"
                       },
                       {
                         "id": "custom.width",
-                        "value": 170
-                      },
-                      {
-                        "id": "mappings",
-                        "value": [
-                          {
-                            "type": "value",
-                            "options": {
-                              "action_required": {
-                                "color": "red",
-                                "index": 0,
-                                "text": "ACTION REQUIRED"
-                              },
-                              "monitor": {
-                                "color": "blue",
-                                "index": 1,
-                                "text": "MONITOR"
-                              },
-                              "resolved_no_action": {
-                                "color": "green",
-                                "index": 2,
-                                "text": "RESOLVED / NO ACTION"
-                              },
-                              "insufficient_evidence": {
-                                "color": "gray",
-                                "index": 3,
-                                "text": "INSUFFICIENT EVIDENCE"
-                              },
-                              "": {
-                                "color": "gray",
-                                "index": 4,
-                                "text": "UNSPECIFIED"
-                              }
-                            }
-                          }
-                        ]
+                        "value": 135
                       }
                     ]
                   },
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Title"
+                      "options": "Resolved"
                     },
                     "properties": [
                       {
-                        "id": "custom.width",
-                        "value": 300
+                        "id": "unit",
+                        "value": "dateTimeFromNow"
                       },
                       {
-                        "id": "custom.wrapText",
-                        "value": true
+                        "id": "custom.width",
+                        "value": 135
                       }
                     ]
                   },
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Explanation"
+                      "options": "Duration (min)"
                     },
                     "properties": [
                       {
                         "id": "custom.width",
-                        "value": 620
-                      },
-                      {
-                        "id": "custom.wrapText",
-                        "value": true
+                        "value": 110
                       }
                     ]
                   },
@@ -1190,42 +1169,32 @@
                     },
                     "properties": [
                       {
-                        "id": "custom.align",
-                        "value": "center"
-                      },
-                      {
                         "id": "custom.width",
-                        "value": 105
+                        "value": 95
                       }
                     ]
                   },
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Tags"
+                      "options": "Category"
                     },
                     "properties": [
                       {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "type": "pill"
-                        }
-                      },
-                      {
                         "id": "custom.width",
-                        "value": 280
+                        "value": 120
                       }
                     ]
                   },
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Model"
+                      "options": "Interface Flap"
                     },
                     "properties": [
                       {
                         "id": "custom.width",
-                        "value": 170
+                        "value": 110
                       }
                     ]
                   },
@@ -1233,18 +1202,6 @@
                     "matcher": {
                       "id": "byName",
                       "options": "Incident ID"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.width",
-                        "value": 220
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Run ID"
                     },
                     "properties": [
                       {
@@ -1269,8 +1226,8 @@
             "spec": {
               "x": 0,
               "y": 0,
-              "width": 4,
-              "height": 6,
+              "width": 8,
+              "height": 5,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-1"
@@ -1280,10 +1237,10 @@
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 4,
+              "x": 8,
               "y": 0,
-              "width": 4,
-              "height": 6,
+              "width": 8,
+              "height": 5,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-2"
@@ -1293,10 +1250,10 @@
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 8,
+              "x": 16,
               "y": 0,
-              "width": 4,
-              "height": 6,
+              "width": 8,
+              "height": 5,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-3"
@@ -1306,10 +1263,10 @@
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 12,
-              "y": 0,
-              "width": 12,
-              "height": 12,
+              "x": 0,
+              "y": 5,
+              "width": 24,
+              "height": 15,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-4"
@@ -1320,9 +1277,9 @@
             "kind": "GridLayoutItem",
             "spec": {
               "x": 0,
-              "y": 6,
-              "width": 6,
-              "height": 12,
+              "y": 20,
+              "width": 24,
+              "height": 15,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-5"
@@ -1332,39 +1289,13 @@
           {
             "kind": "GridLayoutItem",
             "spec": {
-              "x": 6,
-              "y": 6,
-              "width": 6,
-              "height": 12,
+              "x": 0,
+              "y": 35,
+              "width": 24,
+              "height": 15,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-6"
-              }
-            }
-          },
-          {
-            "kind": "GridLayoutItem",
-            "spec": {
-              "x": 0,
-              "y": 18,
-              "width": 24,
-              "height": 16,
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-7"
-              }
-            }
-          },
-          {
-            "kind": "GridLayoutItem",
-            "spec": {
-              "x": 0,
-              "y": 34,
-              "width": 24,
-              "height": 22,
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-8"
               }
             }
           }
@@ -1375,11 +1306,9 @@
     "liveNow": false,
     "preload": false,
     "tags": [
-      "ai",
-      "enhanced",
+      "noc",
       "incidents",
-      "network-observability",
-      "operator-view"
+      "lifecycle"
     ],
     "timeSettings": {
       "timezone": "browser",
@@ -1399,7 +1328,109 @@
       "fiscalYearStartMonth": 0
     },
     "title": "AI Incident Analysis - Enhanced",
-    "variables": [],
+    "variables": [
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "name": "active_search",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "query": "",
+          "label": "Search Active",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "Search device, event, category, protocol, and incident ID."
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "name": "flap_search",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "query": "",
+          "label": "Search Flaps",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "Search device, interface, and incident ID."
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "name": "resolved_search",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "query": "",
+          "label": "Search Resolved",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "Search resolved device, event, category, protocol, and incident ID."
+        }
+      },
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "severity_filter",
+          "query": "all,emergency,alert,critical,error,warning,notice,informational,unknown",
+          "current": {
+            "text": "All",
+            "value": "all"
+          },
+          "options": [
+            {
+              "text": "All",
+              "value": "all"
+            },
+            {
+              "text": "Emergency",
+              "value": "emergency"
+            },
+            {
+              "text": "Alert",
+              "value": "alert"
+            },
+            {
+              "text": "Critical",
+              "value": "critical"
+            },
+            {
+              "text": "Error",
+              "value": "error"
+            },
+            {
+              "text": "Warning",
+              "value": "warning"
+            },
+            {
+              "text": "Notice",
+              "value": "notice"
+            },
+            {
+              "text": "Informational",
+              "value": "informational"
+            },
+            {
+              "text": "Unknown",
+              "value": "unknown"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Severity",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "Server-side severity filter for Active and Resolved events.",
+          "allowCustomValue": false
+        }
+      }
+    ],
     "preferences": {
       "layout": {
         "kind": "GridLayout",
@@ -1407,8 +1438,7 @@
           "items": []
         }
       }
-    },
-    "description": "Operator-focused copy of AI Incident Analysis. The original dashboard remains available unchanged for immediate rollback."
+    }
   },
   "status": {}
 }

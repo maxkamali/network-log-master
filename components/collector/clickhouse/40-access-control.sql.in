@@ -4,6 +4,7 @@
 --   00-database.sql
 --   10-syslog.sql
 --   20-ai-updates.sql
+--   25-incident-updates.sql
 --   30-grafana-logs.sql
 --   40-access-control.sql.in
 --
@@ -37,6 +38,9 @@ TO grafana_reader;
 GRANT SELECT ON observability.ai_result_devices
 TO grafana_reader;
 
+GRANT SELECT ON observability.incident_updates
+TO grafana_reader;
+
 GRANT SELECT ON observability.grafana_logs
 TO grafana_reader;
 
@@ -53,6 +57,9 @@ GRANT SELECT ON system.tables
 TO grafana_reader;
 
 GRANT INSERT ON observability.ai_updates
+TO vector_ingest;
+
+GRANT INSERT ON observability.incident_updates
 TO vector_ingest;
 
 GRANT INSERT ON observability.syslog

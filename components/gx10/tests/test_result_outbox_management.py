@@ -15,6 +15,7 @@ from unittest import mock
 
 GX10_DIR = Path(__file__).resolve().parents[1]
 RUNNER_PATH = GX10_DIR / 'sbin' / 'run-result-outbox.py'
+INCIDENT_RUNNER_PATH = GX10_DIR / 'sbin' / 'run-incident-outbox.py'
 INSTALLER_PATH = GX10_DIR / 'install' / 'install-result-outbox.py'
 VERIFIER_PATH = GX10_DIR / 'install' / 'verify-result-outbox.py'
 ACTIVATOR_PATH = GX10_DIR / 'install' / 'activate-result-outbox.py'
@@ -25,6 +26,7 @@ TIMER_PATH = (
     GX10_DIR / 'systemd' / 'network-log-gx10-result-outbox.timer'
 )
 PRODUCER_PATH = GX10_DIR / 'sbin' / 'build-result-outbox.py'
+INCIDENT_PRODUCER_PATH = GX10_DIR / 'sbin' / 'build-incident-outbox.py'
 
 
 def load_module(name, path):
@@ -38,6 +40,9 @@ class ResultOutboxManagementTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.runner = load_module('managed_outbox_runner_test', RUNNER_PATH)
+        cls.incident_runner = load_module(
+            'managed_incident_outbox_runner_test', INCIDENT_RUNNER_PATH
+        )
         cls.installer = load_module(
             'managed_outbox_installer_test', INSTALLER_PATH
         )
@@ -49,6 +54,9 @@ class ResultOutboxManagementTests(unittest.TestCase):
         )
         cls.producer = load_module(
             'managed_outbox_producer_test', PRODUCER_PATH
+        )
+        cls.incident_producer = load_module(
+            'managed_incident_outbox_producer_test', INCIDENT_PRODUCER_PATH
         )
 
     def setUp(self):
@@ -110,6 +118,35 @@ class ResultOutboxManagementTests(unittest.TestCase):
             ):
                 self.runner.load_producer(altered)
 
+    def test_incident_runner_hash_is_bound_and_invokes_local_paths(self):
+        expected = hashlib.sha256(INCIDENT_PRODUCER_PATH.read_bytes()).hexdigest()
+        self.assertEqual(self.incident_runner.PRODUCER_SHA256, expected)
+        config = {
+            'database_path': self.root / 'events.sqlite3',
+            'ready_path': self.root / 'outbox' / 'ready',
+            'delivered_path': self.root / 'outbox' / 'delivered',
+        }
+        producer = types.SimpleNamespace(
+            build=lambda *_: {
+                'incidents': 3, 'changed': 3, 'batches': 1,
+                'created': 1, 'reused': 0, 'ready': 1,
+                'delivered': 0, 'recovered': 0, 'written_bytes': 512,
+            }
+        )
+        with (
+            mock.patch.object(
+                self.incident_runner, 'load_config', return_value=config
+            ),
+            mock.patch.object(
+                self.incident_runner, 'load_producer', return_value=producer
+            ),
+            redirect_stdout(io.StringIO()) as output,
+            redirect_stderr(io.StringIO()),
+        ):
+            result = self.incident_runner.run()
+        self.assertEqual(result, 0)
+        self.assertIn('GX10_MANAGED_INCIDENT_OUTBOX=PASS', output.getvalue())
+
     def test_systemd_boundary_has_no_network_and_is_bounded(self):
         service = SERVICE_PATH.read_text(encoding='utf-8')
         timer = TIMER_PATH.read_text(encoding='utf-8')
@@ -124,6 +161,11 @@ class ResultOutboxManagementTests(unittest.TestCase):
             self.assertIn(line, service)
         self.assertNotIn('Environment=', service)
         self.assertNotIn('ssh', service.casefold())
+        self.assertIn(
+            'ExecStart=/usr/local/libexec/network-log-gx10/run-incident-outbox.py',
+            service,
+        )
+        self.assertIn('After=network-log-gx10-correlation.service', service)
         self.assertIn('OnUnitInactiveSec=1min', timer)
         self.assertIn(
             'Unit=network-log-gx10-result-outbox.service', timer
@@ -150,6 +192,7 @@ class ResultOutboxManagementTests(unittest.TestCase):
         connection.executescript(
             '''
             CREATE TABLE reasoning_packets (packet_id TEXT PRIMARY KEY);
+            CREATE TABLE incidents (incident_id TEXT PRIMARY KEY);
             CREATE TABLE reasoning_model_versions (
               model_version TEXT PRIMARY KEY
             );
@@ -174,7 +217,10 @@ class ResultOutboxManagementTests(unittest.TestCase):
     def test_verifier_database_requires_terminal_result_invariant(self):
         database = self.create_database()
         state = self.verifier.validate_database(database)
-        self.assertEqual(state, {'results': 1, 'started': 0})
+        self.assertEqual(
+            state,
+            {'results': 1, 'started': 0, 'incidents': 0},
+        )
         connection = sqlite3.connect(database)
         connection.execute(
             "INSERT INTO reasoning_runs VALUES ('run-2','STARTED')"
@@ -210,20 +256,23 @@ class ResultOutboxManagementTests(unittest.TestCase):
         path = ready / name
         path.write_bytes(data)
         path.chmod(0o640)
-        records = {name: data}
-        names = self.verifier.inventory(
+        records = {name: (data,)}
+        names, incident_names = self.verifier.inventory(
             ready,
             records,
             self.producer,
+            self.incident_producer,
             os.geteuid(),
             os.getegid(),
         )
         self.assertEqual(names, {name})
+        self.assertEqual(incident_names, set())
         with self.assertRaisesRegex(ValueError, 'file differs'):
             self.verifier.inventory(
                 ready,
                 records,
                 self.producer,
+                self.incident_producer,
                 os.geteuid() + 1,
                 os.getegid(),
             )

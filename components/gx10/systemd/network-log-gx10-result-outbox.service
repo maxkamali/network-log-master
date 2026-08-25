@@ -1,6 +1,6 @@
 [Unit]
-Description=Network log GX10 local reasoning-result outbox
-After=network-log-gx10-reasoning.service
+Description=Network log GX10 result and deterministic incident-state outbox
+After=network-log-gx10-correlation.service
 
 [Service]
 Type=oneshot
@@ -8,6 +8,7 @@ User=network-log-agent
 Group=network-log-agent
 
 ExecStart=/usr/local/libexec/network-log-gx10/run-result-outbox.py
+ExecStart=/usr/local/libexec/network-log-gx10/run-incident-outbox.py
 TimeoutStartSec=2min
 
 UMask=0077

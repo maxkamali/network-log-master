@@ -17,6 +17,9 @@ import sys
 MAX_FILE_BYTES = 256 * 1024
 LOCK_NAME = '.result-outbox.lock'
 FINAL_RE = re.compile(r'^ai-result-v1-[0-9a-f]{32}\.jsonl$')
+INCIDENT_FINAL_RE = re.compile(
+    r'^incident-state-v1-[0-9a-f]{32}\.jsonl$'
+)
 HOST_RE = re.compile(r'^[A-Za-z0-9.-]+$')
 USER_RE = re.compile(r'^[A-Za-z0-9._-]+$')
 SAFE_PATH_RE = re.compile(r'^[A-Za-z0-9_./-]+$')
@@ -41,6 +44,16 @@ EXPECTED_RECORD_KEYS = {
     'type',
 }
 DEVICE_RECORD_KEYS = EXPECTED_RECORD_KEYS | {'device'}
+INCIDENT_RECORD_KEYS = {
+    'body', 'device', 'engine_version', 'entity_name', 'entity_type',
+    'event_family', 'first_seen', 'incident_id', 'interface_flap',
+    'last_observation_state', 'last_seen', 'lifecycle_status',
+    'occurrence_count', 'opened_at', 'producer_schema', 'producer_version',
+    'protocol', 'recovering_at', 'repeat_count_total', 'resolved_at',
+    'severity', 'snapshot_id', 'snapshot_version', 'state_change_count',
+    'timestamp', 'title', 'type',
+}
+INCIDENT_STATUSES = {'CANDIDATE', 'OPEN', 'RECOVERING', 'RESOLVED'}
 
 
 class SenderError(ValueError):
@@ -71,6 +84,11 @@ def output_name(run_id):
         raise SenderError('result sender run identity differs')
     digest = hashlib.sha256(run_id.encode('utf-8')).hexdigest()
     return f'ai-result-v1-{digest[:32]}.jsonl'
+
+
+def incident_output_name(data):
+    digest = hashlib.sha256(data).hexdigest()
+    return f'incident-state-v1-{digest[:32]}.jsonl'
 
 
 def validate_directory(path):
@@ -118,9 +136,90 @@ def validate_private_file(path, label):
     return path
 
 
+def validate_incident_record(record):
+    if (
+        not isinstance(record, dict)
+        or set(record) != INCIDENT_RECORD_KEYS
+        or record.get('producer_schema') != 'network-log-incident-state'
+        or record.get('producer_version') != 1
+        or record.get('type') != 'incident_lifecycle'
+        or record.get('lifecycle_status') not in INCIDENT_STATUSES
+        or type(record.get('interface_flap')) is not bool
+    ):
+        raise SenderError('incident sender record identity differs')
+    for field, maximum in (
+        ('body', 65536), ('device', 256), ('entity_type', 128),
+        ('event_family', 128), ('incident_id', 256), ('protocol', 128),
+        ('severity', 64), ('snapshot_id', 64), ('title', 512),
+    ):
+        value = record.get(field)
+        if not isinstance(value, str) or not value.strip() or len(value) > maximum:
+            raise SenderError(f'incident sender {field} differs')
+    for field, maximum in (
+        ('entity_name', 512), ('last_observation_state', 128),
+    ):
+        value = record.get(field)
+        if not isinstance(value, str) or len(value) > maximum:
+            raise SenderError(f'incident sender {field} differs')
+    for field in ('timestamp', 'first_seen', 'last_seen'):
+        if not valid_timestamp(record.get(field)):
+            raise SenderError(f'incident sender {field} differs')
+    for field in ('opened_at', 'recovering_at', 'resolved_at'):
+        value = record.get(field)
+        if value is not None and not valid_timestamp(value):
+            raise SenderError(f'incident sender {field} differs')
+    if (
+        (record['lifecycle_status'] == 'RESOLVED')
+        != (record['resolved_at'] is not None)
+    ):
+        raise SenderError('incident sender resolution timestamp differs')
+    if (
+        record['lifecycle_status'] == 'RECOVERING'
+        and record['recovering_at'] is None
+    ):
+        raise SenderError('incident sender recovery timestamp differs')
+    for field in (
+        'engine_version', 'occurrence_count', 'repeat_count_total',
+        'snapshot_version', 'state_change_count',
+    ):
+        value = record.get(field)
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            raise SenderError(f'incident sender {field} differs')
+    if record['occurrence_count'] < 1 or record['repeat_count_total'] < 1:
+        raise SenderError('incident sender counters differ')
+
+
+def validate_incident_batch(name, data):
+    if incident_output_name(data) != name:
+        raise SenderError('incident sender filename differs')
+    try:
+        lines = data.decode('utf-8').splitlines()
+    except UnicodeDecodeError as exc:
+        raise SenderError('incident sender file JSON differs') from exc
+    if not 1 <= len(lines) <= 100 or data.count(b'\n') != len(lines):
+        raise SenderError('incident sender record count differs')
+    records = []
+    incidents = set()
+    for line in lines:
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise SenderError('incident sender file JSON differs') from exc
+        if canonical_json(record) != line:
+            raise SenderError('incident sender file is not canonical')
+        validate_incident_record(record)
+        if record['incident_id'] in incidents:
+            raise SenderError('incident sender batch duplicates an incident')
+        incidents.add(record['incident_id'])
+        records.append(record)
+    return min(records, key=lambda item: item['timestamp'])
+
+
 def validate_record(name, data):
     if not data or len(data) > MAX_FILE_BYTES or not data.endswith(b'\n'):
         raise SenderError('result sender file bounds differ')
+    if INCIDENT_FINAL_RE.fullmatch(name):
+        return validate_incident_batch(name, data)
     if data.count(b'\n') != 1:
         raise SenderError('result sender file record count differs')
     try:
@@ -168,7 +267,14 @@ def validate_record(name, data):
 
 def validate_outbox_file(path):
     path = Path(path)
-    if path.is_symlink() or not path.is_file() or not FINAL_RE.fullmatch(path.name):
+    if (
+        path.is_symlink()
+        or not path.is_file()
+        or not (
+            FINAL_RE.fullmatch(path.name)
+            or INCIDENT_FINAL_RE.fullmatch(path.name)
+        )
+    ):
         raise SenderError('result sender outbox entry differs')
     before = path.stat()
     if (

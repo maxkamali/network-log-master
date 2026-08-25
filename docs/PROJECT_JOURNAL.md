@@ -12150,3 +12150,41 @@ Vector, ClickHouse, Grafana, the collector result gate, the GX10 pipeline/correl
 ### Next action
 
 None. Normal operation and operator evaluation of the enhanced dashboard continue; the original dashboard remains the immediate rollback/fallback presentation.
+
+## 2026-08-25 12:06 PDT - Item 34 deterministic NOC lifecycle candidate complete locally
+
+### Status
+
+Item 34 is the single `NEXT` item. No production artifact, schema, service, schedule, transport file, or dashboard changed during candidate construction.
+
+The operator approved replacing the enhanced dashboard's assessment-centric mechanics with three deterministic operational windows: Active Events, Interface Flaps, and Resolved Events. Assigned-operator and AI-recommendation fields are deliberately absent. The original AI dashboard remains the unchanged fallback.
+
+The candidate projects the authoritative GX10 `incidents` table directly rather than waiting for model inference. A protected local export cursor emits only changed incident snapshots in content-addressed JSONL batches of at most 100 records and 256 KiB. The existing shared outbox lock, one-file write-only sender, collector settling/acceptance ledger, and exact replay/conflict boundary are retained. Result records and lifecycle batches remain separately typed and strictly validated.
+
+Aggregate-only production sizing was read without printing identities:
+
+```text
+incidents_total=794
+OPEN=31
+RESOLVED=763
+interface_incidents=652
+interface_with_state_changes=630
+```
+
+The collector candidate adds `observability.incident_updates` as an additive replacing latest-state projection, routes lifecycle records away from `ai_updates`, and grants only insert to Vector and read-only select to Grafana. Active queries deliberately ignore the dashboard time picker so persistent unresolved incidents cannot disappear with age. Resolved queries apply the selected range to `resolved_at`. Three text controls search server-side across device/entity/category/protocol/title/incident identity, and a server-side severity selector applies to Active and Resolved windows. All interface-flap incidents are excluded from Active Events and shown only in the dedicated flap window until deterministic resolution.
+
+Local validation:
+
+```text
+gx10_tests=200
+collector_tests=55
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+collector_installer_syntax=PASS
+diff_check=PASS
+```
+
+The candidate includes deterministic batch/no-op/change/replay/tamper/ledger tests, dual-record sender tests, strict collector-gate lifecycle tests, clean-install schema/routing/grant assertions, reproducible Grafana v2 generation, server-side search assertions, and original-dashboard SHA-256 preservation.
+
+### Next action
+
+Run final public gates, publish and independently verify the exact candidate, then stage it on protected host-local paths. Validate Vector and Grafana syntax before activation; create only the additive ClickHouse table/grants; protect exact predecessors; upgrade the GX10/collector bounded chain; allow the initial batched lifecycle handoff to settle; verify current/resolved/flap cardinality and all dashboard queries; reconcile documentation; and publish closure.

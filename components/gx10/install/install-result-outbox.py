@@ -41,6 +41,16 @@ ARTIFACTS = (
         0o755,
     ),
     (
+        GX10_DIR / 'sbin' / 'build-incident-outbox.py',
+        LIBEXEC_DIR / 'build-incident-outbox.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'run-incident-outbox.py',
+        LIBEXEC_DIR / 'run-incident-outbox.py',
+        0o755,
+    ),
+    (
         GX10_DIR / 'systemd' / SERVICE,
         SYSTEMD_DIR / SERVICE,
         0o644,
@@ -52,6 +62,7 @@ ARTIFACTS = (
     ),
 )
 REQUIRED_TABLES = {
+    'incidents',
     'reasoning_packets',
     'reasoning_model_versions',
     'reasoning_prompt_versions',

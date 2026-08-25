@@ -43,6 +43,16 @@ ARTIFACTS = (
         0o755,
     ),
     (
+        GX10_DIR / 'sbin' / 'build-incident-outbox.py',
+        LIBEXEC_DIR / 'build-incident-outbox.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'run-incident-outbox.py',
+        LIBEXEC_DIR / 'run-incident-outbox.py',
+        0o755,
+    ),
+    (
         GX10_DIR / 'systemd' / SERVICE,
         SYSTEMD_DIR / SERVICE,
         0o644,
@@ -54,6 +64,7 @@ ARTIFACTS = (
     ),
 )
 REQUIRED_TABLES = {
+    'incidents',
     'reasoning_packets',
     'reasoning_model_versions',
     'reasoning_prompt_versions',
@@ -156,12 +167,17 @@ def validate_database(path):
             SELECT
               (SELECT COUNT(*) FROM reasoning_results),
               (SELECT COUNT(*) FROM reasoning_runs WHERE status='SUCCEEDED'),
-              (SELECT COUNT(*) FROM reasoning_runs WHERE status='STARTED')
+              (SELECT COUNT(*) FROM reasoning_runs WHERE status='STARTED'),
+              (SELECT COUNT(*) FROM incidents)
             '''
         ).fetchone()
         if counts[0] != counts[1] or counts[2]:
             raise ValueError('managed result outbox reasoning state differs')
-        return {'results': counts[0], 'started': counts[2]}
+        return {
+            'results': counts[0],
+            'started': counts[2],
+            'incidents': counts[3],
+        }
     finally:
         connection.close()
 
@@ -173,6 +189,18 @@ def load_producer():
     )
     if specification is None or specification.loader is None:
         raise ValueError('managed result outbox producer cannot be loaded')
+    module = importlib.util.module_from_spec(specification)
+    specification.loader.exec_module(module)
+    return module
+
+
+def load_incident_producer():
+    path = LIBEXEC_DIR / 'build-incident-outbox.py'
+    specification = importlib.util.spec_from_file_location(
+        'verified_installed_incident_outbox', path
+    )
+    if specification is None or specification.loader is None:
+        raise ValueError('managed incident outbox producer cannot be loaded')
     module = importlib.util.module_from_spec(specification)
     specification.loader.exec_module(module)
     return module
@@ -206,6 +234,10 @@ def validate_private_runtime(database, root, ready, delivered):
     if lock.exists() or lock.is_symlink():
         validate_file(lock, 0o600, uid=uid, gid=gid)
         allowed.add(lock.name)
+    ledger = Path(root) / '.incident-export-v1.sqlite3'
+    if ledger.exists() or ledger.is_symlink():
+        validate_file(ledger, 0o600, uid=uid, gid=gid)
+        allowed.add(ledger.name)
     if {path.name for path in Path(root).iterdir()} != allowed:
         raise ValueError('managed result outbox root entries differ')
     database_details = Path(database).stat()
@@ -242,17 +274,16 @@ def validate_units(active):
         raise ValueError('managed result outbox restart count differs')
 
 
-def inventory(directory, records, producer, uid, gid):
-    names = set()
+def inventory(directory, records, producer, incident_producer, uid, gid):
+    result_names = set()
+    incident_names = set()
     for path in sorted(Path(directory).iterdir(), key=lambda item: item.name):
-        if producer.PARTIAL_RE.fullmatch(path.name):
-            raise ValueError('managed result outbox has a stale partial')
         if (
-            producer.FINAL_RE.fullmatch(path.name) is None
-            or path.name not in records
-            or path.is_symlink()
-            or not path.is_file()
+            producer.PARTIAL_RE.fullmatch(path.name)
+            or incident_producer.PARTIAL_RE.fullmatch(path.name)
         ):
+            raise ValueError('managed result outbox has a stale partial')
+        if path.is_symlink() or not path.is_file():
             raise ValueError('managed result outbox entry differs')
         details = path.stat()
         if (
@@ -260,11 +291,21 @@ def inventory(directory, records, producer, uid, gid):
             or details.st_uid != uid
             or details.st_gid != gid
             or stat.S_IMODE(details.st_mode) != 0o640
-            or path.read_bytes() != records[path.name]
         ):
             raise ValueError('managed result outbox file differs')
-        names.add(path.name)
-    return names
+        if producer.FINAL_RE.fullmatch(path.name):
+            if (
+                path.name not in records
+                or path.read_bytes() not in records[path.name]
+            ):
+                raise ValueError('managed result outbox file differs')
+            result_names.add(path.name)
+        elif incident_producer.FINAL_RE.fullmatch(path.name):
+            incident_producer.validate_file(path, expected_uid=uid)
+            incident_names.add(path.name)
+        else:
+            raise ValueError('managed result outbox entry differs')
+    return result_names, incident_names
 
 
 def verify(
@@ -282,15 +323,25 @@ def verify(
     uid, gid = validate_private_runtime(database, root, ready, delivered)
     validate_units(active)
     producer = load_producer()
+    incident_producer = load_incident_producer()
     records = producer.load_records(database)
-    ready_names = inventory(ready, records, producer, uid, gid)
-    delivered_names = inventory(delivered, records, producer, uid, gid)
+    ready_names, incident_ready = inventory(
+        ready, records, producer, incident_producer, uid, gid
+    )
+    delivered_names, incident_delivered = inventory(
+        delivered, records, producer, incident_producer, uid, gid
+    )
     if ready_names & delivered_names:
         raise ValueError('managed result outbox state is duplicated')
+    if incident_ready & incident_delivered:
+        raise ValueError('managed incident outbox state is duplicated')
     if (
         not active
         and not allow_populated_inactive
-        and (ready_names or delivered_names)
+        and (
+            ready_names or delivered_names
+            or incident_ready or incident_delivered
+        )
     ):
         raise ValueError('inactive managed result outbox is not empty')
     if len(ready_names) + len(delivered_names) > state['results']:
@@ -299,6 +350,9 @@ def verify(
         'results': state['results'],
         'ready': len(ready_names),
         'delivered': len(delivered_names),
+        'incidents': state['incidents'],
+        'incident_ready': len(incident_ready),
+        'incident_delivered': len(incident_delivered),
     }
 
 

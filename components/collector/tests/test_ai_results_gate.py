@@ -40,6 +40,38 @@ def record(title: str = "synthetic result") -> bytes:
     ).encode("utf-8")
 
 
+def incident_record() -> dict:
+    return {
+        "body": "Deterministic incident lifecycle state.",
+        "device": "router.example.invalid",
+        "engine_version": 1,
+        "entity_name": "Ethernet1",
+        "entity_type": "interface",
+        "event_family": "ethport",
+        "first_seen": "2026-08-24T08:00:00Z",
+        "incident_id": "inc-v1-synthetic",
+        "interface_flap": True,
+        "last_observation_state": "down",
+        "last_seen": "2026-08-24T08:05:00Z",
+        "lifecycle_status": "OPEN",
+        "occurrence_count": 3,
+        "opened_at": "2026-08-24T08:00:00Z",
+        "producer_schema": "network-log-incident-state",
+        "producer_version": 1,
+        "protocol": "ethernet",
+        "recovering_at": None,
+        "repeat_count_total": 3,
+        "resolved_at": None,
+        "severity": "warning",
+        "snapshot_id": "state-v1-" + "a" * 32,
+        "snapshot_version": 1787559000000,
+        "state_change_count": 2,
+        "timestamp": "2026-08-24T08:05:00Z",
+        "title": "ethport: Ethernet1",
+        "type": "incident_lifecycle",
+    }
+
+
 class AIResultsGateTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
@@ -110,6 +142,21 @@ class AIResultsGateTests(unittest.TestCase):
         self.assertEqual(
             GATE.validate_record(value),
             "device exceeds 256 characters",
+        )
+
+    def test_incident_lifecycle_record_is_strict_and_bounded(self):
+        value = incident_record()
+        self.assertIsNone(GATE.validate_record(value))
+        value["lifecycle_status"] = "CLOSED"
+        self.assertEqual(
+            GATE.validate_record(value),
+            "incident lifecycle identity differs",
+        )
+        value = incident_record()
+        value["unexpected"] = True
+        self.assertEqual(
+            GATE.validate_record(value),
+            "incident lifecycle record keys differ",
         )
 
     def test_exact_replay_is_rejected_after_ready_file_is_removed(self):

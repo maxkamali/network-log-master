@@ -146,6 +146,28 @@ The primary NOC dashboard should remain a high-signal operational view. It shoul
 
 Raw logs remain available through drilldowns when investigation requires them.
 
+## NOC least-privilege access
+
+The working deployment has a dedicated Grafana organization for NOC Viewer access. It contains only copies of `NOC View` and `AI Incident Analysis - Enhanced` plus the two datasource definitions those dashboards require. The datasource copies retain their stable UIDs and use the existing read-only ClickHouse identity. The main organization and its six captured dashboards remain unchanged.
+
+The NOC account is a Viewer and belongs only to that organization. `NOC View` is its home dashboard and both approved dashboards are starred. Explicit dashboard View grants are retained, persistent dashboard creation/save is denied, and a dashboard outside the NOC inventory returns not found.
+
+Grafana OSS normally withholds Explore from Viewers. The working deployment enables `[users] viewers_can_edit = true` through a reversible systemd drop-in. This permits Viewer Explore and temporary panel editing but does not permit dashboard saves. Because Viewer Explore can query any datasource available to its organization, the separate organization contains only the two read-only datasource copies. The setting is global to future Viewer accounts, so any additional Viewer must be placed in a deliberately scoped organization.
+
+Grafana OSS does not provide a per-user custom navigation role. The Viewer role hides administration, connection management, and persistent editing, but an exact left-menu allowlist of only Home, Bookmarks, Starred, Dashboards, and Explore is not enforceable in this edition; other standard Viewer-accessible product sections may remain visible. Exact custom navigation/RBAC would require an edition or customization that supports it.
+
+For reconstruction after Grafana and the main organization are healthy:
+
+1. create a separate NOC organization
+2. create the operator-selected account as a Viewer belonging only to that organization
+3. copy only the two required datasource definitions using an operator-owned private read-only password input
+4. copy only the two approved dashboards and bind any organization-specific drilldown links to the NOC organization
+5. grant View, set `NOC View` as home, and star both dashboards
+6. enable Viewer Explore compatibility and restart Grafana through the normal protected service path
+7. verify organization isolation, dashboard/datasource inventory, save denial, non-scoped dashboard denial, every panel query, and unchanged main-organization resources
+
+Account passwords and datasource credentials are operator-owned private inputs and must not enter this public repository.
+
 ## AI presentation
 
 The live `AI Incident Analysis` dashboard presents the stabilized item-30 result contract from `observability.ai_updates`. The separate editable `AI Incident Analysis - Enhanced` resource preserves that original as an immediate fallback and now presents deterministic lifecycle state from `observability.incident_updates` as the operational NOC queue.
@@ -186,7 +208,9 @@ Item-34 production validation passed enhanced-only replacement dry-run, exact si
 
 Item-35 production validation passed pre/post execution of all thirteen live datasource queries, `dryRun=All`, enhanced-only replacement, and exact reread of all six resources. The current active split is two non-interface Active Events and 34 Interface Flaps, with zero interface entities in Active Events. Neither current Active row has a stored AI summary, so both display the deterministic detail fallback. The resolved statistic is labeled `Resolved` while retaining its selected-range semantics, and the original dashboard remains byte-exact.
 
-Item 36 tracks the repository-only protocol-monitoring candidate. Active Events maps deterministic `RECOVERING` to `MONITORING` only for BGP/OSPF/OSPFv3 and displays distinct issue episodes as lifecycle `recurrence_count + 1`. The enhanced queries require the additive default-zero collector column so immutable version-1 history remains queryable. Production remains unchanged until ordered collector-first deployment and enhanced-only dry-run/replacement pass.
+Item-36 production validation passed the ordered collector-first deployment, exact six-resource reread, all thirteen original/enhanced queries, enhanced-only replacement, recurrence parity, and unchanged existing resolved protocol history. Active Events maps deterministic `RECOVERING` to `MONITORING` only for BGP/OSPF/OSPFv3 and displays distinct issue episodes as lifecycle `recurrence_count + 1`; the additive default-zero collector column keeps immutable version-1 history queryable.
+
+Item-37 production validation passed the isolated NOC Viewer boundary, two-dashboard/two-datasource inventory, home/star preferences, non-scoped dashboard denial, persistent-write denial, all fourteen panel queries executed as the NOC Viewer, exact unchanged verification of all six main-organization dashboards, and healthy Grafana/data-path services.
 
 ## Change discipline
 

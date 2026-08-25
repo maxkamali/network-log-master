@@ -12415,3 +12415,40 @@ None. Remove only the two named temporary staging directories and the local memo
 Closure/documentation commit `c9aa2a6eb6493abc12f3605dcfce7d263d99f778` was published to GitHub, and an independent `ls-remote` comparison matched local and remote `main` exactly.
 
 The exact item-36 GX10 and collector staging directories and local memory-only credential helper are absent. Protected root-only predecessor copies remain retained on both hosts. Post-cleanup health remained green: all four GX10 schedules are enabled/active; correlation, reasoning, outbox, and sender last results are successful with zero restarts; ClickHouse, Vector, Grafana, and the collector gate timer are active with zero relevant restarts. Item 36 is `DONE`, the end-to-end target is complete through item 36, and there is no remaining `NEXT` item.
+
+## 2026-08-25 15:16 PDT - Item 37 isolated NOC Viewer access passed production validation
+
+### Status
+
+Item 37 is `DONE`. There is no remaining numbered `NEXT` item.
+
+The operator requested a read-only Grafana NOC account limited to `NOC View`, `AI Incident Analysis - Enhanced`, and Explore. Grafana OSS 13.1.1 cannot express an exact per-user left-navigation allowlist and normally withholds Explore from Viewers. The implemented least-privilege boundary therefore uses a separate Grafana organization containing only the two approved dashboards and two required datasource copies, a single dedicated Viewer membership, and the reversible `viewers_can_edit` compatibility setting. This enables Explore and temporary panel editing while persistent save/admin access remains denied. Future Viewer accounts would inherit that global compatibility setting and must be placed in intentionally scoped organizations.
+
+Before mutation, a root-only rollback boundary captured the original Grafana configuration and an online SQLite backup; the copy passed `PRAGMA quick_check`. A systemd drop-in enabling Viewer Explore compatibility passed unit verification before Grafana was restarted. Grafana returned healthy on HTTPS, remained active with zero restarts, and its administrator context was restored to the main organization after the bounded account/dashboard transaction.
+
+The dedicated account was created through no-echo credential handling. Its final access checks passed:
+
+```text
+organizations=1
+organization_role=Viewer
+server_admin=no
+dashboards=2
+starred_dashboards=2
+datasources=2
+dashboard_save=no
+dashboard_admin=no
+non_scoped_dashboard_status=404
+persistent_write_probe_status=403
+viewer_explore_compatibility=true
+home_dashboard=NOC View
+```
+
+Both datasource copies retain the required stable UIDs and use only the existing read-only database identity. Every panel query in both approved dashboards executed successfully as the NOC Viewer: eight `NOC View` panels and six enhanced-analysis panels, fourteen of fourteen total. Only frame and row counts were printed; no query result values, event content, device identity, credential, or private connection value entered the journal.
+
+The repository's exact main-organization verifier then reread all six captured dashboards and proved each complete specification unchanged. Grafana's SQLite database retained `quick_check=ok`; Grafana, ClickHouse, and Vector were active with successful results and zero restarts; the collector result-gate timer was enabled, active, and waiting with its latest service result successful.
+
+No ClickHouse data/schema, Vector configuration, GX10 artifact, transport file, incident state, model behavior, or captured dashboard specification changed. The only persistent changes are the isolated Grafana organization/account resources, its two dashboard and datasource copies, user home/star preferences, and the reversible Viewer Explore systemd drop-in. No password or datasource credential is stored in the public repository.
+
+### Next action
+
+None. Publish and independently verify this closure/documentation checkpoint, remove only the exact temporary validation stages and local helpers, retain the root-only rollback boundary, and continue normal NOC evaluation. Exact custom per-user navigation would require a separately authorized Grafana edition/customization change.

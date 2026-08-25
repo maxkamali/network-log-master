@@ -154,6 +154,8 @@ The enhanced dashboard is the deterministic NOC queue. Active Events and Interfa
 
 Grafana is served over HTTPS by the collector and reads ClickHouse through captured datasource identities.
 
+The working deployment also has a separate NOC Viewer organization containing only `NOC View`, `AI Incident Analysis - Enhanced`, and two datasource copies backed by the read-only ClickHouse identity. Its Viewer can use Explore and temporary panel editing because the reversible `viewers_can_edit` compatibility setting is active, but cannot save dashboards or administer Grafana. Viewer Explore can query every datasource in the Viewer organization, which is why no other datasource is present there. Passwords remain private operator inputs. Grafana OSS cannot enforce an exact per-user left-navigation allowlist; organization isolation and Viewer permissions are the supported boundary.
+
 Current dashboard reconstruction uses the supported Grafana 13 `dashboard.grafana.app/v2` API. Rebuild tooling must not write directly into Grafana's SQLite database.
 
 The clean-machine runtime installer restores the six captured dashboard resources only after HTTPS health and both ClickHouse datasources are verified, then runs the independent dashboard verifier and the redacted thirteen-query original/enhanced verifier. Runtime restore is fail-closed for unexpected divergent existing dashboards: automatic replacement is not enabled.

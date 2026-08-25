@@ -20,7 +20,7 @@ Disposable clean-two-server execution: `WAIVED BY OPERATOR`, empirically unverif
 
 Rebuild/documentation milestone disposition: `ACCEPTED WITH RESIDUAL RISK`.
 
-End-to-end working-system target: `COMPLETE` after the item-31 production/repository closure audit and item-32 AI-results dashboard addition.
+End-to-end working-system target: `COMPLETE` through the post-closure item-37 NOC access boundary.
 
 Post-closure AI-results Grafana dashboard feature: `DONE` under item 32.
 
@@ -34,6 +34,8 @@ Post-closure NOC presentation correction: `DONE` under item 35. The live enhance
 
 Post-closure OSPF/BGP monitoring window: `DONE` under item 36. Production retains confirmed BGP/OSPF/OSPFv3 incidents in deterministic `RECOVERING` state for 24 continuous healthy hours, presents that state as `MONITORING`, reopens the same correlated incident on an adverse relapse, and exports a dedicated recurrence counter through backward-compatible lifecycle producer version 2. Existing resolved history was not reopened or rewritten. The additive collector column/gate, exact GX10 engine/outbox/sender chain, and enhanced-only dashboard replacement are active under protected predecessors. Closure reconciled all 853 authoritative incidents to latest producer version 2 with the exact GX10 recurrence sum of 3,037 across 526 incidents.
 
+Post-closure NOC least-privilege Grafana access: `DONE` under item 37. A dedicated Viewer is isolated in a separate Grafana organization containing only `NOC View`, `AI Incident Analysis - Enhanced`, and two datasource copies backed by the existing read-only database identity. Both dashboards are starred, `NOC View` is the home dashboard, non-scoped dashboard access returns not found, and persistent dashboard writes are denied. Viewer Explore compatibility is enabled, so temporary panel exploration and direct queries are possible without save/admin rights. Grafana OSS does not support an exact per-user navigation-menu allowlist; the separate organization and Viewer role enforce the resource boundary while standard Viewer-accessible product sections may still appear.
+
 The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
 ## Platform state
@@ -43,6 +45,7 @@ The working observability path currently provides:
 - network syslog collection through Vector
 - durable raw syslog storage in ClickHouse
 - Grafana visualization over captured ClickHouse data
+- an isolated Grafana NOC Viewer organization with only the two approved operational dashboards and read-only datasource copies
 - compressed raw file backlog creation and preserved collector-local history
 - restricted read-only retrieval of verified normalized handoff files by GX10
 - GX10 local durable ingest with replay/idempotency protection
@@ -358,8 +361,9 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 34. `DONE` — published and independently verified the deterministic lifecycle/NOC candidate; protected and activated the additive incident-state outbox, collector lifecycle table/routing, and enhanced-only dashboard replacement; proved active incidents persist outside the time range, every interface flap is isolated in its own active window, resolved incidents use the selected resolution-time range, all three searches and severity filtering execute server-side, and the original dashboard/data paths remain unchanged and healthy.
 35. `DONE` — published and independently verified the enhanced-dashboard correction; proved all 34 active interface entities, including first observations with zero state changes, appear only under Interface Flaps while the two Active Events are non-interface; added latest AI summary with deterministic fallback to Active Event details; renamed the resolved statistic to `Resolved`; replaced only the enhanced resource after dry-run; and reverified all six resources, thirteen queries, original-dashboard exactness, and service health.
 36. `DONE` — published and independently verified the protocol-monitoring candidate; activated the additive collector recurrence column and version-2 gate before the GX10 producer; atomically upgraded the GX10 engine/outbox/sender chain under protected predecessors; proved exact recurrence parity, unchanged existing resolved protocol history, legacy version-1 compatibility, all six Grafana resources, all thirteen queries, enhanced-only replacement, empty outbox, and healthy unrelated schedules/data paths. Deterministic tests prove the 24-hour `MONITORING` and same-incident relapse behavior; no live confirmed protocol recovery existed during activation, so production evidence does not fabricate that state.
+37. `DONE` — created a dedicated Grafana NOC Viewer in an isolated organization; copied only `NOC View`, `AI Incident Analysis - Enhanced`, and their two read-only datasource definitions; set the NOC home/star preferences; enabled Viewer Explore compatibility; proved exactly one Viewer membership, two-dashboard/two-datasource inventory, non-scoped dashboard denial, persistent-write denial, all fourteen panel queries, unchanged exact main-organization dashboards, database integrity, and healthy Grafana/ClickHouse/Vector/gate services. Exact per-user navigation pruning remains unavailable in Grafana OSS and is not represented as enforced.
 
-The end-to-end target is complete through item 36. There is no remaining `NEXT` item. Item 36 changed only the deterministic recovery-monitoring policy and lifecycle presentation/recurrence projection for forward operation, without rewriting existing resolved history or changing model authority.
+The end-to-end target is complete through item 37. There is no remaining `NEXT` item. Item 37 changed only Grafana account/organization presentation access and the global Viewer Explore compatibility setting; it did not change dashboard specifications, ClickHouse data/schema, Vector, GX10, transport, incident state, or model authority.
 
 ## Scope constraints
 

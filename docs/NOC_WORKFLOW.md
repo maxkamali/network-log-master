@@ -16,6 +16,12 @@ The enhanced dashboard has three mutually understandable operational windows:
 
 Each window has a server-side text search across device, entity, event family, protocol, title, and incident ID. Active search also covers the displayed AI/deterministic detail. Active and Resolved have a server-side severity selector. The tables expose Device and Incident ID; they do not contain an assigned-operator field or an AI recommendation field.
 
+## Access boundary
+
+The working Grafana deployment exposes the operational queue through a dedicated NOC organization. Its Viewer sees only `NOC View`, `AI Incident Analysis - Enhanced`, and the two required read-only datasource copies. `NOC View` is the home dashboard and both dashboards are starred. Dashboard saves, administration, and access to dashboards in the main organization are denied.
+
+Explore is available to the Viewer for read-only investigation. Grafana implements this compatibility by permitting temporary panel editing, but persistence remains denied and the available datasource inventory is isolated to the two read-only copies. Grafana OSS does not support an exact per-user navigation allowlist, so standard Viewer-accessible sections may still be present even though administration and unrelated organization resources are not.
+
 ## State authority and movement
 
 GX10 owns deterministic lifecycle state in its local `incidents` table. The dashboard is a projection, not an editable ticket database.

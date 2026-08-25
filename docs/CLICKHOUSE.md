@@ -88,13 +88,14 @@ first_seen           DateTime64(3, 'UTC')
 last_seen            DateTime64(3, 'UTC')
 resolved_at          Nullable(DateTime64(3, 'UTC'))
 occurrence_count     UInt32
+recurrence_count     UInt32
 state_change_count   UInt32
 interface_flap       Bool
 type                 LowCardinality(String)
 raw_json             String
 ```
 
-The table uses `ReplacingMergeTree(snapshot_version)` ordered by `incident_id`. It intentionally has no TTL: unresolved state must not disappear because it is old, and resolved history remains available until an explicit retention policy is approved. Grafana selects the latest row per incident with `argMax` over `(snapshot_version, snapshot_id)`.
+The table uses `ReplacingMergeTree(snapshot_version)` ordered by `incident_id`. It intentionally has no TTL: unresolved state must not disappear because it is old, and resolved history remains available until an explicit retention policy is approved. Grafana selects the latest row per incident with `argMax` over `(snapshot_version, snapshot_id)`. The additive `recurrence_count` column defaults to zero for immutable producer-version-1 history; producer version 2 supplies the derived relapse count directly.
 
 Vector may insert into this table and Grafana may select from it. Lifecycle records are routed exclusively here; `type = incident_lifecycle` must never appear in `observability.ai_updates`.
 

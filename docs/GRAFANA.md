@@ -186,6 +186,8 @@ Item-34 production validation passed enhanced-only replacement dry-run, exact si
 
 Item-35 production validation passed pre/post execution of all thirteen live datasource queries, `dryRun=All`, enhanced-only replacement, and exact reread of all six resources. The current active split is two non-interface Active Events and 34 Interface Flaps, with zero interface entities in Active Events. Neither current Active row has a stored AI summary, so both display the deterministic detail fallback. The resolved statistic is labeled `Resolved` while retaining its selected-range semantics, and the original dashboard remains byte-exact.
 
+Item 36 tracks the repository-only protocol-monitoring candidate. Active Events maps deterministic `RECOVERING` to `MONITORING` only for BGP/OSPF/OSPFv3 and displays distinct issue episodes as lifecycle `recurrence_count + 1`. The enhanced queries require the additive default-zero collector column so immutable version-1 history remains queryable. Production remains unchanged until ordered collector-first deployment and enhanced-only dry-run/replacement pass.
+
 ## Change discipline
 
 When changing Grafana state:

@@ -364,6 +364,158 @@ class IncidentEngineTests(unittest.TestCase):
         self.assertEqual(context['windows']['60m']['evidence_count'], 5)
         self.assertEqual(context['windows']['60m']['repeat_count_total'], 8)
 
+    def test_ospf_recovery_monitors_for_24_hours_and_relapse_reopens(self):
+        start = 1787551200000
+        key = 'OSPF|router-a.example.invalid|1|192.0.2.20'
+        first = self.add_event(
+            start,
+            signal='state_transition',
+            state='down',
+            protocol='ospf',
+            family='ospf',
+            entity_type='ospf_neighbor',
+            entity_key=key,
+        )
+        recovery = self.add_event(
+            start + 60_000,
+            signal='recovery',
+            state='up',
+            protocol='ospf',
+            family='ospf',
+            entity_type='ospf_neighbor',
+            entity_key=key,
+        )
+        self.add_event(
+            start + 6 * 60_000,
+            entity_key=None,
+            entity_type=None,
+            signal='observation',
+            state=None,
+            attention=0,
+        )
+        relapse = self.add_event(
+            start + 23 * 60 * 60_000,
+            signal='state_transition',
+            state='down',
+            protocol='ospf',
+            family='ospf',
+            entity_type='ospf_neighbor',
+            entity_key=key,
+        )
+        second_recovery = self.add_event(
+            start + 23 * 60 * 60_000 + 60_000,
+            signal='recovery',
+            state='up',
+            protocol='ospf',
+            family='ospf',
+            entity_type='ospf_neighbor',
+            entity_key=key,
+        )
+        self.add_event(
+            start + 47 * 60 * 60_000,
+            entity_key=None,
+            entity_type=None,
+            signal='observation',
+            state=None,
+            attention=0,
+        )
+
+        self.assertEqual(self.run_engine(), 0)
+        self.assertEqual(
+            self.rows(
+                'SELECT status, occurrence_count, engine_version FROM incidents'
+            ),
+            [('RECOVERING', 4, 2)],
+        )
+        self.assertEqual(
+            self.rows(
+                '''
+                SELECT from_status, to_status, event_id, reason
+                FROM incident_transitions
+                ORDER BY transition_sequence
+                '''
+            ),
+            [
+                (None, 'CANDIDATE', first, 'first_adverse_evidence'),
+                ('CANDIDATE', 'OPEN', first, 'explicit_adverse_state'),
+                ('OPEN', 'RECOVERING', recovery, 'recovery_evidence'),
+                ('RECOVERING', 'OPEN', relapse, 'adverse_relapse'),
+                ('OPEN', 'RECOVERING', second_recovery, 'recovery_evidence'),
+            ],
+        )
+
+        self.add_event(
+            start + 47 * 60 * 60_000 + 2 * 60_000,
+            entity_key=None,
+            entity_type=None,
+            signal='observation',
+            state=None,
+            attention=0,
+        )
+        self.assertEqual(self.run_engine(), 0)
+        self.assertEqual(
+            self.rows('SELECT status FROM incidents'),
+            [('RESOLVED',)],
+        )
+        self.assertEqual(
+            self.rows(
+                '''
+                SELECT reason FROM incident_transitions
+                ORDER BY transition_sequence DESC LIMIT 1
+                '''
+            ),
+            [('protocol_monitoring_period',)],
+        )
+
+    def test_bgp_recovery_uses_24_hour_monitoring_deadline(self):
+        start = 1787551200000
+        key = 'BGP|router-a.example.invalid|192.0.2.30'
+        self.add_event(
+            start,
+            signal='state_transition',
+            state='idle',
+            protocol='bgp',
+            family='bgp',
+            entity_type='bgp_peer',
+            entity_key=key,
+        )
+        self.add_event(
+            start + 60_000,
+            signal='recovery',
+            state='established',
+            protocol='bgp',
+            family='bgp',
+            entity_type='bgp_peer',
+            entity_key=key,
+        )
+        self.add_event(
+            start + 23 * 60 * 60_000,
+            entity_key=None,
+            entity_type=None,
+            signal='observation',
+            state=None,
+            attention=0,
+        )
+        self.assertEqual(self.run_engine(), 0)
+        self.assertEqual(
+            self.rows('SELECT status FROM incidents'),
+            [('RECOVERING',)],
+        )
+
+        self.add_event(
+            start + 24 * 60 * 60_000 + 2 * 60_000,
+            entity_key=None,
+            entity_type=None,
+            signal='observation',
+            state=None,
+            attention=0,
+        )
+        self.assertEqual(self.run_engine(), 0)
+        self.assertEqual(
+            self.rows('SELECT status FROM incidents'),
+            [('RESOLVED',)],
+        )
+
     def test_candidate_timeout_and_suppressed_event(self):
         start = 1787551200000
         self.add_event(

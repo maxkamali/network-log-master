@@ -21,7 +21,7 @@ MAX_RECORDS = 100
 LEDGER_NAME = ".accepted-v1.sqlite3"
 LEDGER_VERSION = 1
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
-INCIDENT_RECORD_KEYS = {
+INCIDENT_RECORD_KEYS_V1 = {
     "body", "device", "engine_version", "entity_name", "entity_type",
     "event_family", "first_seen", "incident_id", "interface_flap",
     "last_observation_state", "last_seen", "lifecycle_status",
@@ -30,6 +30,7 @@ INCIDENT_RECORD_KEYS = {
     "severity", "snapshot_id", "snapshot_version", "state_change_count",
     "timestamp", "title", "type",
 }
+INCIDENT_RECORD_KEYS_V2 = INCIDENT_RECORD_KEYS_V1 | {"recurrence_count"}
 INCIDENT_STATUSES = {"CANDIDATE", "OPEN", "RECOVERING", "RESOLVED"}
 
 os.umask(0o027)
@@ -65,15 +66,23 @@ def valid_timestamp(value):
 
 
 def validate_incident_record(obj):
-    if set(obj) != INCIDENT_RECORD_KEYS:
+    producer_version = obj.get("producer_version")
+    expected_keys = {
+        1: INCIDENT_RECORD_KEYS_V1,
+        2: INCIDENT_RECORD_KEYS_V2,
+    }.get(producer_version)
+    if expected_keys is None or set(obj) != expected_keys:
         return "incident lifecycle record keys differ"
     if (
         obj.get("producer_schema") != "network-log-incident-state"
-        or obj.get("producer_version") != 1
         or obj.get("lifecycle_status") not in INCIDENT_STATUSES
         or type(obj.get("interface_flap")) is not bool
     ):
         return "incident lifecycle identity differs"
+    if not obj.get("snapshot_id", "").startswith(
+        f"state-v{producer_version}-"
+    ):
+        return "incident lifecycle snapshot identity differs"
     required_strings = {
         "device": 256,
         "entity_type": 128,
@@ -128,6 +137,14 @@ def validate_incident_record(obj):
             return f"{field} must be a nonnegative integer"
     if obj["occurrence_count"] < 1 or obj["repeat_count_total"] < 1:
         return "incident lifecycle counters must be positive"
+    if producer_version == 2:
+        value = obj["recurrence_count"]
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, int)
+            or not 0 <= value <= 4294967295
+        ):
+            return "recurrence_count must be a UInt32 integer"
     return None
 
 

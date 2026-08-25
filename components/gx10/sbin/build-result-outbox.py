@@ -22,10 +22,10 @@ MAX_FILE_BYTES = 256 * 1024
 LOCK_NAME = '.result-outbox.lock'
 FINAL_RE = re.compile(r'^ai-result-v1-[0-9a-f]{32}\.jsonl$')
 INCIDENT_FINAL_RE = re.compile(
-    r'^incident-state-v1-[0-9a-f]{32}\.jsonl$'
+    r'^incident-state-v[12]-[0-9a-f]{32}\.jsonl$'
 )
 INCIDENT_PARTIAL_RE = re.compile(
-    r'^\.incident-state-v1-[0-9a-f]{32}\.jsonl\.tmp-[1-9][0-9]*-[0-9]+$'
+    r'^\.incident-state-v[12]-[0-9a-f]{32}\.jsonl\.tmp-[1-9][0-9]*-[0-9]+$'
 )
 PARTIAL_RE = re.compile(
     r'^\.ai-result-v1-[0-9a-f]{32}\.jsonl\.tmp-[1-9][0-9]*-[0-9]+$'

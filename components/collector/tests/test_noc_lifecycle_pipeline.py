@@ -18,9 +18,15 @@ class NocLifecyclePipelineTests(unittest.TestCase):
             'snapshot_id', 'snapshot_version', 'incident_id', 'device',
             'entity_type', 'entity_name', 'event_family', 'protocol',
             'lifecycle_status', 'resolved_at', 'occurrence_count',
-            'state_change_count', 'interface_flap', 'raw_json',
+            'recurrence_count', 'state_change_count', 'interface_flap',
+            'raw_json',
         ):
             self.assertIn(f'`{column}`', sql)
+        migration = (
+            COLLECTOR / 'clickhouse/26-incident-recurrence.sql'
+        ).read_text(encoding='utf-8')
+        self.assertIn('ADD COLUMN IF NOT EXISTS `recurrence_count`', migration)
+        self.assertIn('UInt32 DEFAULT 0', migration)
 
     def test_vector_routes_lifecycle_away_from_ai_assessments(self):
         config = (COLLECTOR / 'vector/vector.yaml').read_text(encoding='utf-8')
@@ -47,6 +53,7 @@ class NocLifecyclePipelineTests(unittest.TestCase):
             COLLECTOR / 'clickhouse/40-access-control.sql.in'
         ).read_text(encoding='utf-8')
         self.assertGreaterEqual(installer.count('25-incident-updates.sql'), 2)
+        self.assertGreaterEqual(installer.count('26-incident-recurrence.sql'), 2)
         self.assertIn('"incident_updates": "ReplacingMergeTree"', verifier)
         self.assertIn(
             'GRANT SELECT ON observability.incident_updates\nTO grafana_reader;',

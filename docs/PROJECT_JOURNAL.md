@@ -12327,3 +12327,39 @@ None. Publish and independently verify this closure/documentation checkpoint, th
 Closure/documentation commit `01631f567044a299bff74b3a0f7976c00effb06a` was published to GitHub and an independent `ls-remote` comparison matched local and remote `main` exactly.
 
 The exact item-35 collector validation stage and local no-disk credential helper remain absent. Production verification is complete, item 35 is `DONE`, and there is no remaining `NEXT` item. Normal operator evaluation of the enhanced dashboard can continue with the original dashboard retained as the unchanged fallback.
+
+## 2026-08-25 14:07 PDT - Item 36 OSPF/BGP 24-hour monitoring candidate complete locally
+
+### Status
+
+Item 36 is the single `NEXT` item. No production service, schema, data, transport file, dashboard, credential, model, or schedule changed during candidate construction.
+
+The operator required confirmed OSPF and BGP incidents to remain under monitoring for 24 hours after recovery and to reuse an incrementing occurrence counter when the same correlated issue returns during that interval. The existing deterministic engine already retained `RECOVERING` as active, reopened the same correlation identity on adverse relapse, and created a new incident only after resolution. The candidate therefore changes the protocol-specific recovery deadline rather than redesigning identity or lifecycle state.
+
+Engine version 2 retains the 15-minute unconfirmed-candidate deadline and the five-minute recovery quiet period for unrelated protocols. BGP, OSPF, and OSPFv3 use a 24-hour event-time deadline anchored to the recovery transition. Supporting healthy evidence does not extend the deadline. A relapse before the deadline transitions the same incident from `RECOVERING` to `OPEN`; after the next recovery, a fresh 24-hour continuous-health window begins. Existing resolved rows are not reopened or rewritten.
+
+The existing `occurrence_count` counts accepted evidence rather than distinct fault episodes. Lifecycle producer version 2 therefore derives `recurrence_count` from append-only `RECOVERING -> OPEN` transitions whose reason is `adverse_relapse`. Grafana presents issue Occurrences as `recurrence_count + 1`. The GX10 database schema is unchanged; recurrence truth is derived from its immutable transition table.
+
+Producer version 2 adds only the bounded UInt32 recurrence field, uses `state-v2-*` snapshot identities, version-scaled monotonic snapshot numbers, and `incident-state-v2-*` filenames. Producer/sender/shared-directory/collector-gate validation remains strict for both immutable version-1 and new version-2 records. The collector candidate adds one default-zero UInt32 column through an idempotent `ALTER TABLE`; version-1 history therefore remains queryable without rewrite.
+
+The enhanced dashboard candidate labels BGP/OSPF/OSPFv3 `RECOVERING` rows as `MONITORING`, retains them in the time-range-independent Active queue, and uses distinct issue episodes for Occurrences. The original dashboard remains byte-exact at SHA-256 `794719f7cf112babb37c716df16959e631b0f63b81bbe9e503d243ffb36b83e5`; the new enhanced candidate is `518b442c32a8f327a8e008177df48ab42f7fc46567622e566cb1f8b640d9485b`.
+
+Focused engine/export/sender/gate/schema/dashboard validation passed 58 tests. The complete suites pass:
+
+```text
+gx10_tests=205
+collector_tests=56
+public_validator_tests=9
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+PUBLIC_REPOSITORY_CURRENT_TREE=PASS
+PUBLIC_REPOSITORY_HISTORY=PASS
+PUBLIC_REPOSITORY_LINKS=PASS
+PUBLIC_REPOSITORY_REF_TOPOLOGY=PASS
+PUBLIC_REPOSITORY_VALIDATION=PASS
+collector_installer_syntax=PASS
+diff_check=PASS
+```
+
+### Next action
+
+Run final public gates, publish and independently verify the exact candidate, then use protected collector-first deployment: add/verify the recurrence column and version-2 gate before any new record can arrive; validate all thirteen Grafana queries against the additive column; protect and atomically upgrade the exact GX10 engine/outbox/sender chain; allow bounded version-2 lifecycle export/delivery/acceptance; verify legacy version-1 inventory, new recurrence values, protocol-monitoring state, and all schedules; then dry-run and replace only the enhanced dashboard before final documentation closure.

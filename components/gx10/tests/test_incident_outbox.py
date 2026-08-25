@@ -60,6 +60,16 @@ class IncidentOutboxTests(unittest.TestCase):
             )
             '''
         )
+        connection.execute(
+            '''
+            CREATE TABLE incident_transitions (
+                incident_id TEXT NOT NULL,
+                from_status TEXT,
+                to_status TEXT NOT NULL,
+                reason TEXT NOT NULL
+            )
+            '''
+        )
         connection.commit()
         connection.close()
 
@@ -90,7 +100,7 @@ class IncidentOutboxTests(unittest.TestCase):
 
     def records(self):
         result = []
-        for path in sorted(self.ready.glob('incident-state-v1-*.jsonl')):
+        for path in sorted(self.ready.glob('incident-state-v*-*.jsonl')):
             result.extend(
                 json.loads(line)
                 for line in path.read_text(encoding='utf-8').splitlines()
@@ -152,8 +162,48 @@ class IncidentOutboxTests(unittest.TestCase):
         self.assertEqual(record['entity_name'], 'Ethernet7')
         self.assertTrue(record['interface_flap'])
         self.assertEqual(record['type'], 'incident_lifecycle')
+        self.assertEqual(record['producer_version'], 2)
+        self.assertEqual(record['recurrence_count'], 0)
+        self.assertTrue(record['snapshot_id'].startswith('state-v2-'))
         self.assertNotIn('model', record)
         self.assertNotIn('recommended_actions', record)
+
+    def test_recurrence_count_is_derived_from_adverse_relapse_transitions(self):
+        self.add_incident(8)
+        connection = sqlite3.connect(self.database)
+        connection.executemany(
+            'INSERT INTO incident_transitions VALUES (?, ?, ?, ?)',
+            [
+                (f'inc-v1-{8:032x}', 'RECOVERING', 'OPEN', 'adverse_relapse'),
+                (f'inc-v1-{8:032x}', 'OPEN', 'RECOVERING', 'recovery_evidence'),
+                (f'inc-v1-{8:032x}', 'RECOVERING', 'OPEN', 'adverse_relapse'),
+            ],
+        )
+        connection.commit()
+        connection.close()
+
+        OUTBOX.build(self.database, self.ready, self.delivered)
+
+        self.assertEqual(self.records()[0]['recurrence_count'], 2)
+
+    def test_legacy_version_1_delivery_remains_valid_during_version_2_export(self):
+        self.add_incident(9)
+        current = OUTBOX.load_incidents(self.database)
+        record = json.loads(next(iter(current.values()))[1])
+        record.pop('recurrence_count')
+        record['producer_version'] = 1
+        record['snapshot_id'] = 'state-v1-' + 'b' * 32
+        record['snapshot_version'] = 1787559000000
+        data = (OUTBOX.canonical_json(record) + '\n').encode('utf-8')
+        path = self.delivered / OUTBOX.output_name(data)
+        path.write_bytes(data)
+        path.chmod(0o640)
+
+        state = OUTBOX.build(self.database, self.ready, self.delivered)
+
+        self.assertEqual(state['delivered'], 1)
+        self.assertEqual(state['created'], 1)
+        self.assertTrue(next(self.ready.iterdir()).name.startswith('incident-state-v2-'))
 
     def test_tampered_lifecycle_file_is_refused(self):
         self.add_incident(1)

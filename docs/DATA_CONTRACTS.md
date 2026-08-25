@@ -218,6 +218,7 @@ opened_at
 recovering_at
 resolved_at
 occurrence_count
+recurrence_count
 repeat_count_total
 state_change_count
 last_observation_state
@@ -230,7 +231,7 @@ producer_schema
 producer_version
 ```
 
-The producer emits only changed incidents, in immutable content-addressed JSONL batches of at most 100 records and 256 KiB. A service-owned mode-`0600` SQLite cursor records the last exported snapshot version per incident. The producer shares the result-outbox lock but does not invoke the network.
+The producer emits only changed incidents, in immutable content-addressed JSONL batches of at most 100 records and 256 KiB. A service-owned mode-`0600` SQLite cursor records the last exported snapshot version per incident. The producer shares the result-outbox lock but does not invoke the network. Producer version 2 adds nonnegative UInt32 `recurrence_count`, derived from append-only adverse-relapse transitions, and uses a monotonic version-scaled snapshot number. Exact producer-version-1 files remain valid and are never rewritten.
 
 The collector gate accepts lifecycle batches only when every record has the exact bounded lifecycle shape and timestamp invariants. Vector routes them exclusively to `observability.incident_updates`; AI-result records continue exclusively to `observability.ai_updates`.
 
@@ -247,6 +248,8 @@ CANDIDATE -> OPEN -> RECOVERING -> RESOLVED
 ```
 
 Incident state retains append-only evidence/transitions, first/last seen times, occurrence and canonical repeat counters, entity identity, current state, and exact 60-minute/180-minute/24-hour rolling context summaries.
+
+Confirmed BGP/OSPF/OSPFv3 incidents remain `RECOVERING` for 24 continuous healthy hours after recovery; operator presentation labels that state `MONITORING`. A correlated adverse relapse during the window reopens the same incident and increments its derived recurrence count. Other protocols retain the five-minute recovery quiet period, and unconfirmed candidates retain the 15-minute qualification deadline.
 
 The local LLM consumes immutable incident packets and returns append-only structured analysis; it does not become the canonical incident database.
 

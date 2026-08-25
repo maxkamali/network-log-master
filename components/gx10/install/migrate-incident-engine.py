@@ -18,7 +18,7 @@ BASE_SCHEMA = GX10_DIR / "sql" / "initialize.sql"
 INCIDENT_SCHEMA = GX10_DIR / "sql" / "incident-v1.sql"
 ENGINE_SOURCE = GX10_DIR / "sbin" / "incident-engine.py"
 ENGINE_SHA256 = (
-    "10b1133a00f775e5e5a4a3597156022eb46d62a2c1c2fe6424579af6341bfb6a"
+    "b45aa4f723f0f8caa81201ac47a302d45f3da4827a19090ab5d241a0be31009d"
 )
 SCHEMA_SHA256 = (
     "25f4e6a4246c2fe25ac9db726be29accef3d57b268a59f4aa676d851edb52693"

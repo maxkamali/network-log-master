@@ -57,13 +57,14 @@ def incident_record() -> dict:
         "occurrence_count": 3,
         "opened_at": "2026-08-24T08:00:00Z",
         "producer_schema": "network-log-incident-state",
-        "producer_version": 1,
+        "producer_version": 2,
         "protocol": "ethernet",
+        "recurrence_count": 1,
         "recovering_at": None,
         "repeat_count_total": 3,
         "resolved_at": None,
         "severity": "warning",
-        "snapshot_id": "state-v1-" + "a" * 32,
+        "snapshot_id": "state-v2-" + "a" * 32,
         "snapshot_version": 1787559000000,
         "state_change_count": 2,
         "timestamp": "2026-08-24T08:05:00Z",
@@ -158,6 +159,14 @@ class AIResultsGateTests(unittest.TestCase):
             GATE.validate_record(value),
             "incident lifecycle record keys differ",
         )
+
+    def test_legacy_version_1_incident_record_remains_accepted(self):
+        value = incident_record()
+        value.pop("recurrence_count")
+        value["producer_version"] = 1
+        value["snapshot_id"] = "state-v1-" + "a" * 32
+
+        self.assertIsNone(GATE.validate_record(value))
 
     def test_exact_replay_is_rejected_after_ready_file_is_removed(self):
         source = self.write_incoming()

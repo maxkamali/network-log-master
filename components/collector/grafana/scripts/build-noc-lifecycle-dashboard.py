@@ -23,6 +23,7 @@ LATEST_CTE = '''WITH latest AS (
         argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,
         argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,
         argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,
+        argMax(recurrence_count, tuple(snapshot_version, snapshot_id)) AS recurrence_count,
         argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,
         argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,
         argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,
@@ -298,11 +299,16 @@ def build_document():
             )
         )
     ) AS "Event Details",
-    lifecycle_status AS "State",
+    if(
+        lifecycle_status = 'RECOVERING'
+        AND lowerUTF8(protocol) IN ('bgp', 'ospf', 'ospfv3'),
+        'MONITORING',
+        lifecycle_status
+    ) AS "State",
     first_seen AS "First Seen",
     last_seen AS "Last Activity",
     dateDiff('minute', first_seen, now()) AS "Age (min)",
-    occurrence_count AS "Occurrences",
+    recurrence_count + 1 AS "Occurrences",
     event_family AS "Category",
     incident_id AS "Incident ID"
 FROM latest
@@ -320,7 +326,7 @@ LIMIT 500'''
     first_seen AS "First Seen",
     last_seen AS "Last Activity",
     state_change_count AS "Flaps",
-    occurrence_count AS "Occurrences",
+    recurrence_count + 1 AS "Occurrences",
     dateDiff('minute', first_seen, now()) AS "Age (min)",
     incident_id AS "Incident ID"
 FROM latest
@@ -336,7 +342,7 @@ LIMIT 500'''
     first_seen AS "First Seen",
     resolved_at AS "Resolved",
     dateDiff('minute', first_seen, assumeNotNull(resolved_at)) AS "Duration (min)",
-    occurrence_count AS "Occurrences",
+    recurrence_count + 1 AS "Occurrences",
     event_family AS "Category",
     if(entity_type = 'interface', 'yes', 'no') AS "Interface Flap",
     incident_id AS "Incident ID"
@@ -353,7 +359,7 @@ LIMIT 500'''
         'panel-1': stat_panel(1, 'Active Events', 'Current non-interface incidents; active state is never hidden by the dashboard time range.', active_count, 'red'),
         'panel-2': stat_panel(2, 'Interface Flaps', 'All current interface incidents, including a first down observation before another state change, are kept in this queue.', flap_count, 'orange'),
         'panel-3': stat_panel(3, 'Resolved', 'Incidents resolved during the selected dashboard time range.', resolved_count, 'green'),
-        'panel-4': table_panel(4, 'Active Events', 'One current row per unresolved non-interface incident. Event Details uses the latest AI summary when available and deterministic state detail otherwise. Search is server-side and the time picker does not hide persistent incidents.', active_sql, [
+        'panel-4': table_panel(4, 'Active Events', 'One current row per unresolved non-interface incident. Recovered OSPF/BGP incidents remain MONITORING for 24 continuous healthy hours; a relapse reopens the same incident and increments Occurrences. Event Details uses the latest AI summary when available and deterministic state detail otherwise. Search is server-side and the time picker does not hide persistent incidents.', active_sql, [
             ('Severity', 105), ('Device', 190), ('Event', 260),
             ('Event Details', 560), ('State', 125),
             ('First Seen', 135), ('Last Activity', 135), ('Age (min)', 95),

@@ -148,7 +148,7 @@ authoritative incidents      -> changed lifecycle batches
 
 The sender remains one-file-per-cycle and uses the existing write-only identity. The collector gate validates both record families, its immutable filename/content ledger applies to both, and Vector routes them to separate ClickHouse tables. Lifecycle records cannot enter `ai_updates` and AI records cannot enter `incident_updates`.
 
-The enhanced dashboard is the deterministic NOC queue. Active Events and Interface Flaps deliberately ignore the dashboard time range so unresolved work persists; Resolved Events uses `resolved_at` within the selected range. Operators can search each window and filter Active/Resolved by severity. Resolution remains engine-driven; Grafana does not mutate incident state. See `docs/NOC_WORKFLOW.md`.
+The enhanced dashboard is the deterministic NOC queue. Active Events and Interface Flaps deliberately ignore the dashboard time range so unresolved work persists; Resolved Events uses `resolved_at` within the selected range. Confirmed recovered BGP/OSPF/OSPFv3 incidents remain active for a 24-hour monitoring window, display `MONITORING`, and reuse the same incident/issue-occurrence counter if they relapse before resolution. Operators can search each window and filter Active/Resolved by severity. Resolution remains engine-driven; Grafana does not mutate incident state. See `docs/NOC_WORKFLOW.md`.
 
 ## Grafana operational boundary
 

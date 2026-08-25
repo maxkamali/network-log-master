@@ -21,7 +21,7 @@ The collector owns:
 - long-lived data retention
 - unknown-event inventory and replay material
 
-The enhanced Grafana resource is the deterministic NOC queue over `observability.incident_updates`: Active Events, Interface Flaps, and Resolved Events each have server-side search; Active and Resolved also have server-side severity filtering. Queue placement uses `entity_type = interface` so even a first interface-down observation appears only under Interface Flaps. Active Event detail uses the latest stored AI summary when available and deterministic fallback otherwise. The original AI dashboard remains unchanged as the assessment-history fallback. See `docs/NOC_WORKFLOW.md`.
+The enhanced Grafana resource is the deterministic NOC queue over `observability.incident_updates`: Active Events, Interface Flaps, and Resolved Events each have server-side search; Active and Resolved also have server-side severity filtering. Queue placement uses `entity_type = interface` so even a first interface-down observation appears only under Interface Flaps. Active Event detail uses the latest stored AI summary when available and deterministic fallback otherwise. The item-36 candidate displays recovered BGP/OSPF/OSPFv3 incidents as `MONITORING` during their 24-hour deterministic window and presents distinct issue episodes from the version-2 recurrence projection. The original AI dashboard remains unchanged as the assessment-history fallback. See `docs/NOC_WORKFLOW.md`.
 
 ## Rebuild objective
 

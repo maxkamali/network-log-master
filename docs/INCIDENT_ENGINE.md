@@ -2,7 +2,7 @@
 
 ## Status and authority boundary
 
-The version-1 incident engine completed execution-order item 25. Its private working-database-copy, cursor-reset replay, independent deterministic rebuild, and guarded unscheduled working-system migration gates pass. Item 26 later completed the separate managed production invocation gate: initial backfill and three scheduled zero-lag cadences passed while the original fetch/ingest timer continued advancing. The protected pre-migration backup remains retained.
+The version-1 incident engine completed execution-order item 25. Its private working-database-copy, cursor-reset replay, independent deterministic rebuild, and guarded unscheduled working-system migration gates pass. Item 26 later completed the separate managed production invocation gate: initial backfill and three scheduled zero-lag cadences passed while the original fetch/ingest timer continued advancing. The protected pre-migration backup remains retained. Item 36 advances the repository candidate to engine version 2 solely for the forward-only protocol-monitoring policy; production remains on the verified predecessor until that candidate is published and protected deployment passes.
 
 The engine consumes only classification-version-4 rows created by the canonical normalized-field projector. It does not parse raw messages, infer identity with an LLM, call Ollama, or emit AI results. Canonical normalized records remain observation authority; deterministic SQLite state remains incident identity and lifecycle authority.
 
@@ -40,7 +40,8 @@ The permitted transitions are deliberately narrower than the diagram's visual gr
 - a candidate with no qualifying second adverse observation resolves at its fixed 15-minute deadline
 - recovery evidence moves an open incident to `RECOVERING`
 - adverse evidence during recovery reopens the same incident as a relapse
-- five minutes of quiet after the latest recovery-period evidence resolves the incident
+- confirmed BGP, OSPF, and OSPFv3 recovery remains `RECOVERING` for 24 continuous healthy hours from the recovery transition; the dashboard presents this as `MONITORING`
+- other recovering incidents retain the five-minute quiet-period rule
 - adverse evidence after resolution creates a new deterministic incident instance
 
 Every lifecycle transition is append-only. Timeout transitions use their deterministic event-time deadline rather than wall-clock execution time. Before each later event is correlated, deadlines at or before the current event-time watermark are resolved, so a late recovery or supporting observation cannot extend an expired candidate.
@@ -58,6 +59,8 @@ The mutable incident row is a compact materialization over immutable evidence. I
 - deterministic rolling context
 
 Context contains exact evidence, repeat, adverse, recovery, and supporting counts for 60-minute, 180-minute, and 24-hour windows. It is canonical compact JSON and can later be supplied to a local model, but model output cannot modify these facts or lifecycle state.
+
+The operator-facing issue-occurrence count is distinct from evidence count. Lifecycle producer version 2 derives `recurrence_count` from append-only `RECOVERING -> OPEN` `adverse_relapse` transitions and presents total issue episodes as `recurrence_count + 1`. A relapse inside the 24-hour monitoring window therefore increments the same incident; only an adverse event after deterministic resolution creates a new incident instance.
 
 ## Transactions, replay, and failure behavior
 

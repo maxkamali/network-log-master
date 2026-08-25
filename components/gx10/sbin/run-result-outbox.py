@@ -16,7 +16,7 @@ PRODUCER_PATH = Path(
     '/usr/local/libexec/network-log-gx10/build-result-outbox.py'
 )
 PRODUCER_SHA256 = (
-    '7f4b55bbe7a8ad9c833c4e3a227851854f97ead9e3769bcb7f6bba270be2c30e'
+    'c9e7ecb110f691a0c29fafc9b35ea42573fe2bec352d4aad8ad47a924c4c9a5a'
 )
 
 

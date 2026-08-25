@@ -20,12 +20,14 @@ DB = (
     if load_runtime_config is not None
     else None
 )
-ENGINE_VERSION = 1
+ENGINE_VERSION = 2
 PROJECTION_VERSION = 4
 CURSOR_KEY = "incident_engine_v1_last_event_id"
 BATCH_SIZE = 1000
 CANDIDATE_WINDOW_MS = 15 * 60 * 1000
 RECOVERY_QUIET_MS = 5 * 60 * 1000
+PROTOCOL_MONITORING_MS = 24 * 60 * 60 * 1000
+MONITORED_PROTOCOLS = {"bgp", "ospf", "ospfv3"}
 CONTEXT_WINDOWS_MS = {
     "60m": 60 * 60 * 1000,
     "180m": 180 * 60 * 1000,
@@ -163,6 +165,38 @@ def iso_from_epoch(epoch_ms: int) -> str:
         epoch_ms / 1000,
         tz=timezone.utc,
     ).isoformat()
+
+
+def epoch_from_iso(value: str) -> int:
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (AttributeError, ValueError) as exc:
+        raise IncidentError("incident recovery timestamp is invalid") from exc
+    if parsed.tzinfo is None:
+        raise IncidentError("incident recovery timestamp is invalid")
+    return int(parsed.timestamp() * 1000)
+
+
+def uses_protocol_monitoring(current: sqlite3.Row) -> bool:
+    return any(
+        (current[field] or "").casefold() in MONITORED_PROTOCOLS
+        for field in ("protocol", "event_family")
+    )
+
+
+def recovery_deadline(current: sqlite3.Row) -> tuple[int, str]:
+    if uses_protocol_monitoring(current):
+        if not current["recovering_at"]:
+            raise IncidentError("monitored incident lacks recovery timestamp")
+        return (
+            epoch_from_iso(current["recovering_at"])
+            + PROTOCOL_MONITORING_MS,
+            "protocol_monitoring_period",
+        )
+    return (
+        current["last_seen_epoch_ms"] + RECOVERY_QUIET_MS,
+        "recovery_quiet_period",
+    )
 
 
 def validate_database_contract(connection: sqlite3.Connection) -> None:
@@ -592,6 +626,7 @@ def update_incident_with_evidence(
             observation_state_changes = ?,
             last_observation_state = COALESCE(?, last_observation_state),
             last_event_id = ?,
+            engine_version = ?,
             updated_at = ?
         WHERE incident_id = ?
         """,
@@ -603,6 +638,7 @@ def update_incident_with_evidence(
             state_changes,
             state,
             row["id"],
+            ENGINE_VERSION,
             row["timestamp"],
             incident,
         ),
@@ -722,10 +758,11 @@ def resolve_at_deadline(
     connection.execute(
         """
         UPDATE incidents
-        SET status = 'RESOLVED', resolved_at = ?, updated_at = ?
+        SET status = 'RESOLVED', resolved_at = ?, engine_version = ?,
+            updated_at = ?
         WHERE incident_id = ?
         """,
-        (occurred_at, occurred_at, current["incident_id"]),
+        (occurred_at, ENGINE_VERSION, occurred_at, current["incident_id"]),
     )
     refresh_context(connection, current["incident_id"])
 
@@ -746,8 +783,7 @@ def sweep_timeouts(
             deadline = current["first_seen_epoch_ms"] + CANDIDATE_WINDOW_MS
             reason = "candidate_timeout"
         else:
-            deadline = current["last_seen_epoch_ms"] + RECOVERY_QUIET_MS
-            reason = "recovery_quiet_period"
+            deadline, reason = recovery_deadline(current)
         if deadline <= watermark_ms:
             resolve_at_deadline(connection, current, reason, deadline)
             transitions += 1

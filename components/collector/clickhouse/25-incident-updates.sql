@@ -17,6 +17,7 @@ CREATE TABLE observability.incident_updates
     `recovering_at` Nullable(DateTime64(3, 'UTC')),
     `resolved_at` Nullable(DateTime64(3, 'UTC')),
     `occurrence_count` UInt32,
+    `recurrence_count` UInt32 DEFAULT 0,
     `repeat_count_total` UInt64,
     `state_change_count` UInt32,
     `last_observation_state` LowCardinality(String),

@@ -285,6 +285,7 @@ for path in \
     "$CLICKHOUSE_DIR/10-syslog.sql" \
     "$CLICKHOUSE_DIR/20-ai-updates.sql" \
     "$CLICKHOUSE_DIR/25-incident-updates.sql" \
+    "$CLICKHOUSE_DIR/26-incident-recurrence.sql" \
     "$CLICKHOUSE_DIR/30-grafana-logs.sql" \
     "$CLICKHOUSE_DIR/40-access-control.sql.in" \
     "$VECTOR_DIR/vector.yaml" \
@@ -457,6 +458,7 @@ for sql in \
     "$CLICKHOUSE_DIR/10-syslog.sql" \
     "$CLICKHOUSE_DIR/20-ai-updates.sql" \
     "$CLICKHOUSE_DIR/25-incident-updates.sql" \
+    "$CLICKHOUSE_DIR/26-incident-recurrence.sql" \
     "$CLICKHOUSE_DIR/30-grafana-logs.sql" \
     "$RENDERED/40-access-control.sql"
 do

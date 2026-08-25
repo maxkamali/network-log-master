@@ -18,7 +18,7 @@ MAX_FILE_BYTES = 256 * 1024
 LOCK_NAME = '.result-outbox.lock'
 FINAL_RE = re.compile(r'^ai-result-v1-[0-9a-f]{32}\.jsonl$')
 INCIDENT_FINAL_RE = re.compile(
-    r'^incident-state-v1-[0-9a-f]{32}\.jsonl$'
+    r'^incident-state-v(?P<version>[12])-[0-9a-f]{32}\.jsonl$'
 )
 HOST_RE = re.compile(r'^[A-Za-z0-9.-]+$')
 USER_RE = re.compile(r'^[A-Za-z0-9._-]+$')
@@ -44,7 +44,7 @@ EXPECTED_RECORD_KEYS = {
     'type',
 }
 DEVICE_RECORD_KEYS = EXPECTED_RECORD_KEYS | {'device'}
-INCIDENT_RECORD_KEYS = {
+INCIDENT_RECORD_KEYS_V1 = {
     'body', 'device', 'engine_version', 'entity_name', 'entity_type',
     'event_family', 'first_seen', 'incident_id', 'interface_flap',
     'last_observation_state', 'last_seen', 'lifecycle_status',
@@ -53,6 +53,7 @@ INCIDENT_RECORD_KEYS = {
     'severity', 'snapshot_id', 'snapshot_version', 'state_change_count',
     'timestamp', 'title', 'type',
 }
+INCIDENT_RECORD_KEYS_V2 = INCIDENT_RECORD_KEYS_V1 | {'recurrence_count'}
 INCIDENT_STATUSES = {'CANDIDATE', 'OPEN', 'RECOVERING', 'RESOLVED'}
 
 
@@ -87,8 +88,15 @@ def output_name(run_id):
 
 
 def incident_output_name(data):
+    try:
+        first = json.loads(data.decode('utf-8').splitlines()[0])
+    except (IndexError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SenderError('incident sender file JSON differs') from exc
+    version = first.get('producer_version') if isinstance(first, dict) else None
+    if version not in {1, 2}:
+        raise SenderError('incident sender producer version differs')
     digest = hashlib.sha256(data).hexdigest()
-    return f'incident-state-v1-{digest[:32]}.jsonl'
+    return f'incident-state-v{version}-{digest[:32]}.jsonl'
 
 
 def validate_directory(path):
@@ -137,16 +145,25 @@ def validate_private_file(path, label):
 
 
 def validate_incident_record(record):
+    producer_version = (
+        record.get('producer_version') if isinstance(record, dict) else None
+    )
+    expected_keys = {
+        1: INCIDENT_RECORD_KEYS_V1,
+        2: INCIDENT_RECORD_KEYS_V2,
+    }.get(producer_version)
     if (
         not isinstance(record, dict)
-        or set(record) != INCIDENT_RECORD_KEYS
+        or expected_keys is None
+        or set(record) != expected_keys
         or record.get('producer_schema') != 'network-log-incident-state'
-        or record.get('producer_version') != 1
         or record.get('type') != 'incident_lifecycle'
         or record.get('lifecycle_status') not in INCIDENT_STATUSES
         or type(record.get('interface_flap')) is not bool
     ):
         raise SenderError('incident sender record identity differs')
+    if not record['snapshot_id'].startswith(f'state-v{producer_version}-'):
+        raise SenderError('incident sender snapshot identity differs')
     for field, maximum in (
         ('body', 65536), ('device', 256), ('entity_type', 128),
         ('event_family', 128), ('incident_id', 256), ('protocol', 128),
@@ -187,6 +204,14 @@ def validate_incident_record(record):
             raise SenderError(f'incident sender {field} differs')
     if record['occurrence_count'] < 1 or record['repeat_count_total'] < 1:
         raise SenderError('incident sender counters differ')
+    if producer_version == 2:
+        value = record['recurrence_count']
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, int)
+            or not 0 <= value <= 4294967295
+        ):
+            raise SenderError('incident sender recurrence_count differs')
 
 
 def validate_incident_batch(name, data):
@@ -200,6 +225,7 @@ def validate_incident_batch(name, data):
         raise SenderError('incident sender record count differs')
     records = []
     incidents = set()
+    versions = set()
     for line in lines:
         try:
             record = json.loads(line)
@@ -208,10 +234,14 @@ def validate_incident_batch(name, data):
         if canonical_json(record) != line:
             raise SenderError('incident sender file is not canonical')
         validate_incident_record(record)
+        versions.add(record['producer_version'])
         if record['incident_id'] in incidents:
             raise SenderError('incident sender batch duplicates an incident')
         incidents.add(record['incident_id'])
         records.append(record)
+    match = INCIDENT_FINAL_RE.fullmatch(name)
+    if len(versions) != 1 or int(match.group('version')) not in versions:
+        raise SenderError('incident sender producer version differs')
     return min(records, key=lambda item: item['timestamp'])
 
 

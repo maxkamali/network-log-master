@@ -88,8 +88,8 @@ class ResultSenderTests(unittest.TestCase):
         path.chmod(0o640)
         return path, data
 
-    def incident_record(self, incident_id, timestamp):
-        return {
+    def incident_record(self, incident_id, timestamp, *, version=2):
+        record = {
             'body': 'Deterministic incident lifecycle state.',
             'device': 'router.example.invalid',
             'engine_version': 1,
@@ -105,24 +105,31 @@ class ResultSenderTests(unittest.TestCase):
             'occurrence_count': 3,
             'opened_at': '2026-08-24T08:00:00Z',
             'producer_schema': 'network-log-incident-state',
-            'producer_version': 1,
+            'producer_version': version,
             'protocol': 'ethernet',
             'recovering_at': None,
             'repeat_count_total': 3,
             'resolved_at': None,
             'severity': 'warning',
-            'snapshot_id': 'state-v1-' + 'a' * 32,
+            'snapshot_id': f'state-v{version}-' + 'a' * 32,
             'snapshot_version': 1787559000000,
             'state_change_count': 2,
             'timestamp': timestamp,
             'title': 'ethport: Ethernet1',
             'type': 'incident_lifecycle',
         }
+        if version == 2:
+            record['recurrence_count'] = 1
+        return record
 
-    def add_incident_batch(self):
+    def add_incident_batch(self, *, version=2):
         records = [
-            self.incident_record('inc-v1-a', '2026-08-24T08:09:00Z'),
-            self.incident_record('inc-v1-b', '2026-08-24T08:10:00Z'),
+            self.incident_record(
+                'inc-v1-a', '2026-08-24T08:09:00Z', version=version
+            ),
+            self.incident_record(
+                'inc-v1-b', '2026-08-24T08:10:00Z', version=version
+            ),
         ]
         data = ''.join(canonical_json(row) + '\n' for row in records).encode()
         name = SENDER.incident_output_name(data)
@@ -196,6 +203,14 @@ class ResultSenderTests(unittest.TestCase):
 
     def test_canonical_incident_batch_is_sent_unchanged(self):
         path, data = self.add_incident_batch()
+
+        state = self.send()
+
+        self.assertEqual(state['sent'], 1)
+        self.assertEqual((self.delivered / path.name).read_bytes(), data)
+
+    def test_legacy_version_1_incident_batch_remains_sendable(self):
+        path, data = self.add_incident_batch(version=1)
 
         state = self.send()
 

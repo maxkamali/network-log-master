@@ -16,15 +16,15 @@ import time
 
 
 PRODUCER_SCHEMA = 'network-log-incident-state'
-PRODUCER_VERSION = 1
+PRODUCER_VERSION = 2
 RECORD_TYPE = 'incident_lifecycle'
 LEDGER_NAME = '.incident-export-v1.sqlite3'
 LOCK_NAME = '.result-outbox.lock'
 MAX_FILE_BYTES = 256 * 1024
 MAX_RECORDS = 100
-FINAL_RE = re.compile(r'^incident-state-v1-[0-9a-f]{32}\.jsonl$')
+FINAL_RE = re.compile(r'^incident-state-v(?P<version>[12])-[0-9a-f]{32}\.jsonl$')
 PARTIAL_RE = re.compile(
-    r'^\.incident-state-v1-[0-9a-f]{32}\.jsonl\.tmp-[1-9][0-9]*-[0-9]+$'
+    r'^\.incident-state-v[12]-[0-9a-f]{32}\.jsonl\.tmp-[1-9][0-9]*-[0-9]+$'
 )
 STATUSES = {'CANDIDATE', 'OPEN', 'RECOVERING', 'RESOLVED'}
 REQUIRED_COLUMNS = {
@@ -47,7 +47,7 @@ REQUIRED_COLUMNS = {
     'engine_version',
     'updated_at',
 }
-RECORD_KEYS = {
+RECORD_KEYS_V1 = {
     'body',
     'device',
     'engine_version',
@@ -76,6 +76,8 @@ RECORD_KEYS = {
     'title',
     'type',
 }
+RECORD_KEYS_V2 = RECORD_KEYS_V1 | {'recurrence_count'}
+EXPORT_COLUMNS = REQUIRED_COLUMNS | {'recurrence_count'}
 
 
 class IncidentOutboxError(ValueError):
@@ -132,7 +134,7 @@ def entity_parts(entity_key):
 
 
 def map_incident(row):
-    for field in REQUIRED_COLUMNS:
+    for field in EXPORT_COLUMNS:
         if field not in row.keys():
             raise IncidentOutboxError('incident schema differs')
     status = row['status']
@@ -176,8 +178,9 @@ def map_incident(row):
         bounded_text(last_state, 128, 'incident observation state')
     source = {
         field: row[field]
-        for field in sorted(REQUIRED_COLUMNS)
+        for field in sorted(EXPORT_COLUMNS)
     }
+    source['producer_version'] = PRODUCER_VERSION
     snapshot_digest = sha256_bytes(canonical_json(source).encode('utf-8'))
     label = entity_name or row['entity_type']
     title = f'{row["event_family"]}: {label}'
@@ -202,12 +205,15 @@ def map_incident(row):
         'producer_schema': PRODUCER_SCHEMA,
         'producer_version': PRODUCER_VERSION,
         'protocol': row['protocol'],
+        'recurrence_count': row['recurrence_count'],
         'recovering_at': row['recovering_at'],
         'repeat_count_total': row['repeat_count_total'],
         'resolved_at': row['resolved_at'],
         'severity': row['severity'],
-        'snapshot_id': f'state-v1-{snapshot_digest[:32]}',
-        'snapshot_version': timestamp_version(row['updated_at']),
+        'snapshot_id': f'state-v2-{snapshot_digest[:32]}',
+        'snapshot_version': (
+            timestamp_version(row['updated_at']) * 10 + PRODUCER_VERSION
+        ),
         'state_change_count': row['observation_state_changes'],
         'timestamp': row['updated_at'],
         'title': title[:512],
@@ -219,16 +225,25 @@ def map_incident(row):
 
 
 def validate_record(record):
-    if not isinstance(record, dict) or set(record) != RECORD_KEYS:
+    if not isinstance(record, dict):
+        raise IncidentOutboxError('incident lifecycle record keys differ')
+    producer_version = record.get('producer_version')
+    expected_keys = {
+        1: RECORD_KEYS_V1,
+        2: RECORD_KEYS_V2,
+    }.get(producer_version)
+    if expected_keys is None or set(record) != expected_keys:
         raise IncidentOutboxError('incident lifecycle record keys differ')
     if (
         record['producer_schema'] != PRODUCER_SCHEMA
-        or record['producer_version'] != PRODUCER_VERSION
         or record['type'] != RECORD_TYPE
         or record['lifecycle_status'] not in STATUSES
         or type(record['interface_flap']) is not bool
     ):
         raise IncidentOutboxError('incident lifecycle record identity differs')
+    expected_snapshot_prefix = f'state-v{producer_version}-'
+    if not record['snapshot_id'].startswith(expected_snapshot_prefix):
+        raise IncidentOutboxError('incident lifecycle snapshot identity differs')
     for field, maximum in (
         ('body', 65536),
         ('device', 256),
@@ -275,6 +290,14 @@ def validate_record(record):
         value = record[field]
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
             raise IncidentOutboxError(f'lifecycle {field} is invalid')
+    if producer_version == 2:
+        value = record['recurrence_count']
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, int)
+            or not 0 <= value <= 4294967295
+        ):
+            raise IncidentOutboxError('lifecycle recurrence_count is invalid')
     if record['occurrence_count'] < 1 or record['repeat_count_total'] < 1:
         raise IncidentOutboxError('lifecycle counters differ')
 
@@ -298,7 +321,20 @@ def load_incidents(database):
             raise IncidentOutboxError('incident outbox database schema differs')
         records = {}
         for row in connection.execute(
-            'SELECT * FROM incidents ORDER BY incident_id'
+            '''
+            SELECT
+                incident.*,
+                (
+                    SELECT COUNT(*)
+                    FROM incident_transitions AS transition
+                    WHERE transition.incident_id = incident.incident_id
+                      AND transition.from_status = 'RECOVERING'
+                      AND transition.to_status = 'OPEN'
+                      AND transition.reason = 'adverse_relapse'
+                ) AS recurrence_count
+            FROM incidents AS incident
+            ORDER BY incident.incident_id
+            '''
         ):
             digest, data = map_incident(row)
             if row['incident_id'] in records:
@@ -394,7 +430,14 @@ def open_ledger(root):
 
 
 def output_name(data):
-    return f'incident-state-v1-{sha256_bytes(data)[:32]}.jsonl'
+    try:
+        first = json.loads(data.decode('utf-8').splitlines()[0])
+    except (IndexError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise IncidentOutboxError('incident outbox JSON differs') from exc
+    version = first.get('producer_version') if isinstance(first, dict) else None
+    if version not in {1, 2}:
+        raise IncidentOutboxError('incident outbox producer version differs')
+    return f'incident-state-v{version}-{sha256_bytes(data)[:32]}.jsonl'
 
 
 def validate_file(path, *, expected_uid=None):
@@ -419,6 +462,7 @@ def validate_file(path, *, expected_uid=None):
     if not 1 <= len(lines) <= MAX_RECORDS or data.count(b'\n') != len(lines):
         raise IncidentOutboxError('incident outbox record count differs')
     incident_ids = set()
+    versions = set()
     for line in lines:
         try:
             record = json.loads(line)
@@ -427,9 +471,13 @@ def validate_file(path, *, expected_uid=None):
         if canonical_json(record) != line:
             raise IncidentOutboxError('incident outbox JSON is not canonical')
         validate_record(record)
+        versions.add(record['producer_version'])
         if record['incident_id'] in incident_ids:
             raise IncidentOutboxError('incident outbox batch duplicates an incident')
         incident_ids.add(record['incident_id'])
+    match = FINAL_RE.fullmatch(path.name)
+    if len(versions) != 1 or int(match.group('version')) not in versions:
+        raise IncidentOutboxError('incident outbox producer version differs')
     return data
 
 

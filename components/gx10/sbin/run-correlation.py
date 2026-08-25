@@ -57,7 +57,7 @@ PROJECTION_SHA256 = (
     'f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079'
 )
 INCIDENT_SHA256 = (
-    '10b1133a00f775e5e5a4a3597156022eb46d62a2c1c2fe6424579af6341bfb6a'
+    'b45aa4f723f0f8caa81201ac47a302d45f3da4827a19090ab5d241a0be31009d'
 )
 PROJECTION_CURSOR = 'normalized_projection_v1_last_event_id'
 INCIDENT_CURSOR = 'incident_engine_v1_last_event_id'

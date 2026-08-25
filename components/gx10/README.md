@@ -37,7 +37,8 @@ Current state:
 - item 29 is complete after backlog deferral, one safely diagnosed terminal invalid output, exact portable prompt revision `r3`, protected-copy replay, four-artifact upgrade, protected resume, and three natural fixed-packet drain cadences
 - item 30 is complete after protected local-producer activation, durable collector acceptance-ledger deployment, configured-inactive writer installation, first-live ClickHouse provenance, exact replay and divergent conflict isolation, 186 local/exact-stage tests, active-state verification, timer-only activation, and natural collector acceptance/ingestion
 - item 33 adds a backward-compatible Device projection to new result files while preserving exact legacy ready/delivered bytes; the current suite passes 192 tests and all production schedules retain zero restarts
-- item 34 adds an inference-independent incident lifecycle producer, strict shared transport validation, and the collector NOC projection; the current suite passes 200 tests and both outbox/sender timers remain enabled and healthy
+- item 34 added an inference-independent incident lifecycle producer, strict shared transport validation, and the collector NOC projection; its then-current suite passed 200 tests and both outbox/sender timers remained enabled and healthy
+- item 36 adds a forward-only 24-hour monitoring candidate for confirmed BGP/OSPF/OSPFv3 recovery, strict version-2 lifecycle recurrence projection with version-1 compatibility, and managed exact-hash upgrades; production remains unchanged until its protected gate
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 

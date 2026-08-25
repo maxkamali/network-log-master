@@ -105,6 +105,9 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         self.assertIn('ai_description', sql)
         self.assertIn('AS "Event Details"', sql)
         self.assertIn('deterministic_detail', sql)
+        self.assertIn("lowerUTF8(protocol) IN ('bgp', 'ospf', 'ospfv3')", sql)
+        self.assertIn("'MONITORING'", sql)
+        self.assertIn('recurrence_count + 1 AS "Occurrences"', sql)
         self.assertNotIn('$__fromTime', sql)
         self.assertNotIn('$__toTime', sql)
         self.assertNotIn('Model', sql)
@@ -128,6 +131,7 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         self.assertIn('resolved_at <= $__toTime', sql)
         self.assertIn('${resolved_search:sqlstring}', sql)
         self.assertIn('${severity_filter:sqlstring}', sql)
+        self.assertIn('recurrence_count + 1 AS "Occurrences"', sql)
 
     def test_tables_keep_operator_focused_theme_and_filters(self):
         for name in ('panel-4', 'panel-5', 'panel-6'):

@@ -12,6 +12,8 @@ Item 34 is complete. The additive `observability.incident_updates` table, least-
 
 Item 35 is complete. Aggregate diagnosis proved 22 active interface/`ethport` rows with zero state changes were outside the narrower `interface_flap` flag. After public checkpoint verification, all thirteen live queries passed, `dryRun=All` selected only the enhanced resource, and protected replacement plus exact six-resource reread passed. The live queues now contain two non-interface Active Events and all 34 active interface incidents under Interface Flaps, with zero interface leakage. Active Event detail uses the latest AI summary when available and deterministic fallback otherwise; both current rows use fallback. The resolved statistic is labeled simply `Resolved`, and the original dashboard remains byte-exact.
 
+Item 36 is in progress. The repository candidate adds the backward-compatible lifecycle producer-version-2 `recurrence_count`, an additive default-zero ClickHouse column/migration, collector gate support for strict version-1 and version-2 records, and enhanced-dashboard `MONITORING` plus distinct issue-episode Occurrences presentation. The original dashboard remains byte-exact. Production remains on item 35 pending public checkpoint, ordered collector-first schema/gate activation, GX10 exact-artifact upgrade, lifecycle acceptance, enhanced-only dashboard dry-run/replacement, and complete query/health verification.
+
 After each completed validated collector sub-section, append and push a `docs/PROJECT_JOURNAL.md` entry before materially proceeding into the next sub-section.
 
 ## Rebuild objective

@@ -4,9 +4,11 @@ Status: public collector rebuild package, sanitation, and operator documentation
 
 ## Execution authority
 
-This file records detailed collector-specific rebuild evidence and remaining technical work. `docs/CURRENT_STATE.md` at the repository root is the authority for project execution order and the single `NEXT` item.
+This file records detailed collector-specific rebuild evidence. `docs/CURRENT_STATE.md` at the repository root is the authority for project execution order and the completed-state declaration when no `NEXT` item remains.
 
 The later production-normalizer extension is implemented separately under `components/collector/normalizer/`. It is not part of the clean-machine reconstruction path and is not invoked by that installer. Shadow mode was separately authorized and activated on 2026-08-23. Its catch-up/steady-state evidence and the forward-only handoff design/rehearsal passed. On 2026-08-24 the separate handoff package completed its guarded immutable-floor production activation with exact collector/GX10 hash and cardinality parity; the raw backlog and exact mount-only rollback remain preserved. See `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` and `docs/NORMALIZER_HANDOFF.md`.
+
+Item 34 is complete. The additive `observability.incident_updates` table, least-privilege grants, strict lifecycle gate, exclusive Vector route, and enhanced-only Grafana replacement are active under protected predecessors. Initial ingestion produced 804 latest incidents: 26 active non-flap events, 10 active flaps, and 768 resolved, with zero missing Device/entity values, zero lifecycle timestamp violations, and zero lifecycle rows in `ai_updates`. All six dashboard resources reread exact and all thirteen current original/enhanced queries passed; the original dashboard remained byte-exact.
 
 After each completed validated collector sub-section, append and push a `docs/PROJECT_JOURNAL.md` entry before materially proceeding into the next sub-section.
 
@@ -201,7 +203,7 @@ Validation completed:
 
 `GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
 
-The clean-machine runtime installer now requires the dashboard API scripts, the redacted AI query verifier, and all six captured dashboard resources. It restores dashboards only after normal HTTPS Grafana health and datasource provisioning are verified, then runs the independent resource verifier and all fifteen original/enhanced AI queries through the configured datasource. The runtime calls use Python `-B` so installer execution does not create bytecode cache artifacts inside the repository.
+The clean-machine runtime installer now requires the dashboard API scripts, the redacted query verifier, and all six captured dashboard resources. It restores dashboards only after normal HTTPS Grafana health and datasource provisioning are verified, then runs the independent resource verifier and all thirteen current original/enhanced queries through the configured datasource. The runtime calls use Python `-B` so installer execution does not create bytecode cache artifacts inside the repository.
 
 Automatic dashboard replacement is not enabled in the installer. A missing dashboard is created, an exact match is left unchanged, and an unexpected divergent existing resource causes the rebuild to fail rather than overwrite it.
 

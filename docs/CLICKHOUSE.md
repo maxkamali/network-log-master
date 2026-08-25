@@ -67,6 +67,37 @@ This table contains accepted AI result records only. Malformed files are rejecte
 
 `observability.ai_result_devices` is a small 12-month private lookup keyed by `run_id`. It supplies device identity only for immutable legacy result files that predate the direct `device` projection. Grafana has read-only access; Vector does not write this table. Current result files carry `device` directly.
 
+## Deterministic incident update table
+
+Authoritative GX10 incident snapshots are stored separately in `observability.incident_updates`. This table is not an AI-output table.
+
+Representative fields include:
+
+```text
+snapshot_id          String
+snapshot_version     UInt64
+incident_id          String
+device               String
+entity_type          LowCardinality(String)
+entity_name          String
+event_family         LowCardinality(String)
+protocol             LowCardinality(String)
+lifecycle_status     LowCardinality(String)
+severity             LowCardinality(String)
+first_seen           DateTime64(3, 'UTC')
+last_seen            DateTime64(3, 'UTC')
+resolved_at          Nullable(DateTime64(3, 'UTC'))
+occurrence_count     UInt32
+state_change_count   UInt32
+interface_flap       Bool
+type                 LowCardinality(String)
+raw_json             String
+```
+
+The table uses `ReplacingMergeTree(snapshot_version)` ordered by `incident_id`. It intentionally has no TTL: unresolved state must not disappear because it is old, and resolved history remains available until an explicit retention policy is approved. Grafana selects the latest row per incident with `argMax` over `(snapshot_version, snapshot_id)`.
+
+Vector may insert into this table and Grafana may select from it. Lifecycle records are routed exclusively here; `type = incident_lifecycle` must never appear in `observability.ai_updates`.
+
 ## Grafana semantic view
 
 Grafana reads network logs through a semantic view that exposes display-oriented fields such as level, body, and device context while preserving the raw table unchanged.
@@ -76,6 +107,7 @@ This separation is intentional:
 - raw schema -> durable evidence and replay
 - semantic view -> operator presentation
 - AI result table -> validated reasoning output
+- incident update table -> authoritative deterministic NOC lifecycle projection
 
 ## Vector sink exception
 
@@ -85,4 +117,4 @@ Treat that setting as an operationally validated exception. Do not remove it dur
 
 ## Access boundary
 
-GX10 does not receive direct ClickHouse write authority. Results return through a separate write-only file path and collector-side validation gate.
+GX10 does not receive direct ClickHouse write authority. AI results and deterministic lifecycle snapshots return through the same bounded write-only file path and collector-side validation gate, then split into exclusive Vector sinks.

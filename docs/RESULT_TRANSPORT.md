@@ -6,7 +6,7 @@ Execution-order item 30 is complete. The collector-side durable acceptance ledge
 
 ## Replay problem
 
-The GX10 result producer derives one deterministic filename and canonical JSONL payload per successful reasoning run. A future sender can therefore retry exactly. The unsafe window is:
+Each GX10 outbox producer derives deterministic filenames and canonical JSONL payloads. The active sender can therefore retry exactly. The unsafe window is:
 
 1. the remote upload completes
 2. the sender is interrupted before moving the local file from `ready` to `delivered`
@@ -51,13 +51,13 @@ Exact replay is operationally safe and expected after sender interruption. It is
 
 ## Sender acknowledgment contract
 
-The future sender must upload the already-validated local ready file under its unchanged deterministic basename. It must never generate a second transport identity or rewrite content during retry. Only after the transport client reports successful completion may it atomically move the local file from `ready` to `delivered` under the existing shared outbox lock.
+The active sender uploads the already-validated local ready file under its unchanged deterministic basename. It never generates a second transport identity or rewrites content during retry. Only after the transport client reports successful completion may it atomically move the local file from `ready` to `delivered` under the existing shared outbox lock.
 
 `delivered` means transport completion, not proven collector ingestion. Collector gate failures, rejected files, Vector ingestion, and ClickHouse row/provenance evidence remain independent end-to-end gates. The sender must retain bounded logs/metrics that expose retries and failures without result content.
 
 ## Sender core
 
-The repository core independently validates the outbox root/ready/delivered layout, shared lock, every ready and delivered file, exact service ownership/group/modes/links, 256-KiB/one-line bounds, canonical JSON, exact top-level contract, versioned producer identity, run-derived filename, and timezone-aware timestamps before selecting work. It accepts both exact legacy device-less version-1 records and the backward-compatible device-bearing shape; new files require a nonempty bounded Device derived from the deterministic incident entity key. It sends at most one file: the oldest embedded result timestamp, with filename as a stable tie-breaker.
+The repository core independently validates the outbox root/ready/delivered layout, shared lock, every ready and delivered file, exact service ownership/group/modes/links, 256-KiB bounds, canonical JSON, exact top-level contracts, producer identity, deterministic filenames, and timezone-aware timestamps before selecting work. It accepts exact legacy/current single-record AI result files and strict multi-record `incident_lifecycle` batches. New AI files and every lifecycle row require nonempty bounded Device identity. It sends at most one file per invocation, oldest embedded timestamp first with filename as a stable tie-breaker.
 
 Its SFTP subprocess uses a fixed executable and argument vector without a shell. Batch mode, identities-only behavior, password and keyboard-interactive refusal, strict supplied known-host checking, disabled global known hosts, one connection attempt, bounded connection/keepalive behavior, and a total process timeout are mandatory. The upload batch preserves the exact local absolute path bytes and unchanged remote basename. Process output is captured and never included in sender error messages.
 
@@ -121,6 +121,8 @@ After exact-replay closure was published, the same installed-identity/core/confi
 The public verifier then gained an explicit active configured-state mode and passed 186 tests locally. An initial GX10 stage omitted the repository-relative collector sibling and failed only the 11 cross-boundary imports; no production state was touched. The corrected exact published repository layout passed all 186 tests on GX10. Exact inactive full preflight passed before `systemctl enable --now` changed only the sender timer. Immediate active verification passed and the first natural cycle moved one file. Two more natural cycles followed, for delivered `1 -> 4` with the active producer/outbox remaining internally consistent. The first natural result then settled, created the second immutable ledger/ready identity, and was proven as the second exact complete ClickHouse row; the next two natural files remained normally in flight at the activation checkpoint. Sender restarts remained zero and every preexisting schedule/service passed.
 
 Item 33 later added the backward-compatible Device projection. Exact predecessor copies were retained, existing ready/delivered bytes were reused without rewrite, the producer/sender wrappers were updated to exact new hashes, and the current 192-test GX10 suite passes. Replay identity, filenames, provenance, deterministic incident state, and the write-only transport boundary remain unchanged.
+
+Item 34 added the independent changed-incident producer, strict lifecycle batch validation, collector-exclusive lifecycle routing, and deterministic NOC presentation. The first production pass exported 804 incidents in nine bounded files; all were delivered through the existing sender and ingested without any lifecycle row entering `ai_updates`. Natural scheduled changes continued through the same path. The active installed outbox and sender verifiers pass, both timers remain enabled/active, and existing AI-result bytes and identities were not rewritten.
 
 ## Passed repository/copy gates
 

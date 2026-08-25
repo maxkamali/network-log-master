@@ -1,6 +1,6 @@
 # Current State
 
-Last verified project checkpoint: 2026-08-24.
+Last verified project checkpoint: 2026-08-25.
 
 This file is the authority for current execution order. Exactly one item is marked `NEXT` while project execution remains; a completed state has none.
 
@@ -28,7 +28,7 @@ Post-closure local-model comparison: `DONE`. Two identical 13-case synthetic pas
 
 Post-closure enhanced AI dashboard copy: `DONE` under item 33. The distinct sixth live resource and all fifteen original/enhanced queries pass while the original `AI Incident Analysis` capture remains byte-exact. Device is projected directly for current results, private lookup restores 145 legacy identities, and one unmatched historical collector row is explicitly labeled unavailable rather than guessed.
 
-Post-closure deterministic NOC workflow: `IN PROGRESS` under item 34. The local candidate exports authoritative GX10 incident snapshots independently of inference, routes them into a separate collector lifecycle table, and replaces only the enhanced dashboard presentation with searchable Active Events, Interface Flaps, and Resolved Events windows. Production is unchanged pending checkpoint publication and protected activation.
+Post-closure deterministic NOC workflow: `DONE` under item 34. Authoritative GX10 incident snapshots are exported independently of inference, routed exclusively into a separate collector lifecycle table, and presented in the enhanced dashboard as searchable Active Events, Interface Flaps, and Resolved Events windows. Initial production closure verified 804 current incidents, 26 active non-flap events, 10 active flaps, 768 resolved incidents, complete Device identity, clean lifecycle timestamps, zero lifecycle rows in the AI table, six exact Grafana resources, and all thirteen original/enhanced queries.
 
 The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
@@ -44,6 +44,7 @@ The working observability path currently provides:
 - GX10 local durable ingest with replay/idempotency protection
 - managed canonical normalized-field projection and deterministic incident correlation on GX10, with historical version-3 enrichment preserved
 - collector-side write-only AI-result return boundary and validation/ingestion path, with an active durable accepted-filename/content ledger
+- deterministic GX10 incident-state outbox using the same bounded write-only transport and a collector-exclusive lifecycle ingestion route
 - local Ollama runtime on GX10
 
 Rediscovery did not identify a historical GX10 application producer or application-specific Ollama caller. Items 28–30 now add a separately managed strict local caller and result-return path without altering the deterministic ingest/correlation authority. The local outbox and recurring sender are active after first-live, exact-replay, divergent-conflict, exact staged-verifier, and natural delivery/acceptance/ClickHouse gates. The collector's immutable acceptance ledger remains the replay authority.
@@ -111,7 +112,7 @@ The collector checkpoint includes captured and public-safe rebuild artifacts for
 - AI-result validation gate
 - GX10 spool-retention behavior
 - independent collector runtime verification
-- six Grafana 13 dashboard resources, including original and enhanced AI incident dashboards
+- six Grafana 13 dashboard resources, including the unchanged original AI dashboard and deterministic enhanced NOC workflow
 - Grafana dashboard restore and verification scripts
 
 Important completed collector validation includes:
@@ -180,7 +181,7 @@ Completed validation:
 - `GRAFANA_DASHBOARD_LIVE_NONDESTRUCTIVE_TEST=PASS`
 - `GRAFANA_DASHBOARD_WIRING_FINAL_VALIDATION=PASS`
 
-The clean-machine runtime installer restores the six captured dashboards after HTTPS health and datasource verification, runs the independent dashboard verifier, and executes all fifteen original/enhanced AI queries through Grafana's configured read-only ClickHouse datasource. Automatic replacement is intentionally not enabled; an unexpected existing divergent dashboard causes the installer to fail rather than overwrite it.
+The clean-machine runtime installer restores the six captured dashboards after HTTPS health and datasource verification, runs the independent dashboard verifier, and executes all thirteen current original/enhanced queries through Grafana's configured read-only ClickHouse datasource. Automatic replacement is intentionally not enabled; an unexpected existing divergent dashboard causes the installer to fail rather than overwrite it.
 
 ## Grafana administrator bootstrap
 
@@ -350,9 +351,11 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 31. `DONE` — completed the final production/repository closure audit: exact active conservation at 10 delivered = eight durably accepted + two settling; all eight accepted results have exactly one byte/size/projection/provenance-equivalent ClickHouse row; exact-replay/conflict quarantine evidence remains one pair each; both hosts pass full active health with zero deterministic lag and zero sender restarts; 186 GX10, 30 collector, 14 shadow-package, 11 gate-package, 94 normalizer, and nine repository-validator tests pass; current-tree/history/link/ref sanitation and GitHub checkpoint parity pass; stale current-status documentation was reconciled without deleting rollback or evidence.
 32. `DONE` — built and published a new non-replacing `AI Incident Analysis` dashboard for `observability.ai_updates`; passed five-resource create-only dry-run, exact live resource verification, unchanged exact verification of all four preexisting dashboards, seven-for-seven live datasource queries with data, 38 Python-3.13 collector tests, clean-machine installer integration, documentation reconciliation, and unchanged Grafana/data-path health.
 33. `DONE` — created the distinct enhanced dashboard; implemented backward-compatible Device projection with exact legacy-byte reuse; privately restored 145 run-to-device identities; explicitly labeled one unmatched historical row unavailable; passed six-resource exact verification, all fifteen queries, 192 GX10 and 50 collector tests, public-safety gates, active zero-restart schedules/services, private-stage cleanup, and original-dashboard byte-exact proof.
-34. `NEXT` — publish and independently verify the deterministic lifecycle/NOC candidate; protect and activate the additive incident-state outbox, collector lifecycle table/routing, and enhanced-only dashboard replacement; then prove active incidents persist outside the time range, every interface flap is isolated in its own active window, resolved incidents use the selected resolution-time range, all three searches and severity filtering execute server-side, and the original dashboard/data paths remain unchanged and healthy.
+34. `DONE` — published and independently verified the deterministic lifecycle/NOC candidate; protected and activated the additive incident-state outbox, collector lifecycle table/routing, and enhanced-only dashboard replacement; proved active incidents persist outside the time range, every interface flap is isolated in its own active window, resolved incidents use the selected resolution-time range, all three searches and severity filtering execute server-side, and the original dashboard/data paths remain unchanged and healthy.
 
-The end-to-end target remains complete. Item 34 is the single `NEXT`; it adds an operator presentation over authoritative deterministic state without making AI output part of the NOC queue.
+The end-to-end target remains complete. Item 34 is complete, and authoritative deterministic state now supplies the NOC queue without making AI output part of that queue.
+
+There is no remaining `NEXT` item.
 
 ## Scope constraints
 

@@ -8,7 +8,7 @@ The architecture is intentionally split across two roles: a durable collector/lo
 
 ## Application at a glance
 
-Network devices send syslog to the collector. The collector preserves the raw records, normalizes a durable file backlog, and exposes only verified forward-going files to GX10. GX10 ingests those files into replay-safe local state, builds deterministic incidents, decides when reasoning is warranted, and asks a loopback-only local Ollama model for a structured explanation. Results return through a separate write-only transport; the collector validates and deduplicates them before ClickHouse stores them and Grafana presents them to an operator.
+Network devices send syslog to the collector. The collector preserves the raw records, normalizes a durable file backlog, and exposes only verified forward-going files to GX10. GX10 ingests those files into replay-safe local state and builds deterministic incidents. Changed lifecycle snapshots feed the NOC queue directly, while separately selected incidents may ask a loopback-only local Ollama model for a structured explanation. Both record families return through one bounded write-only transport; the collector validates, deduplicates, and routes them to separate ClickHouse tables before Grafana presents them to an operator.
 
 ```mermaid
 flowchart LR
@@ -20,8 +20,9 @@ flowchart LR
         raw["Raw ClickHouse storage"]
         backlog["Durable compressed backlog"]
         normalizer["Deterministic normalizer<br/>and verified handoff"]
-        gate["AI-result validation<br/>and replay ledger"]
+        gate["Result/lifecycle validation<br/>and replay ledger"]
         updates["Validated AI updates<br/>in ClickHouse"]
+        lifecycle_store["Deterministic incident state<br/>in ClickHouse"]
         grafana["Grafana dashboards"]
     end
 
@@ -29,7 +30,9 @@ flowchart LR
         ingest["Read-only fetch<br/>and replay-safe ingest"]
         incidents["Canonical projection<br/>and incident correlation"]
         reasoning["Deterministic wake policy<br/>and local Ollama reasoning"]
-        outbox["Validated result outbox<br/>and recurring sender"]
+        outbox["Validated AI result outbox"]
+        lifecycle["Changed incident<br/>lifecycle outbox"]
+        sender["Recurring one-file sender"]
     end
 
     devices -->|syslog| vector
@@ -39,11 +42,16 @@ flowchart LR
     normalizer -->|read-only file transport| ingest
     ingest --> incidents
     incidents --> reasoning
+    incidents --> lifecycle
     reasoning --> outbox
-    outbox -->|write-only file transport| gate
+    lifecycle --> sender
+    outbox --> sender
+    sender -->|write-only file transport| gate
     gate --> updates
+    gate --> lifecycle_store
     raw --> grafana
     updates --> grafana
+    lifecycle_store --> grafana
     grafana --> operator
 ```
 
@@ -58,12 +66,17 @@ Collector: Vector -> raw ClickHouse
                                                                    |
                                                       read-only file transport
                                                                    v
-GX10: replay-safe ingest -> canonical projection -> incidents -> wake policy
-      -> local Ollama reasoning -> validated outbox -> recurring sender
-                                                                   |
-                                                      write-only file transport
-                                                                   v
-Collector: validation + replay ledger -> ClickHouse AI updates -> Grafana -> operator
+GX10: replay-safe ingest -> canonical projection -> deterministic incidents
+                                   |                          |
+                                   | changed lifecycle        | selected reasoning
+                                   v                          v
+                         lifecycle outbox             AI result outbox
+                                   \                          /
+                                    +-> recurring sender <-+
+                                              |
+                                 write-only file transport
+                                              v
+Collector: validation + replay ledger -> incident state + AI updates -> Grafana -> operator
 ```
 
 The deterministic layers own event identity, normalization, incident state, wake decisions, and replay safety. The LLM produces nonauthoritative explanation records; it cannot redefine source facts or incident lifecycle. The two file transports use independent least-privilege identities, and GX10 has no direct ClickHouse write path.
@@ -91,6 +104,7 @@ Owns:
 - Grafana presentation
 - unknown-event inventory
 - validation and storage of AI results
+- validation and storage of deterministic incident lifecycle snapshots
 - compressed durable backlog for GX10
 - large and long-lived data stores
 - service boundaries that protect durable storage from GX10
@@ -107,10 +121,11 @@ Owns:
 - deciding when the local LLM should run
 - local inference
 - returning thin AI result records
+- returning changed deterministic incident snapshots
 
 GX10 is intentionally not the authoritative raw-log archive, dashboard server, or direct ClickHouse writer.
 
-Current production has independent GX10 schedules for read-only backlog fetch and replay-safe local SQLite ingest, canonical projection and deterministic incident correlation, bounded packet creation and strict local-model invocation, result-outbox projection, and recurring result delivery. Reasoning results remain append-only and nonauthoritative. The result sender uses a dedicated write-only collector identity and cannot access ClickHouse directly.
+Current production has independent GX10 schedules for read-only backlog fetch and replay-safe local SQLite ingest, canonical projection and deterministic incident correlation, bounded packet creation and strict local-model invocation, AI-result/lifecycle outbox projection, and recurring result delivery. Reasoning results remain append-only and nonauthoritative. The sender uses a dedicated write-only collector identity and cannot access ClickHouse directly.
 
 ## Current data path
 
@@ -126,13 +141,14 @@ Devices
            -> local durable replay-safe ingest
            -> scheduled canonical projection
            -> deterministic incident correlation/lifecycle
+           -> changed deterministic lifecycle outbox
            -> deterministic versioned reasoning packets
            -> bounded local inference through loopback Ollama
            -> append-only validated result outbox
            -> recurring write-only result sender
               -> collector validation/quarantine gate
               -> immutable acceptance ledger
-              -> ClickHouse validated AI updates
+              -> exclusive ClickHouse lifecycle and AI-update sinks
               -> Grafana
 ```
 

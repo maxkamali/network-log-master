@@ -24,6 +24,8 @@ Item 30 is complete. The new result producer/outbox/sender boundary passed prote
 
 Item 33 adds the affected Device to newly projected result files. The producer and sender accept both exact legacy device-less bytes and the backward-compatible device-bearing shape; existing files were reused without rewrite. Protected predecessor copies, exact installed hashes, 192 tests, active pipeline/correlation/reasoning/outbox/sender schedules, and zero service restarts passed.
 
+Item 34 is complete. An inference-independent producer now exports only changed authoritative incident snapshots through a protected local cursor and content-addressed batches of at most 100 records/256 KiB. Its exact-hash runner executes after the existing result producer under the same private-network oneshot and shared lock. The first production pass mapped 804 incidents into nine files; all were delivered through the existing one-file sender, and later natural changes followed the same path. The installed outbox and configured-active sender verifiers pass, both timers are enabled/active, existing 355 AI result files were reused exactly, and the full suite passes 200 tests plus the filesystem contract.
+
 A post-closure model comparison retained the exact selected `gemma4:latest` version. Two identical 13-case public-safe synthetic passes gave Gemma 12 strict-contract passes and 12 acceptable-severity matches, versus Nemotron 3.5 Lightning 30B's 6 and 7. Nemotron was faster once resident and conservative about likely causes, but repeatedly inflated noncritical incidents to critical and mislabeled action risk. The reusable evaluator plus four regression tests bring the local GX10 suite to 190 tests. No production model/runtime/application state changed.
 
 Item 30 repository/copy gates now pass. The read-only version-1 producer maps only successful append-only results to one canonical collector-compatible JSONL record/file while retaining the complete result and exact packet/model/prompt/request/run provenance. Eleven focused tests bring the full suite to 151 and add shared-lock ready/delivered states, delivered suppression of recreation, and duplicate-state refusal to the prior failure/reuse/crash/tamper/filesystem coverage. The exact tree passed on GX10; a fresh protected copy with 12 packets, 13 terminal runs, 12 results, and one preserved failure produced 12 collector-valid ready files. After one simulated durable acknowledgment moved a file to delivered, replay created zero, reused all 12, and retained 11 ready plus one delivered. Copy and production health remained unchanged. Nothing is installed and no writer credential or transmission was used. See `docs/RESULT_OUTBOX.md`.
@@ -44,7 +46,7 @@ The working-system inactive install placed and verified exact projector, inciden
 
 The production backfill then projected `8712` canonical rows, applied suppression to `6622`, and created `23` incidents, `477` evidence rows, and `519` transitions with `3` active incidents. Both watermarks reached event ID `955874` with zero lag before the new timer was enabled. Three later scheduled gates reached event IDs `956240`, `956338`, and `956413`, each with zero projection/incident lag and zero service restarts. Third-gate state contained `9251` canonical rows, `24` incidents, `508` evidence rows, `551` transitions, and `4` active incidents. A final prepublication verification later reached event ID `956995` with both lags still zero and both timers active. The existing fetch/ingest timer advanced during the same window.
 
-This document is the component recovery authority for the active GX10 milestone. `docs/CURRENT_STATE.md` remains the authority for project-wide execution order and the single `NEXT` item.
+This document is the component recovery authority for the active GX10 milestone. `docs/CURRENT_STATE.md` remains the authority for project-wide execution order and the completed-state declaration when no `NEXT` item remains.
 
 ## Reconstruction progress
 
@@ -81,6 +83,7 @@ Completed:
 - complete clean-machine operator runbook
 - final structural, syntax, generated/private-artifact, IPv4/public-safety, unit-test, and filesystem-contract audit
 - 186 synthetic tests passing at the completed item-30 active-verifiable boundary
+- 200 synthetic tests passing at the completed item-34 deterministic lifecycle boundary
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.

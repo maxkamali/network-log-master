@@ -12,6 +12,7 @@ Responsibilities:
 - decide when a local LLM should run
 - invoke local models through Ollama
 - emit thin AI result records through a write-only return path
+- emit changed deterministic incident snapshots through the same bounded write-only path
 
 GX10 is not:
 
@@ -36,6 +37,7 @@ Current state:
 - item 29 is complete after backlog deferral, one safely diagnosed terminal invalid output, exact portable prompt revision `r3`, protected-copy replay, four-artifact upgrade, protected resume, and three natural fixed-packet drain cadences
 - item 30 is complete after protected local-producer activation, durable collector acceptance-ledger deployment, configured-inactive writer installation, first-live ClickHouse provenance, exact replay and divergent conflict isolation, 186 local/exact-stage tests, active-state verification, timer-only activation, and natural collector acceptance/ingestion
 - item 33 adds a backward-compatible Device projection to new result files while preserving exact legacy ready/delivered bytes; the current suite passes 192 tests and all production schedules retain zero restarts
+- item 34 adds an inference-independent incident lifecycle producer, strict shared transport validation, and the collector NOC projection; the current suite passes 200 tests and both outbox/sender timers remain enabled and healthy
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
@@ -71,7 +73,9 @@ The three rediscovered live custom applications and deliberate post-rediscovery 
 - `build-reasoning-packets.py` — deterministic wake selection and bounded append-only packet construction; no inference
 - `run-local-reasoning.py` — exact model/prompt/run binding and strict loopback structured inference; installed but not scheduled
 - `build-result-outbox.py` — installed read-only versioned successful-result projection to one canonical local JSONL file per run, including deterministic Device identity for new files and exact legacy-byte reuse
+- `build-incident-outbox.py` — installed read-only changed-incident projection to content-addressed lifecycle batches of at most 100 records and 256 KiB
 - `run-result-outbox.py` — installed exact-hash managed producer runner with no transport capability
+- `run-incident-outbox.py` — installed exact-hash managed lifecycle runner with a protected local export cursor and no transport capability
 - `send-result-outbox.py` — deterministic single-file write-only transport core; synthetic tests inject transport, while separately gated production uses a dedicated writer identity
 - `run-result-sender.py` — installed exact-hash managed sender runner behind its independently disableable active timer
 - `install/install-result-sender.py` and `verify-result-sender.py` — guarded inactive installation plus explicit configured inactive/active verification

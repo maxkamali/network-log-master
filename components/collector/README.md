@@ -17,8 +17,11 @@ The collector owns:
 - restricted backlog transport boundary
 - AI-result validation before durable ingestion
 - validated AI-result storage
+- deterministic incident-lifecycle validation, exclusive routing, and durable storage
 - long-lived data retention
 - unknown-event inventory and replay material
+
+The enhanced Grafana resource is now the deterministic NOC queue over `observability.incident_updates`: Active Events, Interface Flaps, and Resolved Events each have server-side search; Active and Resolved also have server-side severity filtering. The original AI dashboard remains unchanged as the assessment-history fallback. See `docs/NOC_WORKFLOW.md`.
 
 ## Rebuild objective
 

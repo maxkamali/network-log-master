@@ -43,12 +43,15 @@ Collector: Vector -> raw ClickHouse
                                                         | read-only
                                                         v
 GX10: ingest -> project -> correlate incidents -> local reasoning -> result outbox
-                                                        | write-only
+                              |                         | write-only
+                              | deterministic state     v
+                              +-----------------> lifecycle outbox
+                                                        |
                                                         v
-Collector: validation + replay ledger -> AI updates -> Grafana -> operator
+Collector: validation + replay ledger -> AI updates + incident state -> Grafana -> operator
 ```
 
-The deployed system keeps deterministic truth outside the LLM. The model explains already-correlated incident evidence; deterministic code owns identity, lifecycle, wake policy, replay protection, and acceptance. The read-only observation transport and write-only result transport use independent least-privilege identities, and GX10 never writes directly to ClickHouse.
+The deployed system keeps deterministic truth outside the LLM. The model explains already-correlated incident evidence; deterministic code owns identity, lifecycle, wake policy, replay protection, and acceptance. The enhanced NOC dashboard reads that deterministic lifecycle projection directly, while the original AI dashboard remains available for assessment history. The read-only observation transport and write-only result transport use independent least-privilege identities, and GX10 never writes directly to ClickHouse.
 
 ## Architectural invariants
 
@@ -92,6 +95,7 @@ The published checkpoint includes:
 - immutable AI-result acceptance ledger with exact-replay and divergent-conflict isolation
 - package and runtime verifiers
 - six Grafana 13 dashboard resources, including the original and enhanced AI incident views
+- a dedicated no-TTL deterministic incident-state table and exclusive Vector lifecycle route
 - API-based dashboard restore and verification scripts
 
 The independent live collector verifier reached `COLLECTOR_RUNTIME_VERIFY=PASS`.
@@ -100,9 +104,9 @@ The collector public rebuild package, operator documentation, sanitation, and re
 
 ### GX10
 
-GX10's complete public rebuild package is published under [`components/gx10/`](components/gx10/). It preserves the proven `timer -> fetch -> ingest` chain, exact SQLite state, canonical normalized-field projection with historical version-3 enrichment retained, deterministic incident correlation, versioned local reasoning, replay-safe result outbox, recurring write-only sender, platform/dependency contract, Ollama service and six-model store, guarded activation, and the clean-machine runbook.
+GX10's complete public rebuild package is published under [`components/gx10/`](components/gx10/). It preserves the proven `timer -> fetch -> ingest` chain, exact SQLite state, canonical normalized-field projection with historical version-3 enrichment retained, deterministic incident correlation, versioned local reasoning, replay-safe AI-result and incident-lifecycle outboxes, recurring write-only sender, platform/dependency contract, Ollama service and six-model store, guarded activation, and the clean-machine runbook.
 
-The current GX10 suite passes 192 tests and `GX10_REBUILD_PACKAGE_VALIDATION=PASS`. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
+The current GX10 suite passes 200 tests and `GX10_REBUILD_PACKAGE_VALIDATION=PASS`. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
 
 ### Two-server rebuild
 
@@ -119,6 +123,7 @@ The current GX10 suite passes 192 tests and `GX10_REBUILD_PACKAGE_VALIDATION=PAS
 - [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) - final repository/reference acceptance evidence and waived clean-host boundary.
 - [`docs/CLICKHOUSE.md`](docs/CLICKHOUSE.md) - durable table and sink contracts.
 - [`docs/GRAFANA.md`](docs/GRAFANA.md) - datasource, dashboard restore, drilldown, and NOC-view behavior.
+- [`docs/NOC_WORKFLOW.md`](docs/NOC_WORKFLOW.md) - deterministic Active, Interface Flaps, and Resolved queue behavior.
 - [`docs/NORMALIZER_MIGRATION.md`](docs/NORMALIZER_MIGRATION.md) - controlled collector-side normalization migration.
 - [`docs/NORMALIZER_PRODUCTION_INTEGRATION.md`](docs/NORMALIZER_PRODUCTION_INTEGRATION.md) - shadow-first collector integration, observability, promotion, and rollback design.
 - [`docs/REASONING_PACKETS.md`](docs/REASONING_PACKETS.md) - deterministic wake policy and compact append-only packet boundary.

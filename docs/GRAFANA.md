@@ -148,7 +148,7 @@ Raw logs remain available through drilldowns when investigation requires them.
 
 ## AI presentation
 
-The live `AI Incident Analysis` dashboard presents the stabilized item-30 result contract from `observability.ai_updates`. The separate editable `AI Incident Analysis - Enhanced` copy preserves that original as an immediate fallback while adding a more operational event presentation.
+The live `AI Incident Analysis` dashboard presents the stabilized item-30 result contract from `observability.ai_updates`. The separate editable `AI Incident Analysis - Enhanced` resource preserves that original as an immediate fallback and now presents deterministic lifecycle state from `observability.incident_updates` as the operational NOC queue.
 
 Its default seven-day, one-minute-refresh view contains:
 
@@ -159,20 +159,21 @@ Its default seven-day, one-minute-refresh view contains:
 - severity and status distributions
 - a newest-first 200-row detail table with timestamp, severity, status, title, explanation, occurrence count, tags, model, incident ID, and run ID
 
-The enhanced copy retains those summaries and adds two medium-row, paginated, filterable tables with frozen Time/Device columns, relative time, severity/disposition color badges, wrapped text, and tag pills:
+The enhanced resource has three summary counts and three medium-row, paginated, filterable operational tables:
 
-- one deterministic latest assessment per incident
-- complete newest-first assessment history
+- Active Events: unresolved non-flap incidents, independent of the time picker
+- Interface Flaps: every unresolved interface incident with state-change evidence, independent of the time picker
+- Resolved Events: resolved incidents filtered by `resolved_at` and the selected time range
 
-Current GX10 results project Device directly. Immutable legacy version-1 files remain byte-valid; their devices resolve through the private `ai_result_devices` lookup. One unmatched historical collector row is displayed explicitly as `unavailable - legacy record` rather than guessed or left blank.
+All three tables expose Device and Incident ID. Separate server-side text variables search Active, Flap, and Resolved rows across device/entity/category/protocol/title/incident identity. A server-side severity variable filters Active and Resolved. Assigned-operator and AI-recommendation fields are intentionally absent.
 
-Every query is a bounded `SELECT` through the existing read-only datasource, applies the Grafana time range, and avoids exposing the complete `raw_json` provenance object in the dashboard. The permanent redacted verifier executes the original seven plus enhanced eight panels through Grafana's datasource API and reports only frame/row counts.
+Every query is a bounded `SELECT` through the existing read-only datasource and avoids exposing complete `raw_json` provenance. The permanent redacted verifier executes the original seven plus enhanced six panels through Grafana's datasource API and reports only frame/row counts. Active windows deliberately do not age out with the time picker; Resolved uses the selected resolution-time range.
 
 The governing pattern remains:
 
 1. deterministic incident/evidence state remains authoritative outside Grafana
-2. validated AI result records are stored in ClickHouse
-3. Grafana presents summaries, status, severity, and explanations
+2. deterministic lifecycle snapshots and validated AI result records are stored in separate ClickHouse tables
+3. the enhanced dashboard presents the deterministic NOC queue; the original presents AI assessment history
 4. operators retain drilldown access to the underlying raw observations
 
 Grafana must not become the incident state database or a substitute for deterministic correlation.
@@ -180,6 +181,8 @@ Grafana must not become the incident state database or a substitute for determin
 Item-32 production validation passed create-only `dryRun=All`, exact live resource reread, unchanged exact verification of the four preexisting dashboards, and all seven live datasource queries. No existing dashboard was replaced.
 
 Item-33 production validation passed distinct create/dry-run, exact six-resource reread, all fifteen live datasource queries, backward-compatible GX10/collector Device projection, private legacy mapping, and unchanged exact verification of the original dashboard. Only the distinct enhanced resource was replaced during refinement.
+
+Item-34 production validation passed enhanced-only replacement dry-run, exact six-resource reread, all thirteen current live datasource queries, 804 latest lifecycle rows with complete Device identity, exclusive interface-flap presentation, and zero lifecycle records in `ai_updates`. The original dashboard remained byte-exact. See `docs/NOC_WORKFLOW.md` for queue semantics.
 
 ## Change discipline
 

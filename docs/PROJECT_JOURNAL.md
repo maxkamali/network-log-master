@@ -12188,3 +12188,72 @@ The candidate includes deterministic batch/no-op/change/replay/tamper/ledger tes
 ### Next action
 
 Run final public gates, publish and independently verify the exact candidate, then stage it on protected host-local paths. Validate Vector and Grafana syntax before activation; create only the additive ClickHouse table/grants; protect exact predecessors; upgrade the GX10/collector bounded chain; allow the initial batched lifecycle handoff to settle; verify current/resolved/flap cardinality and all dashboard queries; reconcile documentation; and publish closure.
+
+## 2026-08-25 12:34 PDT - Item 34 deterministic NOC lifecycle production closure passed
+
+### Status
+
+Item 34 is `DONE`. There is no remaining numbered `NEXT` item.
+
+Candidate checkpoint `a97cbe8814da14d6617adb7bcf3296f75e3fb006` was published and independently matched GitHub `main` before production activation. The collector received only additive schema/grant/routing changes plus the protected gate upgrade and enhanced-dashboard replacement. GX10 received only the published lifecycle producer/wrapper, compatible result producer/sender upgrades, and sequential outbox unit. Exact root-only predecessor copies remain on both hosts.
+
+The collector table/grant gate created `observability.incident_updates` as a no-TTL `ReplacingMergeTree(snapshot_version)` ordered by incident identity. Vector has insert-only access, Grafana has select-only access, and lifecycle records have an exclusive route away from `ai_updates`. The rendered production Vector configuration passed standalone validation before atomic installation. Vector, ClickHouse, Grafana, and the collector validation-gate timer remained active/healthy with zero relevant service restarts.
+
+The first installed GX10 outbox cycle reused all 355 existing AI-result files exactly and projected 804 current incidents into nine immutable lifecycle batches totaling 735,705 bytes. The protected mode-`0600` lifecycle cursor was created under the established service identity. The sender timer remained stopped during generation. Five one-file manual sends passed before systemd's ordinary burst-rate guard refused the sixth start; no file or transport failed. Clearing only that transient failed state and pacing the remaining four sends completed with ready zero and nine lifecycle files delivered. Both recurring timers were then restored enabled/active.
+
+The collector's normal 90-second settling gate accepted all nine initial files. Natural schedules subsequently generated and accepted two more changed-state batches without manual intervention. The configured-active sender verifier and active outbox verifier pass, both timers remain waiting normally, and sender restart count remains zero.
+
+Initial ClickHouse latest-state verification returned:
+
+```text
+latest_incidents=804
+active_events=26
+active_flaps=10
+resolved=768
+empty_device=0
+empty_entity_type=0
+wrong_record_type=0
+resolved_without_time=0
+active_with_resolved_time=0
+lifecycle_rows_in_ai_updates=0
+```
+
+After natural scheduled advancement, eleven lifecycle files were durably accepted and latest state reached 808 incidents: 26 Active Events, 13 Interface Flaps, and 769 Resolved. Identity, type, timestamp, and cross-routing defect counts remained zero.
+
+Grafana `dryRun=All` classified only `ai-incident-analysis-enhanced.json` as a replacement; the other five resources were exact and unchanged. The protected live call replaced only that enhanced resource. Immediate API reread proved all six complete specifications exact. The original `AI Incident Analysis` resource remained byte-exact at SHA-256 `794719f7cf112babb37c716df16959e631b0f63b81bbe9e503d243ffb36b83e5`.
+
+All thirteen current queries passed through Grafana's configured read-only datasource:
+
+```text
+original_queries=7/7
+enhanced_queries=6/6
+enhanced_active_rows=26
+enhanced_flap_rows=10
+enhanced_resolved_rows=500 (bounded display limit)
+grafana_resources_exact=6
+```
+
+The enhanced resource now implements the approved mechanics: Active Events and Interface Flaps persist independently of the dashboard time picker; every unresolved deterministic interface flap is excluded from Active Events and shown in the dedicated flap window; Resolved Events uses `resolved_at` in the selected range; all three windows have independent server-side search; Active and Resolved have server-side severity filtering; Device is present; assigned operator and AI recommendation are absent. Manual resolution remains deliberately out of scope because Grafana is presentation rather than the incident state authority.
+
+All administrator/read-only database credentials were entered through no-echo processes and retained only in process memory. No credential file was created, printed, copied into the repository, or retained in temporary staging.
+
+Final repository validation:
+
+```text
+gx10_tests=200
+collector_tests=55
+public_validator_tests=9
+GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS
+PUBLIC_REPOSITORY_CURRENT_TREE=PASS
+PUBLIC_REPOSITORY_HISTORY=PASS
+PUBLIC_REPOSITORY_LINKS=PASS
+PUBLIC_REPOSITORY_REF_TOPOLOGY=PASS
+PUBLIC_REPOSITORY_VALIDATION=PASS
+diff_check=PASS
+```
+
+Documentation now includes the lifecycle branch in the main application diagram, a dedicated `docs/NOC_WORKFLOW.md` operator contract, current Grafana/ClickHouse/data/operations/transport descriptions, both component status records, and a current fresh-session handoff. Historical item-33 fifteen-query evidence remains preserved as history; the current enhanced replacement has six panels for thirteen combined queries.
+
+### Next action
+
+None. Publish and independently verify this closure/documentation checkpoint, remove only temporary validation stages, and continue normal operator evaluation of the enhanced NOC dashboard. The original dashboard and protected predecessor copies remain available.

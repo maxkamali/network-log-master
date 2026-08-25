@@ -196,6 +196,46 @@ Current boundary status:
 
 The complete producer, transport, validation, replay-protection, ClickHouse-ingestion, and Grafana-presentation path is active. Historical rediscovery still correctly records that no predecessor GX10 producer was found; the current path is explicitly reconstructed behavior.
 
+## Deterministic incident lifecycle export
+
+The lifecycle export is a direct projection of the authoritative GX10 `incidents` table and is independent of model inference. Each canonical JSON record includes:
+
+```text
+timestamp
+snapshot_id
+snapshot_version
+incident_id
+device
+entity_type
+entity_name
+event_family
+protocol
+lifecycle_status
+severity
+first_seen
+last_seen
+opened_at
+recovering_at
+resolved_at
+occurrence_count
+repeat_count_total
+state_change_count
+last_observation_state
+interface_flap
+engine_version
+title
+body
+type = incident_lifecycle
+producer_schema
+producer_version
+```
+
+The producer emits only changed incidents, in immutable content-addressed JSONL batches of at most 100 records and 256 KiB. A service-owned mode-`0600` SQLite cursor records the last exported snapshot version per incident. The producer shares the result-outbox lock but does not invoke the network.
+
+The collector gate accepts lifecycle batches only when every record has the exact bounded lifecycle shape and timestamp invariants. Vector routes them exclusively to `observability.incident_updates`; AI-result records continue exclusively to `observability.ai_updates`.
+
+`interface_flap` is deterministic: it is true when `entity_type` is `interface` and the incident has one or more observation-state changes. No importance ranking is inferred. The enhanced NOC dashboard uses this flag to keep every unresolved flap out of Active Events and in the dedicated Interface Flaps window.
+
 ## Incident contract - deterministic implementation
 
 An incident is a durable deterministic object assembled from observations.

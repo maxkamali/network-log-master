@@ -12292,3 +12292,32 @@ The resolved count still uses the selected `resolved_at` range but aliases and d
 ### Next action
 
 Run the full collector/GX10/public gates, publish and independently verify the exact candidate, stage only its public-safe dashboard/scripts, execute all thirteen captured queries through the live read-only datasource before mutation, run Grafana `dryRun=All`, replace only the enhanced resource, reread all six specifications, and close item 35 only after live counts prove zero interface entities in Active Events and all active interface entities in Interface Flaps.
+
+## 2026-08-25 12:50 PDT - Item 35 enhanced NOC presentation production closure passed
+
+### Status
+
+Item 35 is `DONE`. There is no remaining numbered `NEXT` item.
+
+Candidate checkpoint `4480fa4eadecf28dbb2074d118ca66a2294804ff` was published and independently matched GitHub `main` before production mutation. Its generated enhanced-dashboard SHA-256 is `8441f00bda849750c923b3ad1bee9349c6538b85d55efd2dcc1012ffa35aa56c`. The original dashboard remained byte-exact at SHA-256 `794719f7cf112babb37c716df16959e631b0f63b81bbe9e503d243ffb36b83e5`.
+
+All seven original and six enhanced panel queries passed through Grafana's configured read-only datasource before mutation. Enhanced results included two Active Events, 34 Interface Flaps, and the bounded 500-row Resolved display. Aggregate-only database verification printed no device or incident identity and proved the final exclusive split:
+
+```text
+active_events=2
+interface_flaps=34
+active_with_ai_detail=0
+active_with_deterministic_fallback=2
+```
+
+Grafana `dryRun=All` classified only `ai-incident-analysis-enhanced.json` as a replacement; the other five resources were exact and unchanged. The protected live call replaced only that enhanced resource. Immediate API reread proved all six complete specifications exact, and all thirteen live datasource queries passed again with the same active/flap split.
+
+The enhanced Active query now excludes every `entity_type = interface` incident and the Interface Flaps query includes every active interface incident, independent of the narrower state-change-evidence flag. Active Event `Event Details` uses the latest nonempty AI body for that incident when one exists, otherwise it constructs deterministic event/entity/current-state detail. The top resolved statistic is labeled `Resolved`; its query still honors the selected `resolved_at` time range.
+
+The change touched no GX10 artifact, lifecycle record, ClickHouse schema/data, Vector route, transport boundary, model behavior, schedule, or original dashboard. Grafana, Vector, and ClickHouse remained active/running with zero restarts; the collector validation-gate timer remained active/waiting and its most recent run remained successful. The exact temporary item-35 collector stage and local no-disk credential helper were removed after verification; protected rollback copies were retained.
+
+Final repository validation before production activation passed 200 GX10 tests, 55 collector tests, 12 focused dashboard/pipeline tests, nine public-validator tests, the GX10 filesystem contract, public current-tree/history/link/ref-topology/combined gates, and the diff check. Administrator/read-only credentials were supplied only to no-echo processes and retained only in process memory; no credential file was created, printed, copied into the repository, or retained for this task.
+
+### Next action
+
+None. Publish and independently verify this closure/documentation checkpoint, then continue normal operator evaluation of the enhanced NOC dashboard. The original dashboard and protected predecessor copies remain available.

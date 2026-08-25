@@ -184,7 +184,7 @@ Item-33 production validation passed distinct create/dry-run, exact six-resource
 
 Item-34 production validation passed enhanced-only replacement dry-run, exact six-resource reread, all thirteen current live datasource queries, 804 latest lifecycle rows with complete Device identity, exclusive interface-flap presentation, and zero lifecycle records in `ai_updates`. The original dashboard remained byte-exact. See `docs/NOC_WORKFLOW.md` for queue semantics.
 
-Item 35 tracks the enhanced-only presentation correction prompted by operator review: interface entity type, not nonzero change count, controls exclusive flap-queue placement; Active Events regains the latest stored AI summary with deterministic fallback; and the resolved statistic label is shortened without changing its range semantics.
+Item-35 production validation passed pre/post execution of all thirteen live datasource queries, `dryRun=All`, enhanced-only replacement, and exact reread of all six resources. The current active split is two non-interface Active Events and 34 Interface Flaps, with zero interface entities in Active Events. Neither current Active row has a stored AI summary, so both display the deterministic detail fallback. The resolved statistic is labeled `Resolved` while retaining its selected-range semantics, and the original dashboard remains byte-exact.
 
 ## Change discipline
 

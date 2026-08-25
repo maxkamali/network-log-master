@@ -69,3 +69,17 @@ grafana_queries_passed=13
 ```
 
 Natural scheduled changes continued through the same bounded path after activation. Both GX10 timers remained enabled/active with zero service restarts, and the collector gate, Vector, ClickHouse, and Grafana stayed healthy.
+
+Item 35 production correction passed after operator review. The repository candidate was published and independently verified before mutation; all thirteen queries passed before and after the protected change; Grafana `dryRun=All` identified only the enhanced resource for replacement; and all six live specifications reread exact afterward. Aggregate latest-state verification returned:
+
+```text
+active_non_interface_events=2
+active_interface_events=34
+active_interface_events_in_active_window=0
+active_rows_with_ai_summary=0
+active_rows_with_deterministic_fallback=2
+grafana_resources_exact=6
+grafana_queries_passed=13
+```
+
+The original dashboard remains byte-exact. Collector services stayed healthy with zero relevant restarts, and no lifecycle data, schema, transport, GX10 artifact, model behavior, or schedule changed.

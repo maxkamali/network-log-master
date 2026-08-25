@@ -12409,3 +12409,9 @@ All four GX10 timers were restored enabled/active after reconciliation; the outb
 ### Next action
 
 None. Remove only the two named temporary staging directories and the local memory-only credential helper, run the final public repository gates, publish and independently verify this closure/documentation checkpoint, and retain protected root-only rollback copies.
+
+## 2026-08-25 14:32 PDT - Item 36 closure publication independently verified
+
+Closure/documentation commit `c9aa2a6eb6493abc12f3605dcfce7d263d99f778` was published to GitHub, and an independent `ls-remote` comparison matched local and remote `main` exactly.
+
+The exact item-36 GX10 and collector staging directories and local memory-only credential helper are absent. Protected root-only predecessor copies remain retained on both hosts. Post-cleanup health remained green: all four GX10 schedules are enabled/active; correlation, reasoning, outbox, and sender last results are successful with zero restarts; ClickHouse, Vector, Grafana, and the collector gate timer are active with zero relevant restarts. Item 36 is `DONE`, the end-to-end target is complete through item 36, and there is no remaining `NEXT` item.

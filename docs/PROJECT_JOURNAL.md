@@ -12265,3 +12265,30 @@ Closure/documentation commit `45c336942071dccc4af37fe7b572ab14f86caf2c` was publ
 The two named host-local validation directories and the local no-disk credential-runner helper were removed. No temporary credential file existed. Protected root-only predecessor/rollback copies were deliberately retained.
 
 Post-cleanup health remained green: both GX10 outbox/sender timers are enabled and waiting with zero ready files; the collector gate timer is waiting; Vector, ClickHouse, and Grafana are active/running with zero restarts. There is no remaining `NEXT` item.
+
+## 2026-08-25 12:44 PDT - Item 35 enhanced NOC presentation correction opened
+
+### Status
+
+Item 35 is the single `NEXT` item. No production dashboard, service, schema, data, transport, model, credential, or schedule changed during diagnosis or candidate construction.
+
+Operator review identified three presentation defects in the live enhanced dashboard: newly opened interface incidents were visible in Active Events, Active Events did not explain what happened, and the top statistic exposed the implementation phrase `Resolved in Range` rather than the simpler operator label `Resolved`.
+
+An aggregate-only ClickHouse query printed no device or incident identity and proved the classification gap exactly:
+
+```text
+active interface/ethport with interface_flap=false=22
+of those with state_change_count=0=22
+active interface/ethport with interface_flap=true=12
+active non-interface ospf=2
+```
+
+The lifecycle producer correctly uses `interface_flap` to mean observed state-change evidence. That field is too narrow for the requested presentation because an initial interface-down observation has not changed state yet. The dashboard-only candidate therefore routes every active `entity_type = interface` row exclusively to Interface Flaps and excludes every interface entity from Active Events. No lifecycle republish, database mutation, or GX10 change is required.
+
+Active Events now left-joins only the latest stored `ai_updates.body` summary by deterministic incident identity. When none exists, the query constructs immediate deterministic detail from event family, entity, and current observed state. It does not expose `recommended_actions`, model metadata, or raw provenance, and AI remains nonauthoritative. Active search covers both AI and fallback detail.
+
+The resolved count still uses the selected `resolved_at` range but aliases and displays the statistic simply as `Resolved`. Focused dashboard/pipeline regression coverage passes 12 tests, preserves original-dashboard SHA-256 `794719f7cf112babb37c716df16959e631b0f63b81bbe9e503d243ffb36b83e5`, and requires the enhanced capture to reproduce exactly from its generator.
+
+### Next action
+
+Run the full collector/GX10/public gates, publish and independently verify the exact candidate, stage only its public-safe dashboard/scripts, execute all thirteen captured queries through the live read-only datasource before mutation, run Grafana `dryRun=All`, replace only the enhanced resource, reread all six specifications, and close item 35 only after live counts prove zero interface entities in Active Events and all active interface entities in Interface Flaps.

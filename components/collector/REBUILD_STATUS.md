@@ -10,6 +10,8 @@ The later production-normalizer extension is implemented separately under `compo
 
 Item 34 is complete. The additive `observability.incident_updates` table, least-privilege grants, strict lifecycle gate, exclusive Vector route, and enhanced-only Grafana replacement are active under protected predecessors. Initial ingestion produced 804 latest incidents: 26 active non-flap events, 10 active flaps, and 768 resolved, with zero missing Device/entity values, zero lifecycle timestamp violations, and zero lifecycle rows in `ai_updates`. All six dashboard resources reread exact and all thirteen current original/enhanced queries passed; the original dashboard remained byte-exact.
 
+Item 35 is in progress after operator review found first-observation interface incidents in Active Events. Aggregate diagnosis proved 22 active interface/`ethport` rows with zero state changes were outside the narrower `interface_flap` flag. The repository-only correction uses interface entity type for exclusive queue placement, adds latest AI summary with deterministic fallback to Active Event detail, and shortens the resolved statistic label. Production is unchanged pending public checkpoint, live query validation, dry-run, and enhanced-only replacement.
+
 After each completed validated collector sub-section, append and push a `docs/PROJECT_JOURNAL.md` entry before materially proceeding into the next sub-section.
 
 ## Rebuild objective

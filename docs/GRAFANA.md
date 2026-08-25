@@ -161,11 +161,11 @@ Its default seven-day, one-minute-refresh view contains:
 
 The enhanced resource has three summary counts and three medium-row, paginated, filterable operational tables:
 
-- Active Events: unresolved non-flap incidents, independent of the time picker
-- Interface Flaps: every unresolved interface incident with state-change evidence, independent of the time picker
+- Active Events: unresolved non-interface incidents, independent of the time picker, with latest AI summary and deterministic fallback detail
+- Interface Flaps: every unresolved interface incident, including a first adverse observation with zero recorded state changes, independent of the time picker
 - Resolved Events: resolved incidents filtered by `resolved_at` and the selected time range
 
-All three tables expose Device and Incident ID. Separate server-side text variables search Active, Flap, and Resolved rows across device/entity/category/protocol/title/incident identity. A server-side severity variable filters Active and Resolved. Assigned-operator and AI-recommendation fields are intentionally absent.
+All three tables expose Device and Incident ID. Separate server-side text variables search Active, Flap, and Resolved rows across device/entity/category/protocol/title/incident identity; Active search also covers its displayed detail. A server-side severity variable filters Active and Resolved. Assigned-operator and AI-recommendation fields are intentionally absent. The top resolved statistic is labeled simply `Resolved`; its count still honors the selected `resolved_at` range.
 
 Every query is a bounded `SELECT` through the existing read-only datasource and avoids exposing complete `raw_json` provenance. The permanent redacted verifier executes the original seven plus enhanced six panels through Grafana's datasource API and reports only frame/row counts. Active windows deliberately do not age out with the time picker; Resolved uses the selected resolution-time range.
 
@@ -183,6 +183,8 @@ Item-32 production validation passed create-only `dryRun=All`, exact live resour
 Item-33 production validation passed distinct create/dry-run, exact six-resource reread, all fifteen live datasource queries, backward-compatible GX10/collector Device projection, private legacy mapping, and unchanged exact verification of the original dashboard. Only the distinct enhanced resource was replaced during refinement.
 
 Item-34 production validation passed enhanced-only replacement dry-run, exact six-resource reread, all thirteen current live datasource queries, 804 latest lifecycle rows with complete Device identity, exclusive interface-flap presentation, and zero lifecycle records in `ai_updates`. The original dashboard remained byte-exact. See `docs/NOC_WORKFLOW.md` for queue semantics.
+
+Item 35 tracks the enhanced-only presentation correction prompted by operator review: interface entity type, not nonzero change count, controls exclusive flap-queue placement; Active Events regains the latest stored AI summary with deterministic fallback; and the resolved statistic label is shortened without changing its range semantics.
 
 ## Change discipline
 

@@ -26,8 +26,20 @@ LATEST_CTE = '''WITH latest AS (
         argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,
         argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,
         argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,
-        argMax(title, tuple(snapshot_version, snapshot_id)) AS title
+        argMax(title, tuple(snapshot_version, snapshot_id)) AS title,
+        argMax(body, tuple(snapshot_version, snapshot_id)) AS deterministic_detail
     FROM observability.incident_updates
+    GROUP BY incident_id
+)'''
+
+
+ACTIVE_CTE = LATEST_CTE + ''',
+latest_ai AS (
+    SELECT
+        incident_id,
+        argMax(body, tuple(timestamp, run_id)) AS ai_description
+    FROM observability.ai_updates
+    WHERE notEmpty(incident_id) AND notEmpty(body)
     GROUP BY incident_id
 )'''
 
@@ -175,7 +187,7 @@ def table_panel(identifier, title, description, sql, fields):
                     },
                 }],
             ))
-        if name in {'Event', 'Subject'}:
+        if name in {'Event', 'Subject', 'Event Details'}:
             properties.append(('custom.wrapText', True))
         overrides.append(field_override(name, properties))
     return {
@@ -237,14 +249,24 @@ def severity_condition():
     return f"({value} = 'all' OR lowerUTF8(severity) = {value})"
 
 
+def active_search_condition():
+    value = '${active_search:sqlstring}'
+    return (
+        f"({value} = '' OR positionCaseInsensitiveUTF8("
+        "concat(device, ' ', entity_name, ' ', event_family, ' ', "
+        "protocol, ' ', title, ' ', deterministic_detail, ' ', "
+        f"ifNull(ai_description, ''), ' ', incident_id), {value}) > 0)"
+    )
+
+
 def build_document():
     active_filter = (
         "lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')\n"
-        "  AND interface_flap = false"
+        "  AND entity_type != 'interface'"
     )
     flap_filter = (
         "lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')\n"
-        "  AND interface_flap = true"
+        "  AND entity_type = 'interface'"
     )
     active_count = (
         LATEST_CTE + "\nSELECT count() AS \"Active Events\"\nFROM latest\n"
@@ -255,14 +277,27 @@ def build_document():
         "WHERE " + flap_filter
     )
     resolved_count = (
-        LATEST_CTE + "\nSELECT count() AS \"Resolved in Range\"\nFROM latest\n"
+        LATEST_CTE + "\nSELECT count() AS \"Resolved\"\nFROM latest\n"
         "WHERE lifecycle_status = 'RESOLVED'\n"
         "  AND resolved_at >= $__fromTime\n  AND resolved_at <= $__toTime"
     )
-    active_sql = LATEST_CTE + f'''\nSELECT
+    active_sql = ACTIVE_CTE + f'''\nSELECT
     severity AS "Severity",
     device AS "Device",
     title AS "Event",
+    if(
+        notEmpty(ifNull(ai_description, '')),
+        ai_description,
+        concat(
+            'Detected ', event_family, ' event',
+            if(empty(entity_name), '', concat(' involving ', entity_name)),
+            if(
+                empty(last_observation_state),
+                '.',
+                concat('; current observed state: ', last_observation_state, '.')
+            )
+        )
+    ) AS "Event Details",
     lifecycle_status AS "State",
     first_seen AS "First Seen",
     last_seen AS "Last Activity",
@@ -271,9 +306,10 @@ def build_document():
     event_family AS "Category",
     incident_id AS "Incident ID"
 FROM latest
+LEFT JOIN latest_ai USING incident_id
 WHERE {active_filter}
   AND {severity_condition()}
-  AND {search_condition('active_search')}
+  AND {active_search_condition()}
 ORDER BY multiIf(severity IN ('emergency', 'alert'), 0, severity = 'critical', 1, severity = 'error', 2, severity = 'warning', 3, 4), last_seen DESC
 LIMIT 500'''
     flap_sql = LATEST_CTE + f'''\nSELECT
@@ -302,7 +338,7 @@ LIMIT 500'''
     dateDiff('minute', first_seen, assumeNotNull(resolved_at)) AS "Duration (min)",
     occurrence_count AS "Occurrences",
     event_family AS "Category",
-    if(interface_flap, 'yes', 'no') AS "Interface Flap",
+    if(entity_type = 'interface', 'yes', 'no') AS "Interface Flap",
     incident_id AS "Incident ID"
 FROM latest
 WHERE lifecycle_status = 'RESOLVED'
@@ -314,15 +350,16 @@ ORDER BY resolved_at DESC
 LIMIT 500'''
 
     elements = {
-        'panel-1': stat_panel(1, 'Active Events', 'Current non-flap incidents; active state is never hidden by the dashboard time range.', active_count, 'red'),
-        'panel-2': stat_panel(2, 'Interface Flaps', 'Current interface-flap incidents kept in their own operational queue.', flap_count, 'orange'),
+        'panel-1': stat_panel(1, 'Active Events', 'Current non-interface incidents; active state is never hidden by the dashboard time range.', active_count, 'red'),
+        'panel-2': stat_panel(2, 'Interface Flaps', 'All current interface incidents, including a first down observation before another state change, are kept in this queue.', flap_count, 'orange'),
         'panel-3': stat_panel(3, 'Resolved', 'Incidents resolved during the selected dashboard time range.', resolved_count, 'green'),
-        'panel-4': table_panel(4, 'Active Events', 'One current row per unresolved non-flap incident. Search is server-side and the time picker does not hide persistent incidents.', active_sql, [
-            ('Severity', 105), ('Device', 190), ('Event', 330), ('State', 125),
+        'panel-4': table_panel(4, 'Active Events', 'One current row per unresolved non-interface incident. Event Details uses the latest AI summary when available and deterministic state detail otherwise. Search is server-side and the time picker does not hide persistent incidents.', active_sql, [
+            ('Severity', 105), ('Device', 190), ('Event', 260),
+            ('Event Details', 560), ('State', 125),
             ('First Seen', 135), ('Last Activity', 135), ('Age (min)', 95),
             ('Occurrences', 95), ('Category', 120), ('Incident ID', 220),
         ]),
-        'panel-5': table_panel(5, 'Interface Flaps', 'One current row per device/interface while deterministic state changes continue; recovery moves it to Resolved after the quiet-period gate.', flap_sql, [
+        'panel-5': table_panel(5, 'Interface Flaps', 'Every unresolved interface incident is kept here, including its first down observation; recovery moves it to Resolved after the quiet-period gate.', flap_sql, [
             ('Device', 190), ('Interface', 220), ('Current State', 120), ('State', 125),
             ('First Seen', 135), ('Last Activity', 135), ('Flaps', 85),
             ('Occurrences', 95), ('Age (min)', 95), ('Incident ID', 220),

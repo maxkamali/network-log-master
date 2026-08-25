@@ -10,11 +10,11 @@ The original `AI Incident Analysis` dashboard remains unchanged as the assessmen
 
 The enhanced dashboard has three mutually understandable operational windows:
 
-- **Active Events** — unresolved non-interface-flap incidents. This query deliberately ignores the dashboard time picker, so a persistent incident remains visible until the deterministic engine resolves it.
-- **Interface Flaps** — unresolved incidents whose deterministic interface evidence contains at least one state change. Every such incident is excluded from Active Events and remains here until resolution.
+- **Active Events** — unresolved non-interface incidents. This query deliberately ignores the dashboard time picker, so a persistent incident remains visible until the deterministic engine resolves it. `Event Details` shows the latest stored AI summary when available and a deterministic event/entity/current-state description otherwise.
+- **Interface Flaps** — every unresolved incident whose deterministic `entity_type` is `interface`, including its first adverse observation before a second state change exists. Every interface incident is excluded from Active Events and remains here until resolution.
 - **Resolved Events** — the latest state of resolved incidents whose `resolved_at` timestamp falls inside the selected dashboard range.
 
-Each window has a server-side text search across device, entity, event family, protocol, title, and incident ID. Active and Resolved also have a server-side severity selector. The tables expose Device and Incident ID; they do not contain an assigned-operator field or an AI recommendation field.
+Each window has a server-side text search across device, entity, event family, protocol, title, and incident ID. Active search also covers the displayed AI/deterministic detail. Active and Resolved have a server-side severity selector. The tables expose Device and Incident ID; they do not contain an assigned-operator field or an AI recommendation field.
 
 ## State authority and movement
 
@@ -34,7 +34,7 @@ GX10 incidents
 An incident moves between dashboard windows only when the deterministic engine changes its lifecycle state:
 
 - `CANDIDATE`, `OPEN`, or `RECOVERING` stays active.
-- an active interface flap appears only in Interface Flaps.
+- every active interface entity appears only in Interface Flaps, even when its lifecycle snapshot still has zero recorded state changes.
 - `RESOLVED` leaves both active windows and appears in Resolved Events for ranges containing its resolution time.
 - a later relapse produces a newer snapshot and returns the incident to the appropriate active window.
 
@@ -45,6 +45,8 @@ Manual resolution is intentionally not implemented. Adding it requires a separat
 The lifecycle producer is independent of the AI-result producer but shares its filesystem lock and ready/delivered directories. It emits only changed incidents in content-addressed batches of at most 100 records and 256 KiB. A protected local SQLite cursor records the last exported snapshot version per incident.
 
 Lifecycle batches use `type = incident_lifecycle`. The collector gate validates their exact shape and Vector routes them exclusively to `observability.incident_updates`; they must never enter `observability.ai_updates`.
+
+The exported `interface_flap` field continues to record whether interface state-change evidence exists. Dashboard queue placement deliberately uses authoritative `entity_type = interface` instead, so a newly opened interface-down incident cannot leak into Active Events before its next transition.
 
 `incident_updates` has no TTL. Latest-per-incident dashboard queries use `argMax` over `(snapshot_version, snapshot_id)`, so active state does not age out and resolved history remains available. Retention changes require an explicit policy decision.
 

@@ -81,23 +81,30 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         }
         self.assertEqual(references, set(self.elements))
 
-    def test_every_query_is_read_only_deterministic_lifecycle_data(self):
-        for panel in self.elements.values():
+    def test_every_query_is_read_only_and_lifecycle_authoritative(self):
+        for name, panel in self.elements.items():
             query = panel_query(panel)
             self.assertEqual(query['datasource']['name'], DATASOURCE_UID)
             sql = query['spec']['rawSql']
             self.assertIn('FROM observability.incident_updates', sql)
             self.assertIn('argMax(', sql)
-            self.assertNotIn('observability.ai_updates', sql)
+            if name == 'panel-4':
+                self.assertIn('FROM observability.ai_updates', sql)
+                self.assertIn('LEFT JOIN latest_ai USING incident_id', sql)
+            else:
+                self.assertNotIn('observability.ai_updates', sql)
             self.assertNotIn('recommended_actions', sql)
             self.assertNotRegex(sql, r'(?i)\b(INSERT|UPDATE|DELETE|ALTER|DROP|TRUNCATE)\b')
 
     def test_active_queue_persists_and_excludes_flaps(self):
         sql = panel_query(self.elements['panel-4'])['spec']['rawSql']
         self.assertIn("lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')", sql)
-        self.assertIn('interface_flap = false', sql)
+        self.assertIn("entity_type != 'interface'", sql)
         self.assertIn('${active_search:sqlstring}', sql)
         self.assertIn('${severity_filter:sqlstring}', sql)
+        self.assertIn('ai_description', sql)
+        self.assertIn('AS "Event Details"', sql)
+        self.assertIn('deterministic_detail', sql)
         self.assertNotIn('$__fromTime', sql)
         self.assertNotIn('$__toTime', sql)
         self.assertNotIn('Model', sql)
@@ -105,13 +112,16 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
 
     def test_flap_queue_is_exclusive_and_searchable(self):
         sql = panel_query(self.elements['panel-5'])['spec']['rawSql']
-        self.assertIn('interface_flap = true', sql)
+        self.assertIn("entity_type = 'interface'", sql)
         self.assertIn('${flap_search:sqlstring}', sql)
         self.assertIn('state_change_count AS "Flaps"', sql)
         self.assertNotIn('$__fromTime', sql)
         self.assertNotIn('$__toTime', sql)
 
     def test_resolved_queue_uses_resolved_time_range_and_search(self):
+        count_sql = panel_query(self.elements['panel-3'])['spec']['rawSql']
+        self.assertIn('count() AS "Resolved"', count_sql)
+        self.assertNotIn('Resolved in Range', count_sql)
         sql = panel_query(self.elements['panel-6'])['spec']['rawSql']
         self.assertIn("lifecycle_status = 'RESOLVED'", sql)
         self.assertIn('resolved_at >= $__fromTime', sql)
@@ -130,6 +140,8 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
             self.assertTrue(defaults['custom']['filterable'])
         severity = override(self.elements['panel-4'], 'Severity')['properties']
         self.assertTrue(any(item['id'] == 'mappings' for item in severity))
+        details = override(self.elements['panel-4'], 'Event Details')['properties']
+        self.assertIn({'id': 'custom.wrapText', 'value': True}, details)
 
 
 if __name__ == '__main__':

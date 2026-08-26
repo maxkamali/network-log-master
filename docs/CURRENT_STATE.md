@@ -20,7 +20,7 @@ Disposable clean-two-server execution: `WAIVED BY OPERATOR`, empirically unverif
 
 Rebuild/documentation milestone disposition: `ACCEPTED WITH RESIDUAL RISK`.
 
-End-to-end working-system target: `COMPLETE` through item 39; item 40 dashboard drilldown ergonomics is the single `NEXT` item.
+End-to-end working-system target: `COMPLETE` through item 40. There is no remaining numbered `NEXT` item.
 
 Post-closure AI-results Grafana dashboard feature: `DONE` under item 32.
 
@@ -40,7 +40,7 @@ Post-closure NOC rotation playlist: `DONE` under item 38. The isolated NOC organ
 
 Post-closure enhanced incident-log drilldown: `DONE` under item 39. Every cell in the Active Events, Interface Flaps, and Resolved Events tables now opens a new Explore tab for the selected deterministic incident. The incident ID resolves authoritative device, entity, protocol/event family, and incident time bounds before querying the existing read-only log datasource. Both the main and isolated NOC enhanced resources were replaced under an online Grafana database backup; the NOC copy retains its server-owned fields and uses organization 2. Exact rereads, all panel queries, and sampled active/flap/resolved drilldowns passed without printing event values.
 
-Post-closure dashboard drilldown ergonomics: `IN PROGRESS` under item 40. The validated repository candidate starts all enhanced-incident and linked NOC View Explore panes in compact mode, and marks the four existing NOC View data links as one-click targets. It changes no SQL, datasource, incident state, time range, result cap, account permission, playlist, or data path. Production replacement remains pending protected dry-run and exact reread.
+Post-closure dashboard drilldown ergonomics: `DONE` under item 40. All enhanced-incident and linked NOC View Explore panes now start in compact mode, and the four existing NOC View data links are one-click targets. Main links retain organization 1 and the isolated NOC copies retain organization 2. Main six-resource exact verification, organization-scoped NOC reread, both enhanced query/drilldown passes, all four NOC drilldown queries, SQLite integrity, and unchanged service health passed under a root-only rollback boundary. No SQL, datasource, incident state, time range, result cap, account permission, playlist, or data path changed.
 
 The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
@@ -370,9 +370,9 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 37. `DONE` — created a dedicated Grafana NOC Viewer in an isolated organization; copied only `NOC View`, `AI Incident Analysis - Enhanced`, and their two read-only datasource definitions; set the NOC home/star preferences; enabled Viewer Explore compatibility; proved exactly one Viewer membership, two-dashboard/two-datasource inventory, non-scoped dashboard denial, persistent-write denial, all fourteen panel queries, unchanged exact main-organization dashboards, database integrity, and healthy Grafana/ClickHouse/Vector/gate services. Exact per-user navigation pruning remains unavailable in Grafana OSS and is not represented as enforced.
 38. `DONE` — created the isolated `NOC Rotation` playlist with stable dashboard UIDs, exact two-dashboard order, a one-minute interval, and a validated auto-fit play route; proved NOC Viewer read/start access and playlist-create denial, retained `NOC View` as the login home, left the main organization without playlists, reverified all six main-dashboard specifications exact, and retained healthy Grafana/data-path services under a root-only online database backup.
 39. `DONE` — published the validated incident-log drilldown candidate; protected the live Grafana database and exact NOC predecessor; dry-ran and replaced only the enhanced dashboard in each organization with organization-correct Explore links; preserved NOC server-owned fields; proved exact reread, all panel queries, sampled incident-log lookups in both organizations, restored administrator context, and healthy unchanged data-path services.
-40. `NEXT` — publish and independently verify the compact/one-click drilldown candidate, protect Grafana state, dry-run and replace only NOC View plus enhanced analysis in both organizations while preserving organization-local links/server-owned fields, then prove exact rereads, read-only queries, link contracts, and healthy unchanged data paths.
+40. `DONE` — published and independently verified the compact/one-click drilldown candidate and two fail-closed canonicalization corrections; protected Grafana state; updated only NOC View plus enhanced analysis in each organization through the correct organization-scoped interfaces; preserved organization-local links/server-owned fields; and proved exact main rereads, organization-2 link contracts, read-only queries, database integrity, and healthy unchanged data paths.
 
-The end-to-end target is complete through item 39. Item 40 is the single `NEXT` item. Its candidate is limited to dashboard navigation state and does not change the original AI dashboard, NOC playlist, home preference, datasource definitions, ClickHouse data/schema, Vector, GX10, transport, incident state, credential, account permission, or model authority.
+The end-to-end target is complete through item 40. There is no remaining `NEXT` item. Item 40 changed only dashboard navigation state; it did not change the original AI dashboard, NOC playlist, home preference, datasource definitions, ClickHouse data/schema, Vector, GX10, transport, incident state, credential, account permission, or model authority.
 
 ## Scope constraints
 

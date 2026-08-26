@@ -12567,3 +12567,27 @@ The corrected capture removes only those four semantically empty placeholders an
 A second main-organization protected apply replaced the enhanced resource exactly, then stopped its strict NOC View verification because a real replacement updates Grafana-owned timestamp annotations that `dryRun=All` leaves unchanged. The NOC View response specification contained the intended change, but the captured server annotation no longer matched. The database backup and exact NOC predecessors remain protected; no organization-2 resource changed.
 
 The NOC View capture now follows the same portable metadata rule as the generated enhanced resource: only stable name and namespace are asserted, while Grafana owns annotations, labels, generation, UID, and timestamps. The complete specification remains exact. Republish this metadata-only correction, then reread the already-written main resources against it before any organization-2 mutation.
+
+## 2026-08-25 20:18 PDT - Item 40 compact and one-click drilldowns passed protected production closure
+
+### Status
+
+Item 40 is `DONE`. There is no remaining numbered `NEXT` item.
+
+The initial candidate `6bbdfb335e75bccb4551f948fd193613db60b287`, canonical empty-link correction `101d3d1f893fcb5f43117e8e4a274214ae83d064`, and portable-metadata correction `85d8bab5c5dd1e6d4a21be1c410c8cae89c4840f` were each published and independently matched GitHub `main` before their corresponding live phase. Both strict mismatches stopped before unverified continuation and were documented rather than ignored.
+
+A new root-owned rollback directory retains a mode-`0600` online Grafana database backup plus exact native and organization-scoped NOC predecessors. Both the live and backup databases pass `PRAGMA quick_check=ok`.
+
+Main-organization `dryRun=All` classified only `AI Incident Analysis - Enhanced` and `NOC View` as replacements. The final six-resource reread matches every published capture specification exactly. All three enhanced links retain organization 1 and compact Explore state. All four NOC View links retain organization 1, compact state, one-click behavior, unchanged target-tab behavior, and unchanged query contracts.
+
+Read-only inspection exposed an important Grafana API boundary: the native v2 `default` namespace returns the main dashboard resources even when the administrator's active organization is 2. The actual isolated copies are organization-scoped through the legacy dashboard endpoint. The NOC updater therefore started from exact organization-2 predecessors, changed only three enhanced link URLs, four NOC View link URLs, four one-click fields, and the two server-owned version counters, then reread the complete organization-scoped dashboards. Organization-2 links retain `orgId=2`; every affected Explore pane is compact and all four NOC View links are one-click. The administrator context was restored to organization 1 after every bounded operation.
+
+Both main and organization-2 enhanced validation passes executed all six panel queries and sampled nonempty Interface Flaps and Resolved Events drilldowns; Active Events was empty and correctly skipped. A separate redacted organization-2 verifier executed all four NOC View drilldown queries successfully and reported only frame/row counts. Link adaptation asserted byte-identical raw SQL before and after compact encoding. No event value, incident identity, device, log body, credential, or private connection value was printed or recorded.
+
+Grafana, ClickHouse, Vector, and `ai-results-gate.timer` remain active. Grafana, ClickHouse, Vector, and the gate service report success with zero restarts. No service restart, ClickHouse data/schema change, Vector change, GX10 change, transport change, incident-state change, playlist/preference change, datasource change, account/permission change, or model change occurred.
+
+The exact collector staging directory, temporary organization adapters, redacted inspectors/verifiers, local exact-version Grafana source checkout, and all process-memory credential state were removed. The root-only rollback boundary remains retained.
+
+### Next action
+
+None. Publish and independently verify this closure/documentation checkpoint, then continue normal operator evaluation of the compact and one-click dashboard behavior.

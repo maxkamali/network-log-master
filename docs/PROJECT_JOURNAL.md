@@ -12487,3 +12487,9 @@ Administrator and NOC passwords were supplied only through no-echo processes; th
 ### Next action
 
 None. Publish and independently verify this closure/documentation checkpoint, remove only the exact playlist validation stages/helpers, retain the root-only database backup, and continue normal NOC evaluation using the playlist's auto-fit start mode.
+
+## 2026-08-25 19:00 PDT - Item 38 closure publication and cleanup independently verified
+
+Closure/documentation commit `ad01f0e8178765222d330347e21d40cf65fa3c36` was published to GitHub, and an independent `ls-remote` comparison matched local and remote `main` exactly.
+
+The exact collector-side playlist creator/stage, its bytecode artifact, and the local creator/memory-only credential helper are absent. The separate root-only playlist rollback database remains mode `0600`. Post-cleanup Grafana SQLite integrity and HTTPS health passed; Grafana, ClickHouse, Vector, and the collector result-gate timer are active; relevant service results remain successful with zero restarts. Item 38 is `DONE`, the end-to-end target is complete through item 38, and there is no remaining `NEXT` item.

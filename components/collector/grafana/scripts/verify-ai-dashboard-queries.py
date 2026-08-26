@@ -139,7 +139,7 @@ def drilldown_queries(panel: dict[str, Any]) -> list[dict[str, Any]]:
 
 def drilldown_payload(
     query: dict[str, Any],
-    incident_id: str,
+    substitutions: Any,
     start_ms: int,
     end_ms: int,
 ) -> tuple[str, dict[str, Any]]:
@@ -148,13 +148,23 @@ def drilldown_payload(
     raw_sql = prepared.get("rawSql")
     if not isinstance(raw_sql, str):
         raise DashboardApiError("Explore data link has no SQL")
-    marker = "${__data.fields.incident_id}"
-    if marker not in raw_sql:
-        raise DashboardApiError("Explore data link has no incident-ID marker")
-    prepared["rawSql"] = raw_sql.replace(
-        marker,
-        incident_id.replace("'", "''"),
-    )
+    if isinstance(substitutions, str):
+        substitutions = {
+            "${__data.fields.incident_id}": substitutions,
+        }
+    if not isinstance(substitutions, dict) or not substitutions:
+        raise DashboardApiError("Explore data link has no row-field marker")
+    for marker, value in substitutions.items():
+        if marker not in raw_sql:
+            raise DashboardApiError(
+                "Explore data link is missing its row-field marker"
+            )
+        raw_sql = raw_sql.replace(marker, value.replace("'", "''"))
+    if "${__data.fields." in raw_sql:
+        raise DashboardApiError(
+            "Explore data link has an unresolved row-field marker"
+        )
+    prepared["rawSql"] = raw_sql
     prepared.update({
         "intervalMs": 60_000,
         "maxDataPoints": 1_000,
@@ -239,15 +249,25 @@ def main() -> int:
                 continue
             linked_panels += 1
             incident_ids = response_field_values(response, ref_id, "incident_id")
-            if not incident_ids:
+            device_hex = response_field_values(response, ref_id, "device_hex")
+            interface_hex = response_field_values(
+                response, ref_id, "interface_hex"
+            )
+            if incident_ids:
+                substitutions = {
+                    "${__data.fields.incident_id}": incident_ids[0],
+                }
+            elif device_hex and interface_hex:
+                substitutions = {
+                    "${__data.fields.device_hex}": device_hex[0],
+                    "${__data.fields.interface_hex}": interface_hex[0],
+                }
+            else:
                 print(f"{dashboard.name}/{panel_name} drilldown=SKIP_EMPTY")
                 continue
             for link_query in links:
                 link_ref_id, link_payload = drilldown_payload(
-                    link_query,
-                    incident_ids[0],
-                    start_ms,
-                    end_ms,
+                    link_query, substitutions, start_ms, end_ms
                 )
                 link_status, link_response = api.request(
                     "POST", "/api/ds/query", link_payload

@@ -9,6 +9,12 @@ from urllib.parse import quote
 
 DATASOURCE_UID = 'efvaztlrk8ow0a'
 LOGS_DATASOURCE_UID = 'bfvik20ilwoaof'
+INTERFACE_BOUNCE_THRESHOLD = 10
+INTERFACE_BOUNCE_WINDOW_MINUTES = 60
+INTERFACE_DOWN_EVENT_CODE = '%ETHPORT-5-IF_DOWN_LINK_FAILURE'
+INTERFACE_EXTRACT_RE = (
+    r'(?i)\\bInterface\\s+([A-Za-z0-9./:-]+)\\s+is\\s+down\\b'
+)
 
 
 LATEST_CTE = '''WITH latest AS (
@@ -47,7 +53,39 @@ latest_ai AS (
 )'''
 
 
-def query(sql):
+INTERFACE_BOUNCE_CTE = f'''WITH interface_down_events AS (
+    SELECT
+        timestamp,
+        device,
+        extract(message, '{INTERFACE_EXTRACT_RE}') AS interface
+    FROM observability.grafana_logs
+    WHERE timestamp >= now64(3) - INTERVAL {INTERFACE_BOUNCE_WINDOW_MINUTES} MINUTE
+      AND timestamp <= now64(3)
+      AND positionCaseInsensitiveUTF8(
+          message,
+          '{INTERFACE_DOWN_EVENT_CODE}'
+      ) > 0
+),
+interface_bounces AS (
+    SELECT
+        device,
+        interface,
+        count() AS bounce_count,
+        min(timestamp) AS first_bounce,
+        max(timestamp) AS last_bounce
+    FROM interface_down_events
+    WHERE notEmpty(device) AND notEmpty(interface)
+    GROUP BY device, interface
+    HAVING bounce_count >= {INTERFACE_BOUNCE_THRESHOLD}
+)'''
+
+
+def query(
+    sql,
+    *,
+    datasource_uid=DATASOURCE_UID,
+    table='incident_updates',
+):
     return {
         'kind': 'PanelQuery',
         'spec': {
@@ -55,7 +93,7 @@ def query(sql):
                 'kind': 'DataQuery',
                 'group': 'grafana-clickhouse-datasource',
                 'version': 'v0',
-                'datasource': {'name': DATASOURCE_UID},
+                'datasource': {'name': datasource_uid},
                 'spec': {
                     'editorType': 'sql',
                     'format': 1,
@@ -69,7 +107,7 @@ def query(sql):
                             'mode': 'list',
                             'orderBy': [],
                             'queryType': 'table',
-                            'table': 'incident_updates',
+                            'table': table,
                         }
                     },
                     'pluginVersion': '4.20.0',
@@ -83,18 +121,36 @@ def query(sql):
     }
 
 
-def data(sql):
+def data(
+    sql,
+    *,
+    datasource_uid=DATASOURCE_UID,
+    table='incident_updates',
+):
     return {
         'kind': 'QueryGroup',
         'spec': {
-            'queries': [query(sql)],
+            'queries': [query(
+                sql,
+                datasource_uid=datasource_uid,
+                table=table,
+            )],
             'transformations': [],
             'queryOptions': {},
         },
     }
 
 
-def stat_panel(identifier, title, description, sql, color):
+def stat_panel(
+    identifier,
+    title,
+    description,
+    sql,
+    color,
+    *,
+    datasource_uid=DATASOURCE_UID,
+    table='incident_updates',
+):
     return {
         'kind': 'Panel',
         'spec': {
@@ -102,7 +158,11 @@ def stat_panel(identifier, title, description, sql, color):
             'title': title,
             'description': description,
             'links': [],
-            'data': data(sql),
+            'data': data(
+                sql,
+                datasource_uid=datasource_uid,
+                table=table,
+            ),
             'vizConfig': {
                 'kind': 'VizConfig',
                 'group': 'stat',
@@ -227,13 +287,89 @@ LIMIT 1000'''
     }
 
 
-def table_panel(identifier, title, description, sql, fields):
+def interface_bounce_logs_link():
+    raw_sql = f'''SELECT
+    timestamp,
+    body,
+    level,
+    device,
+    hostname,
+    source_ip
+FROM observability.grafana_logs
+WHERE timestamp >= now64(3) - INTERVAL {INTERFACE_BOUNCE_WINDOW_MINUTES} MINUTE
+  AND timestamp <= now64(3)
+  AND lowerUTF8(device) = lowerUTF8(
+      unhex('${{__data.fields.device_hex}}')
+  )
+  AND positionCaseInsensitiveUTF8(
+      body,
+      unhex('${{__data.fields.interface_hex}}')
+  ) > 0
+ORDER BY timestamp DESC
+LIMIT 1000'''
+    panes = {
+        'interface': {
+            'datasource': LOGS_DATASOURCE_UID,
+            'compact': True,
+            'queries': [{
+                'refId': 'A',
+                'datasource': {
+                    'type': 'grafana-clickhouse-datasource',
+                    'uid': LOGS_DATASOURCE_UID,
+                },
+                'editorType': 'sql',
+                'format': 2,
+                'pluginVersion': '4.20.0',
+                'queryType': 'logs',
+                'rawSql': raw_sql,
+            }],
+            'range': {'from': 'now-60m', 'to': 'now'},
+        }
+    }
+    encoded_panes = quote(json.dumps(panes, separators=(',', ':')), safe='')
+    for variable in (
+        '${__data.fields.device_hex}',
+        '${__data.fields.interface_hex}',
+    ):
+        encoded_panes = encoded_panes.replace(
+            quote(json.dumps(variable)[1:-1], safe=''),
+            variable,
+        )
+    return {
+        'oneClick': True,
+        'targetBlank': True,
+        'title': 'View matching logs',
+        'url': (
+            '/explore?panes='
+            + encoded_panes
+            + '&schemaVersion=1&orgId=1'
+        ),
+    }
+
+
+def table_panel(
+    identifier,
+    title,
+    description,
+    sql,
+    fields,
+    *,
+    datasource_uid=DATASOURCE_UID,
+    table='incident_updates',
+    links=None,
+):
     overrides = []
     for name, width in fields:
         properties = [('custom.width', width)]
         if name == 'incident_id':
             properties.insert(0, ('displayName', 'Incident ID'))
-        if name in {'First Seen', 'Last Activity', 'Resolved'}:
+        if name in {
+            'First Seen',
+            'Last Activity',
+            'First Bounce',
+            'Last Bounce',
+            'Resolved',
+        }:
             properties.insert(0, ('unit', 'dateTimeFromNow'))
         if name in {'Severity', 'State', 'Resolution'}:
             properties.append((
@@ -267,11 +403,14 @@ def table_panel(identifier, title, description, sql, fields):
                         'OPEN': {'color': 'red', 'index': 1, 'text': 'OPEN'},
                         'RECOVERING': {'color': 'yellow', 'index': 2, 'text': 'RECOVERING'},
                         'RESOLVED': {'color': 'green', 'index': 3, 'text': 'RESOLVED'},
+                        'FLAPPING': {'color': 'orange', 'index': 4, 'text': 'FLAPPING'},
                     },
                 }],
             ))
         if name in {'Event', 'Subject', 'Event Details'}:
             properties.append(('custom.wrapText', True))
+        if name in {'device_hex', 'interface_hex'}:
+            properties.append(('custom.hidden', True))
         overrides.append(field_override(name, properties))
     return {
         'kind': 'Panel',
@@ -280,7 +419,11 @@ def table_panel(identifier, title, description, sql, fields):
             'title': title,
             'description': description,
             'links': [],
-            'data': data(sql),
+            'data': data(
+                sql,
+                datasource_uid=datasource_uid,
+                table=table,
+            ),
             'vizConfig': {
                 'kind': 'VizConfig',
                 'group': 'table',
@@ -301,7 +444,11 @@ def table_panel(identifier, title, description, sql, fields):
                     },
                     'fieldConfig': {
                         'defaults': {
-                            'links': [incident_logs_link()],
+                            'links': (
+                                [incident_logs_link()]
+                                if links is None
+                                else links
+                            ),
                             'custom': {
                                 'align': 'left',
                                 'cellOptions': {'type': 'auto'},
@@ -348,21 +495,18 @@ def build_document():
         "lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')\n"
         "  AND entity_type != 'interface'"
     )
-    flap_filter = (
-        "lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')\n"
-        "  AND entity_type = 'interface'"
-    )
     active_count = (
         LATEST_CTE + "\nSELECT count() AS \"Active Events\"\nFROM latest\n"
         "WHERE " + active_filter
     )
     flap_count = (
-        LATEST_CTE + "\nSELECT count() AS \"Active Flaps\"\nFROM latest\n"
-        "WHERE " + flap_filter
+        INTERFACE_BOUNCE_CTE
+        + '\nSELECT count() AS "Active Flaps"\nFROM interface_bounces'
     )
     resolved_count = (
         LATEST_CTE + "\nSELECT count() AS \"Resolved\"\nFROM latest\n"
         "WHERE lifecycle_status = 'RESOLVED'\n"
+        "  AND entity_type != 'interface'\n"
         "  AND resolved_at >= $__fromTime\n  AND resolved_at <= $__toTime"
     )
     active_sql = ACTIVE_CTE + f'''\nSELECT
@@ -401,21 +545,24 @@ WHERE {active_filter}
   AND {active_search_condition()}
 ORDER BY multiIf(severity IN ('emergency', 'alert'), 0, severity = 'critical', 1, severity = 'error', 2, severity = 'warning', 3, 4), last_seen DESC
 LIMIT 500'''
-    flap_sql = LATEST_CTE + f'''\nSELECT
+    flap_sql = INTERFACE_BOUNCE_CTE + f'''\nSELECT
     device AS "Device",
-    entity_name AS "Interface",
-    last_observation_state AS "Current State",
-    lifecycle_status AS "State",
-    first_seen AS "First Seen",
-    last_seen AS "Last Activity",
-    state_change_count AS "Flaps",
-    recurrence_count + 1 AS "Occurrences",
-    dateDiff('minute', first_seen, now()) AS "Age (min)",
-    incident_id
-FROM latest
-WHERE {flap_filter}
-  AND {search_condition('flap_search')}
-ORDER BY last_seen DESC, state_change_count DESC
+    interface AS "Interface",
+    'FLAPPING' AS "State",
+    bounce_count AS "Bounces (60m)",
+    first_bounce AS "First Bounce",
+    last_bounce AS "Last Bounce",
+    hex(device) AS device_hex,
+    hex(interface) AS interface_hex
+FROM interface_bounces
+WHERE (
+    ${{flap_search:sqlstring}} = ''
+    OR positionCaseInsensitiveUTF8(
+        concat(device, ' ', interface),
+        ${{flap_search:sqlstring}}
+    ) > 0
+)
+ORDER BY bounce_count DESC, last_bounce DESC
 LIMIT 500'''
     resolved_sql = LATEST_CTE + f'''\nSELECT
     severity AS "Severity",
@@ -431,6 +578,7 @@ LIMIT 500'''
     incident_id
 FROM latest
 WHERE lifecycle_status = 'RESOLVED'
+  AND entity_type != 'interface'
   AND resolved_at >= $__fromTime
   AND resolved_at <= $__toTime
   AND {severity_condition()}
@@ -440,20 +588,38 @@ LIMIT 500'''
 
     elements = {
         'panel-1': stat_panel(1, 'Active Events', 'Current non-interface incidents; active state is never hidden by the dashboard time range.', active_count, 'red'),
-        'panel-2': stat_panel(2, 'Interface Flaps', 'All current interface incidents, including a first down observation before another state change, are kept in this queue.', flap_count, 'orange'),
-        'panel-3': stat_panel(3, 'Resolved', 'Incidents resolved during the selected dashboard time range.', resolved_count, 'green'),
+        'panel-2': stat_panel(
+            2,
+            'Interface Flaps',
+            'Ports with at least 10 interface-down transitions during the rolling preceding 60 minutes. Single downs and lower-rate bounces are hidden.',
+            flap_count,
+            'orange',
+            datasource_uid=LOGS_DATASOURCE_UID,
+            table='grafana_logs',
+        ),
+        'panel-3': stat_panel(3, 'Resolved', 'Non-interface incidents resolved during the selected dashboard time range.', resolved_count, 'green'),
         'panel-4': table_panel(4, 'Active Events', 'One current row per unresolved non-interface incident. Click any row cell to open matching device/entity/protocol logs in Explore. Recovered OSPF/BGP incidents remain MONITORING for 24 continuous healthy hours; a relapse reopens the same incident and increments Occurrences. Event Details uses the latest AI summary when available and deterministic state detail otherwise. Search is server-side and the time picker does not hide persistent incidents.', active_sql, [
             ('Severity', 105), ('Device', 190), ('Event', 260),
             ('Event Details', 560), ('State', 125),
             ('First Seen', 135), ('Last Activity', 135), ('Age (min)', 95),
             ('Occurrences', 95), ('Category', 120), ('incident_id', 220),
         ]),
-        'panel-5': table_panel(5, 'Interface Flaps', 'Every unresolved interface incident is kept here, including its first down observation. Click any row cell to open matching device/interface logs in Explore; recovery moves the incident to Resolved after the quiet-period gate.', flap_sql, [
-            ('Device', 190), ('Interface', 220), ('Current State', 120), ('State', 125),
-            ('First Seen', 135), ('Last Activity', 135), ('Flaps', 85),
-            ('Occurrences', 95), ('Age (min)', 95), ('incident_id', 220),
-        ]),
-        'panel-6': table_panel(6, 'Resolved Events', 'Resolved incident episodes in the selected time range. Click any row cell to open matching logs from the incident window. Records remain searchable history and are not deleted by dashboard actions.', resolved_sql, [
+        'panel-5': table_panel(
+            5,
+            'Interface Flaps',
+            'Only ports with at least 10 interface-down transitions in the rolling preceding 60 minutes appear. Click any row cell to open that device/interface log window. A port automatically leaves when its rolling count falls below 10.',
+            flap_sql,
+            [
+                ('Device', 220), ('Interface', 240), ('State', 125),
+                ('Bounces (60m)', 130), ('First Bounce', 150),
+                ('Last Bounce', 150), ('device_hex', 1),
+                ('interface_hex', 1),
+            ],
+            datasource_uid=LOGS_DATASOURCE_UID,
+            table='grafana_logs',
+            links=[interface_bounce_logs_link()],
+        ),
+        'panel-6': table_panel(6, 'Resolved Events', 'Resolved non-interface incident episodes in the selected time range. Click any row cell to open matching logs from the incident window. Interface history remains searchable in raw logs but is intentionally absent here.', resolved_sql, [
             ('Severity', 105), ('Device', 190), ('Event', 330), ('Resolution', 125),
             ('First Seen', 135), ('Resolved', 135), ('Duration (min)', 110),
             ('Occurrences', 95), ('Category', 120), ('Interface Flap', 110),
@@ -480,7 +646,7 @@ LIMIT 500'''
     variables = []
     for name, label, description in (
         ('active_search', 'Search Active', 'Search device, event, category, protocol, and incident ID.'),
-        ('flap_search', 'Search Flaps', 'Search device, interface, and incident ID.'),
+        ('flap_search', 'Search Flaps', 'Search device and interface.'),
         ('resolved_search', 'Search Resolved', 'Search resolved device, event, category, protocol, and incident ID.'),
     ):
         variables.append({

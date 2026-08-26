@@ -20,6 +20,8 @@ Item 38 is complete. The isolated NOC organization has one `NOC Rotation` playli
 
 Item 39 is complete. Both organization-local copies of `AI Incident Analysis - Enhanced` now provide a `View matching logs` link from every event-table cell. The selected deterministic incident identity drives a bounded, read-only, incident-time/device/entity/protocol/event-family lookup in `observability.grafana_logs`. The main replacement changed only the enhanced capture; the NOC replacement preserved its server-added annotations, preferences, and variable selections while binding Explore to organization 2. All panel queries and sampled drilldowns passed in both organizations under a new root-only online Grafana database backup and exact NOC resource predecessor.
 
+Item 41 is the current presentation-only `NEXT`. Its repository candidate keeps every interface entity out of Active and Resolved, replaces lifecycle-owned flap visibility with an exact rolling 60-minute aggregation of raw NX-OS interface-down transitions, and displays only device/interface pairs with at least 10 observations. The flap row keeps compact one-click raw-log drilldown using exact hidden row keys. Full collector and public repository validation pass; production remains unchanged until candidate publication, protected dry-run/replacement in both Grafana organizations, exact reread, query/drilldown proof, and health closure.
+
 After each completed validated collector sub-section, append and push a `docs/PROJECT_JOURNAL.md` entry before materially proceeding into the next sub-section.
 
 ## Rebuild objective

@@ -12765,3 +12765,49 @@ created one ordinary 944-byte lifecycle update, and left unit
 `Result=success`. This establishes recovery on the normal schedule without
 changing schema, permissions, paths, or code to conceal the retained failure
 evidence.
+
+## 2026-08-26 11:48 PDT - Item 41 rolling interface-flap candidate validated
+
+### Status
+
+Item 41 is the single `NEXT` item. The operator explicitly authorized the
+presentation-only filter after confirming that ports which go down and remain
+down are normal network behavior and that a visible flap should require at
+least 10 bounces in a reasonable one-hour period. No production dashboard,
+datasource, account, service, schema, data, transport, incident state, model,
+credential, or schedule changed during candidate construction.
+
+The enhanced-dashboard generator now derives both the Interface Flaps count
+and table directly from `observability.grafana_logs`. It selects only the exact
+NX-OS `%ETHPORT-5-IF_DOWN_LINK_FAILURE` event marker inside the rolling
+preceding 60 minutes, extracts the interface from the normalized message,
+groups by exact device/interface, and applies `HAVING bounce_count >= 10`.
+Each down transition is one observation. A persistent single-down port and
+lower-rate reboot/bounce noise therefore remain hidden; a visible row leaves
+automatically when its rolling count falls below 10. The dashboard time picker
+does not change this rolling hour.
+
+Active Events and Resolved Events both exclude every
+`entity_type = 'interface'` row. Durable raw and lifecycle history remains unchanged and
+searchable. The flap table exposes only Device, Interface, `FLAPPING`, the
+rolling count, and first/last transition in the current hour. Its compact
+one-click Explore lookup uses hidden hex-encoded row keys to bind exact
+device/interface values without permitting row text to change SQL structure;
+it is read-only, newest first, and capped at 1,000 rows. Main capture links
+retain organization 1; production adaptation must retain organization 2 in the
+isolated NOC copy.
+
+Focused dashboard/link tests pass 23 of 23. The full collector suite passes 62
+tests under Python 3.13. Nine public-repository validator tests plus current
+tree, reachable history, links, and ref-topology gates pass. The generated
+dashboard reproduces exactly from its builder and `git diff --check` passes.
+
+### Next action
+
+Publish and independently verify the item-41 candidate. Then create a new
+root-only online Grafana database backup and retain exact main/NOC enhanced
+predecessors; execute all six enhanced panel queries and a sampled rolling
+device/interface drilldown read-only; dry-run and replace only `AI Incident
+Analysis - Enhanced` in both organizations with organization-correct links and
+preserved NOC server-owned fields; reread exact resources; verify database and
+service health; and mark item 41 complete only after every gate passes.

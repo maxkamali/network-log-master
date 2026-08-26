@@ -186,6 +186,35 @@ class AiIncidentDashboardTests(unittest.TestCase):
         self.assertIn("inc-v1-''safe", payload["queries"][0]["rawSql"])
         self.assertNotIn("${__data.fields", payload["queries"][0]["rawSql"])
 
+    def test_drilldown_payload_supports_multiple_safe_row_fields(self):
+        verifier = load_query_verifier()
+        query = {
+            "refId": "A",
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "logs",
+            },
+            "rawSql": (
+                "SELECT 1 WHERE device = "
+                "unhex('${__data.fields.device_hex}') "
+                "AND interface = "
+                "unhex('${__data.fields.interface_hex}')"
+            ),
+        }
+        _, payload = verifier.drilldown_payload(
+            query,
+            {
+                "${__data.fields.device_hex}": "4142",
+                "${__data.fields.interface_hex}": "4344",
+            },
+            1000,
+            2000,
+        )
+        sql = payload["queries"][0]["rawSql"]
+        self.assertIn("unhex('4142')", sql)
+        self.assertIn("unhex('4344')", sql)
+        self.assertNotIn("${__data.fields", sql)
+
     def test_clean_machine_installer_restores_and_queries_dashboard(self):
         installer = (
             ROOT / "components/collector/install/install-runtime.sh"

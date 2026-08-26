@@ -113,7 +113,7 @@
         "spec": {
           "id": 2,
           "title": "Interface Flaps",
-          "description": "All current interface incidents, including a first down observation before another state change, are kept in this queue.",
+          "description": "Ports with at least 10 interface-down transitions during the rolling preceding 60 minutes. Single downs and lower-rate bounces are hidden.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -127,7 +127,7 @@
                       "group": "grafana-clickhouse-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "efvaztlrk8ow0a"
+                        "name": "bfvik20ilwoaof"
                       },
                       "spec": {
                         "editorType": "sql",
@@ -144,12 +144,12 @@
                             "mode": "list",
                             "orderBy": [],
                             "queryType": "table",
-                            "table": "incident_updates"
+                            "table": "grafana_logs"
                           }
                         },
                         "pluginVersion": "4.20.0",
                         "queryType": "table",
-                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(recurrence_count, tuple(snapshot_version, snapshot_id)) AS recurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title,\n        argMax(body, tuple(snapshot_version, snapshot_id)) AS deterministic_detail\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT count() AS \"Active Flaps\"\nFROM latest\nWHERE lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')\n  AND entity_type = 'interface'"
+                        "rawSql": "WITH interface_down_events AS (\n    SELECT\n        timestamp,\n        device,\n        extract(message, '(?i)\\\\bInterface\\\\s+([A-Za-z0-9./:-]+)\\\\s+is\\\\s+down\\\\b') AS interface\n    FROM observability.grafana_logs\n    WHERE timestamp >= now64(3) - INTERVAL 60 MINUTE\n      AND timestamp <= now64(3)\n      AND positionCaseInsensitiveUTF8(\n          message,\n          '%ETHPORT-5-IF_DOWN_LINK_FAILURE'\n      ) > 0\n),\ninterface_bounces AS (\n    SELECT\n        device,\n        interface,\n        count() AS bounce_count,\n        min(timestamp) AS first_bounce,\n        max(timestamp) AS last_bounce\n    FROM interface_down_events\n    WHERE notEmpty(device) AND notEmpty(interface)\n    GROUP BY device, interface\n    HAVING bounce_count >= 10\n)\nSELECT count() AS \"Active Flaps\"\nFROM interface_bounces"
                       }
                     },
                     "refId": "A",
@@ -210,7 +210,7 @@
         "spec": {
           "id": 3,
           "title": "Resolved",
-          "description": "Incidents resolved during the selected dashboard time range.",
+          "description": "Non-interface incidents resolved during the selected dashboard time range.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -246,7 +246,7 @@
                         },
                         "pluginVersion": "4.20.0",
                         "queryType": "table",
-                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(recurrence_count, tuple(snapshot_version, snapshot_id)) AS recurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title,\n        argMax(body, tuple(snapshot_version, snapshot_id)) AS deterministic_detail\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT count() AS \"Resolved\"\nFROM latest\nWHERE lifecycle_status = 'RESOLVED'\n  AND resolved_at >= $__fromTime\n  AND resolved_at <= $__toTime"
+                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(recurrence_count, tuple(snapshot_version, snapshot_id)) AS recurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title,\n        argMax(body, tuple(snapshot_version, snapshot_id)) AS deterministic_detail\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT count() AS \"Resolved\"\nFROM latest\nWHERE lifecycle_status = 'RESOLVED'\n  AND entity_type != 'interface'\n  AND resolved_at >= $__fromTime\n  AND resolved_at <= $__toTime"
                       }
                     },
                     "refId": "A",
@@ -553,6 +553,11 @@
                                 "color": "green",
                                 "index": 3,
                                 "text": "RESOLVED"
+                              },
+                              "FLAPPING": {
+                                "color": "orange",
+                                "index": 4,
+                                "text": "FLAPPING"
                               }
                             }
                           }
@@ -655,7 +660,7 @@
         "spec": {
           "id": 5,
           "title": "Interface Flaps",
-          "description": "Every unresolved interface incident is kept here, including its first down observation. Click any row cell to open matching device/interface logs in Explore; recovery moves the incident to Resolved after the quiet-period gate.",
+          "description": "Only ports with at least 10 interface-down transitions in the rolling preceding 60 minutes appear. Click any row cell to open that device/interface log window. A port automatically leaves when its rolling count falls below 10.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -669,7 +674,7 @@
                       "group": "grafana-clickhouse-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "efvaztlrk8ow0a"
+                        "name": "bfvik20ilwoaof"
                       },
                       "spec": {
                         "editorType": "sql",
@@ -686,12 +691,12 @@
                             "mode": "list",
                             "orderBy": [],
                             "queryType": "table",
-                            "table": "incident_updates"
+                            "table": "grafana_logs"
                           }
                         },
                         "pluginVersion": "4.20.0",
                         "queryType": "table",
-                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(recurrence_count, tuple(snapshot_version, snapshot_id)) AS recurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title,\n        argMax(body, tuple(snapshot_version, snapshot_id)) AS deterministic_detail\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT\n    device AS \"Device\",\n    entity_name AS \"Interface\",\n    last_observation_state AS \"Current State\",\n    lifecycle_status AS \"State\",\n    first_seen AS \"First Seen\",\n    last_seen AS \"Last Activity\",\n    state_change_count AS \"Flaps\",\n    recurrence_count + 1 AS \"Occurrences\",\n    dateDiff('minute', first_seen, now()) AS \"Age (min)\",\n    incident_id\nFROM latest\nWHERE lifecycle_status IN ('CANDIDATE', 'OPEN', 'RECOVERING')\n  AND entity_type = 'interface'\n  AND (${flap_search:sqlstring} = '' OR positionCaseInsensitiveUTF8(concat(device, ' ', entity_name, ' ', event_family, ' ', protocol, ' ', title, ' ', incident_id), ${flap_search:sqlstring}) > 0)\nORDER BY last_seen DESC, state_change_count DESC\nLIMIT 500"
+                        "rawSql": "WITH interface_down_events AS (\n    SELECT\n        timestamp,\n        device,\n        extract(message, '(?i)\\\\bInterface\\\\s+([A-Za-z0-9./:-]+)\\\\s+is\\\\s+down\\\\b') AS interface\n    FROM observability.grafana_logs\n    WHERE timestamp >= now64(3) - INTERVAL 60 MINUTE\n      AND timestamp <= now64(3)\n      AND positionCaseInsensitiveUTF8(\n          message,\n          '%ETHPORT-5-IF_DOWN_LINK_FAILURE'\n      ) > 0\n),\ninterface_bounces AS (\n    SELECT\n        device,\n        interface,\n        count() AS bounce_count,\n        min(timestamp) AS first_bounce,\n        max(timestamp) AS last_bounce\n    FROM interface_down_events\n    WHERE notEmpty(device) AND notEmpty(interface)\n    GROUP BY device, interface\n    HAVING bounce_count >= 10\n)\nSELECT\n    device AS \"Device\",\n    interface AS \"Interface\",\n    'FLAPPING' AS \"State\",\n    bounce_count AS \"Bounces (60m)\",\n    first_bounce AS \"First Bounce\",\n    last_bounce AS \"Last Bounce\",\n    hex(device) AS device_hex,\n    hex(interface) AS interface_hex\nFROM interface_bounces\nWHERE (\n    ${flap_search:sqlstring} = ''\n    OR positionCaseInsensitiveUTF8(\n        concat(device, ' ', interface),\n        ${flap_search:sqlstring}\n    ) > 0\n)\nORDER BY bounce_count DESC, last_bounce DESC\nLIMIT 500"
                       }
                     },
                     "refId": "A",
@@ -729,9 +734,10 @@
                 "defaults": {
                   "links": [
                     {
+                      "oneClick": true,
                       "targetBlank": true,
                       "title": "View matching logs",
-                      "url": "/explore?panes=%7B%22incident%22%3A%7B%22datasource%22%3A%22bfvik20ilwoaof%22%2C%22compact%22%3Atrue%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22grafana-clickhouse-datasource%22%2C%22uid%22%3A%22bfvik20ilwoaof%22%7D%2C%22editorType%22%3A%22sql%22%2C%22format%22%3A2%2C%22pluginVersion%22%3A%224.20.0%22%2C%22queryType%22%3A%22logs%22%2C%22rawSql%22%3A%22WITH%20incident%20AS%20%28%5Cn%20%20%20%20SELECT%5Cn%20%20%20%20%20%20%20%20count%28%29%20AS%20incident_rows%2C%5Cn%20%20%20%20%20%20%20%20argMax%28device%2C%20tuple%28snapshot_version%2C%20snapshot_id%29%29%20AS%20device%2C%5Cn%20%20%20%20%20%20%20%20argMax%28entity_name%2C%20tuple%28snapshot_version%2C%20snapshot_id%29%29%20AS%20entity_name%2C%5Cn%20%20%20%20%20%20%20%20argMax%28event_family%2C%20tuple%28snapshot_version%2C%20snapshot_id%29%29%20AS%20event_family%2C%5Cn%20%20%20%20%20%20%20%20argMax%28protocol%2C%20tuple%28snapshot_version%2C%20snapshot_id%29%29%20AS%20protocol%2C%5Cn%20%20%20%20%20%20%20%20argMax%28first_seen%2C%20tuple%28snapshot_version%2C%20snapshot_id%29%29%20AS%20first_seen%2C%5Cn%20%20%20%20%20%20%20%20argMax%28last_seen%2C%20tuple%28snapshot_version%2C%20snapshot_id%29%29%20AS%20last_seen%2C%5Cn%20%20%20%20%20%20%20%20argMax%28resolved_at%2C%20tuple%28snapshot_version%2C%20snapshot_id%29%29%20AS%20resolved_at%5Cn%20%20%20%20FROM%20observability.incident_updates%5Cn%20%20%20%20WHERE%20incident_id%20%3D%20%27${__data.fields.incident_id}%27%5Cn%29%5CnSELECT%5Cn%20%20%20%20logs.timestamp%2C%5Cn%20%20%20%20logs.body%2C%5Cn%20%20%20%20logs.level%2C%5Cn%20%20%20%20logs.device%2C%5Cn%20%20%20%20logs.hostname%2C%5Cn%20%20%20%20logs.source_ip%5CnFROM%20observability.grafana_logs%20AS%20logs%5CnCROSS%20JOIN%20incident%5CnWHERE%20incident.incident_rows%20%3E%200%5Cn%20%20AND%20logs.timestamp%20%3E%3D%20incident.first_seen%20-%20INTERVAL%2015%20MINUTE%5Cn%20%20AND%20logs.timestamp%20%3C%3D%20ifNull%28incident.resolved_at%2C%20incident.last_seen%29%20%2B%20INTERVAL%2015%20MINUTE%5Cn%20%20AND%20%28%5Cn%20%20%20%20%20%20lowerUTF8%28logs.device%29%20%3D%20lowerUTF8%28incident.device%29%5Cn%20%20%20%20%20%20OR%20lowerUTF8%28logs.hostname%29%20%3D%20lowerUTF8%28incident.device%29%5Cn%20%20%20%20%20%20OR%20logs.source_ip%20%3D%20incident.device%5Cn%20%20%29%5Cn%20%20AND%20%28%5Cn%20%20%20%20%20%20%28notEmpty%28incident.entity_name%29%20AND%20positionCaseInsensitiveUTF8%28logs.body%2C%20incident.entity_name%29%20%3E%200%29%5Cn%20%20%20%20%20%20OR%20%28notEmpty%28incident.protocol%29%20AND%20positionCaseInsensitiveUTF8%28logs.body%2C%20incident.protocol%29%20%3E%200%29%5Cn%20%20%20%20%20%20OR%20%28notEmpty%28incident.event_family%29%20AND%20positionCaseInsensitiveUTF8%28logs.body%2C%20incident.event_family%29%20%3E%200%29%5Cn%20%20%29%5CnORDER%20BY%20logs.timestamp%20DESC%5CnLIMIT%201000%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D&schemaVersion=1&orgId=1"
+                      "url": "/explore?panes=%7B%22interface%22%3A%7B%22datasource%22%3A%22bfvik20ilwoaof%22%2C%22compact%22%3Atrue%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22grafana-clickhouse-datasource%22%2C%22uid%22%3A%22bfvik20ilwoaof%22%7D%2C%22editorType%22%3A%22sql%22%2C%22format%22%3A2%2C%22pluginVersion%22%3A%224.20.0%22%2C%22queryType%22%3A%22logs%22%2C%22rawSql%22%3A%22SELECT%5Cn%20%20%20%20timestamp%2C%5Cn%20%20%20%20body%2C%5Cn%20%20%20%20level%2C%5Cn%20%20%20%20device%2C%5Cn%20%20%20%20hostname%2C%5Cn%20%20%20%20source_ip%5CnFROM%20observability.grafana_logs%5CnWHERE%20timestamp%20%3E%3D%20now64%283%29%20-%20INTERVAL%2060%20MINUTE%5Cn%20%20AND%20timestamp%20%3C%3D%20now64%283%29%5Cn%20%20AND%20lowerUTF8%28device%29%20%3D%20lowerUTF8%28%5Cn%20%20%20%20%20%20unhex%28%27${__data.fields.device_hex}%27%29%5Cn%20%20%29%5Cn%20%20AND%20positionCaseInsensitiveUTF8%28%5Cn%20%20%20%20%20%20body%2C%5Cn%20%20%20%20%20%20unhex%28%27${__data.fields.interface_hex}%27%29%5Cn%20%20%29%20%3E%200%5CnORDER%20BY%20timestamp%20DESC%5CnLIMIT%201000%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-60m%22%2C%22to%22%3A%22now%22%7D%7D%7D&schemaVersion=1&orgId=1"
                     }
                   ],
                   "custom": {
@@ -754,7 +760,7 @@
                     "properties": [
                       {
                         "id": "custom.width",
-                        "value": 190
+                        "value": 220
                       }
                     ]
                   },
@@ -766,19 +772,7 @@
                     "properties": [
                       {
                         "id": "custom.width",
-                        "value": 220
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Current State"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.width",
-                        "value": 120
+                        "value": 240
                       }
                     ]
                   },
@@ -824,6 +818,11 @@
                                 "color": "green",
                                 "index": 3,
                                 "text": "RESOLVED"
+                              },
+                              "FLAPPING": {
+                                "color": "orange",
+                                "index": 4,
+                                "text": "FLAPPING"
                               }
                             }
                           }
@@ -834,7 +833,19 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "First Seen"
+                      "options": "Bounces (60m)"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 130
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "First Bounce"
                     },
                     "properties": [
                       {
@@ -843,14 +854,14 @@
                       },
                       {
                         "id": "custom.width",
-                        "value": 135
+                        "value": 150
                       }
                     ]
                   },
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Last Activity"
+                      "options": "Last Bounce"
                     },
                     "properties": [
                       {
@@ -859,59 +870,39 @@
                       },
                       {
                         "id": "custom.width",
-                        "value": 135
+                        "value": 150
                       }
                     ]
                   },
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Flaps"
+                      "options": "device_hex"
                     },
                     "properties": [
                       {
                         "id": "custom.width",
-                        "value": 85
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Occurrences"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.width",
-                        "value": 95
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Age (min)"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.width",
-                        "value": 95
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "incident_id"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Incident ID"
+                        "value": 1
                       },
                       {
+                        "id": "custom.hidden",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "interface_hex"
+                    },
+                    "properties": [
+                      {
                         "id": "custom.width",
-                        "value": 220
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.hidden",
+                        "value": true
                       }
                     ]
                   }
@@ -926,7 +917,7 @@
         "spec": {
           "id": 6,
           "title": "Resolved Events",
-          "description": "Resolved incident episodes in the selected time range. Click any row cell to open matching logs from the incident window. Records remain searchable history and are not deleted by dashboard actions.",
+          "description": "Resolved non-interface incident episodes in the selected time range. Click any row cell to open matching logs from the incident window. Interface history remains searchable in raw logs but is intentionally absent here.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -962,7 +953,7 @@
                         },
                         "pluginVersion": "4.20.0",
                         "queryType": "table",
-                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(recurrence_count, tuple(snapshot_version, snapshot_id)) AS recurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title,\n        argMax(body, tuple(snapshot_version, snapshot_id)) AS deterministic_detail\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT\n    severity AS \"Severity\",\n    device AS \"Device\",\n    title AS \"Event\",\n    lifecycle_status AS \"Resolution\",\n    first_seen AS \"First Seen\",\n    resolved_at AS \"Resolved\",\n    dateDiff('minute', first_seen, assumeNotNull(resolved_at)) AS \"Duration (min)\",\n    recurrence_count + 1 AS \"Occurrences\",\n    event_family AS \"Category\",\n    if(entity_type = 'interface', 'yes', 'no') AS \"Interface Flap\",\n    incident_id\nFROM latest\nWHERE lifecycle_status = 'RESOLVED'\n  AND resolved_at >= $__fromTime\n  AND resolved_at <= $__toTime\n  AND (${severity_filter:sqlstring} = 'all' OR lowerUTF8(severity) = ${severity_filter:sqlstring})\n  AND (${resolved_search:sqlstring} = '' OR positionCaseInsensitiveUTF8(concat(device, ' ', entity_name, ' ', event_family, ' ', protocol, ' ', title, ' ', incident_id), ${resolved_search:sqlstring}) > 0)\nORDER BY resolved_at DESC\nLIMIT 500"
+                        "rawSql": "WITH latest AS (\n    SELECT\n        incident_id,\n        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,\n        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,\n        argMax(entity_type, tuple(snapshot_version, snapshot_id)) AS entity_type,\n        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,\n        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,\n        argMax(lifecycle_status, tuple(snapshot_version, snapshot_id)) AS lifecycle_status,\n        argMax(severity, tuple(snapshot_version, snapshot_id)) AS severity,\n        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,\n        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,\n        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at,\n        argMax(occurrence_count, tuple(snapshot_version, snapshot_id)) AS occurrence_count,\n        argMax(recurrence_count, tuple(snapshot_version, snapshot_id)) AS recurrence_count,\n        argMax(state_change_count, tuple(snapshot_version, snapshot_id)) AS state_change_count,\n        argMax(last_observation_state, tuple(snapshot_version, snapshot_id)) AS last_observation_state,\n        argMax(interface_flap, tuple(snapshot_version, snapshot_id)) AS interface_flap,\n        argMax(title, tuple(snapshot_version, snapshot_id)) AS title,\n        argMax(body, tuple(snapshot_version, snapshot_id)) AS deterministic_detail\n    FROM observability.incident_updates\n    GROUP BY incident_id\n)\nSELECT\n    severity AS \"Severity\",\n    device AS \"Device\",\n    title AS \"Event\",\n    lifecycle_status AS \"Resolution\",\n    first_seen AS \"First Seen\",\n    resolved_at AS \"Resolved\",\n    dateDiff('minute', first_seen, assumeNotNull(resolved_at)) AS \"Duration (min)\",\n    recurrence_count + 1 AS \"Occurrences\",\n    event_family AS \"Category\",\n    if(entity_type = 'interface', 'yes', 'no') AS \"Interface Flap\",\n    incident_id\nFROM latest\nWHERE lifecycle_status = 'RESOLVED'\n  AND entity_type != 'interface'\n  AND resolved_at >= $__fromTime\n  AND resolved_at <= $__toTime\n  AND (${severity_filter:sqlstring} = 'all' OR lowerUTF8(severity) = ${severity_filter:sqlstring})\n  AND (${resolved_search:sqlstring} = '' OR positionCaseInsensitiveUTF8(concat(device, ' ', entity_name, ' ', event_family, ' ', protocol, ' ', title, ' ', incident_id), ${resolved_search:sqlstring}) > 0)\nORDER BY resolved_at DESC\nLIMIT 500"
                       }
                     },
                     "refId": "A",
@@ -1156,6 +1147,11 @@
                                 "color": "green",
                                 "index": 3,
                                 "text": "RESOLVED"
+                              },
+                              "FLAPPING": {
+                                "color": "orange",
+                                "index": 4,
+                                "text": "FLAPPING"
                               }
                             }
                           }
@@ -1405,7 +1401,7 @@
           "label": "Search Flaps",
           "hide": "dontHide",
           "skipUrlSync": false,
-          "description": "Search device, interface, and incident ID."
+          "description": "Search device and interface."
         }
       },
       {

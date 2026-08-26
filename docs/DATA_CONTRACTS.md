@@ -235,7 +235,7 @@ The producer emits only changed incidents, in immutable content-addressed JSONL 
 
 The collector gate accepts lifecycle batches only when every record has the exact bounded lifecycle shape and timestamp invariants. Vector routes them exclusively to `observability.incident_updates`; AI-result records continue exclusively to `observability.ai_updates`.
 
-`interface_flap` is deterministic: it is true when `entity_type` is `interface` and the incident has one or more observation-state changes. No importance ranking is inferred. The enhanced NOC dashboard uses this flag to keep every unresolved flap out of Active Events and in the dedicated Interface Flaps window.
+`interface_flap` is deterministic: it is true when `entity_type` is `interface` and the incident has one or more observation-state changes. No importance ranking is inferred. The enhanced NOC dashboard retains this field and the underlying lifecycle history but does not use it as the visible flap threshold. Both incident windows exclude `entity_type = 'interface'`; the dedicated Interface Flaps window independently counts exact raw interface-down transitions by device/interface over the rolling preceding 60 minutes and shows only counts of 10 or more.
 
 ## Incident contract - deterministic implementation
 

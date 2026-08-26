@@ -83,13 +83,21 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         }
         self.assertEqual(references, set(self.elements))
 
-    def test_every_query_is_read_only_and_lifecycle_authoritative(self):
+    def test_every_query_is_read_only_and_uses_its_authoritative_source(self):
         for name, panel in self.elements.items():
             query = panel_query(panel)
-            self.assertEqual(query['datasource']['name'], DATASOURCE_UID)
             sql = query['spec']['rawSql']
-            self.assertIn('FROM observability.incident_updates', sql)
-            self.assertIn('argMax(', sql)
+            if name in {'panel-2', 'panel-5'}:
+                self.assertEqual(
+                    query['datasource']['name'], LOGS_DATASOURCE_UID
+                )
+                self.assertIn('FROM observability.grafana_logs', sql)
+                self.assertNotIn('observability.incident_updates', sql)
+                self.assertNotIn('argMax(', sql)
+            else:
+                self.assertEqual(query['datasource']['name'], DATASOURCE_UID)
+                self.assertIn('FROM observability.incident_updates', sql)
+                self.assertIn('argMax(', sql)
             if name == 'panel-4':
                 self.assertIn('FROM observability.ai_updates', sql)
                 self.assertIn('LEFT JOIN latest_ai USING incident_id', sql)
@@ -115,13 +123,30 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         self.assertNotIn('Model', sql)
         self.assertNotIn('Recommendation', sql)
 
-    def test_flap_queue_is_exclusive_and_searchable(self):
+    def test_flap_queue_is_a_rolling_raw_log_rate_view(self):
+        for name in ('panel-2', 'panel-5'):
+            query = panel_query(self.elements[name])
+            self.assertEqual(query['datasource']['name'], LOGS_DATASOURCE_UID)
+            self.assertEqual(
+                query['spec']['meta']['builderOptions']['table'],
+                'grafana_logs',
+            )
+            sql = query['spec']['rawSql']
+            self.assertIn('now64(3) - INTERVAL 60 MINUTE', sql)
+            self.assertIn("'%ETHPORT-5-IF_DOWN_LINK_FAILURE'", sql)
+            self.assertIn('extract(message,', sql)
+            self.assertIn('GROUP BY device, interface', sql)
+            self.assertIn('HAVING bounce_count >= 10', sql)
+            self.assertNotIn('$__fromTime', sql)
+            self.assertNotIn('$__toTime', sql)
+            self.assertNotIn('incident_updates', sql)
+
         sql = panel_query(self.elements['panel-5'])['spec']['rawSql']
-        self.assertIn("entity_type = 'interface'", sql)
         self.assertIn('${flap_search:sqlstring}', sql)
-        self.assertIn('state_change_count AS "Flaps"', sql)
-        self.assertNotIn('$__fromTime', sql)
-        self.assertNotIn('$__toTime', sql)
+        self.assertIn('bounce_count AS "Bounces (60m)"', sql)
+        self.assertIn("'FLAPPING' AS \"State\"", sql)
+        self.assertIn('hex(device) AS device_hex', sql)
+        self.assertIn('hex(interface) AS interface_hex', sql)
 
     def test_resolved_queue_uses_resolved_time_range_and_search(self):
         count_sql = panel_query(self.elements['panel-3'])['spec']['rawSql']
@@ -131,6 +156,8 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         self.assertIn("lifecycle_status = 'RESOLVED'", sql)
         self.assertIn('resolved_at >= $__fromTime', sql)
         self.assertIn('resolved_at <= $__toTime', sql)
+        self.assertIn("entity_type != 'interface'", count_sql)
+        self.assertIn("entity_type != 'interface'", sql)
         self.assertIn('${resolved_search:sqlstring}', sql)
         self.assertIn('${severity_filter:sqlstring}', sql)
         self.assertIn('recurrence_count + 1 AS "Occurrences"', sql)
@@ -149,8 +176,8 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         details = override(self.elements['panel-4'], 'Event Details')['properties']
         self.assertIn({'id': 'custom.wrapText', 'value': True}, details)
 
-    def test_every_event_row_links_to_incident_scoped_matching_logs(self):
-        for name in ('panel-4', 'panel-5', 'panel-6'):
+    def test_incident_rows_link_to_incident_scoped_matching_logs(self):
+        for name in ('panel-4', 'panel-6'):
             panel = self.elements[name]
             defaults = panel['spec']['vizConfig']['spec']['fieldConfig']['defaults']
             self.assertEqual(len(defaults['links']), 1)
@@ -191,6 +218,45 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
             self.assertIn('Click any row cell', panel['spec']['description'])
             incident_id = override(panel, 'incident_id')['properties']
             self.assertIn({'id': 'displayName', 'value': 'Incident ID'}, incident_id)
+
+    def test_flap_rows_link_to_the_rolling_device_interface_log_window(self):
+        panel = self.elements['panel-5']
+        defaults = panel['spec']['vizConfig']['spec']['fieldConfig']['defaults']
+        self.assertEqual(len(defaults['links']), 1)
+        link = defaults['links'][0]
+        self.assertIs(link['oneClick'], True)
+        self.assertTrue(link['targetBlank'])
+        self.assertEqual(link['title'], 'View matching logs')
+        self.assertIn('${__data.fields.device_hex}', link['url'])
+        self.assertIn('${__data.fields.interface_hex}', link['url'])
+        self.assertNotIn('%24%7B__data', link['url'])
+
+        parsed = urlsplit(link['url'])
+        parameters = parse_qs(parsed.query)
+        self.assertEqual(parameters['schemaVersion'], ['1'])
+        self.assertEqual(parameters['orgId'], ['1'])
+        panes = json.loads(parameters['panes'][0])
+        self.assertEqual(set(panes), {'interface'})
+        pane = panes['interface']
+        self.assertEqual(pane['datasource'], LOGS_DATASOURCE_UID)
+        self.assertIs(pane['compact'], True)
+        self.assertEqual(pane['range'], {'from': 'now-60m', 'to': 'now'})
+        sql = pane['queries'][0]['rawSql']
+        self.assertIn('FROM observability.grafana_logs', sql)
+        self.assertIn("unhex('${__data.fields.device_hex}')", sql)
+        self.assertIn("unhex('${__data.fields.interface_hex}')", sql)
+        self.assertIn('now64(3) - INTERVAL 60 MINUTE', sql)
+        self.assertIn('LIMIT 1000', sql)
+        self.assertNotRegex(
+            sql,
+            r'(?i)\b(INSERT|UPDATE|DELETE|ALTER|DROP|TRUNCATE)\b',
+        )
+        for field in ('device_hex', 'interface_hex'):
+            properties = override(panel, field)['properties']
+            self.assertIn(
+                {'id': 'custom.hidden', 'value': True},
+                properties,
+            )
 
 
 if __name__ == '__main__':

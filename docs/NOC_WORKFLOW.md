@@ -11,12 +11,12 @@ The original `AI Incident Analysis` dashboard remains unchanged as the assessmen
 The enhanced dashboard has three mutually understandable operational windows:
 
 - **Active Events** — unresolved non-interface incidents. This query deliberately ignores the dashboard time picker, so a persistent incident remains visible until the deterministic engine resolves it. Confirmed recovered BGP/OSPF/OSPFv3 incidents remain here for 24 continuous healthy hours and display `MONITORING`. `Event Details` shows the latest stored AI summary when available and a deterministic event/entity/current-state description otherwise.
-- **Interface Flaps** — every unresolved incident whose deterministic `entity_type` is `interface`, including its first adverse observation before a second state change exists. Every interface incident is excluded from Active Events and remains here until resolution.
-- **Resolved Events** — the latest state of resolved incidents whose `resolved_at` timestamp falls inside the selected dashboard range.
+- **Interface Flaps** — a rolling raw-log rate view. A device/interface pair appears only after at least 10 `%ETHPORT-5-IF_DOWN_LINK_FAILURE` transitions in the preceding 60 minutes, independent of the dashboard time picker. A single down event, a port that goes down and stays down, and lower-rate reboot/bounce noise remain hidden. The row leaves automatically when its rolling count falls below 10.
+- **Resolved Events** — the latest state of resolved non-interface incidents whose `resolved_at` timestamp falls inside the selected dashboard range. Interface lifecycle history remains retained and searchable in raw logs, but is intentionally absent from this operator queue.
 
-Each window has a server-side text search across device, entity, event family, protocol, title, and incident ID. Active search also covers the displayed AI/deterministic detail. Active and Resolved have a server-side severity selector. The tables expose Device and Incident ID; they do not contain an assigned-operator field or an AI recommendation field.
+Each window has a server-side text search. Active and Resolved search device, entity, event family, protocol, title, and incident ID; Active also covers the displayed AI/deterministic detail. Interface Flaps searches device and interface. Active and Resolved have a server-side severity selector. The incident tables expose Device and Incident ID; the rolling flap table exposes Device, Interface, rolling bounce count, and first/last bounce within the current hour. No table contains an assigned-operator field or an AI recommendation field.
 
-Every cell in all three tables provides a `View matching logs` link. It opens a new Explore tab with the SQL editor initially collapsed and scopes the read-only lookup from the selected incident ID rather than from display text: authoritative device plus entity, protocol, or event family must match inside the incident's first-seen through last-seen/resolution window, with a 15-minute context boundary. The result is newest first and capped at 1,000 rows. This keeps an old but still-active incident investigable even when the dashboard time picker is narrower than the incident.
+Every cell provides a `View matching logs` link with the SQL editor initially collapsed. Active and Resolved use the selected incident ID: authoritative device plus entity, protocol, or event family must match inside the incident's first-seen through last-seen/resolution window, with a 15-minute context boundary. The Interface Flaps link is one-click and uses hidden hex-encoded row keys to select that exact device/interface over the same rolling 60-minute window. All lookups are read-only, newest first, and capped at 1,000 rows.
 
 The four linked `NOC View` summaries—Severity Breakdown, Top Devices, OSPF Events, and BGP Events—use their sole data link as a one-click target and also open Explore with the SQL editor initially collapsed. The drilldown remains a read-only view over the selected dashboard time range.
 
@@ -43,13 +43,15 @@ GX10 incidents
   -> Grafana latest-per-incident queries
 ```
 
-An incident moves between dashboard windows only when the deterministic engine changes its lifecycle state:
+Non-interface incidents move between Active and Resolved only when the deterministic engine changes lifecycle state:
 
 - `CANDIDATE`, `OPEN`, or `RECOVERING` stays active.
 - Grafana presents protocol-monitoring `RECOVERING` rows as `MONITORING`; a relapse inside 24 hours returns the same incident to `OPEN`, increments its recurrence counter, and restarts the 24-hour window after the next recovery.
-- every active interface entity appears only in Interface Flaps, even when its lifecycle snapshot still has zero recorded state changes.
-- `RESOLVED` leaves both active windows and appears in Resolved Events for ranges containing its resolution time.
-- a later relapse produces a newer snapshot and returns the incident to the appropriate active window.
+- every interface entity is excluded from both incident windows; its retained lifecycle does not determine flap visibility.
+- `RESOLVED` leaves Active Events and appears in Resolved Events for ranges containing its resolution time.
+- a later non-interface relapse produces a newer snapshot and returns the incident to Active Events.
+
+Interface Flaps has independent presentation movement: each exact raw down transition contributes one observation to the device/interface rolling hour. The pair enters at 10 observations and leaves as soon as the rolling count is below 10. No dashboard write, manual acknowledgement, current-port-state inference, or lifecycle mutation is involved.
 
 Manual resolution is intentionally not implemented. Adding it requires a separately designed, authenticated acknowledgement/override data contract rather than mutating Grafana presentation state.
 
@@ -61,7 +63,7 @@ The lifecycle producer is independent of the AI-result producer but shares its f
 
 Lifecycle batches use `type = incident_lifecycle`. The collector gate validates their exact shape and Vector routes them exclusively to `observability.incident_updates`; they must never enter `observability.ai_updates`. Producer version 2 adds `recurrence_count`; the gate, sender, and shared-directory inventories continue accepting immutable version-1 lifecycle files.
 
-The exported `interface_flap` field continues to record whether interface state-change evidence exists. Dashboard queue placement deliberately uses authoritative `entity_type = interface` instead, so a newly opened interface-down incident cannot leak into Active Events before its next transition.
+The exported `interface_flap` field and all interface lifecycle snapshots remain part of the durable data contract. Dashboard presentation deliberately uses `entity_type != 'interface'` for both incident windows and a separate read-only aggregation over `observability.grafana_logs` for Interface Flaps. This prevents single downs and persistent-down ports from becoming operator work while preserving their raw and lifecycle history.
 
 `incident_updates` has no TTL. Latest-per-incident dashboard queries use `argMax` over `(snapshot_version, snapshot_id)`, so active state does not age out and resolved history remains available. Retention changes require an explicit policy decision.
 

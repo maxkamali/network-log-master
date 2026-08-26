@@ -12616,3 +12616,43 @@ or production state changed. The completed project sequence remains closed with
 no numbered `NEXT` item; implementing any backlog entry is separately scoped
 future work requiring synthetic fixtures, lifecycle policy, protected
 validation, and an explicit replay/backfill decision.
+
+## 2026-08-25 21:43 PDT - Hidden AI detection side-channel design completed
+
+### Status
+
+The operator confirmed the generic fallback policy: review uncovered severity
+0-4 events, admit severity 5 only when novel or repeated, retain pending work
+without fail-open incident creation when Gemma is unavailable, and allow
+automatic learned coverage only after repeated consistent severity 0-3 model
+decisions. An AI-positive event must appear through the existing Active and
+Resolved windows; an AI-negative event remains only in retained logs. No new
+operator-facing event type or dashboard section is permitted.
+
+`docs/AI_DETECTION_SIDE_CHANNEL.md` now defines the implementation-ready
+architecture. It retains original enrichment, adds append-only signature,
+batch, attempt, decision, effective-override, and learned-rule provenance,
+applies positive decisions through the ordinary deterministic incident engine,
+and reuses the existing incident and AI-result transport plus dashboard joins.
+The five-minute managed reasoning boundary remains capped at one model call per
+cycle; a single triage call may assess up to 24 aggregated signatures.
+
+Read-only workload sizing found that the existing two exact ICMPv6 suppression
+rules already remove the dominant high-severity noise. The remaining 24-hour
+sample contained 2,630 severity 0-3 rows, 179 device/event-code groups, an
+average of 4.77 groups per five-minute window, and an observed maximum of 16.
+No device, address, event body, credential, connection value, or private path is
+recorded.
+
+The promotion gate is declarative and non-executable. It requires three
+confidence-70-or-higher positive decisions from separate batches spanning at
+least 30 minutes, stable category/template coverage, no contradictory decision,
+valid provenance, a nonempty event code, no suppression match, and severity
+0-3 throughout. Severity 4/5 can produce AI-mediated incidents but never
+automatic learned rules. Generic incidents open immediately, enter recovery
+after 60 quiet minutes, and resolve after a further 15 quiet minutes.
+
+This entry records design only. No production schema, executable, service,
+schedule, prompt, model setting, event, incident, result, learned rule,
+ClickHouse object, Grafana resource, credential, or transport state changed.
+The completed numbered project sequence remains closed with no `NEXT` item.

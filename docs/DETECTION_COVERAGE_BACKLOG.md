@@ -4,6 +4,11 @@ This file records public-safe deterministic detection gaps found during normal
 NOC evaluation. An entry here is not implemented behavior and does not change
 the completed project sequence in `docs/CURRENT_STATE.md`.
 
+`docs/AI_DETECTION_SIDE_CHANNEL.md` defines the implementation-ready generic
+AI-review and learned-coverage design for future gaps. Specialized parsers in
+this backlog remain valuable because they can extract richer entities and
+authoritative recovery behavior than generic learned coverage.
+
 The listed events are already captured and retained. They currently pass
 through the normalizer as attention-eligible generic observations, but they do
 not have the entity identity, adverse/recovery signal, or state required by the
@@ -32,4 +37,3 @@ entity of their own. They currently remain generic supporting observations.
 Supporting them safely requires deterministic association with the preceding
 event from the same ordered source stream; they must never be attached across
 devices, source files, or ambiguous ordering boundaries.
-

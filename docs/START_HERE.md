@@ -19,7 +19,8 @@ Read and verify in this order before changing implementation:
 7. `docs/ACCEPTANCE.md` — confirm what passed and which unavailable disposable-host executions were waived with residual risk.
 8. Component-specific documentation for the area being reviewed. For the completed result-return boundary, read `docs/RESULT_OUTBOX.md`, `docs/RESULT_TRANSPORT.md`, `components/gx10/README.md`, and `components/collector/REBUILD_STATUS.md`.
 9. `docs/DETECTION_COVERAGE_BACKLOG.md` — review important captured event types that still require deterministic parser and incident-lifecycle coverage.
-10. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
+10. `docs/AI_DETECTION_SIDE_CHANNEL.md` — review the implementation-ready design for hidden AI review of uncovered high-severity events and automatically learned severity 0-3 coverage.
+11. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
 
 Do not infer a new execution order from the journal. `docs/CURRENT_STATE.md` is the execution authority.
 

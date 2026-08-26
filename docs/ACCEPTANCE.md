@@ -10,6 +10,18 @@ Disposable clean two-server execution: `WAIVED BY OPERATOR`, empirically unverif
 
 The public collector and GX10 rebuild packages, component runbooks, cross-system runbook, current/target architecture split, and final sanitation gate are complete. Suitable disposable Debian 13 amd64 and Ubuntu 24.04 arm64 GX10-class targets are not available. On 2026-08-23, the operator explicitly accepted that residual risk and authorized advancement; the project still does not claim that clean-host execution passed.
 
+## Current operational addendum
+
+The working two-server application is complete through item 41 with no numbered
+`NEXT` item. Post-rebuild production gates activated deterministic incidents,
+bounded Gemma reasoning, hidden fail-closed review of uncovered important
+events, replay-protected AI/lifecycle result return, ClickHouse ingestion, the
+isolated Grafana NOC organization and playlist, 24-hour BGP/OSPF monitoring,
+compact one-click log drilldowns, and the rolling interface-flap threshold.
+The operator confirmed the resulting behavior is the desired functional
+baseline. Current authority remains `docs/CURRENT_STATE.md`; the detailed
+evidence remains append-only in `docs/PROJECT_JOURNAL.md`.
+
 ## Durable public-repository gate
 
 Run:

@@ -83,11 +83,12 @@ Completed:
 - complete preactivation verifier with reference-like/nonempty-state refusal
 - exact installed-source, configuration, SQLite, filesystem, systemd, and effective-limit verification
 - dual-confirmation activator with full offline blob hashing, ordered enablement, and failure rollback
-- Ollama, the original fetch/ingest timer, and the separately disableable correlation timer are active; no local-reasoning caller is scheduled
+- Ollama, the original fetch/ingest timer, correlation, managed reasoning, outbox, sender, and hidden uncovered-event triage are active through separately bounded schedules; at most one local-model invocation is permitted per managed five-minute cycle
 - complete clean-machine operator runbook
 - final structural, syntax, generated/private-artifact, IPv4/public-safety, unit-test, and filesystem-contract audit
 - 186 synthetic tests passing at the completed item-30 active-verifiable boundary
 - 200 synthetic tests passing at the completed item-34 deterministic lifecycle boundary
+- 215 synthetic tests passing at the active hidden AI detection side-channel boundary
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
 The bootstrap refuses an existing application database and is not executed against the working reference system.

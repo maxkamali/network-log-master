@@ -12,7 +12,7 @@ master import:      8d55320 Import normalizer component history
 verification:       58 tests passing from components/normalizer/
 ```
 
-Current verified feature checkpoint:
+Historical parser feature checkpoint:
 
 ```text
 18ec113 Fix public repo gate for monorepo layout
@@ -20,6 +20,16 @@ Current verified feature checkpoint:
 81a3812 Enable NX-OS OSPF parser in default registry
 70 tests passing
 public repository gate passing
+```
+
+Current production-integration validation boundary:
+
+```text
+94 normalizer/worker tests passing
+14 collector normalizer-package tests passing
+live shadow catch-up and steady-state verification complete
+forward-only normalized handoff active
+GX10 consuming the verified normalized handoff
 ```
 
 Current coverage includes:
@@ -40,10 +50,10 @@ The former standalone normalizer repository is retained for historical provenanc
 
 ## Production integration status
 
-Selected replay/parity is complete: 24 representative observations produced 21 strict semantic matches, 3 intentional OSPFv3 improvements, and 0 unexpected differences. The full suite now includes durable shadow-worker tests in addition to parser/replay coverage.
+Selected replay/parity is complete: 24 representative observations produced 21 strict semantic matches, 3 intentional OSPFv3 improvements, and 0 unexpected differences. The full suite includes durable shadow-worker and handoff tests in addition to parser/replay coverage.
 
 The approved collector integration is a separate durable-file shadow worker implemented in `src/network_log_normalizer/shadow.py`. Packaging, systemd hardening, a non-activating installer, and an independent verifier are under `components/collector/normalizer/`.
 
-The repository-only forward handoff candidate is implemented in `src/network_log_normalizer/handoff.py`. It publishes only verified at/after-floor shadow outputs under their original transport identities. Its synthetic cutover and rollback contract is documented in `docs/NORMALIZER_HANDOFF.md`; the handoff candidate is not installed or active on the collector.
+The forward handoff is implemented in `src/network_log_normalizer/handoff.py`. It publishes only verified at/after-floor shadow outputs under their original transport identities. Its synthetic rehearsal, protected live cutover, immutable floor, exact verification, and raw-view rollback contract are documented in `docs/NORMALIZER_HANDOFF.md`. The handoff is active on the collector, and GX10 consumes its read-only normalized view. The original raw backlog, complete shadow history, and exact rollback boundary remain preserved.
 
-Do not add parser breadth by default. Production handoff staging and cutover remain separate authorization/evidence gates in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
+Do not add parser breadth by default. Future normalizer or handoff changes must retain the authorization, fail-closed validation, immutable-source, and rollback gates in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` and `docs/NORMALIZER_HANDOFF.md`.

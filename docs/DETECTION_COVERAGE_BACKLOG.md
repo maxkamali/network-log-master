@@ -4,15 +4,16 @@ This file records public-safe deterministic detection gaps found during normal
 NOC evaluation. An entry here is not implemented behavior and does not change
 the completed project sequence in `docs/CURRENT_STATE.md`.
 
-`docs/AI_DETECTION_SIDE_CHANNEL.md` defines the implementation-ready generic
-AI-review and learned-coverage design for future gaps. Specialized parsers in
-this backlog remain valuable because they can extract richer entities and
-authoritative recovery behavior than generic learned coverage.
+`docs/AI_DETECTION_SIDE_CHANNEL.md` defines the active generic AI-review and
+learned-coverage path for future gaps. Specialized parsers in this backlog
+remain valuable because they can extract richer entities and authoritative
+recovery behavior than generic learned coverage.
 
-The listed events are already captured and retained. They currently pass
-through the normalizer as attention-eligible generic observations, but they do
-not have the entity identity, adverse/recovery signal, or state required by the
-GX10 incident engine. They are not suppression-rule matches.
+The listed events are already captured and retained. They pass through the
+normalizer as attention-eligible generic observations and can be admitted by
+the active AI side channel as ordinary `event_signature` incidents. They do
+not yet have specialized deterministic entity identity, adverse/recovery
+signals, or lifecycle behavior. They are not suppression-rule matches.
 
 Do not add a parser from the event-code name alone. Each implementation must
 include synthetic fixtures, deterministic correlation identity, repeat

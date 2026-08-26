@@ -2,13 +2,13 @@
 
 ## Purpose
 
-The platform turns raw network telemetry into durable observations, deterministic normalized events, long-lived incident state, and concise local-AI explanations without allowing the LLM to become the source of truth for identity or lifecycle.
+The platform turns raw network telemetry into durable observations, deterministic normalized events, long-lived incident state, concise local-AI explanations, and fail-closed review of important deterministic coverage gaps without allowing the LLM to become the source of truth for identity or lifecycle.
 
 The architecture is intentionally split across two roles: a durable collector/log server and a replaceable local-inference host named GX10.
 
 ## Application at a glance
 
-Network devices send syslog to the collector. The collector preserves the raw records, normalizes a durable file backlog, and exposes only verified forward-going files to GX10. GX10 ingests those files into replay-safe local state and builds deterministic incidents. Changed lifecycle snapshots feed the NOC queue directly, while separately selected incidents may ask a loopback-only local Ollama model for a structured explanation. Both record families return through one bounded write-only transport; the collector validates, deduplicates, and routes them to separate ClickHouse tables before Grafana presents them to an operator.
+Network devices send syslog to the collector. The collector preserves the raw records, normalizes a durable file backlog, and exposes only verified forward-going files to GX10. GX10 ingests those files into replay-safe local state and builds deterministic incidents. A hidden fail-closed side channel reviews important events not yet covered by deterministic rules and may admit only validated positives as ordinary incidents. Changed lifecycle snapshots feed the NOC queue directly, while separately selected incidents may ask the loopback-only local Gemma model for a structured explanation. Both record families return through one bounded write-only transport; the collector validates, deduplicates, and routes them to separate ClickHouse tables before Grafana presents them to an operator.
 
 ```mermaid
 flowchart LR
@@ -29,7 +29,8 @@ flowchart LR
     subgraph gx10["GX10 / local inference"]
         ingest["Read-only fetch<br/>and replay-safe ingest"]
         incidents["Canonical projection<br/>and incident correlation"]
-        reasoning["Deterministic wake policy<br/>and local Ollama reasoning"]
+        reasoning["Selected incident assessment<br/>through local Gemma"]
+        triage["Hidden uncovered-event triage<br/>through local Gemma"]
         outbox["Validated AI result outbox"]
         lifecycle["Changed incident<br/>lifecycle outbox"]
         sender["Recurring one-file sender"]
@@ -41,6 +42,8 @@ flowchart LR
     backlog --> normalizer
     normalizer -->|read-only file transport| ingest
     ingest --> incidents
+    ingest --> triage
+    triage -->|validated positive only| incidents
     incidents --> reasoning
     incidents --> lifecycle
     reasoning --> outbox
@@ -66,20 +69,23 @@ Collector: Vector -> raw ClickHouse
                                                                    |
                                                       read-only file transport
                                                                    v
-GX10: replay-safe ingest -> canonical projection -> deterministic incidents
-                                   |                          |
-                                   | changed lifecycle        | selected reasoning
-                                   v                          v
-                         lifecycle outbox             AI result outbox
-                                   \                          /
-                                    +-> recurring sender <-+
+GX10: replay-safe ingest -> canonical projection
+                                  |-> deterministic incident engine -> lifecycle outbox
+                                  |          \-> selected assessment -> AI result outbox
+                                  |
+                                  \-> uncovered-event triage
+                                             \-> validated positive -> incident engine
+
+                         lifecycle outbox + AI result outbox
+                                           |
+                                  recurring sender
                                               |
                                  write-only file transport
                                               v
 Collector: validation + replay ledger -> incident state + AI updates -> Grafana -> operator
 ```
 
-The deterministic layers own event identity, normalization, incident state, wake decisions, and replay safety. The LLM produces nonauthoritative explanation records; it cannot redefine source facts or incident lifecycle. The two file transports use independent least-privilege identities, and GX10 has no direct ClickHouse write path.
+The deterministic layers own event identity, normalization, incident state, wake decisions, and replay safety. For already-correlated incidents, the LLM produces nonauthoritative explanation records. A separate fail-closed side channel may admit an otherwise uncovered important event only after a validated positive decision; it becomes an ordinary deterministic incident whose later lifecycle is not model-owned. The two file transports use independent least-privilege identities, and GX10 has no direct ClickHouse write path.
 
 ## Rebuildability contract
 
@@ -140,6 +146,7 @@ Devices
            -> GX10 restricted read-only fetch
            -> local durable replay-safe ingest
            -> scheduled canonical projection
+           -> hidden fail-closed review of uncovered important events
            -> deterministic incident correlation/lifecycle
            -> changed deterministic lifecycle outbox
            -> deterministic versioned reasoning packets
@@ -163,6 +170,7 @@ collector capture
   -> collector-side deterministic normalization
   -> durable prepared observations
   -> GX10 deterministic incident correlation/lifecycle
+  -> hidden AI review for deterministic coverage gaps
   -> deterministic wake policy
   -> local Ollama reasoning
   -> thin result producer
@@ -196,7 +204,7 @@ Lifecycle:
 CANDIDATE -> OPEN -> RECOVERING -> RESOLVED
 ```
 
-The LLM may summarize or explain an incident but does not decide canonical identity, deduplication, or lifecycle state.
+The LLM may summarize or explain an incident but does not decide canonical identity, deduplication, or lifecycle state. The hidden uncovered-event side channel may create an ordinary generic incident only from a validated positive decision; deterministic correlation keys and lifecycle own the incident after admission, while unavailable or invalid inference remains pending without fail-open creation.
 
 The long-lived deterministic incident engine is implemented and active behind a separately disableable offline schedule. Its identity, evidence, lifecycle, repeat, rolling-context, transaction, replay, and managed-invocation contracts are documented in `docs/INCIDENT_ENGINE.md` and `docs/MANAGED_CORRELATION.md`. The original fetch/ingest schedule remains independent.
 
@@ -220,6 +228,14 @@ Reasoning runs are event-driven and rate-limited rather than invoked for every r
 - OSPF retransmission degradation is a valid wake reason
 
 The exact policy remains deterministic and testable outside the LLM.
+
+Uncovered important events follow a separate bounded selector. Severity 0–4
+events and only novel/repeated severity-5 notices are eligible. The local model
+returns `incident`, `ignore`, or `insufficient`; only validated positives enter
+the ordinary incident engine. Learned exact-event coverage is restricted to
+severity 0–3 and requires three consistent confidence-70+ decisions over at
+least 30 minutes without contradiction. See
+`docs/AI_DETECTION_SIDE_CHANNEL.md`.
 
 ## Trust boundaries
 

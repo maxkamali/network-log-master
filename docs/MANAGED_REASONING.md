@@ -2,9 +2,9 @@
 
 ## Status
 
-Execution-order item 29 is complete. Exact published `incident-assessment-v2-r3` passed 140 remote tests, same-packet protected-copy inference, exact inactive upgrade, one fresh-backup protected production drain, and three natural timer cadences through the unchanged strict validator. Production now has 12 packets, eight revised-version pending, two prompt registrations, ten total runs, nine successful results, one preserved safe failure, and zero `STARTED` rows/restarts. Deterministic lag is zero and all independent schedules are healthy. Collector result production remains a separate item-30 gate.
+Execution-order item 29 and the later result-return and hidden-triage extensions are complete. Exact published `incident-assessment-v2-r3` passed the historical 140-test item-29 gate, same-packet protected-copy inference, exact inactive upgrade, one fresh-backup protected production drain, and three natural timer cadences through the unchanged strict validator. Item 30 subsequently activated replay-protected result return. The current 215-test GX10 boundary uses `run-managed-ai.py` as the one-call coordinator: existing incident-assessment backlog has priority, otherwise the same five-minute managed slot may review one bounded uncovered-event batch. Deterministic lag is zero and the independent schedules remain healthy.
 
-The candidate manages exactly this separately disableable chain:
+The incident-assessment branch documented here remains this separately disableable chain:
 
 ```text
 deterministic packet builder -> one bounded local-model invocation
@@ -75,7 +75,7 @@ It installs the managed runner, service/timer, private database-path configurati
 
 ## Candidate validation
 
-Twenty-four focused item-29 tests currently prove:
+Twenty-four focused item-29 tests proved:
 
 - strict private database configuration
 - exact dependency hashes and file metadata
@@ -96,7 +96,7 @@ Twenty-four focused item-29 tests currently prove:
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The full GX10 suite currently passes `140` tests, including the item-28 generation-schema compatibility assertion. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, bounded-backlog current-state-copy rehearsal, exact inactive runner upgrade, protected corrected resume, and one corrected natural drain cadence have passed. The next cadence exercised terminal invalid-output isolation and was disabled. Protected-copy diagnosis reproduced and classified the compatibility defect without exposing content. No validation rule is weakened. Collector result return is outside item 29.
+The historical item-29 gate passed `140` GX10 tests, including the item-28 generation-schema compatibility assertion. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, bounded-backlog current-state-copy rehearsal, exact inactive runner upgrade, protected corrected resume, and the later prompt-compatibility correction all passed without weakening validation. The current complete GX10 suite passes `215` tests and includes the active item-30 result-return path plus the hidden-triage coordinator. Item 29 itself remains independently disableable from both later extensions.
 
 ## Protected current-state-copy evidence
 

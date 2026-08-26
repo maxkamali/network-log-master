@@ -133,24 +133,38 @@ Status: `DONE`
 
 ## Milestone 8 - Validated AI result return
 
-Status: `IN PROGRESS`
+Status: `DONE`
 
 1. `DONE` — build a versioned deterministic outbox projection from successful append-only reasoning results
 2. `DONE` — prove idempotent mapping, duplicate suppression, atomic local publication, crash recovery, strict output bounds, and protected-copy behavior
 3. `DONE` — package, rehearse, and install an independently managed inactive no-network local producer boundary
 4. `DONE` — activate the no-network local producer through protected initial-cycle, three no-op cadences, and natural one-file catch-up gates
-5. separately install the least-privilege write-only transport identity only after local producer verification passes
-6. activate one bounded live result return and prove collector validation, ClickHouse ingestion, exact provenance, replay safety, and failure isolation
-7. retain GX10 without direct ClickHouse access and keep all model results nonauthoritative
+5. `DONE` — separately installed the least-privilege write-only transport identity only after local producer verification passed
+6. `DONE` — activated bounded live result return and proved collector validation, ClickHouse ingestion, exact provenance, exact replay, divergent-conflict isolation, and recurring natural delivery
+7. `DONE` — retained GX10 without direct ClickHouse access and kept ordinary model assessments nonauthoritative
 
 ## Milestone 9 - AI presentation refinement
 
-Status: `FUTURE IMPLEMENTATION`
+Status: `DONE`
 
-1. present validated incident/AI records in Grafana after contracts stabilize
-2. preserve drilldown to underlying raw observations
-3. keep Grafana stateless with respect to incident truth
-4. avoid turning the primary NOC view into a raw-log wall
+1. `DONE` — added the original AI assessment-history dashboard without replacing existing resources
+2. `DONE` — added a distinct enhanced deterministic NOC queue with Active, Interface Flaps, and Resolved windows
+3. `DONE` — preserved one-click compact drilldown to bounded read-only raw observations
+4. `DONE` — kept Grafana stateless with respect to incident truth and isolated a read-only NOC Viewer organization
+5. `DONE` — added 24-hour BGP/OSPF/OSPFv3 recovery monitoring and same-incident recurrence accounting
+6. `DONE` — added the one-minute two-dashboard NOC rotation playlist
+7. `DONE` — replaced interface lifecycle noise with a rolling 60-minute threshold of 10 exact down transitions while retaining raw and lifecycle history
+
+## Milestone 10 - Hidden AI coverage for uncovered important events
+
+Status: `DONE`
+
+1. `DONE` — selected deterministic signatures only from events not already owned by incident evidence
+2. `DONE` — added bounded severity 0–4 and novel/repeated severity-5 local-model review without a new operator-facing event type
+3. `DONE` — retained pending work and created no incident when Gemma was unavailable, invalid, or interrupted
+4. `DONE` — bridged validated positives into ordinary deterministic incidents and the existing Active/Resolved workflow
+5. `DONE` — guarded automatic exact-event learned coverage to severity 0–3 with three consistent confidence-70+ decisions spanning at least 30 minutes and no contradiction
+6. `DONE` — activated through protected migration, shadow proof, exact staged validation, existing result/lifecycle transport, and collector acceptance
 
 ## Continuity gate
 

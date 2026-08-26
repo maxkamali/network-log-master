@@ -2,7 +2,7 @@
 
 ## Status
 
-Execution-order items 28 and 29 are complete. The original calibrated schema/caller/configuration/prompt boundary was first installed empty and unscheduled under protected backup. Item 29 later activated bounded managed invocation, safely preserved one terminal `INVALID_OUTPUT`, diagnosed its action-text compatibility cause, and promoted immutable portable prompt revision `r3` through protected-copy, exact-upgrade, protected-resume, and three natural-cadence gates. Managed reasoning is active with strict validation unchanged; collector result production remains a separate item-30 gate.
+Execution-order items 28–30 are complete. The original calibrated schema/caller/configuration/prompt boundary was first installed empty and unscheduled under protected backup. Item 29 later activated bounded managed invocation, safely preserved one terminal `INVALID_OUTPUT`, diagnosed its action-text compatibility cause, and promoted immutable portable prompt revision `r3` through protected-copy, exact-upgrade, protected-resume, and three natural-cadence gates. Item 30 then activated the separately bounded replay-protected result return. Managed reasoning and result delivery are active with strict validation unchanged. The current five-minute managed owner also coordinates the hidden uncovered-event side channel while permitting at most one model call per cycle.
 
 The installed caller consumes only immutable item-27 packets. It cannot change incidents, evidence, transitions, packets, collector state, or Grafana state.
 
@@ -18,7 +18,7 @@ The calibrated candidate uses the second-smallest model in the captured six-mani
 - current prompt version: `incident-assessment-v2-r3`
 - output schema version: `2`
 
-The smallest captured model (`qwen3:8b`) passed structural output but failed calibration: one early result under-escalated a critical OSPF case, and stricter attempts safely rejected meaningless or non-packet-derived output. Validation was not weakened. The next bounded candidate, `gemma4:latest`, passed all three synthetic OSPF/interface/BGP cases with strict severity, confidence, action-risk, tag-provenance, canonical-result, and no-op gates. Its exact manifest and active loopback runtime were revalidated. Protected-copy inference passed before the empty unscheduled working-system installation; production invocation remains a separate gate.
+The smallest captured model (`qwen3:8b`) passed structural output but failed calibration: one early result under-escalated a critical OSPF case, and stricter attempts safely rejected meaningless or non-packet-derived output. Validation was not weakened. The next bounded candidate, `gemma4:latest`, passed all three synthetic OSPF/interface/BGP cases with strict severity, confidence, action-risk, tag-provenance, canonical-result, and no-op gates. Its exact manifest and active loopback runtime were revalidated. Protected-copy inference passed before the empty unscheduled item-28 installation; item 29 later activated production invocation through the managed boundary.
 
 ## Post-closure Gemma/Nemotron comparison
 

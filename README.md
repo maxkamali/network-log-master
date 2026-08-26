@@ -1,38 +1,113 @@
 # Network Log Intelligence Platform
 
-A capture-first network observability and local-AI incident reasoning platform.
+A two-server network-observability application that turns device syslog into a
+searchable log archive, durable incident state, local-AI review, and an
+operator-focused Grafana NOC queue.
 
-This repository is the master public engineering record and active source repository for the deterministic normalizer plus complete public-safe collector and GX10 rebuild packages. Disposable-host execution of both clean-machine runbooks was not available and remains empirically unverified.
+**Working-system status:** operational and complete through project item 41.
+There is no open numbered implementation item. The public rebuild packages are
+complete, although clean installation on two disposable servers was unavailable
+and remains explicitly unverified rather than being represented as passed.
 
-Final repository-only rebuild milestone status: `PUBLISHED`. The operator explicitly accepted the residual clean-host execution risk on 2026-08-23 so the project could advance; the unavailable execution is `WAIVED`, not falsely recorded as passed.
+## What this application does
 
-End-to-end working-system status: `COMPLETE`. The collector normalization/handoff, GX10 incident reasoning, recurring result return, collector validation/replay protection, ClickHouse ingestion, and Grafana presentation path passed the final production and repository closure audit.
+The platform receives syslog from network equipment and keeps the original
+records even when an event is unfamiliar. It then:
 
-## Start here
+1. stores raw logs durably in ClickHouse
+2. normalizes supported vendor messages without discarding unknown events
+3. transfers verified observations to a separate GX10 inference host
+4. correlates observations into deterministic incidents with stable identity,
+   recurrence counts, and lifecycle state
+5. uses a local Gemma model for bounded incident explanations and for a hidden,
+   fail-closed review of important events not yet covered by deterministic rules
+6. returns validated incident snapshots and AI results through a replay-protected
+   write-only path
+7. presents current work, noisy interface flaps, resolved history, and matching
+   raw logs in Grafana
 
-For a fresh engineering or AI session, begin with:
+The system is an observability and incident-presentation platform. It is not an
+automatic remediation system or an editable ticket database. Resolution is
+driven by observed state, and the application does not make network changes.
 
-1. [`docs/START_HERE.md`](docs/START_HERE.md)
-2. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-3. [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md)
-4. [`components/collector/REBUILD_STATUS.md`](components/collector/REBUILD_STATUS.md) and [`components/gx10/REBUILD_STATUS.md`](components/gx10/REBUILD_STATUS.md)
-5. the latest entries in [`docs/PROJECT_JOURNAL.md`](docs/PROJECT_JOURNAL.md)
+## What the NOC operator sees
 
-`docs/CURRENT_STATE.md` is the authority for execution order. It contains exactly one item marked `NEXT` while work remains and none after an explicit completed-state declaration.
+`AI Incident Analysis - Enhanced` is the operational queue:
 
-## Rebuild acceptance criterion
+- **Active Events** shows unresolved non-interface incidents. Recovered
+  BGP/OSPF/OSPFv3 incidents remain in `MONITORING` for 24 continuous healthy
+  hours so a quick relapse reopens the same incident and increments its
+  occurrence count.
+- **Interface Flaps** shows a device/interface only after at least 10 exact
+  interface-down transitions in the rolling preceding 60 minutes. Single downs,
+  ports that remain down, and lower-rate reboot noise stay hidden. Rows leave
+  automatically below the threshold.
+- **Resolved Events** shows resolved non-interface incidents within the selected
+  dashboard time range.
 
-The reconstruction/documentation effort is complete only when:
+Every row supports search and read-only log investigation. One click opens a
+compact Grafana Explore view scoped to the incident or to the rolling
+device/interface window. A dedicated Viewer account is isolated in a NOC
+organization containing only the approved dashboards and read-only datasource
+copies. A one-minute playlist rotates between `NOC View` and the enhanced
+incident dashboard.
 
-> Two clean servers, this public repository, and operator-supplied environment values are sufficient for another engineer or AI to reconstruct the current functional system without undocumented implementation memory.
+The original `AI Incident Analysis` dashboard remains available as unchanged AI
+assessment history and as a presentation fallback.
 
-Environment-specific credentials, addresses, usernames, SSH keys, certificate private keys, and similar identity-bearing values are intentionally supplied during rebuild and are not stored publicly.
+For exact queue semantics, read
+[`docs/NOC_WORKFLOW.md`](docs/NOC_WORKFLOW.md).
 
-The empirical clean-host proof was unavailable. The operator accepted that residual risk and authorized the project to treat the rebuild/documentation milestone as complete for execution-order purposes while retaining the missing evidence as an explicit qualification.
+## How it works
 
-## Core design
+```mermaid
+flowchart LR
+    devices["Network devices"]
+    operator["NOC operator"]
 
-The annotated GitHub-rendered diagram, plain-text fallback, and trust-boundary explanation are in [`docs/ARCHITECTURE.md#application-at-a-glance`](docs/ARCHITECTURE.md#application-at-a-glance).
+    subgraph collector["Collector / log server"]
+        ingress["Vector syslog ingress"]
+        raw["Raw ClickHouse logs"]
+        backlog["Durable compressed backlog"]
+        normalize["Deterministic normalizer<br/>and verified handoff"]
+        gate["Validation, quarantine,<br/>and replay ledger"]
+        results["Incident state and AI updates<br/>in ClickHouse"]
+        grafana["Grafana NOC dashboards"]
+    end
+
+    subgraph gx10["GX10 / local inference host"]
+        ingest["Read-only fetch and<br/>replay-safe ingest"]
+        project["Canonical event projection"]
+        incidents["Deterministic incident<br/>correlation and lifecycle"]
+        select["Deterministic wake policy"]
+        triage["Hidden uncovered-event triage<br/>through local Gemma"]
+        assess["Selected incident assessment<br/>through local Gemma"]
+        outbox["Lifecycle and AI-result outboxes"]
+        sender["Bounded write-only sender"]
+    end
+
+    devices -->|syslog| ingress
+    ingress --> raw
+    ingress --> backlog
+    backlog --> normalize
+    normalize -->|verified read-only files| ingest
+    ingest --> project
+    project --> incidents
+    project --> triage
+    triage -->|validated positive only| incidents
+    incidents --> select
+    select --> assess
+    incidents --> outbox
+    assess -->|structured assessment| outbox
+    outbox --> sender
+    sender -->|one file at a time| gate
+    gate --> results
+    raw --> grafana
+    results --> grafana
+    grafana --> operator
+```
+
+Plain-text equivalent:
 
 ```text
 Network devices
@@ -42,117 +117,126 @@ Collector: Vector -> raw ClickHouse
                   -> durable backlog -> normalizer -> verified handoff
                                                         | read-only
                                                         v
-GX10: ingest -> project -> correlate incidents -> local reasoning -> result outbox
-                              |                         | write-only
-                              | deterministic state     v
-                              +-----------------> lifecycle outbox
-                                                        |
-                                                        v
-Collector: validation + replay ledger -> AI updates + incident state -> Grafana -> operator
+GX10: ingest -> canonical events -> deterministic incidents -> lifecycle outbox
+                    |                    |                         |
+                    | uncovered review   | selected assessment     |
+                    +-------> local Gemma model -> AI result ------+
+                                                                  |
+                                                    write-only sender
+                                                                  v
+Collector: validation + replay ledger -> ClickHouse -> Grafana -> NOC operator
 ```
 
-The deployed system keeps deterministic truth outside the LLM. The model explains already-correlated incident evidence; deterministic code owns identity, lifecycle, wake policy, replay protection, and acceptance. The enhanced NOC dashboard reads that deterministic lifecycle projection directly, while the original AI dashboard remains available for assessment history. The read-only observation transport and write-only result transport use independent least-privilege identities, and GX10 never writes directly to ClickHouse.
+The collector is the durable system of record. GX10 owns compact working state,
+correlation, and local inference, but it cannot write directly to ClickHouse.
+Read-only observation transport and write-only result transport use independent
+least-privilege identities.
 
-## Architectural invariants
+The more detailed diagram, ownership model, and trust boundaries are in
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-- Capture first. Legitimate observations are retained even when no parser recognizes them.
-- Unknown and rare events remain attention-eligible by default.
-- Vendor-specific parsing enriches events; it never acts as an admission allowlist.
-- Suppression means "do not wake the reasoning layer", not deletion.
+## Role of AI
+
+The LLM is deliberately bounded:
+
+- deterministic code owns normalization, incident identity, lifecycle,
+  recurrence, replay protection, and acceptance
+- ordinary incident reasoning produces nonauthoritative structured explanations
+- the hidden side channel reviews uncovered severity 0–4 events and only
+  novel/repeated severity-5 notices
+- an unavailable, timed-out, or invalid model leaves work pending and never
+  creates an incident by failure
+- a validated positive side-channel decision may admit an uncovered event as an
+  ordinary `event_signature` incident; deterministic lifecycle owns it afterward
+- automatically learned exact-event coverage is limited to severity 0–3 and
+  requires three consistent confidence-70+ decisions spanning at least 30 minutes
+- the model cannot modify devices, Grafana state, ClickHouse, or source logs
+
+The pinned working model is `gemma4:latest`. A repeatable comparison retained it
+over Nemotron 3.5 Lightning because Gemma followed the strict output and severity
+contracts more reliably. See
+[`docs/AI_DETECTION_SIDE_CHANNEL.md`](docs/AI_DETECTION_SIDE_CHANNEL.md) and
+[`docs/LOCAL_REASONING.md`](docs/LOCAL_REASONING.md).
+
+## Core design guarantees
+
+- Capture first: legitimate observations are retained even when no parser
+  recognizes them.
+- Unknown and rare events remain reviewable instead of being silently dropped.
 - Raw messages remain replayable.
-- Collector arrival time is authoritative; device-provided time is secondary metadata.
-- The collector owns collection, durable storage, normalization, presentation, and large/long-lived datasets.
-- GX10 owns compact working state, correlation, reasoning, and explanation.
-- GX10 is replaceable and does not become the authoritative raw-log store.
-- The LLM does not own identity, deduplication, incident lifecycle, or deterministic state transitions.
-- GX10 does not write directly to ClickHouse; AI results cross a validation boundary first.
-- File-based backlog remains the V1 transport until measured requirements justify a streaming bus.
+- Collector arrival time is authoritative; device time is secondary metadata.
+- Incident state is deterministic and survives dashboard time-range changes.
+- Model failure is fail-closed and cannot invent successful work.
+- Result acceptance is replay-protected and divergent same-name content is
+  quarantined.
+- Grafana is a projection, not the incident-state database.
+- GX10 is replaceable and is not the authoritative raw-log archive.
+- No production credential, private address, customer log, or private key is
+  stored in this public repository.
 
-## Current milestone state
+## Main components
 
-### Normalizer
+| Component | Responsibility | Source |
+|---|---|---|
+| Collector | Syslog ingress, raw retention, normalization, ClickHouse, Grafana, validation and replay protection | [`components/collector/`](components/collector/) |
+| Normalizer | Deterministic vendor-aware event normalization with capture-first fallback | [`components/normalizer/`](components/normalizer/) |
+| GX10 | Replay-safe ingest, canonical projection, deterministic incidents, local reasoning, side-channel triage, and result delivery | [`components/gx10/`](components/gx10/) |
 
-The active normalizer source is [`components/normalizer/`](components/normalizer/).
+This documentation checkpoint reran 62 collector tests and 215 GX10 tests. The
+completed normalizer/handoff gate records 94 normalizer/worker tests and 14
+collector normalizer-package tests. Operational checkpoints also retain the
+GX10 filesystem contract and the public current-tree/history/link/ref-topology
+gate. Historical milestone counts remain in the append-only journal where they
+describe the gate that existed at that time.
 
-The selected replay/parity milestone is complete with 73 tests passing and 0 unexpected semantic differences in the reviewed 24-sample production replay scope.
+## Start here
 
-The collector-side durable shadow worker, private-inventory validator, ledger, hardened unit/timer, artifact manifests, handoff publisher, and independent verifiers are implemented. The expanded suite has 94 normalizer/worker tests plus 14 collector-package tests passing. Complete shadow catch-up/steady-state validation passed, and the forward-only immutable-floor handoff completed its production cutover with exact collector/GX10 file-hash and record-count parity. GX10 now consumes the verified normalized handoff view; the raw backlog, shadow history, and exact mount-only rollback boundary remain preserved.
+For a new engineer or AI session, use this order:
 
-### Collector
+1. [`docs/START_HERE.md`](docs/START_HERE.md)
+2. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+3. [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md)
+4. [`docs/NOC_WORKFLOW.md`](docs/NOC_WORKFLOW.md)
+5. [`components/collector/REBUILD_STATUS.md`](components/collector/REBUILD_STATUS.md)
+   and [`components/gx10/REBUILD_STATUS.md`](components/gx10/REBUILD_STATUS.md)
+6. the latest entries in
+   [`docs/PROJECT_JOURNAL.md`](docs/PROJECT_JOURNAL.md)
 
-The collector rebuild capture is published under [`components/collector/`](components/collector/).
+`docs/CURRENT_STATE.md` is the execution authority. It contains exactly one
+numbered `NEXT` while implementation work remains and none in the current
+completed state.
 
-The published checkpoint includes:
+## Repository guide
 
-- package/version reconstruction
-- configuration renderer
-- Vector configuration
-- ClickHouse schema/access artifacts
-- Grafana datasource and HTTPS artifacts
-- Certbot renewal artifacts
-- SFTP/chroot/ACL/bind-mount transport reconstruction
-- AI-result gate and retention behavior
-- immutable AI-result acceptance ledger with exact-replay and divergent-conflict isolation
-- package and runtime verifiers
-- six Grafana 13 dashboard resources, including the original and enhanced AI incident views
-- a dedicated no-TTL deterministic incident-state table and exclusive Vector lifecycle route
-- API-based dashboard restore and verification scripts
+- [`docs/START_HERE.md`](docs/START_HERE.md) — recovery order and safety rules
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — data flow, ownership, and trust boundaries
+- [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md) — authoritative current status
+- [`docs/NOC_WORKFLOW.md`](docs/NOC_WORKFLOW.md) — operator queue behavior
+- [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — runtime behavior and failure handling
+- [`docs/DATA_CONTRACTS.md`](docs/DATA_CONTRACTS.md) — raw, normalized, incident, and AI records
+- [`docs/AI_DETECTION_SIDE_CHANNEL.md`](docs/AI_DETECTION_SIDE_CHANNEL.md) — uncovered-event AI review
+- [`docs/GRAFANA.md`](docs/GRAFANA.md) — dashboards, access boundary, restore, and verification
+- [`docs/TWO_SERVER_REBUILD.md`](docs/TWO_SERVER_REBUILD.md) — collector-first reconstruction
+- [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) — passed evidence and waived clean-host boundary
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) — architecture decisions
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — completed milestone sequence
+- [`docs/PROJECT_JOURNAL.md`](docs/PROJECT_JOURNAL.md) — append-only engineering history
+- [`SECURITY.md`](SECURITY.md) — public-repository security policy
 
-The independent live collector verifier reached `COLLECTOR_RUNTIME_VERIFY=PASS`.
+## Rebuild and security boundary
 
-The collector public rebuild package, operator documentation, sanitation, and repository-only validation gates are complete. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Debian 13 amd64 target is available.
+The repository is designed so two clean servers plus operator-supplied private
+environment values are sufficient to reconstruct the system without relying on
+conversation history. The public artifacts include implementation, guarded
+installers, configuration templates, data contracts, runbooks, and independent
+verifiers.
 
-### GX10
+The full disposable two-server rebuild was not executed because suitable spare
+systems were unavailable. The operator accepted that residual risk for project
+sequencing; the missing empirical proof is still documented as waived and may
+be completed later.
 
-GX10's complete public rebuild package is published under [`components/gx10/`](components/gx10/). It preserves the proven `timer -> fetch -> ingest` chain, exact SQLite state, canonical normalized-field projection with historical version-3 enrichment retained, deterministic incident correlation, versioned local reasoning, replay-safe AI-result and incident-lifecycle outboxes, recurring write-only sender, platform/dependency contract, Ollama service and six-model store, guarded activation, and the clean-machine runbook.
-
-The current GX10 suite passes 200 tests and `GX10_REBUILD_PACKAGE_VALIDATION=PASS`. Clean-machine execution remains empirically unverified and was waived by the operator because no disposable Ubuntu 24.04 arm64 GX10-class target is available.
-
-### Two-server rebuild
-
-[`docs/TWO_SERVER_REBUILD.md`](docs/TWO_SERVER_REBUILD.md) coordinates the collector-first rebuild order, independent transport keys, cross-server inputs, activation boundary, and acceptance evidence without duplicating the component runbooks.
-
-## Repository map
-
-- [`docs/START_HERE.md`](docs/START_HERE.md) - canonical recovery/read order and project acceptance criterion.
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - end-to-end design and ownership boundaries.
-- [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md) - verified project checkpoint and strict execution order.
-- [`docs/DATA_CONTRACTS.md`](docs/DATA_CONTRACTS.md) - raw, normalized, incident, and AI-result contracts.
-- [`docs/OPERATIONS.md`](docs/OPERATIONS.md) - ingest, backlog, validation, replay, failure, and rebuild behavior.
-- [`docs/TWO_SERVER_REBUILD.md`](docs/TWO_SERVER_REBUILD.md) - collector-first two-host reconstruction and acceptance order.
-- [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) - final repository/reference acceptance evidence and waived clean-host boundary.
-- [`docs/CLICKHOUSE.md`](docs/CLICKHOUSE.md) - durable table and sink contracts.
-- [`docs/GRAFANA.md`](docs/GRAFANA.md) - datasource, dashboard restore, drilldown, and NOC-view behavior.
-- [`docs/NOC_WORKFLOW.md`](docs/NOC_WORKFLOW.md) - deterministic Active, Interface Flaps, and Resolved queue behavior.
-- [`docs/NORMALIZER_MIGRATION.md`](docs/NORMALIZER_MIGRATION.md) - controlled collector-side normalization migration.
-- [`docs/NORMALIZER_PRODUCTION_INTEGRATION.md`](docs/NORMALIZER_PRODUCTION_INTEGRATION.md) - shadow-first collector integration, observability, promotion, and rollback design.
-- [`docs/REASONING_PACKETS.md`](docs/REASONING_PACKETS.md) - deterministic wake policy and compact append-only packet boundary.
-- [`docs/LOCAL_REASONING.md`](docs/LOCAL_REASONING.md) - versioned local-model caller, strict output, and safe-failure boundary.
-- [`docs/MANAGED_REASONING.md`](docs/MANAGED_REASONING.md) - bounded, observable, separately disableable reasoning invocation candidate.
-- [`docs/DECISIONS.md`](docs/DECISIONS.md) - architecture decision log and rationale.
-- [`docs/PUBLICATION_CHECKLIST.md`](docs/PUBLICATION_CHECKLIST.md) - required public-release gates.
-- [`docs/ROADMAP.md`](docs/ROADMAP.md) - broader milestone sequence.
-- [`docs/PROJECT_JOURNAL.md`](docs/PROJECT_JOURNAL.md) - append-only engineering history and continuity record.
-- [`docs/AI_HANDOFF.md`](docs/AI_HANDOFF.md) - fresh-session recovery instructions.
-- [`SECURITY.md`](SECURITY.md) - public-repository publication rules.
-- [`components/normalizer/`](components/normalizer/) - active deterministic normalizer source and tests.
-- [`components/collector/`](components/collector/) - collector rebuild artifacts, verifiers, and component state.
-- [`components/collector/normalizer/`](components/collector/normalizer/) - non-activating collector-side normalizer shadow package and verifier.
-- [`components/gx10/`](components/gx10/) - complete GX10 rebuild artifacts, verifiers, tests, and clean-machine runbook.
-- [`scripts/validate-public-repository.py`](scripts/validate-public-repository.py) - current-tree, reachable-history, link, and ref-topology public gate.
-
-## Source-of-truth policy
-
-This repository is the durable public project control plane. Production changes must still be verified against the live system and current deployed configuration before modification. If documentation, repository code, and a live implementation disagree, stop and reconcile the difference instead of guessing.
-
-Source precedence for resuming work is defined in `docs/AI_HANDOFF.md`.
-
-Historical documents and retired standalone component repositories are reference material only. Current verified state and current master-repository code take precedence.
-
-## Continuity rule
-
-Every completed project sub-section must be validated, recorded in `docs/PROJECT_JOURNAL.md`, and pushed to GitHub before materially proceeding into the next sub-section. When current state or execution order changes, update `docs/CURRENT_STATE.md` as well.
-
-## Public-repository posture
-
-This repository intentionally excludes credentials, keys, tokens, production addresses, firewall allowlists, private hostnames/operator identity, customer/device-identifying raw logs, certificate private keys, generated databases, and other sensitive operational data. Public examples use documentation-only addresses and synthetic identities.
+Never place passwords, API tokens, SSH private keys, production addresses,
+private hostnames, customer/device-identifying logs, certificate private keys,
+or generated runtime databases in this repository. Supply them through the
+documented private operator inputs outside the checkout.

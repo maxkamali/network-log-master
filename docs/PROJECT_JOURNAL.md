@@ -12885,3 +12885,49 @@ repository at mode `0600`; its contents were never printed or copied. The
 root-only rollback directory remains retained, and both its database backup
 and the live database still pass integrity checks. Grafana, ClickHouse, Vector,
 and the validation-gate timer remain active after cleanup.
+
+## 2026-08-26 15:00 PDT - Operator-facing documentation baseline reconciled
+
+### Status
+
+The operator confirmed that the working application now behaves as desired and
+requested a complete GitHub documentation update with a clear opening
+explanation for a new reader. No production host, service, dashboard, account,
+database, schedule, model, incident state, or credential changed in this
+documentation-only checkpoint.
+
+The root `README.md` is now the canonical plain-language introduction. It
+explains the two-server application purpose, the NOC workflow, current Active /
+Interface Flaps / Resolved semantics, compact one-click log investigation, the
+local-AI authority boundary, fail-closed uncovered-event review, component
+ownership, rebuild qualification, and public-security boundary. It includes
+both a Mermaid flow diagram and a plain-text equivalent so the architecture
+remains understandable in renderers that do not support Mermaid.
+
+The current-state, start-here, architecture, roadmap, acceptance, handoff,
+reasoning, detection-backlog, and GX10/normalizer component pages were
+reconciled with the completed item-41 system. In particular, the documentation
+now records the active hidden AI side channel, completed result return, active
+normalized handoff, completed NOC presentation milestones, current rolling
+interface-flap rule, current drilldown behavior, and the absence of a numbered
+`NEXT` item. Historical evidence remains intact and is labeled as historical or
+superseded where necessary rather than being rewritten as current state.
+
+Validation for this checkpoint passed:
+
+- 215 GX10 tests
+- 62 collector tests
+- nine public-repository validator tests
+- current-tree, reachable-history, local-link, and ref-topology public gates
+- clean Git whitespace/error check
+
+The completed normalizer production gate's recorded 94 normalizer/worker and
+14 collector-package tests remain cited as historical evidence; they were not
+represented as rerun by this documentation checkpoint. The operator-owned
+password file remains outside the repository and was neither read nor copied.
+
+### Next action
+
+Publish this documentation checkpoint to GitHub `main`, independently verify
+the remote commit and public repository gates, then append the publication
+verification without opening a new implementation item.

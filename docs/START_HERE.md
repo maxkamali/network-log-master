@@ -4,7 +4,7 @@ Use this file as the canonical entry point when resuming the project after a con
 
 ## First-time orientation
 
-If you are new to the application, begin with [`docs/ARCHITECTURE.md#application-at-a-glance`](ARCHITECTURE.md#application-at-a-glance). It contains a GitHub-rendered end-to-end diagram, a plain-text equivalent, and the core trust boundaries. In one sentence: the collector durably captures and normalizes network telemetry, GX10 deterministically correlates incidents and runs local AI reasoning, and validated results return to the collector for ClickHouse storage and Grafana presentation.
+If you are new to the application, begin with the root [`README.md`](../README.md). It explains what the platform does, what a NOC operator sees, the role and limits of AI, and the complete two-server flow. Then read [`docs/ARCHITECTURE.md#application-at-a-glance`](ARCHITECTURE.md#application-at-a-glance) for the detailed ownership and trust boundaries.
 
 ## Recovery order
 
@@ -19,7 +19,7 @@ Read and verify in this order before changing implementation:
 7. `docs/ACCEPTANCE.md` — confirm what passed and which unavailable disposable-host executions were waived with residual risk.
 8. Component-specific documentation for the area being reviewed. For the completed result-return boundary, read `docs/RESULT_OUTBOX.md`, `docs/RESULT_TRANSPORT.md`, `components/gx10/README.md`, and `components/collector/REBUILD_STATUS.md`.
 9. `docs/DETECTION_COVERAGE_BACKLOG.md` — review important captured event types that still require deterministic parser and incident-lifecycle coverage.
-10. `docs/AI_DETECTION_SIDE_CHANNEL.md` — review the implementation-ready design for hidden AI review of uncovered high-severity events and automatically learned severity 0-3 coverage.
+10. `docs/AI_DETECTION_SIDE_CHANNEL.md` — review the active hidden AI review of uncovered important events and the guarded severity 0-3 learned-coverage boundary.
 11. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
 
 Do not infer a new execution order from the journal. `docs/CURRENT_STATE.md` is the execution authority.
@@ -56,14 +56,14 @@ Use synthetic fixtures and documentation address space when examples require ide
 - Do not weaken safety or validation gates merely to make a commit pass.
 - Do not execute clean-machine rebuild installers against the working reference systems unless the installer explicitly supports that mode.
 
-## Current project sequence
+## Current operating baseline
 
-The current high-level order is:
+The working systems are complete through item 41 with no numbered `NEXT` item.
+Collector capture/normalization, the verified GX10 handoff, deterministic
+incidents, local reasoning, hidden uncovered-event triage, validated result
+return, the isolated NOC organization, compact one-click drilldowns, 24-hour
+protocol monitoring, and the rolling interface-flap filter are active.
 
-1. preserve the completed two-server rebuild package and validated raw production path
-2. advance production normalization only through the documented shadow, handoff, authorization, and rollback gates
-3. activate deterministic projection/incident processing only through the managed invocation, telemetry, failure-isolation, and rollback gate
-4. build local-model orchestration after deterministic incident state is operational
-5. integrate result return/dashboard behavior and close the end-to-end target only after its acceptance evidence passes
-
-All five stages are complete on the working systems. Read `docs/CURRENT_STATE.md` before reopening scope or changing production behavior.
+Read `docs/CURRENT_STATE.md` before reopening scope or changing production
+behavior. The append-only journal contains historical intermediate states and
+must not be used to infer a newer execution order.

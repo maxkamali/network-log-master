@@ -21,6 +21,10 @@ class NocViewDashboardTests(unittest.TestCase):
         cls.elements = cls.document['spec']['elements']
 
     def test_linked_panels_open_explore_directly_in_compact_mode(self):
+        self.assertEqual(
+            self.document['metadata'],
+            {'name': 'ad9vtst', 'namespace': 'default'},
+        )
         self.assertEqual(self.document['spec']['title'], 'NOC View')
         for panel_name, visualization in LINKED_PANELS.items():
             panel = self.elements[panel_name]

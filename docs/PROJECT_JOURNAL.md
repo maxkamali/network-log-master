@@ -12874,3 +12874,14 @@ artifact, transport file, incident state, schedule, or model behavior changed.
 None. Publish and independently verify this closure checkpoint, remove only
 the exact temporary item-41 stages and helpers, close the localhost tunnel,
 retain the root-only rollback directory, and continue normal NOC evaluation.
+
+### Post-publication cleanup
+
+Closure commit `d3228c720b8ec8813c4ea842e41b2cb0d0f04bde` was
+published and independently matched GitHub `main`. The exact collector stage
+and all three local item-41 helpers are absent, and the localhost-only Grafana
+tunnel is closed. The operator-owned password file remains outside the
+repository at mode `0600`; its contents were never printed or copied. The
+root-only rollback directory remains retained, and both its database backup
+and the live database still pass integrity checks. Grafana, ClickHouse, Vector,
+and the validation-gate timer remain active after cleanup.

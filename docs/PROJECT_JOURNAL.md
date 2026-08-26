@@ -12811,3 +12811,66 @@ device/interface drilldown read-only; dry-run and replace only `AI Incident
 Analysis - Enhanced` in both organizations with organization-correct links and
 preserved NOC server-owned fields; reread exact resources; verify database and
 service health; and mark item 41 complete only after every gate passes.
+
+## 2026-08-26 12:27 PDT - Item 41 passed protected production closure
+
+### Status
+
+Item 41 is `DONE`. There is no remaining numbered `NEXT` item.
+
+Candidate commit `1593eb760bf1afd6e02feeba39f0bc7e3633a94c` was
+published and independently matched GitHub `main` before production mutation.
+The full collector suite passed 62 tests, nine public-validator tests passed,
+all public current-tree/history/link/ref-topology gates passed, the generated
+dashboard reproduced exactly, and the diff check was clean.
+
+A new root-owned mode-private rollback directory retains an online Grafana
+database backup plus exact main and isolated-NOC enhanced-resource
+predecessors. The published dashboard and verifier hashes matched the private
+collector stage exactly. Both the live and rollback databases pass
+`PRAGMA quick_check=ok`.
+
+Main `dryRun=All` selected only `AI Incident Analysis - Enhanced` and proved
+zero persistence. All six candidate queries plus sampled Active, Flap, and
+Resolved drilldowns passed before replacement. The supported native-resource
+replacement then changed only the enhanced main resource; all six main
+captures reread exact.
+
+Read-only API discovery proved that the isolated dashboard is directly
+addressable through the explicit native `org-2` namespace. Its dry run retained
+the exact persisted predecessor and three organization-2 links. The production
+PUT returned a mismatch only in Grafana-owned metadata annotations after the
+write. The verifier stopped without retrying. A fresh GET proved the complete
+portable specification had already persisted exactly, including preserved NOC
+specification annotations/preferences, variable selections, and all three
+organization-2 links. Verification was corrected to ignore only omitted
+Grafana-owned metadata, and no second write was issued.
+
+With the administrator temporarily scoped to organization 2, all six panel
+queries and sampled Active, Flap, and Resolved drilldowns passed through the
+isolated read-only datasource copies. The administrator context was restored
+to organization 1, where the same complete query/drilldown pass succeeded.
+No credential, event value, incident identity, device, or log body was printed.
+
+Final exact rereads passed for all six main captures and the organization-2
+enhanced specification. The live and predecessor resource inventories both
+contain 20 resources. Identity-based comparison found exactly two changed
+values—the main and organization-2 enhanced dashboards—and zero changes to
+any other resource. Grafana, ClickHouse, Vector, and the validation-gate timer
+remain active; relevant restart counts are zero.
+
+The operator-supplied administrator password file was corrected from mode
+`0644` to `0600` before use. Its single value was consumed only through the
+local no-echo password-file interface over a localhost-only SSH tunnel. It was
+not printed, copied to either server, placed in the repository, or retained in
+task staging. The operator-owned source file remains outside the repository.
+
+No original dashboard, NOC View, playlist, home preference, datasource,
+account permission, ClickHouse data/schema, Vector configuration, GX10
+artifact, transport file, incident state, schedule, or model behavior changed.
+
+### Next action
+
+None. Publish and independently verify this closure checkpoint, remove only
+the exact temporary item-41 stages and helpers, close the localhost tunnel,
+retain the root-only rollback directory, and continue normal NOC evaluation.

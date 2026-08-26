@@ -102,3 +102,5 @@ grafana_queries_passed=13
 ```
 
 The original dashboard remains byte-exact. Collector services stayed healthy with zero relevant restarts, and no lifecycle data, schema, transport, GX10 artifact, model behavior, or schedule changed.
+
+Item 41 production activation passed protected main and isolated-NOC native-resource dry-runs and replacements. Both copies now use the rolling 60-minute raw transition threshold described above. All six panel queries and sampled Active, Flap, and Resolved drilldowns passed in both organizations. Exact rereads, live/rollback database integrity, and service health passed; an aggregate predecessor comparison proved exactly the two enhanced resources changed and every other Grafana resource remained unchanged.

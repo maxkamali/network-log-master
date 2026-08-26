@@ -12591,3 +12591,28 @@ The exact collector staging directory, temporary organization adapters, redacted
 ### Next action
 
 None. Publish and independently verify this closure/documentation checkpoint, then continue normal operator evaluation of the compact and one-click dashboard behavior.
+
+## 2026-08-25 21:04 PDT - Deterministic detection coverage gaps recorded
+
+### Status
+
+Read-only production inspection confirmed that several operationally important
+NX-OS event types are captured, normalized, projected, and processed past the
+GX10 incident cursor but do not become incident evidence. They are
+attention-eligible and have no suppression-rule match; each remains a generic
+`observation` with no canonical entity identity or state. The incident engine
+therefore rejects the records at its entity gate before incident creation.
+
+The public-safe `docs/DETECTION_COVERAGE_BACKLOG.md` now records the affected
+event codes and candidate semantics without production identities, addresses,
+raw log bodies, credentials, or live event counts. The backlog includes ASIC
+buffer-threshold pressure, internal-interface CRC errors, module temperature
+alarm/recovery pairing, critical scale-resource exhaustion, duplicate-source-IP
+conflicts, and the special ambiguity of repetition-only records.
+
+This was documentation and diagnosis only. No parser, projection, incident
+policy, dashboard, service, schedule, database, transport, model, credential,
+or production state changed. The completed project sequence remains closed with
+no numbered `NEXT` item; implementing any backlog entry is separately scoped
+future work requiring synthetic fixtures, lifecycle policy, protected
+validation, and an explicit replay/backfill decision.

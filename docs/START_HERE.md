@@ -18,7 +18,8 @@ Read and verify in this order before changing implementation:
 6. `docs/DATA_CONTRACTS.md`, `docs/OPERATIONS.md`, and `docs/TWO_SERVER_REBUILD.md` — confirm data, operational, and cross-host rebuild contracts.
 7. `docs/ACCEPTANCE.md` — confirm what passed and which unavailable disposable-host executions were waived with residual risk.
 8. Component-specific documentation for the area being reviewed. For the completed result-return boundary, read `docs/RESULT_OUTBOX.md`, `docs/RESULT_TRANSPORT.md`, `components/gx10/README.md`, and `components/collector/REBUILD_STATUS.md`.
-9. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
+9. `docs/DETECTION_COVERAGE_BACKLOG.md` — review important captured event types that still require deterministic parser and incident-lifecycle coverage.
+10. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
 
 Do not infer a new execution order from the journal. `docs/CURRENT_STATE.md` is the execution authority.
 

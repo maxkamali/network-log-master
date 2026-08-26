@@ -3,6 +3,7 @@ import importlib.util
 import json
 from pathlib import Path
 import unittest
+from urllib.parse import parse_qs, urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -11,6 +12,7 @@ ORIGINAL_PATH = DASHBOARD_DIR / 'ai-incident-analysis.json'
 ENHANCED_PATH = DASHBOARD_DIR / 'ai-incident-analysis-enhanced.json'
 BUILDER_PATH = ROOT / 'components/collector/grafana/scripts/build-noc-lifecycle-dashboard.py'
 DATASOURCE_UID = 'efvaztlrk8ow0a'
+LOGS_DATASOURCE_UID = 'bfvik20ilwoaof'
 ORIGINAL_SHA256 = '794719f7cf112babb37c716df16959e631b0f63b81bbe9e503d243ffb36b83e5'
 
 
@@ -146,6 +148,48 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
         self.assertTrue(any(item['id'] == 'mappings' for item in severity))
         details = override(self.elements['panel-4'], 'Event Details')['properties']
         self.assertIn({'id': 'custom.wrapText', 'value': True}, details)
+
+    def test_every_event_row_links_to_incident_scoped_matching_logs(self):
+        for name in ('panel-4', 'panel-5', 'panel-6'):
+            panel = self.elements[name]
+            defaults = panel['spec']['vizConfig']['spec']['fieldConfig']['defaults']
+            self.assertEqual(len(defaults['links']), 1)
+            link = defaults['links'][0]
+            self.assertTrue(link['targetBlank'])
+            self.assertEqual(link['title'], 'View matching logs')
+            self.assertIn('${__data.fields.incident_id}', link['url'])
+            self.assertIn('${__from}', link['url'])
+            self.assertIn('${__to}', link['url'])
+            self.assertNotIn('%24%7B__data', link['url'])
+
+            parsed = urlsplit(link['url'])
+            self.assertEqual(parsed.path, '/explore')
+            parameters = parse_qs(parsed.query)
+            self.assertEqual(parameters['schemaVersion'], ['1'])
+            self.assertEqual(parameters['orgId'], ['1'])
+            panes = json.loads(parameters['panes'][0])
+            self.assertEqual(set(panes), {'incident'})
+            pane = panes['incident']
+            self.assertEqual(pane['datasource'], LOGS_DATASOURCE_UID)
+            self.assertEqual(len(pane['queries']), 1)
+            query = pane['queries'][0]
+            self.assertEqual(query['datasource']['uid'], LOGS_DATASOURCE_UID)
+            self.assertEqual(query['queryType'], 'logs')
+            sql = query['rawSql']
+            self.assertIn('${__data.fields.incident_id}', sql)
+            self.assertIn('FROM observability.incident_updates', sql)
+            self.assertIn('FROM observability.grafana_logs AS logs', sql)
+            self.assertIn('incident.first_seen - INTERVAL 15 MINUTE', sql)
+            self.assertIn('ifNull(incident.resolved_at, incident.last_seen)', sql)
+            self.assertIn('lowerUTF8(logs.device) = lowerUTF8(incident.device)', sql)
+            self.assertIn('positionCaseInsensitiveUTF8(logs.body, incident.entity_name)', sql)
+            self.assertIn('positionCaseInsensitiveUTF8(logs.body, incident.protocol)', sql)
+            self.assertIn('positionCaseInsensitiveUTF8(logs.body, incident.event_family)', sql)
+            self.assertIn('LIMIT 1000', sql)
+            self.assertNotRegex(sql, r'(?i)\b(INSERT|UPDATE|DELETE|ALTER|DROP|TRUNCATE)\b')
+            self.assertIn('Click any row cell', panel['spec']['description'])
+            incident_id = override(panel, 'incident_id')['properties']
+            self.assertIn({'id': 'displayName', 'value': 'Incident ID'}, incident_id)
 
 
 if __name__ == '__main__':

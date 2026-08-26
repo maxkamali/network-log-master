@@ -20,7 +20,7 @@ Disposable clean-two-server execution: `WAIVED BY OPERATOR`, empirically unverif
 
 Rebuild/documentation milestone disposition: `ACCEPTED WITH RESIDUAL RISK`.
 
-End-to-end working-system target: `COMPLETE` through the post-closure item-38 NOC rotation playlist.
+End-to-end working-system target: `IN PROGRESS` at post-closure item 39 enhanced incident-log drilldown.
 
 Post-closure AI-results Grafana dashboard feature: `DONE` under item 32.
 
@@ -37,6 +37,8 @@ Post-closure OSPF/BGP monitoring window: `DONE` under item 36. Production retain
 Post-closure NOC least-privilege Grafana access: `DONE` under item 37. A dedicated Viewer is isolated in a separate Grafana organization containing only `NOC View`, `AI Incident Analysis - Enhanced`, and two datasource copies backed by the existing read-only database identity. Both dashboards are starred, `NOC View` is the home dashboard, non-scoped dashboard access returns not found, and persistent dashboard writes are denied. Viewer Explore compatibility is enabled, so temporary panel exploration and direct queries are possible without save/admin rights. Grafana OSS does not support an exact per-user navigation-menu allowlist; the separate organization and Viewer role enforce the resource boundary while standard Viewer-accessible product sections may still appear.
 
 Post-closure NOC rotation playlist: `DONE` under item 38. The isolated NOC organization contains one `NOC Rotation` playlist using stable dashboard UIDs in the order `NOC View` then `AI Incident Analysis - Enhanced`, with a one-minute interval. The NOC Viewer can read and start the auto-fit route but cannot create playlists; a direct create probe returned forbidden. `NOC View` remains the login home because Grafana home preferences accept dashboards rather than playlists.
+
+Post-closure enhanced incident-log drilldown: `NEXT` under item 39. The repository candidate adds a `View matching logs` Explore link to every cell in the Active Events, Interface Flaps, and Resolved Events tables. The selected deterministic incident ID resolves the authoritative device, entity, protocol/event family, and incident time bounds before querying the existing read-only log datasource. All six candidate panel queries and one sampled drilldown from each table passed against production data without printing event values; production dashboards remain unchanged pending publication and protected replacement.
 
 The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
@@ -365,8 +367,9 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 36. `DONE` — published and independently verified the protocol-monitoring candidate; activated the additive collector recurrence column and version-2 gate before the GX10 producer; atomically upgraded the GX10 engine/outbox/sender chain under protected predecessors; proved exact recurrence parity, unchanged existing resolved protocol history, legacy version-1 compatibility, all six Grafana resources, all thirteen queries, enhanced-only replacement, empty outbox, and healthy unrelated schedules/data paths. Deterministic tests prove the 24-hour `MONITORING` and same-incident relapse behavior; no live confirmed protocol recovery existed during activation, so production evidence does not fabricate that state.
 37. `DONE` — created a dedicated Grafana NOC Viewer in an isolated organization; copied only `NOC View`, `AI Incident Analysis - Enhanced`, and their two read-only datasource definitions; set the NOC home/star preferences; enabled Viewer Explore compatibility; proved exactly one Viewer membership, two-dashboard/two-datasource inventory, non-scoped dashboard denial, persistent-write denial, all fourteen panel queries, unchanged exact main-organization dashboards, database integrity, and healthy Grafana/ClickHouse/Vector/gate services. Exact per-user navigation pruning remains unavailable in Grafana OSS and is not represented as enforced.
 38. `DONE` — created the isolated `NOC Rotation` playlist with stable dashboard UIDs, exact two-dashboard order, a one-minute interval, and a validated auto-fit play route; proved NOC Viewer read/start access and playlist-create denial, retained `NOC View` as the login home, left the main organization without playlists, reverified all six main-dashboard specifications exact, and retained healthy Grafana/data-path services under a root-only online database backup.
+39. `NEXT` — publish the validated incident-log drilldown candidate, protect the live Grafana database and both enhanced-dashboard copies, replace only those two copies with organization-correct Explore links, prove exact reread and NOC Viewer click-query access, reconcile documentation, and publish closure.
 
-The end-to-end target is complete through item 38. There is no remaining `NEXT` item. Item 38 added only the isolated Grafana playlist resource; it did not change the home preference, dashboard specifications, datasource definitions, ClickHouse data/schema, Vector, GX10, transport, incident state, or model authority.
+The end-to-end target is in progress at item 39, which is the single `NEXT` item. Candidate construction and read-only production query validation changed no dashboard, playlist, preference, datasource, ClickHouse data/schema, Vector, GX10, transport, incident state, credential, or model authority.
 
 ## Scope constraints
 

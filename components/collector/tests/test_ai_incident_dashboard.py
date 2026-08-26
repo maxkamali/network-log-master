@@ -141,6 +141,51 @@ class AiIncidentDashboardTests(unittest.TestCase):
         }
         self.assertEqual(verifier.response_counts(response, "A"), (1, 2))
 
+    def test_drilldown_payload_uses_selected_incident_without_exposing_rows(self):
+        verifier = load_query_verifier()
+        response = {
+            "results": {
+                "A": {
+                    "frames": [{
+                        "schema": {"fields": [
+                            {"name": "Device"},
+                            {"name": "incident_id"},
+                        ]},
+                        "data": {"values": [
+                            ["private-device"],
+                            ["inc-v1-private"],
+                        ]},
+                    }]
+                }
+            }
+        }
+        self.assertEqual(
+            verifier.response_field_values(response, "A", "incident_id"),
+            ["inc-v1-private"],
+        )
+        query = {
+            "refId": "A",
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "logs",
+            },
+            "rawSql": (
+                "SELECT 1 WHERE incident_id = "
+                "'${__data.fields.incident_id}'"
+            ),
+        }
+        ref_id, payload = verifier.drilldown_payload(
+            query,
+            "inc-v1-'safe",
+            1000,
+            2000,
+        )
+        self.assertEqual(ref_id, "A")
+        self.assertEqual(payload["from"], "1000")
+        self.assertEqual(payload["to"], "2000")
+        self.assertIn("inc-v1-''safe", payload["queries"][0]["rawSql"])
+        self.assertNotIn("${__data.fields", payload["queries"][0]["rawSql"])
+
     def test_clean_machine_installer_restores_and_queries_dashboard(self):
         installer = (
             ROOT / "components/collector/install/install-runtime.sh"

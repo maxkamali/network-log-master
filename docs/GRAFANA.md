@@ -204,6 +204,10 @@ All three tables expose Device and Incident ID. Separate server-side text variab
 
 Every query is a bounded `SELECT` through the existing read-only datasource and avoids exposing complete `raw_json` provenance. The permanent redacted verifier executes the original seven plus enhanced six panels through Grafana's datasource API and reports only frame/row counts. Active windows deliberately do not age out with the time picker; Resolved uses the selected resolution-time range.
 
+Item 39 adds an incident-scoped `View matching logs` link to every cell in all three enhanced tables. The link opens Explore in a new tab and uses the row's deterministic incident ID to recover authoritative device, entity, protocol/event family, and first/last/resolution timestamps. It then selects matching rows from `observability.grafana_logs` inside the incident window with a 15-minute boundary on each side. The query remains read-only, is capped at 1,000 newest-first rows, and does not depend on the dashboard's selected time range for persistent active incidents. Main-organization links use organization 1; the isolated NOC copy must use organization 2.
+
+The redacted query verifier also recognizes these links. For each nonempty linked table it selects one incident identity only in process memory, executes the rendered Explore query, and prints only frame and row counts. No incident identity, device, or log content is emitted.
+
 The governing pattern remains:
 
 1. deterministic incident/evidence state remains authoritative outside Grafana

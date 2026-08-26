@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 from pathlib import Path
 import sys
 import time
 from typing import Any
+from urllib.parse import parse_qs, urlsplit
 
 from dashboard_api import DashboardApi, DashboardApiError, load_password
 
@@ -83,6 +85,88 @@ def response_counts(response: object, ref_id: str) -> tuple[int, int]:
     return len(frames), row_count
 
 
+def response_field_values(
+    response: object,
+    ref_id: str,
+    field_name: str,
+) -> list[str]:
+    if not isinstance(response, dict):
+        raise DashboardApiError("datasource response is not an object")
+    result = (response.get("results") or {}).get(ref_id)
+    if not isinstance(result, dict):
+        raise DashboardApiError("datasource response is missing the panel result")
+    values: list[str] = []
+    for frame in result.get("frames") or []:
+        fields = ((frame.get("schema") or {}).get("fields") or [])
+        columns = ((frame.get("data") or {}).get("values") or [])
+        for index, field in enumerate(fields):
+            if field.get("name") != field_name:
+                continue
+            if index >= len(columns) or not isinstance(columns[index], list):
+                raise DashboardApiError("datasource response field values are invalid")
+            values.extend(
+                str(value)
+                for value in columns[index]
+                if value is not None and str(value)
+            )
+    return values
+
+
+def drilldown_queries(panel: dict[str, Any]) -> list[dict[str, Any]]:
+    defaults = (
+        panel.get("spec", {})
+        .get("vizConfig", {})
+        .get("spec", {})
+        .get("fieldConfig", {})
+        .get("defaults", {})
+    )
+    links = defaults.get("links") or []
+    queries: list[dict[str, Any]] = []
+    for link in links:
+        parsed = urlsplit(link.get("url", ""))
+        parameters = parse_qs(parsed.query)
+        panes_values = parameters.get("panes") or []
+        if parsed.path != "/explore" or len(panes_values) != 1:
+            raise DashboardApiError("dashboard data link is not a single Explore target")
+        panes = json.loads(panes_values[0])
+        for pane in panes.values():
+            pane_queries = pane.get("queries") or []
+            if not isinstance(pane_queries, list):
+                raise DashboardApiError("Explore data link queries are invalid")
+            queries.extend(pane_queries)
+    return queries
+
+
+def drilldown_payload(
+    query: dict[str, Any],
+    incident_id: str,
+    start_ms: int,
+    end_ms: int,
+) -> tuple[str, dict[str, Any]]:
+    prepared = copy.deepcopy(query)
+    ref_id = prepared.get("refId", "A")
+    raw_sql = prepared.get("rawSql")
+    if not isinstance(raw_sql, str):
+        raise DashboardApiError("Explore data link has no SQL")
+    marker = "${__data.fields.incident_id}"
+    if marker not in raw_sql:
+        raise DashboardApiError("Explore data link has no incident-ID marker")
+    prepared["rawSql"] = raw_sql.replace(
+        marker,
+        incident_id.replace("'", "''"),
+    )
+    prepared.update({
+        "intervalMs": 60_000,
+        "maxDataPoints": 1_000,
+        "refId": ref_id,
+    })
+    return ref_id, {
+        "from": str(start_ms),
+        "to": str(end_ms),
+        "queries": [prepared],
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -128,8 +212,11 @@ def main() -> int:
         elements = (document.get("spec") or {}).get("elements")
         if not isinstance(elements, dict) or not elements:
             raise DashboardApiError(f"{dashboard.name}: dashboard has no panels")
+        linked_panels = 0
+        verified_drilldowns = 0
         for panel_name in sorted(elements):
-            queries = elements[panel_name]["spec"]["data"]["spec"]["queries"]
+            panel = elements[panel_name]
+            queries = panel["spec"]["data"]["spec"]["queries"]
             if len(queries) != 1:
                 raise DashboardApiError(
                     f"{dashboard.name}/{panel_name}: expected one query"
@@ -146,6 +233,41 @@ def main() -> int:
             print(
                 f"{dashboard.name}/{panel_name} frames={frame_count} "
                 f"rows={row_count} query=PASS"
+            )
+            links = drilldown_queries(panel)
+            if not links:
+                continue
+            linked_panels += 1
+            incident_ids = response_field_values(response, ref_id, "incident_id")
+            if not incident_ids:
+                print(f"{dashboard.name}/{panel_name} drilldown=SKIP_EMPTY")
+                continue
+            for link_query in links:
+                link_ref_id, link_payload = drilldown_payload(
+                    link_query,
+                    incident_ids[0],
+                    start_ms,
+                    end_ms,
+                )
+                link_status, link_response = api.request(
+                    "POST", "/api/ds/query", link_payload
+                )
+                if link_status != 200:
+                    raise DashboardApiError(
+                        f"{dashboard.name}/{panel_name}: drilldown status={link_status}"
+                    )
+                link_frames, link_rows = response_counts(
+                    link_response, link_ref_id
+                )
+                verified_drilldowns += 1
+                print(
+                    f"{dashboard.name}/{panel_name} "
+                    f"drilldown_frames={link_frames} "
+                    f"drilldown_rows={link_rows} drilldown=PASS"
+                )
+        if linked_panels and not verified_drilldowns:
+            raise DashboardApiError(
+                f"{dashboard.name}: linked panels have no sample incident"
             )
 
     print(

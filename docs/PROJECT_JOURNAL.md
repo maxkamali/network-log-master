@@ -12493,3 +12493,21 @@ None. Publish and independently verify this closure/documentation checkpoint, re
 Closure/documentation commit `ad01f0e8178765222d330347e21d40cf65fa3c36` was published to GitHub, and an independent `ls-remote` comparison matched local and remote `main` exactly.
 
 The exact collector-side playlist creator/stage, its bytecode artifact, and the local creator/memory-only credential helper are absent. The separate root-only playlist rollback database remains mode `0600`. Post-cleanup Grafana SQLite integrity and HTTPS health passed; Grafana, ClickHouse, Vector, and the collector result-gate timer are active; relevant service results remain successful with zero restarts. Item 38 is `DONE`, the end-to-end target is complete through item 38, and there is no remaining `NEXT` item.
+
+## 2026-08-25 19:20 PDT - Item 39 incident-scoped Explore drilldown candidate validated
+
+### Status
+
+Item 39 is the single `NEXT` item and is in progress. No production dashboard, playlist, preference, datasource, service, schema, data, transport, incident state, credential, or model setting changed during candidate construction or read-only validation.
+
+The operator requested main-dashboard-style log lookup from every event in `AI Incident Analysis - Enhanced`. The candidate adds one `View matching logs` data link to every cell of Active Events, Interface Flaps, and Resolved Events. The rendered Explore query uses only the deterministic `incident_id` row field. It resolves the latest authoritative device, entity, protocol/event family, first seen, last seen, and resolution timestamps from `observability.incident_updates`, then selects newest-first matching rows from `observability.grafana_logs` within the incident window plus 15 minutes on each side. It remains a bounded read-only `SELECT` with a 1,000-row cap.
+
+The visible `Incident ID` label is preserved while the underlying field name is now interpolation-safe. Grafana's proven Explore-link encoding contract is retained: panes are URL encoded while row/time variables remain literal for click-time substitution. Automated regression proves all three table links, both datasource UIDs, the read-only tables and predicates, time boundaries, row cap, organization-1 capture, visible field label, and byte-exact unchanged original AI dashboard.
+
+The permanent redacted Grafana query verifier now detects Explore data links, extracts one sample incident identity from each nonempty table only in memory, renders the exact query safely, and reports only frame/row counts. Through the working main-organization administrator session, all six candidate panel queries passed. The three sampled drilldowns also passed and returned 1, 839, and 22 rows respectively. No device, incident identity, log body, credential, or private connection value was printed or recorded.
+
+Focused dashboard tests passed 19 of 19, the generated capture is exactly reproducible, `git diff --check` passed, and the public current-tree/history/link/ref-topology validator passed.
+
+### Next action
+
+Publish and independently verify this candidate checkpoint. Then create a new root-only online Grafana database backup, prove the live six-dashboard main inventory and two-dashboard NOC inventory still match their expected predecessors, dry-run and replace only the enhanced dashboard in each organization with the correct organization-local Explore link, validate panel and sampled drilldown queries as the NOC Viewer, reconcile closure documentation, and publish item 39.

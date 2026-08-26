@@ -4,9 +4,11 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from urllib.parse import quote
 
 
 DATASOURCE_UID = 'efvaztlrk8ow0a'
+LOGS_DATASOURCE_UID = 'bfvik20ilwoaof'
 
 
 LATEST_CTE = '''WITH latest AS (
@@ -147,10 +149,89 @@ def field_override(name, properties):
     }
 
 
+def incident_logs_link():
+    raw_sql = '''WITH incident AS (
+    SELECT
+        count() AS incident_rows,
+        argMax(device, tuple(snapshot_version, snapshot_id)) AS device,
+        argMax(entity_name, tuple(snapshot_version, snapshot_id)) AS entity_name,
+        argMax(event_family, tuple(snapshot_version, snapshot_id)) AS event_family,
+        argMax(protocol, tuple(snapshot_version, snapshot_id)) AS protocol,
+        argMax(first_seen, tuple(snapshot_version, snapshot_id)) AS first_seen,
+        argMax(last_seen, tuple(snapshot_version, snapshot_id)) AS last_seen,
+        argMax(resolved_at, tuple(snapshot_version, snapshot_id)) AS resolved_at
+    FROM observability.incident_updates
+    WHERE incident_id = '${__data.fields.incident_id}'
+)
+SELECT
+    logs.timestamp,
+    logs.body,
+    logs.level,
+    logs.device,
+    logs.hostname,
+    logs.source_ip
+FROM observability.grafana_logs AS logs
+CROSS JOIN incident
+WHERE incident.incident_rows > 0
+  AND logs.timestamp >= incident.first_seen - INTERVAL 15 MINUTE
+  AND logs.timestamp <= ifNull(incident.resolved_at, incident.last_seen) + INTERVAL 15 MINUTE
+  AND (
+      lowerUTF8(logs.device) = lowerUTF8(incident.device)
+      OR lowerUTF8(logs.hostname) = lowerUTF8(incident.device)
+      OR logs.source_ip = incident.device
+  )
+  AND (
+      (notEmpty(incident.entity_name) AND positionCaseInsensitiveUTF8(logs.body, incident.entity_name) > 0)
+      OR (notEmpty(incident.protocol) AND positionCaseInsensitiveUTF8(logs.body, incident.protocol) > 0)
+      OR (notEmpty(incident.event_family) AND positionCaseInsensitiveUTF8(logs.body, incident.event_family) > 0)
+  )
+ORDER BY logs.timestamp DESC
+LIMIT 1000'''
+    panes = {
+        'incident': {
+            'datasource': LOGS_DATASOURCE_UID,
+            'queries': [{
+                'refId': 'A',
+                'datasource': {
+                    'type': 'grafana-clickhouse-datasource',
+                    'uid': LOGS_DATASOURCE_UID,
+                },
+                'editorType': 'sql',
+                'format': 2,
+                'pluginVersion': '4.20.0',
+                'queryType': 'logs',
+                'rawSql': raw_sql,
+            }],
+            'range': {'from': '${__from}', 'to': '${__to}'},
+        }
+    }
+    encoded_panes = quote(json.dumps(panes, separators=(',', ':')), safe='')
+    for variable in (
+        '${__data.fields.incident_id}',
+        '${__from}',
+        '${__to}',
+    ):
+        encoded_panes = encoded_panes.replace(
+            quote(json.dumps(variable)[1:-1], safe=''),
+            variable,
+        )
+    return {
+        'targetBlank': True,
+        'title': 'View matching logs',
+        'url': (
+            '/explore?panes='
+            + encoded_panes
+            + '&schemaVersion=1&orgId=1'
+        ),
+    }
+
+
 def table_panel(identifier, title, description, sql, fields):
     overrides = []
     for name, width in fields:
         properties = [('custom.width', width)]
+        if name == 'incident_id':
+            properties.insert(0, ('displayName', 'Incident ID'))
         if name in {'First Seen', 'Last Activity', 'Resolved'}:
             properties.insert(0, ('unit', 'dateTimeFromNow'))
         if name in {'Severity', 'State', 'Resolution'}:
@@ -219,6 +300,7 @@ def table_panel(identifier, title, description, sql, fields):
                     },
                     'fieldConfig': {
                         'defaults': {
+                            'links': [incident_logs_link()],
                             'custom': {
                                 'align': 'left',
                                 'cellOptions': {'type': 'auto'},
@@ -310,7 +392,7 @@ def build_document():
     dateDiff('minute', first_seen, now()) AS "Age (min)",
     recurrence_count + 1 AS "Occurrences",
     event_family AS "Category",
-    incident_id AS "Incident ID"
+    incident_id
 FROM latest
 LEFT JOIN latest_ai USING incident_id
 WHERE {active_filter}
@@ -328,7 +410,7 @@ LIMIT 500'''
     state_change_count AS "Flaps",
     recurrence_count + 1 AS "Occurrences",
     dateDiff('minute', first_seen, now()) AS "Age (min)",
-    incident_id AS "Incident ID"
+    incident_id
 FROM latest
 WHERE {flap_filter}
   AND {search_condition('flap_search')}
@@ -345,7 +427,7 @@ LIMIT 500'''
     recurrence_count + 1 AS "Occurrences",
     event_family AS "Category",
     if(entity_type = 'interface', 'yes', 'no') AS "Interface Flap",
-    incident_id AS "Incident ID"
+    incident_id
 FROM latest
 WHERE lifecycle_status = 'RESOLVED'
   AND resolved_at >= $__fromTime
@@ -359,22 +441,22 @@ LIMIT 500'''
         'panel-1': stat_panel(1, 'Active Events', 'Current non-interface incidents; active state is never hidden by the dashboard time range.', active_count, 'red'),
         'panel-2': stat_panel(2, 'Interface Flaps', 'All current interface incidents, including a first down observation before another state change, are kept in this queue.', flap_count, 'orange'),
         'panel-3': stat_panel(3, 'Resolved', 'Incidents resolved during the selected dashboard time range.', resolved_count, 'green'),
-        'panel-4': table_panel(4, 'Active Events', 'One current row per unresolved non-interface incident. Recovered OSPF/BGP incidents remain MONITORING for 24 continuous healthy hours; a relapse reopens the same incident and increments Occurrences. Event Details uses the latest AI summary when available and deterministic state detail otherwise. Search is server-side and the time picker does not hide persistent incidents.', active_sql, [
+        'panel-4': table_panel(4, 'Active Events', 'One current row per unresolved non-interface incident. Click any row cell to open matching device/entity/protocol logs in Explore. Recovered OSPF/BGP incidents remain MONITORING for 24 continuous healthy hours; a relapse reopens the same incident and increments Occurrences. Event Details uses the latest AI summary when available and deterministic state detail otherwise. Search is server-side and the time picker does not hide persistent incidents.', active_sql, [
             ('Severity', 105), ('Device', 190), ('Event', 260),
             ('Event Details', 560), ('State', 125),
             ('First Seen', 135), ('Last Activity', 135), ('Age (min)', 95),
-            ('Occurrences', 95), ('Category', 120), ('Incident ID', 220),
+            ('Occurrences', 95), ('Category', 120), ('incident_id', 220),
         ]),
-        'panel-5': table_panel(5, 'Interface Flaps', 'Every unresolved interface incident is kept here, including its first down observation; recovery moves it to Resolved after the quiet-period gate.', flap_sql, [
+        'panel-5': table_panel(5, 'Interface Flaps', 'Every unresolved interface incident is kept here, including its first down observation. Click any row cell to open matching device/interface logs in Explore; recovery moves the incident to Resolved after the quiet-period gate.', flap_sql, [
             ('Device', 190), ('Interface', 220), ('Current State', 120), ('State', 125),
             ('First Seen', 135), ('Last Activity', 135), ('Flaps', 85),
-            ('Occurrences', 95), ('Age (min)', 95), ('Incident ID', 220),
+            ('Occurrences', 95), ('Age (min)', 95), ('incident_id', 220),
         ]),
-        'panel-6': table_panel(6, 'Resolved Events', 'Resolved incident episodes in the selected time range. Records remain searchable history and are not deleted by dashboard actions.', resolved_sql, [
+        'panel-6': table_panel(6, 'Resolved Events', 'Resolved incident episodes in the selected time range. Click any row cell to open matching logs from the incident window. Records remain searchable history and are not deleted by dashboard actions.', resolved_sql, [
             ('Severity', 105), ('Device', 190), ('Event', 330), ('Resolution', 125),
             ('First Seen', 135), ('Resolved', 135), ('Duration (min)', 110),
             ('Occurrences', 95), ('Category', 120), ('Interface Flap', 110),
-            ('Incident ID', 220),
+            ('incident_id', 220),
         ]),
     }
     layout = []

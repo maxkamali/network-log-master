@@ -12656,3 +12656,97 @@ This entry records design only. No production schema, executable, service,
 schedule, prompt, model setting, event, incident, result, learned rule,
 ClickHouse object, Grafana resource, credential, or transport state changed.
 The completed numbered project sequence remains closed with no `NEXT` item.
+
+## 2026-08-25 22:24 PDT - Hidden AI detection side channel implemented and activated
+
+### Repository implementation
+
+The explicitly authorized post-closure feature is complete. GX10 now has an
+additive append-only triage ledger, deterministic normalized-template
+signatures, bounded 24-signature packets, strict versioned Gemma output,
+durable waiting retries, positive-decision incident overrides, per-device
+ordinary incident identity, short triage summaries, guarded severity-0–3
+learned rules, and 60-minute quiet plus 15-minute recovery confirmation.
+Existing deterministic incident-reasoning backlog has scheduler priority;
+otherwise the side channel may use the cycle. The coordinator proves that at
+most one of the two model paths can invoke per five-minute cycle.
+
+AI-positive incidents are excluded from the ordinary incident-assessment
+packet builder because the triage decision is already the bounded model
+assessment. Their title, detail, operational category, device, and
+event-code-bearing entity are projected directly through the existing
+version-2 lifecycle outbox. They enter the existing `incident_updates` route
+and the unchanged Active/Resolved dashboard queries. They do not create a
+duplicate `ai_updates` record or a new dashboard section. AI-negative events
+remain only in retained logs.
+
+The clean initializer now includes the triage schema. A guarded working-system
+migration creates a protected online SQLite backup and initializes the triage
+cursor at the bounded 24-hour floor. The managed installer/verifier upgrades
+only exact predecessor artifacts, installs the new runtime/prompt/schema and
+coordinator, and binds the existing reasoning service to that coordinator.
+Crash recovery converts stale `STARTED` reservations to immutable transport
+failures before retry. Batch, run, decision, override, summary, and rule
+transitions are append-only or narrowly guarded.
+
+Local and exact staged-server validation passed 215 tests, the GX10 filesystem
+contract, public current-tree/history/link/ref-topology gates, and diff checks.
+The added tests cover positive/negative/unavailable outcomes, learned-rule
+model bypass, one-call scheduling, migration backup/cursor behavior, ordinary
+incident creation, and lifecycle export of summary/category/protocol.
+
+### Protected production rollout
+
+Read-only preflight matched every expected predecessor hash, confirmed the
+configured database had no triage tables, passed SQLite quick/foreign-key
+checks, found equal deterministic watermarks, and confirmed healthy local
+Gemma. The raw spool was paused, deterministic correlation caught up, and all
+database writers were paused before the protected backup, additive migration,
+and atomic artifact install. No private configured path or credential was
+recorded.
+
+The first real shadow attempt exercised the failure boundary: Gemma completed
+with `done_reason=length`, the attempt was immutably recorded as
+`INVALID_OUTPUT`, the batch remained pending, the triage cursor did not move,
+and zero incidents were created. Versioned prompt revision `r2` imposed compact
+10/20/15-word title/summary/reason limits and made a new prompt-version attempt
+immediately eligible. The exact same pending 24-signature batch then passed in
+shadow mode with all 24 decisions and still zero incidents.
+
+Active bridging then succeeded. Across the first two successful batches,
+Gemma produced 33 `incident` and 15 `ignore` decisions. Validated positives
+created 35 ordinary `event_signature` incidents and 246 event-evidence
+overrides; the reviewed snapshot contained 12 open and 23 resolved instances.
+No learned rule is active because no event code yet satisfies the three-
+decision, 30-minute, contradiction-free promotion gate.
+
+The first lifecycle export exposed one bounded compatibility issue: generic
+events have no canonical protocol while the version-2 lifecycle record requires
+a nonempty protocol. The outbox failed before publication. A regression test
+and exact staged-server rerun preceded a narrow projection correction that
+labels only side-channel lifecycle records `event-triage` and carries their
+validated category, without rewriting incident rows, evidence, correlation
+keys, dashboards, or collector schema. The retry passed, produced one 45-record
+44,086-byte lifecycle batch, and the write-only sender delivered it.
+
+The collector validation gate accepted that 45-record batch after its normal
+90-second settle interval. A later follow-up lifecycle file also cleared the
+gate; the incoming writer directory returned to zero. Vector, ClickHouse,
+Grafana, and the validation-gate timer are active. Direct ClickHouse aggregate
+verification was deliberately not attempted with a plaintext password from
+chat: the host-local default-user file retains only an empty plaintext field
+and a one-way SHA-256 verifier. No credential was printed, copied, or stored.
+
+Final GX10 evidence is `quick_check=ok`, zero foreign-key violations, two
+successful batches, two successful runs plus the intentionally retained
+length-limited failure, 48 validated decisions, 35 lifecycle incidents, zero
+active learned rules, successful outbox/sender services, and all six relevant
+timers/services active. The configured-database sibling backup and exact
+rollback predecessors remain protected.
+
+### Status
+
+The hidden AI detection side channel is `DONE` and active. The completed
+numbered sequence remains closed through item 40 with no `NEXT` item. Learned
+coverage remains deliberately empty until real production evidence satisfies
+its automatic gate.

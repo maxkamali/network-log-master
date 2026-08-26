@@ -35,6 +35,56 @@ ARTIFACTS = (
         0o755,
     ),
     (
+        GX10_DIR / 'sbin' / 'run-managed-ai.py',
+        LIBEXEC_DIR / 'run-managed-ai.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'triage-uncovered-events.py',
+        LIBEXEC_DIR / 'triage-uncovered-events.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'incident-engine.py',
+        LIBEXEC_DIR / 'incident-engine.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'build-reasoning-packets.py',
+        LIBEXEC_DIR / 'build-reasoning-packets.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'build-incident-outbox.py',
+        LIBEXEC_DIR / 'build-incident-outbox.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'run-correlation.py',
+        LIBEXEC_DIR / 'run-correlation.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'run-incident-outbox.py',
+        LIBEXEC_DIR / 'run-incident-outbox.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'config' / 'triage-runtime-v1.json',
+        CONFIG_DIR / 'triage-runtime-v1.json',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'prompts' / 'uncovered-event-triage-v1.txt',
+        CONFIG_DIR / 'uncovered-event-triage-v1.txt',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'prompts' / 'uncovered-event-triage-output-v1.json',
+        CONFIG_DIR / 'uncovered-event-triage-output-v1.json',
+        0o644,
+    ),
+    (
         GX10_DIR / 'systemd' / SERVICE,
         SYSTEMD_DIR / SERVICE,
         0o644,
@@ -46,11 +96,6 @@ ARTIFACTS = (
     ),
 )
 DEPENDENCIES = (
-    (
-        GX10_DIR / 'sbin' / 'build-reasoning-packets.py',
-        LIBEXEC_DIR / 'build-reasoning-packets.py',
-        0o755,
-    ),
     (
         GX10_DIR / 'sbin' / 'run-local-reasoning.py',
         LIBEXEC_DIR / 'run-local-reasoning.py',
@@ -149,6 +194,21 @@ def validate_database(path, require_caught_up=True):
         incident = cursor_value(connection, INCIDENT_CURSOR)
         projection_lag = recent - projection
         incident_lag = canonical - incident
+        triage_tables = {
+            'triage_signatures', 'triage_batches', 'triage_runs',
+            'triage_decisions', 'event_detection_overrides',
+            'triage_incident_summaries', 'learned_detection_rules',
+        }
+        present = {
+            row[0] for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )
+        }
+        if not triage_tables <= present:
+            raise ValueError('managed AI triage schema differs')
+        triage_cursor = cursor_value(connection, 'ai_triage_v1_last_event_id')
+        if triage_cursor > incident:
+            raise ValueError('managed AI triage cursor differs')
         if (
             projection_lag < 0
             or incident_lag < 0
@@ -162,6 +222,7 @@ def validate_database(path, require_caught_up=True):
                 'recent': recent,
                 'projection_lag': projection_lag,
                 'incident_lag': incident_lag,
+                'triage_lag': incident - triage_cursor,
             }
         )
         return state
@@ -294,6 +355,7 @@ def main():
             f'recent_max_id={state["recent"]} '
             f'projection_lag={state["projection_lag"]} '
             f'incident_lag={state["incident_lag"]} '
+            f'triage_lag={state["triage_lag"]} '
             f'packets={state["packets"]} pending={state["pending"]} '
             f'model_versions={state["model_versions"]} '
             f'prompt_versions={state["prompt_versions"]} '

@@ -150,6 +150,14 @@ The sender remains one-file-per-cycle and uses the existing write-only identity.
 
 The enhanced dashboard is the deterministic NOC queue. Active Events and Interface Flaps deliberately ignore the dashboard time range so unresolved work persists; Resolved Events uses `resolved_at` within the selected range. Confirmed recovered BGP/OSPF/OSPFv3 incidents remain active for a 24-hour monitoring window, display `MONITORING`, and reuse the same incident/issue-occurrence counter if they relapse before resolution. Operators can search each window and filter Active/Resolved by severity. Resolution remains engine-driven; Grafana does not mutate incident state. See `docs/NOC_WORKFLOW.md`.
 
+## Hidden AI detection side channel
+
+The managed reasoning owner also reviews canonical events that have no deterministic incident evidence. It admits severity 0–4 and only novel or repeated severity-5 notices, groups at most 24 deterministic signatures, and permits at most one local-model invocation per five-minute cycle. Existing incident-reasoning backlog has priority. If Gemma is unavailable or returns invalid output, the immutable batch remains pending and no incident is created; normal incident reasoning may continue during retry backoff.
+
+Validated positive decisions enter the same incident/outbox/collector/dashboard path as every other non-interface incident. They carry the real device, event-code-bearing entity name, AI title/detail, projected operational category, and `event-triage` transport protocol label. After 60 minutes without matching evidence they enter `RECOVERING`; after a further 15 minutes they resolve. A return before resolution reopens and increments the same correlation. Ignored and insufficient events remain available only in raw logs.
+
+Repeated model decisions can create a learned exact-event-code rule only for severity 0–3 after three consistent confidence-70+ positives spanning at least 30 minutes with no contradictory decision. Rules never contain generated code or commands and can only select the same fixed incident bridge. Severity 4/5 is always model-reviewed and never auto-promoted.
+
 ## Grafana operational boundary
 
 Grafana is served over HTTPS by the collector and reads ClickHouse through captured datasource identities.

@@ -51,18 +51,18 @@ class DatabaseInitializationTests(unittest.TestCase):
                 "AND type IN ('table', 'index', 'trigger') "
                 "ORDER BY type, name"
             ).fetchall()
-            self.assertEqual(len(objects), 50)
+            self.assertEqual(len(objects), 81)
             self.assertEqual(
                 sum(1 for kind, _, _ in objects if kind == 'table'),
-                13,
+                21,
             )
             self.assertEqual(
                 sum(1 for kind, _, _ in objects if kind == 'index'),
-                23,
+                30,
             )
             self.assertEqual(
                 sum(1 for kind, _, _ in objects if kind == 'trigger'),
-                14,
+                30,
             )
 
             tables = {
@@ -89,6 +89,11 @@ class DatabaseInitializationTests(unittest.TestCase):
                 'reasoning_packets',
                 'reasoning_runs',
                 'reasoning_results',
+                'triage_batch_members',
+                'triage_runs',
+                'triage_decisions',
+                'event_detection_overrides',
+                'triage_incident_summaries',
             ):
                 for row in connection.execute(f'PRAGMA foreign_key_list({table})'):
                     relationships.add((table, row[3], row[2], row[4]))
@@ -131,6 +136,19 @@ class DatabaseInitializationTests(unittest.TestCase):
                         'packet_id',
                     ),
                     ('reasoning_results', 'incident_id', 'incidents', 'incident_id'),
+                    ('triage_batch_members', 'batch_id', 'triage_batches', 'batch_id'),
+                    ('triage_batch_members', 'signature_id', 'triage_signatures', 'signature_id'),
+                    ('triage_batch_members', 'event_id', 'recent_events', 'id'),
+                    ('triage_runs', 'batch_id', 'triage_batches', 'batch_id'),
+                    ('triage_runs', 'model_version', 'reasoning_model_versions', 'model_version'),
+                    ('triage_runs', 'prompt_version', 'reasoning_prompt_versions', 'prompt_version'),
+                    ('triage_decisions', 'run_id', 'triage_runs', 'run_id'),
+                    ('triage_decisions', 'batch_id', 'triage_batches', 'batch_id'),
+                    ('triage_decisions', 'signature_id', 'triage_signatures', 'signature_id'),
+                    ('event_detection_overrides', 'event_id', 'recent_events', 'id'),
+                    ('event_detection_overrides', 'signature_id', 'triage_signatures', 'signature_id'),
+                    ('triage_incident_summaries', 'incident_id', 'incidents', 'incident_id'),
+                    ('triage_incident_summaries', 'signature_id', 'triage_signatures', 'signature_id'),
                 },
             )
 

@@ -1,0 +1,15 @@
+{
+  "config_version": 1,
+  "model_config_digest": "sha256:f0988ff50a2458c598ff6b1b87b94d0f5c44d73061c2795391878b00b2285e11",
+  "model_manifest_sha256": "c6eb396dbd5992bbe3f5cdb947e8bbc0ee413d7c17e2beaae69f5d569cf982eb",
+  "model_reference": "gemma4:latest",
+  "model_version": "ollama-gemma4-c6eb396d-triage-v1",
+  "prompt_version": "uncovered-event-triage-v1-r2",
+  "provider": "ollama",
+  "request_options": {
+    "num_ctx": 8192,
+    "num_predict": 4096,
+    "seed": 27,
+    "temperature": 0
+  }
+}

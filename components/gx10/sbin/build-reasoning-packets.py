@@ -619,6 +619,7 @@ def run(database=DB):
         incidents = connection.execute(
             '''
             SELECT * FROM incidents
+            WHERE entity_type != 'event_signature'
             ORDER BY first_seen_epoch_ms, incident_id
             '''
         ).fetchall()

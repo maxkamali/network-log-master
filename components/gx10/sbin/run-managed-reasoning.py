@@ -36,7 +36,7 @@ OUTPUT_SCHEMA_PATH = Path(
     '/etc/network-log-gx10/incident-assessment-output-v2.json'
 )
 PACKET_BUILDER_SHA256 = (
-    '3543ca1dd5b661c628fbef6e0101c79d0bc236997d229ce354ba9dc618fc8145'
+    '62bc6c3ca3be60457989f73e6eaced04a1ffd2f16043050c767e7b7c86514326'
 )
 CALLER_SHA256 = (
     'dac1e176108452c77ea4eb2f7195dd8eb8223576ab8cbdb2cb95a2acbb8fcbe8'

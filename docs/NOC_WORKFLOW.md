@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The `AI Incident Analysis - Enhanced` dashboard is the operational NOC queue. It presents authoritative deterministic GX10 incident state; it does not wait for model inference and does not use AI text as incident truth.
+The `AI Incident Analysis - Enhanced` dashboard is the operational NOC queue. It presents authoritative GX10 incident lifecycle state. Deterministically covered events do not wait for inference. The hidden side channel may admit otherwise uncovered important events only after a strict local-model decision; after admission, lifecycle state—not Grafana or subsequent model text—is authoritative.
 
 The original `AI Incident Analysis` dashboard remains unchanged as the assessment-history fallback.
 
@@ -52,6 +52,8 @@ An incident moves between dashboard windows only when the deterministic engine c
 - a later relapse produces a newer snapshot and returns the incident to the appropriate active window.
 
 Manual resolution is intentionally not implemented. Adding it requires a separately designed, authenticated acknowledgement/override data contract rather than mutating Grafana presentation state.
+
+Hidden side-channel positives use the same Active/Resolved windows and one-click log drilldown. They never appear in Interface Flaps because their entity type is `event_signature`. Their AI title and short factual summary are exported in the existing lifecycle record, their category is the validated operational category, and their device/entity identity comes from the canonical source event. They enter `RECOVERING` after 60 quiet minutes and `RESOLVED` after 15 additional quiet minutes; repeat evidence before resolution reopens the same correlation and increments its evidence counters. AI-negative events are not shown as incidents and remain searchable in raw logs.
 
 ## Transport and storage contract
 

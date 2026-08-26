@@ -143,11 +143,14 @@ def map_incident(row):
     for field, maximum in (
         ('incident_id', 256),
         ('event_family', 128),
-        ('protocol', 128),
         ('entity_type', 128),
         ('severity', 64),
     ):
         bounded_text(row[field], maximum, f'incident {field}')
+    projected_protocol = row['protocol']
+    if not projected_protocol and row['entity_type'] == 'event_signature':
+        projected_protocol = 'event-triage'
+    bounded_text(projected_protocol, 128, 'incident protocol')
     for field in ('first_seen', 'last_seen', 'updated_at'):
         if not valid_timestamp(row[field]):
             raise IncidentOutboxError(f'incident {field} is invalid')
@@ -176,21 +179,41 @@ def map_incident(row):
     last_state = row['last_observation_state']
     if last_state is not None:
         bounded_text(last_state, 128, 'incident observation state')
+    triage_title = (
+        row['triage_title'] if 'triage_title' in row.keys() else None
+    )
+    triage_summary = (
+        row['triage_summary'] if 'triage_summary' in row.keys() else None
+    )
+    triage_category = (
+        row['triage_category'] if 'triage_category' in row.keys() else None
+    )
+    if triage_title is not None:
+        bounded_text(triage_title, 160, 'triage incident title')
+    if triage_summary is not None:
+        bounded_text(triage_summary, 1000, 'triage incident summary')
+    if triage_category is not None:
+        bounded_text(triage_category, 128, 'triage incident category')
+    projected_family = triage_category or row['event_family']
     source = {
         field: row[field]
         for field in sorted(EXPORT_COLUMNS)
     }
+    if triage_title is not None or triage_summary is not None:
+        source['triage_title'] = triage_title
+        source['triage_summary'] = triage_summary
+        source['triage_category'] = triage_category
     source['producer_version'] = PRODUCER_VERSION
     snapshot_digest = sha256_bytes(canonical_json(source).encode('utf-8'))
     label = entity_name or row['entity_type']
-    title = f'{row["event_family"]}: {label}'
+    title = triage_title or f'{row["event_family"]}: {label}'
     record = {
-        'body': 'Deterministic incident lifecycle state.',
+        'body': triage_summary or 'Deterministic incident lifecycle state.',
         'device': device,
         'engine_version': row['engine_version'],
         'entity_name': entity_name,
         'entity_type': row['entity_type'],
-        'event_family': row['event_family'],
+        'event_family': projected_family,
         'first_seen': row['first_seen'],
         'incident_id': row['incident_id'],
         'interface_flap': (
@@ -204,7 +227,7 @@ def map_incident(row):
         'opened_at': row['opened_at'],
         'producer_schema': PRODUCER_SCHEMA,
         'producer_version': PRODUCER_VERSION,
-        'protocol': row['protocol'],
+        'protocol': projected_protocol,
         'recurrence_count': row['recurrence_count'],
         'recovering_at': row['recovering_at'],
         'repeat_count_total': row['repeat_count_total'],
@@ -319,9 +342,50 @@ def load_incidents(database):
         }
         if not REQUIRED_COLUMNS <= columns:
             raise IncidentOutboxError('incident outbox database schema differs')
+        tables = {
+            row[0] for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )
+        }
+        triage_projection = ''
+        if 'triage_incident_summaries' in tables:
+            triage_projection = '''
+                ,(
+                    SELECT summary.title
+                    FROM triage_incident_summaries AS summary
+                    WHERE summary.incident_id = incident.incident_id
+                    ORDER BY summary.created_at DESC, summary.source_id DESC
+                    LIMIT 1
+                ) AS triage_title
+                ,(
+                    SELECT summary.summary
+                    FROM triage_incident_summaries AS summary
+                    WHERE summary.incident_id = incident.incident_id
+                    ORDER BY summary.created_at DESC, summary.source_id DESC
+                    LIMIT 1
+                ) AS triage_summary
+                ,(
+                    SELECT COALESCE(
+                        (
+                            SELECT decision.category
+                            FROM triage_decisions AS decision
+                            WHERE decision.decision_id = summary.source_id
+                        ),
+                        (
+                            SELECT rule.category
+                            FROM learned_detection_rules AS rule
+                            WHERE rule.rule_id = summary.source_id
+                        )
+                    )
+                    FROM triage_incident_summaries AS summary
+                    WHERE summary.incident_id = incident.incident_id
+                    ORDER BY summary.created_at DESC, summary.source_id DESC
+                    LIMIT 1
+                ) AS triage_category
+            '''
         records = {}
         for row in connection.execute(
-            '''
+            f'''
             SELECT
                 incident.*,
                 (
@@ -332,6 +396,7 @@ def load_incidents(database):
                       AND transition.to_status = 'OPEN'
                       AND transition.reason = 'adverse_relapse'
                 ) AS recurrence_count
+                {triage_projection}
             FROM incidents AS incident
             ORDER BY incident.incident_id
             '''

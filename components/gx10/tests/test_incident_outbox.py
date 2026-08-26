@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from __future__ import annotations
 
 import importlib.util
@@ -185,6 +186,61 @@ class IncidentOutboxTests(unittest.TestCase):
         OUTBOX.build(self.database, self.ready, self.delivered)
 
         self.assertEqual(self.records()[0]['recurrence_count'], 2)
+
+    def test_ai_triage_incident_projects_summary_category_and_protocol(self):
+        connection = sqlite3.connect(self.database)
+        connection.executescript(
+            '''
+            CREATE TABLE triage_incident_summaries (
+                incident_id TEXT, source_id TEXT, title TEXT, summary TEXT,
+                created_at TEXT
+            );
+            CREATE TABLE triage_decisions (
+                decision_id TEXT PRIMARY KEY, category TEXT
+            );
+            CREATE TABLE learned_detection_rules (
+                rule_id TEXT PRIMARY KEY, category TEXT
+            );
+            '''
+        )
+        incident_id = 'inc-v1-triage'
+        connection.execute(
+            '''
+            INSERT INTO incidents VALUES (
+                ?, 'OPEN', 'unknown', '', 'event_signature',
+                'event_signature|switch-a.example.invalid|BUFFER|signature',
+                'warning', '2026-08-24T08:00:00+00:00',
+                '2026-08-24T08:05:00+00:00', 2, 2, 0, 'detected',
+                '2026-08-24T08:00:00+00:00', NULL, NULL, 2,
+                '2026-08-24T08:05:00+00:00'
+            )
+            ''',
+            (incident_id,),
+        )
+        connection.execute(
+            "INSERT INTO triage_decisions VALUES('decision-1','capacity')"
+        )
+        connection.execute(
+            '''
+            INSERT INTO triage_incident_summaries VALUES(
+                ?,'decision-1','ASIC buffer pressure',
+                'A switch reported sustained buffer pressure.',
+                '2026-08-24T08:05:00+00:00'
+            )
+            ''',
+            (incident_id,),
+        )
+        connection.commit()
+        connection.close()
+
+        OUTBOX.build(self.database, self.ready, self.delivered)
+        record = self.records()[0]
+        self.assertEqual(record['title'], 'ASIC buffer pressure')
+        self.assertEqual(
+            record['body'], 'A switch reported sustained buffer pressure.'
+        )
+        self.assertEqual(record['event_family'], 'capacity')
+        self.assertEqual(record['protocol'], 'event-triage')
 
     def test_legacy_version_1_delivery_remains_valid_during_version_2_export(self):
         self.add_incident(9)

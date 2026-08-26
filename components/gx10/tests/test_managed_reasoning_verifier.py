@@ -48,6 +48,16 @@ class ManagedReasoningVerifierTests(unittest.TestCase):
                 status TEXT NOT NULL
             );
             CREATE TABLE reasoning_results (run_id TEXT PRIMARY KEY);
+            CREATE TABLE triage_signatures (signature_id TEXT PRIMARY KEY);
+            CREATE TABLE triage_batches (batch_id TEXT PRIMARY KEY);
+            CREATE TABLE triage_runs (run_id TEXT PRIMARY KEY);
+            CREATE TABLE triage_decisions (decision_id TEXT PRIMARY KEY);
+            CREATE TABLE event_detection_overrides (event_id INTEGER PRIMARY KEY);
+            CREATE TABLE triage_incident_summaries (incident_id TEXT PRIMARY KEY);
+            CREATE TABLE learned_detection_rules (rule_id TEXT PRIMARY KEY);
+            INSERT INTO agent_state VALUES(
+                'ai_triage_v1_last_event_id','0'
+            );
             '''
         )
         connection.commit()

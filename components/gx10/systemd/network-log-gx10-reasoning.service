@@ -7,7 +7,7 @@ Type=oneshot
 User=network-log-agent
 Group=network-log-agent
 
-ExecStart=/usr/local/libexec/network-log-gx10/run-managed-reasoning.py
+ExecStart=/usr/local/libexec/network-log-gx10/run-managed-ai.py
 TimeoutStartSec=3min
 
 UMask=0077

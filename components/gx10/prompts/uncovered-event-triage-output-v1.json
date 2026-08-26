@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "batch_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "decisions": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "enum": [
+              "capacity",
+              "configuration",
+              "hardware",
+              "protocol",
+              "security",
+              "service",
+              "software",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "confidence": {
+            "maximum": 95,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "decision": {
+            "enum": [
+              "incident",
+              "ignore",
+              "insufficient_evidence"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "signature_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "summary": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "signature_id",
+          "decision",
+          "confidence",
+          "category",
+          "title",
+          "summary",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "maxItems": 24,
+      "minItems": 1,
+      "type": "array"
+    },
+    "schema": {
+      "const": "gx10-uncovered-event-triage",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema",
+    "schema_version",
+    "batch_id",
+    "decisions"
+  ],
+  "type": "object"
+}

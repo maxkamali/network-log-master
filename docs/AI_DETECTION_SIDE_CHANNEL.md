@@ -2,7 +2,25 @@
 
 ## Status and operator contract
 
-This document is an implementation-ready design. It is not deployed behavior.
+Status: `ACTIVE` on the working GX10 system as of 2026-08-25 PDT.
+
+The repository implementation consists of the additive `triage-v1.sql` ledger,
+the deterministic selector/batcher and strict caller in
+`triage-uncovered-events.py`, the one-call coordinator in `run-managed-ai.py`,
+versioned Gemma configuration/prompt/schema artifacts, guarded migration and
+managed-install integration, existing incident/outbox projection, independent
+verification, and regression tests. It adds no dashboard panel, table, event
+window, datasource, or Grafana write behavior.
+
+Production rollout used the configured protected SQLite path without publishing
+it, retained a root-only sibling backup, passed the complete 215-test GX10
+suite locally and from the staged server copy, and ran shadow mode before active
+bridging. The first shadow attempt safely retained its batch after a bounded
+length-limited response; prompt revision `r2` required compact fields and the
+same batch then returned all 24 decisions successfully. Initial active evidence
+is 48 validated decisions: 33 `incident`, 15 `ignore`, zero active learned
+rules, and 35 ordinary lifecycle incidents. The initial 45-record lifecycle
+export passed the collector validation gate.
 
 The side channel reviews important events that reached GX10 but did not qualify
 for deterministic incident correlation. A successful model decision may admit
@@ -74,8 +92,8 @@ normalized event
                       -> append effective-classification override
                       -> deterministic incident bridge
                       -> existing incident/evidence/transition tables
-                      -> existing incident and AI-result outboxes
-                      -> existing ClickHouse tables
+                      -> existing lifecycle outbox
+                      -> existing incident_updates table
                       -> existing Active/Resolved dashboard windows
 
 consistent positive severity 0-3 decisions
@@ -217,23 +235,26 @@ The incident engine reads an override when present and otherwise reads the
 original canonical fields. `detected` on an `event_signature` is an explicit
 immediate-open condition. The model cannot choose or alter that behavior.
 
-For already-cursored events, a separate override cursor invokes the same shared
-incident-processing functions. For future learned-coverage matches, the
-coverage matcher appends the override before the ordinary incident cursor sees
-the event. The unique event-evidence constraint makes both paths replay-safe
-and prevents double admission.
+For already-cursored events, the triage cursor invokes the same shared
+incident-processing functions. Future learned-coverage matches are selected
+after the ordinary incident cursor has established that deterministic evidence
+does not own them, then receive the fixed override without a model call. The
+unique event-evidence constraint makes both paths replay-safe and prevents
+double admission.
 
 An AI-positive signature creates one standard incident per device/signature.
 All matching batch events become ordinary adverse evidence, so occurrence and
 repeat counters reflect the underlying rows. The existing incident lifecycle
 outbox exports it without a new record type.
 
-The existing AI-result transport is extended with a versioned triage-result
-adapter. It emits one validated assessment per created incident into the
-existing collector `ai_updates` path. The dashboard's existing latest-AI join
-therefore displays the triage summary in `Event Details` without a query or
-panel change. Triage provenance remains available in the stored result but is
-not presented as a new user-facing category.
+The existing lifecycle outbox projects the latest validated triage title,
+summary, and operational category into the ordinary incident record. It uses
+the fixed nonempty transport label `event-triage` only in the exported
+projection because generic canonical events have no protocol. The dashboard's
+existing deterministic-detail fallback therefore displays the triage summary
+without a query or panel change. No duplicate assessment is emitted into
+`ai_updates`; complete triage provenance remains in the local append-only
+ledger.
 
 ## Lifecycle
 
@@ -310,17 +331,12 @@ sensor, peer, resource, or explicit recovery extraction.
 The existing five-minute managed reasoning service remains the only scheduled
 model boundary. Its single-inference budget chooses one job per cycle:
 
-1. pending side-channel batch containing severity 0-3
-2. existing critical/open/reopened incident reasoning
-3. pending side-channel batch containing severity 4 or admitted severity 5
-4. remaining existing incident reasoning
-
-A starvation guard admits an existing incident job after two consecutive
-triage cycles unless a new severity 0 or 1 signature is waiting. One triage call
-may decide up to 24 signatures, while an ordinary call retains its current
-single-incident contract. Calls remain serialized under the existing managed
-lock, loopback-only endpoint, three-minute service timeout, one-CPU quota,
-1-GiB memory limit, and bounded response size.
+Existing incident-reasoning backlog has first priority. When none is pending,
+one triage call may decide up to 24 signatures. If triage performs no model
+call because it is idle or inside retry backoff, the ordinary builder/caller
+may use the cycle. Calls remain serialized under the managed owner,
+loopback-only endpoint, three-minute service timeout, one-CPU quota, 1-GiB
+memory limit, and bounded response size.
 
 If no signature is new or materially changed, no triage batch is created. If
 Gemma is unavailable, the attempt is recorded and the batch waits; no dashboard
@@ -330,10 +346,11 @@ and raw logging continue independently.
 ## Dashboard compatibility
 
 No dashboard layout or query change is required. The existing enhanced
-dashboard already selects all non-interface incidents from
-`observability.incident_updates`, joins the newest description from
-`observability.ai_updates`, and derives Active versus Resolved solely from
-lifecycle state. A side-channel incident therefore inherits:
+dashboard selects all non-interface incidents from
+`observability.incident_updates`, prefers any separately stored ordinary AI
+assessment, falls back to the lifecycle detail, and derives Active versus
+Resolved solely from lifecycle state. The side-channel summary is that
+lifecycle fallback, so its incident inherits:
 
 - existing active and resolved searches and severity filtering
 - the existing color and state presentation
@@ -378,9 +395,10 @@ Implementation must pass these gates in order:
 3. Negative tests proving no automatic severity 4/5 promotion, no model-created
    executable rule, no partial batch application, no fail-open incident, and no
    suppressed-event admission.
-4. Result/outbox/gate tests proving triage summaries enter the existing
-   `ai_updates` table and existing lifecycle snapshots enter
-   `incident_updates` without dashboard query changes.
+4. Result/outbox/gate tests proving triage summaries are projected into the
+   existing lifecycle title/body/category fields and enter `incident_updates`
+   without dashboard query changes. They do not create a second assessment or
+   duplicate `ai_updates` record.
 5. Current-production-copy replay over at least 24 hours, with exact row-to-
    aggregate accounting, bounded packet sizes, no event duplication, and
    reviewed model decisions for the known coverage backlog.
@@ -391,6 +409,7 @@ Implementation must pass these gates in order:
 8. Separate learned-coverage activation only after three real consistent
    production decisions satisfy the exact promotion gate.
 
-No production side-channel service, schema, incident, result, rule, dashboard,
-or model configuration may change during design publication.
-
+The design-only publication changed no production state. The later explicitly
+authorized implementation completed gates 1–7. Gate 8 remains automatic and
+data-driven: no learned rule is active until real production decisions satisfy
+the immutable promotion criteria.

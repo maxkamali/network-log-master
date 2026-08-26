@@ -51,6 +51,56 @@ ARTIFACTS = (
         0o755,
     ),
     (
+        GX10_DIR / 'sbin' / 'run-managed-ai.py',
+        LIBEXEC_DIR / 'run-managed-ai.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'triage-uncovered-events.py',
+        LIBEXEC_DIR / 'triage-uncovered-events.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'incident-engine.py',
+        LIBEXEC_DIR / 'incident-engine.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'build-reasoning-packets.py',
+        LIBEXEC_DIR / 'build-reasoning-packets.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'build-incident-outbox.py',
+        LIBEXEC_DIR / 'build-incident-outbox.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'run-correlation.py',
+        LIBEXEC_DIR / 'run-correlation.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'run-incident-outbox.py',
+        LIBEXEC_DIR / 'run-incident-outbox.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'config' / 'triage-runtime-v1.json',
+        CONFIG_DIR / 'triage-runtime-v1.json',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'prompts' / 'uncovered-event-triage-v1.txt',
+        CONFIG_DIR / 'uncovered-event-triage-v1.txt',
+        0o644,
+    ),
+    (
+        GX10_DIR / 'prompts' / 'uncovered-event-triage-output-v1.json',
+        CONFIG_DIR / 'uncovered-event-triage-output-v1.json',
+        0o644,
+    ),
+    (
         GX10_DIR / 'systemd' / SERVICE,
         SYSTEMD_DIR / SERVICE,
         0o644,
@@ -62,11 +112,6 @@ ARTIFACTS = (
     ),
 )
 DEPENDENCIES = (
-    (
-        GX10_DIR / 'sbin' / 'build-reasoning-packets.py',
-        LIBEXEC_DIR / 'build-reasoning-packets.py',
-        0o755,
-    ),
     (
         GX10_DIR / 'prompts' / 'incident-assessment-v2.txt',
         CONFIG_DIR / 'incident-assessment-v2.txt',
@@ -84,6 +129,13 @@ REQUIRED_TABLES = {
     'reasoning_prompt_versions',
     'reasoning_runs',
     'reasoning_results',
+    'triage_signatures',
+    'triage_batches',
+    'triage_runs',
+    'triage_decisions',
+    'event_detection_overrides',
+    'triage_incident_summaries',
+    'learned_detection_rules',
 }
 PREVIOUS_TIMER_BYTES = (
     '[Unit]\n'
@@ -107,7 +159,37 @@ PREVIOUS_ARTIFACT_SHA256 = {
         'e9b894afa16fd5f138cfeec299be58328fd02454db2b53c3e395809e04d58cd0'
     ),
     LIBEXEC_DIR / 'run-managed-reasoning.py': (
-        'c0c095661a7042be57230fb8fc856c03f5fe191ab604e4e246138f28156a3bee'
+        '9b70fade2b79e75f1b41ea57c1bd4a6728331cb73a3d02f1b37c7abae02551b8'
+    ),
+    LIBEXEC_DIR / 'incident-engine.py': (
+        'b45aa4f723f0f8caa81201ac47a302d45f3da4827a19090ab5d241a0be31009d'
+    ),
+    LIBEXEC_DIR / 'build-reasoning-packets.py': (
+        '3543ca1dd5b661c628fbef6e0101c79d0bc236997d229ce354ba9dc618fc8145'
+    ),
+    LIBEXEC_DIR / 'build-incident-outbox.py': (
+        'c0176d70e500a4a03a0c3de52281040a0185d8ee03bd409dc4453ec2486f42a4'
+    ),
+    SYSTEMD_DIR / SERVICE: (
+        '3559ed6a5bdfc98de3544bc6bf7f69cf6459a9cb50083cd96db632a27e52e64a'
+    ),
+    LIBEXEC_DIR / 'run-correlation.py': (
+        'faf75f3f0f8dd1868a173d0e7a5f6acecd046069c181f51a5641c3c6426d055e'
+    ),
+    LIBEXEC_DIR / 'run-incident-outbox.py': (
+        'd117096efa3c3299ee4b07bfb789d7db0af9e143d3af4495b7df7dbfef5a1779'
+    ),
+    LIBEXEC_DIR / 'run-managed-ai.py': (
+        '76eb8b239181641e866dc4b3b433fb6ad248901c42bf4b79b4827bb8ec5d9557'
+    ),
+    LIBEXEC_DIR / 'triage-uncovered-events.py': (
+        'dbf8499d8378337fff386d6b47bbe91536972c2a68ed04747a73483a4afd5303'
+    ),
+    CONFIG_DIR / 'triage-runtime-v1.json': (
+        'c8937ef15c4f76a598ecf2c63c1bf5688b901ba05e0c95cb45a1b6dbfd91d953'
+    ),
+    CONFIG_DIR / 'uncovered-event-triage-v1.txt': (
+        '74846d315a88894adeead7577527b2fd7824d00fe816ff10b35e449230921b8f'
     ),
 }
 

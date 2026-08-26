@@ -26,6 +26,7 @@ CURSOR_KEY = "incident_engine_v1_last_event_id"
 BATCH_SIZE = 1000
 CANDIDATE_WINDOW_MS = 15 * 60 * 1000
 RECOVERY_QUIET_MS = 5 * 60 * 1000
+TRIAGE_RECOVERY_CONFIRM_MS = 15 * 60 * 1000
 PROTOCOL_MONITORING_MS = 24 * 60 * 60 * 1000
 MONITORED_PROTOCOLS = {"bgp", "ospf", "ospfv3"}
 CONTEXT_WINDOWS_MS = {
@@ -185,6 +186,14 @@ def uses_protocol_monitoring(current: sqlite3.Row) -> bool:
 
 
 def recovery_deadline(current: sqlite3.Row) -> tuple[int, str]:
+    if (current["entity_type"] or "").casefold() == "event_signature":
+        if not current["recovering_at"]:
+            raise IncidentError("triage incident lacks recovery timestamp")
+        return (
+            epoch_from_iso(current["recovering_at"])
+            + TRIAGE_RECOVERY_CONFIRM_MS,
+            "triage_recovery_confirmation",
+        )
     if uses_protocol_monitoring(current):
         if not current["recovering_at"]:
             raise IncidentError("monitored incident lacks recovery timestamp")
@@ -568,8 +577,15 @@ def create_incident(
     append_evidence(connection, identifier, row, kind)
     transitions = 1
     if (
-        row["signal_type"] == "state_transition"
-        and (row["state"] or "").casefold() in IMMEDIATE_OPEN_STATES
+        (
+            row["signal_type"] == "state_transition"
+            and (row["state"] or "").casefold() in IMMEDIATE_OPEN_STATES
+        )
+        or (
+            row["entity_type"] == "event_signature"
+            and row["signal_type"] == "degradation"
+            and row["state"] == "detected"
+        )
     ):
         append_transition(
             connection,

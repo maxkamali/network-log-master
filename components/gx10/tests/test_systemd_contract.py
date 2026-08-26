@@ -169,7 +169,7 @@ class SystemdContractTests(unittest.TestCase):
             values['ExecStart'],
             [
                 '/usr/local/libexec/network-log-gx10/'
-                'run-managed-reasoning.py'
+                'run-managed-ai.py'
             ],
         )
         self.assertEqual(values['TimeoutStartSec'], ['3min'])

@@ -12750,3 +12750,18 @@ The hidden AI detection side channel is `DONE` and active. The completed
 numbered sequence remains closed through item 40 with no `NEXT` item. Learned
 coverage remains deliberately empty until real production evidence satisfies
 its automatic gate.
+
+### Post-publication cleanup and natural-cadence check
+
+GitHub `main` and the local checkpoint independently matched commit
+`2f6d2379d58d18f07ca63fb38d4f2fe90e11f3cc`; the committed public-history
+validator passed. The exact temporary GX10 staging directory was then removed.
+All six application timers/services remained active. One scheduled result-
+outbox start transiently reported SQLite `unable to open database file`; exact
+installed producer/runner hashes, service-user ownership and traversal, and a
+direct read-only open all passed. An immediate complete outbox retry passed as
+an exact no-op. The next natural timer cadence also passed both producers,
+created one ordinary 944-byte lifecycle update, and left unit
+`Result=success`. This establishes recovery on the normal schedule without
+changing schema, permissions, paths, or code to conceal the retained failure
+evidence.

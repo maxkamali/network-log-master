@@ -12931,3 +12931,14 @@ password file remains outside the repository and was neither read nor copied.
 Publish this documentation checkpoint to GitHub `main`, independently verify
 the remote commit and public repository gates, then append the publication
 verification without opening a new implementation item.
+
+### Post-publication verification
+
+Documentation commit `4ef115310f281270b8fbd54c8f5ade75684f858b` was
+published to GitHub `main`. An independent remote-head query returned that exact
+commit. The validator then passed again against the committed current tree,
+reachable history, local Markdown links, and ref topology; all nine validator
+tests passed, the working tree was clean, and the whitespace/error check passed.
+
+There is no numbered `NEXT` item. The repository and GitHub now contain the
+complete operator-facing overview and reconciled current documentation.

@@ -12942,3 +12942,50 @@ tests passed, the working tree was clean, and the whitespace/error check passed.
 
 There is no numbered `NEXT` item. The repository and GitHub now contain the
 complete operator-facing overview and reconciled current documentation.
+
+## 2026-08-26 15:13 PDT - Expanded public credential and identity audit passed
+
+### Status
+
+The operator requested an additional explicit assurance that the public
+repository contains no passwords, credentials, secret material, or private
+operational identity. This was a repository-only security audit; no production
+host, service, dashboard, database, account, schedule, model, or credential was
+read or changed.
+
+The current tree and all 250 reachable commits passed the existing private-key,
+provider-token, private-address, workstation-path, sensitive-artifact,
+Markdown-link, and Git-ref checks. A separate redacted audit also examined
+generic password/secret assignments, URL userinfo, Basic/Bearer authorization
+values, JWT-like tokens, non-documentation email addresses, and high-entropy
+mixed-character candidates. Assignment matches were runtime secret-file reads,
+function arguments, operator placeholders, or Vector secret references—not
+stored values. No credential material was found.
+
+Targeted current-tree and history checks also found none of the private
+collector/GX10 aliases, SSH username, server addresses, or device identities
+present in the operator-supplied access details and sample logs. No
+non-documentation email identity exists in repository file content. Git commit
+metadata contains only GitHub service/noreply identities and a generic local
+committer identity; public repository-owner/contributor metadata is not a
+production identity or credential.
+
+The permanent public validator was strengthened to reject:
+
+- `admin.txt`, password files, common local credential stores, private-key
+  basenames, environment-local variants, and password-database suffixes
+- literal password/secret/token assignments while retaining runtime references
+  and public placeholders
+- embedded URL credentials, literal authorization headers, and JWT-like values
+- email identities outside RFC-style documentation examples
+
+Sixteen validator tests pass, including seven new regression cases. The
+strengthened current-tree and all-history validation passes, as does the clean
+diff check. The operator-owned password file remains outside the repository; it
+was not read, printed, hashed, copied, or added to Git.
+
+### Next action
+
+Publish the strengthened security gate and this audit record to GitHub `main`,
+then independently verify the remote commit and rerun the committed all-history
+gate. No implementation item is opened.

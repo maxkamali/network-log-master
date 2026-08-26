@@ -59,13 +59,58 @@ class PublicRepositoryValidatorTests(unittest.TestCase):
 
     def test_sensitive_artifact_paths_are_refused(self):
         for path in (
+            'admin.txt',
+            '.netrc',
+            '.env.production',
             'operator-inputs.env',
+            'password.txt',
             'runtime.sqlite3',
             'private.key',
             'secrets/value.txt',
         ):
             with self.subTest(path=path):
                 self.assertTrue(VALIDATOR.sensitive_path(path))
+
+    def test_literal_credential_assignment_is_refused(self):
+        name = 'pass' + 'word'
+        synthetic = f'{name}=' + 'MixedCase123456789'
+        with self.assertRaisesRegex(ValueError, 'literal credential assignment'):
+            VALIDATOR.validate_text(Path('synthetic'), synthetic, 'synthetic')
+
+    def test_credential_placeholders_and_code_are_allowed(self):
+        name = 'pass' + 'word'
+        VALIDATOR.validate_text(
+            Path('synthetic'),
+            '\n'.join((f'{name}=${{OPERATOR_VALUE}}', f'{name}=read_secret_file()')),
+            'synthetic',
+        )
+
+    def test_embedded_url_credential_is_refused(self):
+        synthetic = 'https://' + 'operator:private-value@' + 'example.com/path'
+        with self.assertRaisesRegex(ValueError, 'embedded credentials'):
+            VALIDATOR.validate_text(Path('synthetic'), synthetic, 'synthetic')
+
+    def test_authorization_literal_is_refused(self):
+        synthetic = 'Author' + 'ization: Bearer ' + 'MixedCase123456789'
+        with self.assertRaisesRegex(ValueError, 'literal authorization'):
+            VALIDATOR.validate_text(Path('synthetic'), synthetic, 'synthetic')
+
+    def test_jwt_like_credential_is_refused(self):
+        synthetic = '.'.join(('eyJ' + 'a' * 12, 'b' * 12, 'c' * 12))
+        with self.assertRaisesRegex(ValueError, 'JWT-like'):
+            VALIDATOR.validate_text(Path('synthetic'), synthetic, 'synthetic')
+
+    def test_non_documentation_email_is_refused(self):
+        synthetic = 'operator' + '@' + 'private.invalid.example.org'
+        with self.assertRaisesRegex(ValueError, 'email identity'):
+            VALIDATOR.validate_text(Path('synthetic'), synthetic, 'synthetic')
+
+    def test_documentation_email_is_allowed(self):
+        VALIDATOR.validate_text(
+            Path('synthetic'),
+            'operator' + '@' + 'example.com',
+            'synthetic',
+        )
 
     def test_execution_authority_accepts_one_next_while_in_progress(self):
         self.execution_authority('1. `NEXT` — bounded work\n')

@@ -44,15 +44,47 @@ SECRET_PATTERNS = (
     re.compile(r'\b' + ('xox' + '[baprs]-') + r'[A-Za-z0-9-]{10,}\b'),
     re.compile(r'\b' + ('AIza' + '[A-Za-z0-9_-]{20,}') + r'\b'),
 )
+CREDENTIAL_ASSIGNMENT_RE = re.compile(
+    r'(?i)(?:^|[^A-Za-z0-9_])'
+    r'(?:pass' + 'word|passwd|passphrase|secret|api[_-]?key|access[_-]?token|'
+    r'auth[_-]?token|client[_-]?secret)'
+    r'[ \t]*[=:][ \t]*([^\s,;#]+)'
+)
+URL_USERINFO_RE = re.compile(
+    r'(?i)\b(?:https?|ssh|sftp)://[^/@\s]+:[^/@\s]+@'
+)
+AUTHORIZATION_LITERAL_RE = re.compile(
+    r'(?i)\b' + 'Authorization' +
+    r'\s*:\s*(?:Basic|Bearer)\s+[A-Za-z0-9._~+/=-]{8,}'
+)
+JWT_RE = re.compile(
+    r'\b' + 'eyJ' +
+    r'[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b'
+)
+EMAIL_RE = re.compile(
+    r'(?i)\b[A-Za-z0-9._%+-]+@([A-Za-z0-9.-]+\.[A-Za-z]{2,})\b'
+)
+ALLOWED_EMAIL_DOMAINS = {'example.com', 'example.org', 'example.net'}
 FORBIDDEN_BASENAMES = {
     '.env',
+    '.netrc',
+    '.npmrc',
+    '.pypirc',
     '.public-gate-local.txt',
+    'admin.txt',
+    'id_dsa',
+    'id_ecdsa',
+    'id_ed25519',
+    'id_rsa',
     'known_hosts',
     'operator-inputs.env',
+    'password.txt',
+    'passwd',
     'token.txt',
 }
 FORBIDDEN_SUFFIXES = {
     '.db',
+    '.kdbx',
     '.key',
     '.p12',
     '.pem',
@@ -93,6 +125,8 @@ def sensitive_path(path):
     pure = PurePosixPath(path)
     if pure.name.lower() in FORBIDDEN_BASENAMES:
         return True
+    if pure.name.lower().startswith('.env.'):
+        return True
     if pure.suffix.lower() in FORBIDDEN_SUFFIXES:
         return True
     return any(part.lower() in FORBIDDEN_DIRECTORIES for part in pure.parts)
@@ -105,6 +139,48 @@ def allowed_ipv4(value):
     return any(address in network for network in ALLOWED_NETWORKS)
 
 
+def safe_credential_assignment(value):
+    cleaned = value.strip().strip('"\'`')
+    lowered = cleaned.lower()
+    if len(cleaned) < 8:
+        return True
+    if (
+        cleaned.startswith(('$', '{', '<', '@', '/operator/', '/run/', '/etc/'))
+        or 'example' in lowered
+        or 'placeholder' in lowered
+        or 'redacted' in lowered
+        or 'replace_me' in lowered
+    ):
+        return True
+    if re.fullmatch(r'[A-Za-z_][A-Za-z0-9_.]*\(', cleaned):
+        return True
+    if re.fullmatch(r'(?i)SECRET\[[A-Za-z0-9_.-]+\]', cleaned):
+        return True
+    if re.fullmatch(r'[A-Za-z_][A-Za-z0-9_.]*(?:\([^)]*\))?', cleaned):
+        return (
+            '_' in cleaned
+            or '.' in cleaned
+            or '(' in cleaned
+            or lowered in {'password', 'passwd', 'passphrase', 'secret', 'token'}
+        )
+    return False
+
+
+def validate_extended_sensitive_text(text, label):
+    if URL_USERINFO_RE.search(text):
+        raise ValueError(f'{label}: URL contains embedded credentials')
+    if AUTHORIZATION_LITERAL_RE.search(text):
+        raise ValueError(f'{label}: literal authorization credential')
+    if JWT_RE.search(text):
+        raise ValueError(f'{label}: JWT-like credential')
+    for match in EMAIL_RE.finditer(text):
+        if match.group(1).lower() not in ALLOWED_EMAIL_DOMAINS:
+            raise ValueError(f'{label}: non-documentation email identity')
+    for match in CREDENTIAL_ASSIGNMENT_RE.finditer(text):
+        if not safe_credential_assignment(match.group(1)):
+            raise ValueError(f'{label}: literal credential assignment')
+
+
 def validate_text(path, text, label):
     if any(marker in text for marker in PRIVATE_PATH_MARKERS):
         raise ValueError(f'{label}: private workstation path')
@@ -112,6 +188,7 @@ def validate_text(path, text, label):
         raise ValueError(f'{label}: private key material')
     if any(pattern.search(text) for pattern in SECRET_PATTERNS):
         raise ValueError(f'{label}: token/access-key pattern')
+    validate_extended_sensitive_text(text, label)
     for match in IPV4_RE.finditer(text):
         if not allowed_ipv4(match.group(0)):
             raise ValueError(f'{label}: non-public IPv4 literal')
@@ -224,6 +301,25 @@ def validate_history_content():
     if secret_findings:
         commit, path, _ = secret_findings[0]
         raise ValueError(f'history secret/path finding: {commit[:12]}:{path}')
+
+    extended_pattern = '|'.join(
+        (
+            '(https?|ssh|sftp)://[^/@[:space:]]+:[^/@[:space:]]+@',
+            'Authorization[[:space:]]*:[[:space:]]*(Basic|Bearer)'
+            '[[:space:]]+[A-Za-z0-9._~+/=-]{8,}',
+            r'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}',
+            r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}',
+            '(^|[^A-Za-z0-9_])('
+            + 'pass' + 'word|passwd|passphrase|secret|api[_-]?key|'
+            'access[_-]?token|auth[_-]?token|client[_-]?secret)'
+            '[[:space:]]*[=:][[:space:]]*[^[:space:]]{3,}',
+        )
+    )
+    for commit, path, line in history_grep(extended_pattern):
+        try:
+            validate_extended_sensitive_text(line, f'{commit[:12]}:{path}')
+        except ValueError as exc:
+            raise ValueError(f'history sensitive-content finding: {exc}') from exc
 
     ipv4_findings = history_grep(HISTORY_IPV4_PATTERN)
     for commit, path, line in ipv4_findings:

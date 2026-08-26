@@ -41,6 +41,15 @@ Run the repository-wide current-tree/history/link/ref gate from repository root:
 
     scripts/validate-public-repository.py
 
+The gate rejects sensitive filenames and directories, private keys, common
+provider-token formats, literal credential assignments, embedded URL
+credentials, literal Basic/Bearer authorization values, JWT-like values,
+non-documentation email identities, private workstation paths, and every IPv4
+literal outside loopback or the RFC documentation ranges. These checks apply to
+both the current tree and all reachable Git history. Runtime credential
+references and operator-supplied placeholders are allowed; literal values are
+not.
+
 Its synthetic tests are:
 
     PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p 'test_*.py'
@@ -50,6 +59,10 @@ Do not weaken a deny list merely to make a gate pass. Fix the content instead.
 ## Operational separation
 
 Production secrets remain external to Git. The collector and GX10 use independent least-privilege credentials for input and output paths. Public documentation describes the trust model without publishing live secrets or allowlists.
+
+Public Git hosting necessarily exposes repository-owner and contributor commit
+metadata. That public Git identity is distinct from prohibited production host,
+device, customer, account, network, and credential identity.
 
 ## Security reports
 

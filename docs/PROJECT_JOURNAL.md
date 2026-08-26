@@ -12511,3 +12511,25 @@ Focused dashboard tests passed 19 of 19, the generated capture is exactly reprod
 ### Next action
 
 Publish and independently verify this candidate checkpoint. Then create a new root-only online Grafana database backup, prove the live six-dashboard main inventory and two-dashboard NOC inventory still match their expected predecessors, dry-run and replace only the enhanced dashboard in each organization with the correct organization-local Explore link, validate panel and sampled drilldown queries as the NOC Viewer, reconcile closure documentation, and publish item 39.
+
+## 2026-08-25 19:32 PDT - Item 39 incident-log drilldowns passed protected production replacement
+
+### Status
+
+Item 39 is `DONE`. There is no remaining numbered `NEXT` item.
+
+Candidate commit `85ffdf591573662f59f9f824215665a56ca6506c` was published first and independently matched GitHub `main`. A new root-only online Grafana database backup passed `PRAGMA quick_check`, retained mode `0600`, and was supplemented with the exact pre-change NOC enhanced resource.
+
+The main-organization predecessor set matched all six published captures exactly. Grafana `dryRun=All` classified only `ai-incident-analysis-enhanced.json` as a replacement and left the other five resources exact. The protected live call replaced only that resource, and immediate reread proved all six main specifications exact.
+
+The NOC copy contained eleven expected server-shape differences from the portable capture: a server-owned annotation shape, absent portable preferences, and selected-state keys on the severity options. The organization-2 updater stopped before mutation, captured the exact resource in the rollback boundary, and then preserved those fields explicitly. Its corrected dry run left the predecessor exact; the protected call changed only the enhanced resource, rewrote Explore links from organization 1 to organization 2, and reread the full adapted specification exact. The existing two-dashboard/two-datasource/one-Viewer organization membership and one-playlist native-resource inventory remain unchanged.
+
+All six post-change enhanced panel queries passed in the main organization and again while the administrator was temporarily and reversibly scoped to organization 2. At final validation Active Events had no current row, so that panel's sampled drilldown correctly skipped; the Interface Flaps and Resolved Events samples returned 12 and one matching log rows. Earlier preflight, while Active Events contained a row, its exact rendered drilldown returned one matching row; preflight flap/resolved samples returned 839 and 22 rows. The administrator's original organization context was restored. Only aggregate frame/row counts were emitted.
+
+The cached transient NOC password available to this execution environment returned unauthorized and was neither printed nor reset. Item-37 Viewer membership, resource permissions, Explore compatibility, dashboard copies, and datasource copies were not modified. Organization-2 resource and query validation therefore used the administrator's temporary organization context; operator password rotation, if desired, remains a separate account-maintenance action rather than an undocumented side effect of this dashboard change.
+
+Grafana SQLite integrity remained `ok`. Grafana, ClickHouse, Vector, and the authoritative `ai-results-gate.timer` are active; the gate service reports success and zero restarts. The online backup is root-owned mode `0600`. No original dashboard, NOC playlist, home preference, datasource, account permission, credential, ClickHouse data/schema, Vector configuration, GX10 artifact, transport file, incident state, schedule, or model behavior changed.
+
+### Next action
+
+None. Publish and independently verify the closure documentation, remove only the exact temporary item-39 validation stages and local helpers, retain the root-only rollback directory, and continue normal NOC use. If the operator cannot authenticate to the NOC account with their retained password, perform a separately acknowledged password rotation without storing it in the repository.

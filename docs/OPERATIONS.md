@@ -158,6 +158,8 @@ The working deployment also has a separate NOC Viewer organization containing on
 
 The same organization has a single `NOC Rotation` playlist that shows `NOC View` and then `AI Incident Analysis - Enhanced` for one minute each. Start it with the shared auto-fit link or choose an auto-fit mode in the playlist dialog. The playlist is not the NOC login home; Grafana home preferences remain bound to `NOC View`. The Viewer may start the playlist but cannot create or modify playlists.
 
+In `AI Incident Analysis - Enhanced`, click any cell in Active Events, Interface Flaps, or Resolved Events and choose `View matching logs`. Grafana opens Explore in a new tab against the organization-local read-only logs datasource. The link uses the row's deterministic incident ID to recover device, entity, protocol/event family, and incident timestamps; it searches from 15 minutes before first detection through 15 minutes after last activity or resolution and returns at most 1,000 newest-first rows. This incident-owned time window is deliberate, so a persistent active event remains investigable even when the dashboard time picker is narrower.
+
 Current dashboard reconstruction uses the supported Grafana 13 `dashboard.grafana.app/v2` API. Rebuild tooling must not write directly into Grafana's SQLite database.
 
 The clean-machine runtime installer restores the six captured dashboard resources only after HTTPS health and both ClickHouse datasources are verified, then runs the independent dashboard verifier and the redacted thirteen-query original/enhanced verifier. Runtime restore is fail-closed for unexpected divergent existing dashboards: automatic replacement is not enabled.

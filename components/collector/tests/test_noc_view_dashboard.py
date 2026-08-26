@@ -46,6 +46,14 @@ class NocViewDashboardTests(unittest.TestCase):
                 r'(?i)\b(INSERT|UPDATE|DELETE|ALTER|DROP|TRUNCATE)\b',
             )
 
+    def test_unlinked_panels_use_grafana_canonical_field_config(self):
+        for panel_name in set(self.elements) - set(LINKED_PANELS):
+            defaults = (
+                self.elements[panel_name]['spec']['vizConfig']['spec']
+                ['fieldConfig']['defaults']
+            )
+            self.assertNotIn('links', defaults)
+
 
 if __name__ == '__main__':
     unittest.main()

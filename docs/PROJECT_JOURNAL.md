@@ -12557,3 +12557,9 @@ Focused compact/one-click tests pass 11 of 11. The full collector suite passes 5
 ### Next action
 
 Publish and independently verify this candidate. Then create a new root-only online Grafana database backup, confirm the six main captures and two isolated NOC predecessors, execute all affected queries read-only, dry-run and replace only `NOC View` plus `AI Incident Analysis - Enhanced` in both organizations with organization-correct links and preserved NOC server-owned fields, reread exact resources, validate compact/one-click link contracts, and close item 40 only after Grafana/data-path health remains green.
+
+### Pre-deployment dry-run correction
+
+Published candidate `6bbdfb335e75bccb4551f948fd193613db60b287` matched GitHub before the protected live phase began. A root-only online Grafana database backup passed `PRAGMA quick_check`. The first organization-1 `dryRun=All` accepted the enhanced resource exactly and left persistence unchanged, but its NOC View response canonically omitted four empty field-default `links` arrays on panels that have no data link. The strict verifier stopped before mutation. No production resource changed.
+
+The corrected capture removes only those four semantically empty placeholders and adds a regression assertion for the Grafana-canonical shape. The four populated links retain `oneClick=true`, compact Explore state, and their unchanged SQL/time/datasource contracts. Republish and independently verify this corrected candidate before repeating the dry run; do not deploy commit `6bbdfb3`.

@@ -168,6 +168,19 @@ For reconstruction after Grafana and the main organization are healthy:
 
 Account passwords and datasource credentials are operator-owned private inputs and must not enter this public repository.
 
+## NOC rotation playlist
+
+The working NOC organization contains one playlist titled `NOC Rotation`. It uses stable dashboard UIDs rather than deprecated internal dashboard IDs and cycles in this exact order:
+
+1. `NOC View`
+2. `AI Incident Analysis - Enhanced`
+
+The stored playlist interval is one minute. Auto-fit panels is a playback mode carried by the start route (`autofitpanels=true`), not part of the playlist resource specification. The NOC Viewer can read and start the playlist through that route; an attempted playlist creation is denied. The main organization contains no playlist.
+
+`NOC View` remains the NOC account's login home. Grafana user/organization home preferences accept a dashboard UID, not a playlist UID. For automatic wallboard behavior, open or bookmark the playlist's shared auto-fit start link after login; select kiosk mode as well only when menus and navigation should be hidden.
+
+Playlist dashboard copies are separate organization resources. If either approved NOC dashboard is deliberately changed later, verify the NOC copy before continuing to use the rotation.
+
 ## AI presentation
 
 The live `AI Incident Analysis` dashboard presents the stabilized item-30 result contract from `observability.ai_updates`. The separate editable `AI Incident Analysis - Enhanced` resource preserves that original as an immediate fallback and now presents deterministic lifecycle state from `observability.incident_updates` as the operational NOC queue.
@@ -211,6 +224,8 @@ Item-35 production validation passed pre/post execution of all thirteen live dat
 Item-36 production validation passed the ordered collector-first deployment, exact six-resource reread, all thirteen original/enhanced queries, enhanced-only replacement, recurrence parity, and unchanged existing resolved protocol history. Active Events maps deterministic `RECOVERING` to `MONITORING` only for BGP/OSPF/OSPFv3 and displays distinct issue episodes as lifecycle `recurrence_count + 1`; the additive default-zero collector column keeps immutable version-1 history queryable.
 
 Item-37 production validation passed the isolated NOC Viewer boundary, two-dashboard/two-datasource inventory, home/star preferences, non-scoped dashboard denial, persistent-write denial, all fourteen panel queries executed as the NOC Viewer, exact unchanged verification of all six main-organization dashboards, and healthy Grafana/data-path services.
+
+Item-38 production validation passed one-minute playlist creation in the isolated NOC namespace, exact stable-UID order, Viewer read/start access, Viewer create denial, the auto-fit play route, zero main-organization playlists, exact unchanged verification of all six main dashboards, database integrity, and healthy Grafana/data-path services.
 
 ## Change discipline
 

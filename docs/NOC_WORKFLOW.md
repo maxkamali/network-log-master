@@ -22,6 +22,8 @@ The working Grafana deployment exposes the operational queue through a dedicated
 
 Explore is available to the Viewer for read-only investigation. Grafana implements this compatibility by permitting temporary panel editing, but persistence remains denied and the available datasource inventory is isolated to the two read-only copies. Grafana OSS does not support an exact per-user navigation allowlist, so standard Viewer-accessible sections may still be present even though administration and unrelated organization resources are not.
 
+The NOC organization also provides a `NOC Rotation` playlist. It displays `NOC View` followed by `AI Incident Analysis - Enhanced`, one minute per dashboard. Use its auto-fit start mode for the rotating wallboard. `NOC View` remains the login home, and the Viewer cannot create or modify playlists.
+
 ## State authority and movement
 
 GX10 owns deterministic lifecycle state in its local `incidents` table. The dashboard is a projection, not an editable ticket database.

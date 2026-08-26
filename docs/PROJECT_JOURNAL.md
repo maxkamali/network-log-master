@@ -12458,3 +12458,32 @@ None. Publish and independently verify this closure/documentation checkpoint, re
 Closure/documentation commit `4413a63bca780da35c2d4fd6581a1de7ec4c3e0c` was published to GitHub, and an independent `ls-remote` comparison matched local and remote `main` exactly.
 
 The exact collector-side NOC staging directories/scripts and all local no-disk credential/validation helpers are absent. The root-only rollback directory remains retained with only its mode-`0600` Grafana configuration and online database backup. Post-cleanup Grafana HTTPS/database health passed; Grafana, ClickHouse, Vector, and the collector result-gate timer are active; the relevant service results remain successful with zero restarts. Item 37 is `DONE`, the end-to-end target is complete through item 37, and there is no remaining `NEXT` item.
+
+## 2026-08-25 18:58 PDT - Item 38 one-minute NOC auto-fit playlist passed production validation
+
+### Status
+
+Item 38 is `DONE`. There is no remaining numbered `NEXT` item.
+
+The operator requested a playlist rotating the two approved NOC dashboards every minute with panels auto-fitted. Before mutation, a new root-only online Grafana database backup passed `PRAGMA quick_check` and was retained as the exact rollback boundary.
+
+The first API attempt created the playlist in Grafana's default namespace because the new playlist API did not infer the administrator's active organization. The NOC Viewer correctly received forbidden for that main-namespace resource. The transactional creator immediately deleted the misplaced playlist and restored the administrator's original organization context; aggregate verification proved zero playlist resources remained in the NOC organization before retry.
+
+The corrected call explicitly addressed the isolated NOC namespace and created one `NOC Rotation` resource with this exact public-safe contract:
+
+```text
+title=NOC Rotation
+interval=1m
+item_1=dashboard_by_uid:NOC View
+item_2=dashboard_by_uid:AI Incident Analysis - Enhanced
+```
+
+The NOC Viewer reread the exact resource, retained access to both referenced dashboards, and reached the auto-fit play route successfully. A separate Viewer playlist-create probe returned HTTP 403 and created no resource. The NOC organization contains exactly one playlist while the main organization contains zero. `NOC View` remains the user home because Grafana home preferences accept dashboard UIDs rather than playlist UIDs; auto-fit is supplied by the shared start route rather than stored in the playlist specification.
+
+The repository's exact verifier reread all six main-organization dashboard specifications and every resource remained exact. Grafana SQLite integrity stayed `ok`; Grafana, ClickHouse, Vector, and the collector result-gate timer remained active; the relevant services retained successful results and zero restarts. No dashboard specification, datasource, account permission, ClickHouse data/schema, Vector configuration, GX10 artifact, transport, incident state, or model behavior changed.
+
+Administrator and NOC passwords were supplied only through no-echo processes; the dashboard verifier used a process-memory file descriptor. No credential, connection value, playlist internal identifier, or private data is committed.
+
+### Next action
+
+None. Publish and independently verify this closure/documentation checkpoint, remove only the exact playlist validation stages/helpers, retain the root-only database backup, and continue normal NOC evaluation using the playlist's auto-fit start mode.

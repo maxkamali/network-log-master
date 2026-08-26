@@ -16,6 +16,8 @@ Item 36 is complete. The additive default-zero `recurrence_count` column and str
 
 Item 37 is complete. The working deployment has a separate Grafana NOC organization with one dedicated Viewer, only `NOC View` and `AI Incident Analysis - Enhanced`, and only the two required datasource copies using the existing read-only ClickHouse identity. Home/star preferences, explicit View access, non-scoped dashboard denial, persistent-write denial, Explore compatibility, and all fourteen NOC panel queries passed. All six main-organization dashboard specifications remain exact and unchanged. A root-only online Grafana database backup and original configuration copy protect rollback. Grafana OSS cannot enforce an exact per-user left-navigation allowlist; this limitation is explicit rather than represented as implemented.
 
+Item 38 is complete. The isolated NOC organization has one `NOC Rotation` playlist using stable UIDs for `NOC View` and `AI Incident Analysis - Enhanced`, in that order, with a one-minute interval. Viewer read/start access, create denial, and the auto-fit play route passed. The main organization has no playlist, `NOC View` remains the login home, all six main dashboard specifications reread exact, and a separate root-only online Grafana database backup protects rollback.
+
 After each completed validated collector sub-section, append and push a `docs/PROJECT_JOURNAL.md` entry before materially proceeding into the next sub-section.
 
 ## Rebuild objective

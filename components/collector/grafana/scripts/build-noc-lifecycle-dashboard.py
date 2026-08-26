@@ -190,6 +190,7 @@ LIMIT 1000'''
     panes = {
         'incident': {
             'datasource': LOGS_DATASOURCE_UID,
+            'compact': True,
             'queries': [{
                 'refId': 'A',
                 'datasource': {

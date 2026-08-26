@@ -171,6 +171,7 @@ class EnhancedAiIncidentDashboardTests(unittest.TestCase):
             self.assertEqual(set(panes), {'incident'})
             pane = panes['incident']
             self.assertEqual(pane['datasource'], LOGS_DATASOURCE_UID)
+            self.assertIs(pane['compact'], True)
             self.assertEqual(len(pane['queries']), 1)
             query = pane['queries'][0]
             self.assertEqual(query['datasource']['uid'], LOGS_DATASOURCE_UID)

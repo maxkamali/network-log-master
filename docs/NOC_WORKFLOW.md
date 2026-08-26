@@ -16,7 +16,9 @@ The enhanced dashboard has three mutually understandable operational windows:
 
 Each window has a server-side text search across device, entity, event family, protocol, title, and incident ID. Active search also covers the displayed AI/deterministic detail. Active and Resolved have a server-side severity selector. The tables expose Device and Incident ID; they do not contain an assigned-operator field or an AI recommendation field.
 
-Every cell in all three tables provides a `View matching logs` link. It opens a new Explore tab and scopes the read-only lookup from the selected incident ID rather than from display text: authoritative device plus entity, protocol, or event family must match inside the incident's first-seen through last-seen/resolution window, with a 15-minute context boundary. The result is newest first and capped at 1,000 rows. This keeps an old but still-active incident investigable even when the dashboard time picker is narrower than the incident.
+Every cell in all three tables provides a `View matching logs` link. It opens a new Explore tab with the SQL editor initially collapsed and scopes the read-only lookup from the selected incident ID rather than from display text: authoritative device plus entity, protocol, or event family must match inside the incident's first-seen through last-seen/resolution window, with a 15-minute context boundary. The result is newest first and capped at 1,000 rows. This keeps an old but still-active incident investigable even when the dashboard time picker is narrower than the incident.
+
+The four linked `NOC View` summaries—Severity Breakdown, Top Devices, OSPF Events, and BGP Events—use their sole data link as a one-click target and also open Explore with the SQL editor initially collapsed. The drilldown remains a read-only view over the selected dashboard time range.
 
 ## Access boundary
 

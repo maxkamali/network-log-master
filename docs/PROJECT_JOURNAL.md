@@ -12541,3 +12541,19 @@ Closure/documentation commit `5a00e95023650de299d595551a571f3fce65374a` was publ
 The exact collector-side item-39 stage, user-side transfer files, local extracted predecessor, and no-disk credential/validation helpers are absent. The root-only rollback directory remains retained with its mode-`0600` online Grafana database backup and exact NOC enhanced-resource predecessor; the backup still passes `PRAGMA quick_check`.
 
 Post-cleanup Grafana, ClickHouse, Vector, and `ai-results-gate.timer` are active. Grafana, ClickHouse, Vector, and the gate service report success with zero restarts. The repository worktree is clean, item 39 is `DONE`, the end-to-end target is complete through item 39, and there is no remaining `NEXT` item.
+
+## 2026-08-25 19:53 PDT - Item 40 compact and one-click drilldown candidate validated
+
+### Status
+
+Item 40 is the single `NEXT` item. No production dashboard, playlist, preference, datasource, service, schema, data, transport, incident state, credential, account permission, or model setting changed during candidate construction.
+
+The enhanced-dashboard generator now sets the Grafana Explore pane `compact` state for every incident-scoped link. The three table links retain their exact organization-1 capture, incident-owned SQL, read-only logs datasource, 15-minute surrounding context, and 1,000-row cap; only initial editor visibility changes.
+
+The four existing linked panels in `NOC View`—Severity Breakdown, Top Devices by Event Count, OSPF Events, and BGP Events—now carry one `oneClick` link each and request compact Explore panes. Their SQL, selected dashboard time bounds, datasource identity, target-tab behavior, and row limits are unchanged. Exact Grafana 13.1.1 source and current Grafana documentation confirm the `compact` pane state and `oneClick` data-link contract.
+
+Focused compact/one-click tests pass 11 of 11. The full collector suite passes 59 tests under Python 3.12; the macOS system Python 3.9 cannot import an existing slots-enabled dataclass and was not used as evidence. Nine public-validator tests and current-tree/history/link/ref-topology gates pass. The generated enhanced dashboard reproduces exactly from its builder, all changed JSON parses, and `git diff --check` passes.
+
+### Next action
+
+Publish and independently verify this candidate. Then create a new root-only online Grafana database backup, confirm the six main captures and two isolated NOC predecessors, execute all affected queries read-only, dry-run and replace only `NOC View` plus `AI Incident Analysis - Enhanced` in both organizations with organization-correct links and preserved NOC server-owned fields, reread exact resources, validate compact/one-click link contracts, and close item 40 only after Grafana/data-path health remains green.

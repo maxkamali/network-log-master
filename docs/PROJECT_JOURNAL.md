@@ -13237,3 +13237,25 @@ Run the collector/GX10/package/public-repository regression gates, publish this
 item-42 closure checkpoint, independently verify GitHub `main`, and rerun the
 committed all-history public-safety gate. No credential, private connection
 value, event content, or environment identity is recorded here.
+
+### Post-publication verification
+
+Closure checkpoint `c81be182febf4fd69f7b9a4a7cd073ecd7364f53` was
+published to GitHub `main`, and an independent remote-head query returned that
+exact commit. The committed current tree, all reachable history, Markdown
+links, and ref topology passed the public-safety gate again.
+
+A fresh archive of that exact published commit was transferred to GX10 under
+root-owned non-group/world-writable staging. All 223 tests passed from the
+stage, followed by the active outbox verifier and the configured-active sender
+verifier in the host's documented legacy-runtime mode. The live outbox had
+zero ready result files at that verification point, the sender was inactive
+between cycles, its timer remained enabled/active, and neither verifier changed
+production state.
+
+Only the exact temporary local/GX10 release stages, diagnostic verifier copy,
+and protected-copy rehearsal directory created during item 42 were removed.
+They are not recoverable and held no authoritative state. Both root-protected
+production rollback backups, the failed full-copy evidence retained under its
+backup, all delivered/accepted records, and every live application artifact
+remain intact.

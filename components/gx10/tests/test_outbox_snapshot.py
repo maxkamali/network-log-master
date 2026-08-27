@@ -57,6 +57,13 @@ class OutboxSnapshotTests(unittest.TestCase):
         connection.executescript(
             '''
             CREATE TABLE incidents (incident_id TEXT PRIMARY KEY);
+            CREATE TABLE incident_transitions (
+              transition_id TEXT PRIMARY KEY,
+              incident_id TEXT NOT NULL,
+              from_status TEXT,
+              to_status TEXT NOT NULL,
+              reason TEXT NOT NULL
+            );
             CREATE TABLE reasoning_packets (packet_id TEXT PRIMARY KEY);
             CREATE TABLE reasoning_model_versions (
               model_version TEXT PRIMARY KEY
@@ -69,15 +76,20 @@ class OutboxSnapshotTests(unittest.TestCase):
               status TEXT NOT NULL
             );
             CREATE TABLE reasoning_results (run_id TEXT PRIMARY KEY);
+            CREATE TABLE unrelated_bulk (payload BLOB NOT NULL);
             INSERT INTO incidents VALUES ('incident-1');
+            INSERT INTO incident_transitions VALUES (
+              'transition-1','incident-1',NULL,'OPEN','confirmed'
+            );
             INSERT INTO reasoning_runs VALUES ('run-1','SUCCEEDED');
             INSERT INTO reasoning_results VALUES ('run-1');
+            INSERT INTO unrelated_bulk VALUES (zeroblob(1048576));
             '''
         )
         connection.commit()
         return connection
 
-    def test_online_backup_captures_consistent_active_wal_state(self):
+    def test_transactional_projection_captures_consistent_active_wal_state(self):
         writer = self.create_source(wal=True)
         self.addCleanup(writer.close)
         writer.execute("INSERT INTO incidents VALUES ('incident-2')")
@@ -101,6 +113,14 @@ class OutboxSnapshotTests(unittest.TestCase):
                 connection.execute('SELECT COUNT(*) FROM incidents').fetchone()[0],
                 2,
             )
+            tables = {
+                row[0]
+                for row in connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                )
+            }
+            self.assertNotIn('unrelated_bulk', tables)
+            self.assertTrue(self.producer.REQUIRED_TABLES <= tables)
         finally:
             connection.close()
         self.assertEqual(

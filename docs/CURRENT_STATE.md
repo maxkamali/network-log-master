@@ -51,11 +51,14 @@ Read-only diagnosis found repeated `unable to open database file` failures only
 in the hardened outbox reader while the live SQLite database remained healthy
 in WAL mode. The candidate preserves the existing outbox's narrow write scope,
 adds a separate no-network exact-hash snapshot service with only the WAL access
-needed for SQLite online backup, atomically publishes a rollback-journal copy,
+needed for one consistent read transaction, copies only the ten tables required
+by result/lifecycle projection, atomically publishes a rollback-journal copy,
 and makes both existing outbox producers depend on a successful fresh snapshot.
-Local and exact GX10-stage suites pass 221 tests; the live predecessor preflight
-and a protected-copy repeated snapshot/integrity/source-preservation gate pass.
-No installed production file or schedule has changed at this checkpoint.
+The original full-copy candidate safely rolled back after its activation gate
+exposed excessive 2.8-GB-per-cycle I/O and a timer-start race. The selective
+candidate passes 221 local/exact-stage tests, exact predecessor preflight, and
+repeated protected-copy producer/integrity/source-preservation gates. Production
+currently remains on the exact restored predecessor pending v2 publication.
 
 Post-closure hidden AI detection side channel: `DONE`. GX10 now batches deterministic signatures for uncovered severity 0–4 events plus novel/repeated severity-5 notices, asks the pinned local `gemma4:latest` model for one strict incident/ignore/insufficient decision per signature, and creates ordinary `event_signature` incidents only from validated positive decisions. Model failure retains a pending batch and never creates an incident. Positive incidents use the existing lifecycle, outbox, collector table, dashboard windows, search, and drilldown; no dashboard resource or query changed. Automatic learned coverage is limited to severity 0–3 and requires three consistent confidence-70+ decisions spanning at least 30 minutes with no contradictory decision. Production activated under an online protected SQLite backup after 215 tests, an exact staged-server pass, one safe length-limited shadow failure, and one 24-decision shadow success. Initial active evidence contains 33 incident and 15 ignore decisions, 35 ordinary lifecycle incidents, zero active learned rules, clean SQLite integrity, healthy GX10 schedules, and collector acceptance of the 45-record lifecycle batch.
 

@@ -12,11 +12,13 @@ Item 42 preserves those semantics while hardening how the producer obtains a
 readable point-in-time view. The working database uses WAL mode; opening it
 from a `ProtectSystem=strict` read-only sandbox can intermittently fail when
 SQLite needs shared-memory sidecar access. A separate no-network snapshot
-oneshot therefore runs first, uses SQLite's online-backup API, validates the
-copy, converts only the copy to rollback-journal mode, and atomically publishes
-it in a dedicated service-owned directory. Both existing producers read that
-stable copy. Snapshot failure prevents outbox execution and never replaces the
-last valid copy.
+oneshot therefore runs first, holds one consistent source read transaction,
+validates source integrity, copies only the ten small tables required by the
+two producers, validates the projection, and atomically publishes it in a
+dedicated service-owned directory. The projection uses rollback-journal mode,
+so both existing producers can read it inside their unchanged sandbox.
+Snapshot failure prevents outbox execution and never replaces the last valid
+copy.
 
 Every successful run maps to exactly one canonical JSON record and one newline-terminated JSONL file. The filename is versioned and derived from the SHA-256 of the run ID rather than exposing the run ID in the filesystem name. A filename collision fails closed. `ready` and `delivered` are protected sibling directories under one outbox root and one shared lock. Each expected file may be present in at most one state. An exact delivered file suppresses ready-file recreation; duplicate or divergent state fails closed.
 
@@ -71,11 +73,24 @@ The local-producer milestone is complete. The collector-side durable acceptance 
 
 ## Item-42 stable-snapshot candidate
 
-The reliability candidate adds no record, schema, transport, model, or
+The reliability candidate adds no record, source schema, transport, model, or
 dashboard behavior. Its local and exact GX10-stage suites pass 221 tests. A
 read-only live preflight proves the installed predecessor matches its captured
-service hash and exact repository artifacts. Two generations from a protected
-online database copy pass with unchanged source bytes, `quick_check=ok`, and
-published `journal_mode=delete`. Production installation and natural-cadence
-acceptance remain pending until the candidate checkpoint is published and
-independently verified.
+service hash and exact repository artifacts.
+
+The first published candidate used a full SQLite online backup. Its explicit
+cycle succeeded, but copied 2,817,204,224 bytes in 51 seconds. Enabling the
+long-boot timer immediately queued another cycle; the upgrade verifier refused
+the concurrent transition and automatically restored the exact predecessor.
+The source retained `quick_check=ok`, the old database binding and enabled timer
+were restored, and the interrupted candidate state was quarantined under its
+root-only backup.
+
+The corrected candidate copies only the ten projection tables. On the same
+protected 2,815,123,456-byte source, it produced an 8,572,928-byte snapshot in
+two seconds. Both existing producers passed against that copy: 652 result files
+and 15 lifecycle batches for 1,473 incidents on the first isolated pass, then
+exact zero-write reuse on repeat. The source hash stayed unchanged,
+`quick_check=ok`, and `journal_mode=delete`. The guarded upgrader now waits for
+the immediate post-enable timer cycle to finish successfully before acceptance.
+Production v2 activation and 15 later natural cadences remain pending.

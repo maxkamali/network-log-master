@@ -12,12 +12,19 @@ import time
 
 REQUIRED_TABLES = {
     'incidents',
+    'incident_transitions',
     'reasoning_packets',
     'reasoning_model_versions',
     'reasoning_prompt_versions',
     'reasoning_runs',
     'reasoning_results',
 }
+OPTIONAL_TABLES = {
+    'learned_detection_rules',
+    'triage_decisions',
+    'triage_incident_summaries',
+}
+PROJECTION_TABLES = tuple(sorted(REQUIRED_TABLES | OPTIONAL_TABLES))
 TRANSIENT_ERRORS = (
     'database is busy',
     'database is locked',
@@ -112,6 +119,42 @@ def remove_temporary_files(temporary):
             pass
 
 
+def quote_identifier(value):
+    return '"' + str(value).replace('"', '""') + '"'
+
+
+def copy_table(source, destination, table):
+    columns = [
+        row[1]
+        for row in source.execute(
+            f'PRAGMA table_info({quote_identifier(table)})'
+        )
+    ]
+    if not columns:
+        raise SnapshotError('snapshot database schema differs')
+    quoted_columns = ','.join(quote_identifier(column) for column in columns)
+    destination.execute(
+        f'CREATE TABLE {quote_identifier(table)} '
+        f'({quoted_columns})'
+    )
+    placeholders = ','.join('?' for _ in columns)
+    select = source.execute(
+        f'SELECT {quoted_columns} FROM {quote_identifier(table)}'
+    )
+    total = 0
+    while True:
+        rows = select.fetchmany(1000)
+        if not rows:
+            break
+        destination.executemany(
+            f'INSERT INTO {quote_identifier(table)} '
+            f'({quoted_columns}) VALUES ({placeholders})',
+            rows,
+        )
+        total += len(rows)
+    return total
+
+
 def snapshot_once(source, temporary):
     source_uri = f'{Path(source).as_uri()}?mode=ro'
     source_connection = sqlite3.connect(
@@ -122,11 +165,29 @@ def snapshot_once(source, temporary):
     destination_connection = sqlite3.connect(temporary, timeout=5)
     try:
         source_connection.execute('PRAGMA query_only=ON')
-        source_connection.backup(
-            destination_connection,
-            pages=1024,
-            sleep=0.05,
-        )
+        source_connection.execute('BEGIN')
+        if source_connection.execute('PRAGMA quick_check').fetchone()[0] != 'ok':
+            raise SnapshotError('snapshot source quick_check failed')
+        if source_connection.execute(
+            'PRAGMA foreign_key_check'
+        ).fetchone() is not None:
+            raise SnapshotError('snapshot source foreign_key_check failed')
+        source_tables = {
+            row[0]
+            for row in source_connection.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )
+        }
+        if not REQUIRED_TABLES <= source_tables:
+            raise SnapshotError('snapshot source schema differs')
+        optional = OPTIONAL_TABLES & source_tables
+        if optional and optional != OPTIONAL_TABLES:
+            raise SnapshotError('snapshot optional schema differs')
+        destination_connection.execute('BEGIN IMMEDIATE')
+        for table in PROJECTION_TABLES:
+            if table in source_tables:
+                copy_table(source_connection, destination_connection, table)
+        destination_connection.commit()
         journal_mode = destination_connection.execute(
             'PRAGMA journal_mode=DELETE'
         ).fetchone()[0]

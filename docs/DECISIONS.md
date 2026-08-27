@@ -627,3 +627,39 @@ Consequence:
 - production acceptance requires a protected predecessor, explicit first run,
   at least 15 natural error-free cadences, conservation/catch-up verification,
   and sanitized publication evidence
+
+## ADR-030 - Snapshot only the outbox projection tables
+
+**Status:** Accepted; supersedes ADR-029's full-database-copy mechanism
+
+The stable outbox snapshot contains only the ten tables read by the result and
+deterministic-lifecycle producers. It is built inside one source read
+transaction rather than copying the full working database.
+
+Why:
+
+- the full-backup candidate correctly solved WAL readability but copied roughly
+  2.8 GB and took 51 seconds on its first production cycle
+- repeating that I/O on the outbox cadence is disproportionate to roughly
+  8.6 MB of actual projection state
+- the two unchanged producers have a closed, testable table dependency set:
+  incidents, transitions, five reasoning tables, and three optional triage
+  tables that must be present as a complete group
+- a single WAL read transaction gives those tables one consistent source view
+  without copying raw observations or unrelated application state
+
+Consequence:
+
+- source `quick_check`, foreign-key integrity, required-table presence, and the
+  optional all-or-none triage group are verified before copying
+- every source column and value from the selected tables is copied into a new
+  private rollback-journal SQLite projection; no source SQL text is reused as
+  destination DDL and no unselected table is copied
+- the destination independently passes integrity, required-table, and
+  run/result invariant checks before atomic replacement
+- the existing result and lifecycle producers remain byte-exact and validate
+  their normal contracts against the projection
+- protected-copy evidence reduces 2,815,123,456 source bytes to 8,572,928 bytes
+  in two seconds while reproducing 652 results and 1,473 incidents
+- the guarded upgrader must wait for the long-boot timer's immediate first
+  scheduled cycle rather than assuming enablement is quiescent

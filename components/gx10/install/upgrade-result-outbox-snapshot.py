@@ -144,6 +144,30 @@ def wait_settled(unit, timeout=120):
     raise UpgradeError('result outbox service did not settle')
 
 
+def wait_new_successful_cycle(previous_invocation, timeout=360):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        outbox_state = systemctl_value(SERVICE, 'ActiveState')
+        snapshot_state = systemctl_value(SNAPSHOT_SERVICE, 'ActiveState')
+        if outbox_state == 'failed' or snapshot_state == 'failed':
+            raise UpgradeError('natural result outbox cycle failed')
+        invocation = systemctl_value(SERVICE, 'InvocationID')
+        if (
+            invocation
+            and invocation != previous_invocation
+            and outbox_state == 'inactive'
+            and snapshot_state == 'inactive'
+        ):
+            if (
+                systemctl_value(SERVICE, 'Result') != 'success'
+                or systemctl_value(SNAPSHOT_SERVICE, 'Result') != 'success'
+            ):
+                raise UpgradeError('natural result outbox result differs')
+            return
+        time.sleep(0.5)
+    raise UpgradeError('natural result outbox cycle did not settle')
+
+
 def install_bytes(path, data, mode, uid=0, gid=0):
     path = Path(path)
     temporary = path.with_name(f'.{path.name}.upgrade-{os.getpid()}')
@@ -380,12 +404,14 @@ def upgrade(backup):
             active=False,
             allow_populated_inactive=True,
         )
+        manual_invocation = systemctl_value(SERVICE, 'InvocationID')
         run_systemctl('enable', '--now', TIMER)
+        wait_new_successful_cycle(manual_invocation)
         active = verifier.verify(
             database, root, ready, delivered, active=True
         )
-        if active != inactive:
-            raise UpgradeError('result outbox activation state differs')
+        if active['results'] < inactive['results']:
+            raise UpgradeError('result outbox activation result count regressed')
         return active
     except Exception:
         run_systemctl('disable', '--now', TIMER, check=False)

@@ -13066,3 +13066,77 @@ candidate, and independently verify GitHub. Only then execute the guarded live
 upgrade under its root-only predecessor backup. Require an explicit successful
 snapshot/outbox cycle and at least 15 consecutive natural timer cadences with
 zero open failures before marking item 42 complete.
+
+## 2026-08-26 18:09 PDT - Item 42 full-copy attempt rolled back; selective correction passed
+
+### Full-copy activation result
+
+Published candidate `425222937b514ae5063ddf82da6f572f4b307ed5`
+independently matched GitHub `main`, and its committed public current-tree,
+history, links, ref topology, and credential gate passed before production.
+The exact release archive passed all 221 GX10 tests and the read-only live
+preflight. Immediate prechange state contained an integrity-clean source, 654
+reasoning results, 1,473 incidents, zero ready files, 1,208 delivered files,
+all five application timers enabled/active, and 13 retained SQLite-open failures
+in the preceding 30 minutes.
+
+The guarded upgrader created its root-only predecessor backup and ran one
+explicit cycle. The new snapshot and both existing outbox producers passed.
+However, the snapshot was 2,817,204,224 bytes and required 51 seconds plus 9.6
+CPU seconds. Starting the enabled timer on a long-running host immediately
+queued another outbox dependency cycle because its boot-relative deadline had
+already elapsed. The active verifier refused the changing state and its failure
+path stopped the candidate, restored the exact legacy service hash, restored
+the direct working-database configuration, removed the new unit/configuration,
+and re-enabled the old timer. The live database remained `quick_check=ok`.
+
+The interrupted second snapshot left one exact partial and journal beside the
+first complete snapshot. Those four public-named artifacts were independently
+validated as regular single-link files and the whole service-owned directory
+was moved intact beneath the existing root-only rollback backup. No candidate
+file remains in the active path. This is a successful rollback gate, not a
+completed activation.
+
+### Selective correction
+
+The corrected producer no longer uses full SQLite backup. It begins one
+read-only transaction on the live WAL database, validates source integrity and
+foreign keys, requires seven core outbox tables, requires the three triage
+tables as an all-or-none group, and copies only those ten tables with safely
+quoted identifiers into a new rollback-journal projection. The copied database
+then passes the same required-table, terminal-state, integrity, and foreign-key
+checks before atomic publication. Raw events and every other bulk table are
+excluded.
+
+The upgrader now records the explicit service invocation, enables/starts the
+timer, and waits up to six minutes for a different complete snapshot/outbox
+invocation with both services inactive and successful. It no longer compares
+ready versus delivered placement byte-for-byte across the activation window,
+because the independent sender may legitimately move a file during that time;
+it still rejects regression of the projected result count and runs the complete
+active verifier.
+
+Correction evidence:
+
+- 221 local tests pass
+- 221 exact staged GX10 tests pass
+- the GX10 filesystem and rebuild-package validators pass
+- the exact restored predecessor and prospective v2 backup path pass read-only
+  preflight
+- a 2,815,123,456-byte protected source produced an 8,572,928-byte selective
+  snapshot in two seconds
+- the selective database has exactly ten tables, `quick_check=ok`, and
+  rollback-journal mode
+- unchanged result projection created 652 files totaling 1,755,062 bytes
+- unchanged lifecycle projection created 15 batches totaling 1,384,764 bytes
+  for all 1,473 incidents
+- immediate repeat created zero result files, zero lifecycle batches, and wrote
+  zero bytes
+- the protected source SHA-256 remained exact across both cycles
+
+### Next action
+
+Publish and independently verify the selective correction. Then execute the
+guarded v2 upgrade under a new root-only predecessor backup, require its
+explicit and immediate scheduled cycles to pass, and begin the 15-cadence
+natural stability window only from the first later timer-only cycle.

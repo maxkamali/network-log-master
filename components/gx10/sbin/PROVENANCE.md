@@ -74,8 +74,9 @@ reliability artifacts. They are not rediscovered historical applications.
 
 The exact-hash runner binds private source/snapshot paths through a root-owned
 configuration and invokes only the local snapshot producer. The producer opens
-the validated service-owned WAL source through SQLite's online-backup API,
-validates the copied outbox schema and terminal-state invariants, converts only
-the copy to rollback-journal mode, and publishes it atomically. It cannot open
-a network socket, make incident/model decisions, or alter result/lifecycle
+the validated service-owned WAL source in one read transaction, validates its
+integrity, copies only the ten tables used by result/lifecycle projection,
+validates the copied schema and terminal-state invariants, and publishes the
+rollback-journal projection atomically. It cannot open a network socket, make
+incident/model decisions, copy raw-event bulk, or alter result/lifecycle
 records. Production activation remains separately gated.

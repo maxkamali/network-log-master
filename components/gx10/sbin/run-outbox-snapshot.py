@@ -16,7 +16,7 @@ PRODUCER_PATH = Path(
     '/usr/local/libexec/network-log-gx10/create-outbox-snapshot.py'
 )
 PRODUCER_SHA256 = (
-    '2b6f508e24ebc78d4be6d38c963eedf871001ff136bde86287c7bd976010a82d'
+    'f4fb4582f9d877619c34d4a1021a1d7b7c4b0a3bcf56d364af246b21dc51c8ff'
 )
 
 

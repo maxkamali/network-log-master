@@ -13002,3 +13002,67 @@ checks, and the clean working-tree/diff checks passed.
 No sanitization rewrite or credential rotation is required because the audit
 found no sensitive value or private operational identity in repository content
 or reachable history. There remains no numbered `NEXT` item.
+
+## 2026-08-26 17:50 PDT - Item 42 stable outbox snapshot candidate validated
+
+### Status
+
+Item 42 is the single `NEXT` item. The operator authorized correction of the
+intermittent GX10 result-outbox failures after a read-only reboot-persistence
+audit found the application schedules enabled but the outbox unreliable. No
+production file, unit, timer, database, result, transport, collector resource,
+dashboard, model, credential, or account changed during candidate construction
+and preflight.
+
+Two hours of retained unit evidence contained 93 outbox failures, all exact
+SQLite `unable to open database file` errors. There were zero lock and zero
+schema errors. The source database was a regular service-owned WAL database,
+passed read-only `quick_check`, and was readable by the service identity. The
+outbox had `ProtectSystem=strict`, retained write scope only to its own outbox
+root, and did not have write scope over the source parent. This isolates the
+failure to WAL sidecar access from the read-only mount namespace rather than
+database corruption.
+
+The candidate retains the existing complex result and lifecycle producers
+unchanged. A new small exact-hash runner invokes a no-network snapshot producer
+before every outbox cycle. It uses SQLite online backup, validates integrity,
+foreign keys, required tables, and reasoning terminal-state invariants;
+converts only the copy to rollback-journal mode; flushes the file and parent;
+and atomically replaces the last snapshot. Four bounded retries cover only
+recognized transient open/busy conditions. Invalid paths, links, metadata,
+schema, integrity, or state fail immediately. Failure removes only the unique
+partial and leaves the last published snapshot untouched.
+
+The snapshot service alone receives derived source-directory write scope needed
+for WAL cooperation. It retains no network, no capabilities, strict system and
+home protection, Unix-only address families, bounded resources, and the same
+validated unprivileged identity. The existing outbox requires successful
+snapshot completion and continues to write only its original ready/delivered
+root. The snapshot configuration binds the private source and copy paths
+without publishing either identity.
+
+Validation evidence:
+
+- all 221 GX10 tests pass locally
+- all 221 tests pass from a new exact root-owned GX10 stage
+- the guarded read-only live upgrade check proves the installed service,
+  timer, four unchanged application artifacts, configuration, private drop-in,
+  runtime identity, database invariant, directories, and enabled timer match
+  the captured predecessor
+- active-WAL, repeated atomic replacement, bounded retry, corruption,
+  symlink, preserved-predecessor, exact-hash runner, and systemd dependency
+  tests pass
+- two runs over a fresh protected online copy each completed in one attempt
+- the protected source byte hash remained exact across the repeated snapshot
+- the published copy passes `quick_check=ok` and reports rollback-journal mode
+- source files, snapshot files, and managed upgrade sources have their required
+  executable or private modes
+- syntax compilation and the clean diff check pass
+
+### Next action
+
+Run the public repository and sensitive-data gates, publish the item-42
+candidate, and independently verify GitHub. Only then execute the guarded live
+upgrade under its root-only predecessor backup. Require an explicit successful
+snapshot/outbox cycle and at least 15 consecutive natural timer cadences with
+zero open failures before marking item 42 complete.

@@ -66,3 +66,16 @@ The incident engine owns deterministic identity/lifecycle over classification-ve
 `build-reasoning-packets.py`, `run-local-reasoning.py`, and `run-managed-reasoning.py` are deliberate post-rediscovery implementation artifacts. They are not represented as captured historical applications.
 
 The packet builder owns deterministic wake selection and compact append-only facts. The local caller binds one immutable packet to exact model/prompt/output versions and records only strict canonical interpretation. The item-29 wrapper validates all stage hashes, holds an independent cycle lock, refuses unreconciled `STARTED` state, runs the packet builder once, permits at most one inference reservation, and emits only aggregate backlog/run/result health. It remains a repository-only candidate until protected-copy and activation gates pass.
+
+## Stable outbox snapshot addition
+
+`create-outbox-snapshot.py` and `run-outbox-snapshot.py` are deliberate item-42
+reliability artifacts. They are not rediscovered historical applications.
+
+The exact-hash runner binds private source/snapshot paths through a root-owned
+configuration and invokes only the local snapshot producer. The producer opens
+the validated service-owned WAL source through SQLite's online-backup API,
+validates the copied outbox schema and terminal-state invariants, converts only
+the copy to rollback-journal mode, and publishes it atomically. It cannot open
+a network socket, make incident/model decisions, or alter result/lifecycle
+records. Production activation remains separately gated.

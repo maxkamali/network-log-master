@@ -1,15 +1,14 @@
 [Unit]
-Description=Network log GX10 result and deterministic incident-state outbox
-Requires=network-log-gx10-outbox-snapshot.service
-After=network-log-gx10-correlation.service network-log-gx10-outbox-snapshot.service
+Description=Network log GX10 consistent outbox database snapshot
+After=network-log-gx10-correlation.service
+Before=network-log-gx10-result-outbox.service
 
 [Service]
 Type=oneshot
 User=network-log-agent
 Group=network-log-agent
 
-ExecStart=/usr/local/libexec/network-log-gx10/run-result-outbox.py
-ExecStart=/usr/local/libexec/network-log-gx10/run-incident-outbox.py
+ExecStart=/usr/local/libexec/network-log-gx10/run-outbox-snapshot.py
 TimeoutStartSec=2min
 
 UMask=0077
@@ -28,7 +27,7 @@ PrivateNetwork=yes
 ProtectSystem=strict
 ProtectHome=yes
 
-ReadWritePaths=/var/lib/network-log-gx10/result-outbox
+ReadWritePaths=/var/lib/network-log-gx10/state
 
 ProtectKernelTunables=yes
 ProtectKernelModules=yes

@@ -20,7 +20,9 @@ Disposable clean-two-server execution: `WAIVED BY OPERATOR`, empirically unverif
 
 Rebuild/documentation milestone disposition: `ACCEPTED WITH RESIDUAL RISK`.
 
-End-to-end working-system target: `COMPLETE` through item 41. There is no remaining numbered `NEXT` item.
+End-to-end working-system target: `COMPLETE` through item 41. Post-closure
+reliability item 42 is the single `NEXT` item while the GX10 result-outbox
+snapshot boundary proceeds through protected production activation.
 
 Post-closure AI-results Grafana dashboard feature: `DONE` under item 32.
 
@@ -43,6 +45,17 @@ Post-closure enhanced incident-log drilldown: `DONE` under item 39. That checkpo
 Post-closure dashboard drilldown ergonomics: `DONE` under item 40. All enhanced-incident and linked NOC View Explore panes now start in compact mode, and the four existing NOC View data links are one-click targets. Main links retain organization 1 and the isolated NOC copies retain organization 2. Main six-resource exact verification, organization-scoped NOC reread, both enhanced query/drilldown passes, all four NOC drilldown queries, SQLite integrity, and unchanged service health passed under a root-only rollback boundary. No SQL, datasource, incident state, time range, result cap, account permission, playlist, or data path changed.
 
 Post-closure interface-flap noise filter: `DONE` under item 41. Both organization-local copies of `AI Incident Analysis - Enhanced` now exclude every interface entity from Active and Resolved, while Interface Flaps independently aggregates exact raw NX-OS interface-down transitions per device/interface over the rolling preceding 60 minutes and displays only counts of 10 or more. Main and NOC dry-runs, protected replacements, exact rereads, all six queries and three sampled drilldowns in each organization, database integrity, two-resource-only change scope, and zero-restart service health passed under a root-only rollback boundary.
+
+Post-closure GX10 result-outbox WAL hardening: `IN PROGRESS` under item 42.
+Read-only diagnosis found repeated `unable to open database file` failures only
+in the hardened outbox reader while the live SQLite database remained healthy
+in WAL mode. The candidate preserves the existing outbox's narrow write scope,
+adds a separate no-network exact-hash snapshot service with only the WAL access
+needed for SQLite online backup, atomically publishes a rollback-journal copy,
+and makes both existing outbox producers depend on a successful fresh snapshot.
+Local and exact GX10-stage suites pass 221 tests; the live predecessor preflight
+and a protected-copy repeated snapshot/integrity/source-preservation gate pass.
+No installed production file or schedule has changed at this checkpoint.
 
 Post-closure hidden AI detection side channel: `DONE`. GX10 now batches deterministic signatures for uncovered severity 0–4 events plus novel/repeated severity-5 notices, asks the pinned local `gemma4:latest` model for one strict incident/ignore/insufficient decision per signature, and creates ordinary `event_signature` incidents only from validated positive decisions. Model failure retains a pending batch and never creates an incident. Positive incidents use the existing lifecycle, outbox, collector table, dashboard windows, search, and drilldown; no dashboard resource or query changed. Automatic learned coverage is limited to severity 0–3 and requires three consistent confidence-70+ decisions spanning at least 30 minutes with no contradictory decision. Production activated under an online protected SQLite backup after 215 tests, an exact staged-server pass, one safe length-limited shadow failure, and one 24-decision shadow success. Initial active evidence contains 33 incident and 15 ignore decisions, 35 ordinary lifecycle incidents, zero active learned rules, clean SQLite integrity, healthy GX10 schedules, and collector acceptance of the 45-record lifecycle batch.
 
@@ -379,10 +392,14 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 39. `DONE` — published the validated incident-log drilldown candidate; protected the live Grafana database and exact NOC predecessor; dry-ran and replaced only the enhanced dashboard in each organization with organization-correct Explore links; preserved NOC server-owned fields; proved exact reread, all panel queries, sampled incident-log lookups in both organizations, restored administrator context, and healthy unchanged data-path services.
 40. `DONE` — published and independently verified the compact/one-click drilldown candidate and two fail-closed canonicalization corrections; protected Grafana state; updated only NOC View plus enhanced analysis in each organization through the correct organization-scoped interfaces; preserved organization-local links/server-owned fields; and proved exact main rereads, organization-2 link contracts, read-only queries, database integrity, and healthy unchanged data paths.
 41. `DONE` — published and independently verified the rolling interface-flap presentation candidate; protected the live Grafana database and exact enhanced predecessors; passed main and organization-2 native-resource dry-runs; replaced only `AI Incident Analysis - Enhanced` in each organization; preserved NOC server-owned specification fields, variable selections, and organization-2 links; passed all six queries and three sampled drilldowns in each organization; and proved database integrity, exactly two changed enhanced resources, zero other resource changes, and healthy zero-restart services.
+42. `NEXT` — publish and independently verify the GX10 result-outbox stable-snapshot candidate; execute its guarded live upgrade under a protected predecessor backup; require one explicit successful snapshot/outbox cycle followed by at least 15 consecutive natural timer cadences with zero SQLite-open failures; verify result/lifecycle conservation, sender/collector catch-up, source-database integrity, service hardening, reboot enablement, and unchanged unrelated schedules; then publish the sanitized closure evidence.
 
 Post-closure feature: `DONE` — implemented and activated the hidden AI detection side channel without adding a numbered `NEXT`: additive append-only triage schema, deterministic signatures, strict versioned batch inference, waiting retries, ordinary incident bridging, 60-minute quiet plus 15-minute confirmation lifecycle, one-inference-per-cycle scheduling, severity-0–3 learned-rule gate, existing outbox/dashboard integration, protected backup, shadow-to-active rollout, 215 tests, and collector acceptance evidence.
 
-The end-to-end target is complete through item 41. There is no remaining `NEXT` item. Item 41 changed only the two organization-local enhanced dashboard resources; it did not change the original AI dashboard, NOC View, NOC playlist, home preference, datasource definitions, ClickHouse data/schema, Vector, GX10, transport, incident state, credential, account permission, or model authority.
+The end-to-end feature target remains complete through item 41. Item 42 is the
+single reliability-hardening `NEXT`; it does not add operator-facing behavior,
+change model authority, or change collector schemas, dashboards, credentials,
+or transport identity.
 
 ## Scope constraints
 

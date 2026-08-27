@@ -22,14 +22,30 @@ CONFIG_DIR = Path('/etc/network-log-gx10')
 SYSTEMD_DIR = Path('/etc/systemd/system')
 DEFAULT_DATABASE = Path('/var/lib/network-log-gx10/state/events.sqlite3')
 DEFAULT_OUTBOX_ROOT = Path('/var/lib/network-log-gx10/result-outbox')
+DEFAULT_SNAPSHOT_ROOT = Path('/var/lib/network-log-gx10/outbox-snapshot')
 MANAGED_CONFIG_PATH = CONFIG_DIR / 'managed-reasoning.json'
 SERVICE = 'network-log-gx10-result-outbox.service'
 TIMER = 'network-log-gx10-result-outbox.timer'
+SNAPSHOT_SERVICE = 'network-log-gx10-outbox-snapshot.service'
 REASONING_SERVICE = 'network-log-gx10-reasoning.service'
 DROPIN_PATH = SYSTEMD_DIR / f'{SERVICE}.d' / '10-runtime.conf'
+SNAPSHOT_DROPIN_PATH = (
+    SYSTEMD_DIR / f'{SNAPSHOT_SERVICE}.d' / '10-runtime.conf'
+)
 CONFIG_PATH = CONFIG_DIR / 'result-outbox.json'
+SNAPSHOT_CONFIG_PATH = CONFIG_DIR / 'outbox-snapshot.json'
 SAFE_NAME_RE = re.compile(r'^[A-Za-z0-9_.@-]+$')
 ARTIFACTS = (
+    (
+        GX10_DIR / 'sbin' / 'create-outbox-snapshot.py',
+        LIBEXEC_DIR / 'create-outbox-snapshot.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'run-outbox-snapshot.py',
+        LIBEXEC_DIR / 'run-outbox-snapshot.py',
+        0o755,
+    ),
     (
         GX10_DIR / 'sbin' / 'build-result-outbox.py',
         LIBEXEC_DIR / 'build-result-outbox.py',
@@ -49,6 +65,11 @@ ARTIFACTS = (
         GX10_DIR / 'sbin' / 'run-incident-outbox.py',
         LIBEXEC_DIR / 'run-incident-outbox.py',
         0o755,
+    ),
+    (
+        GX10_DIR / 'systemd' / SNAPSHOT_SERVICE,
+        SYSTEMD_DIR / SNAPSHOT_SERVICE,
+        0o644,
     ),
     (
         GX10_DIR / 'systemd' / SERVICE,
@@ -207,17 +228,24 @@ def install_bytes(path, data, mode, uid, gid):
             temporary.unlink()
 
 
-def preflight(database, root):
+def preflight(database, root, snapshot_root):
     user, group, uid, gid = service_identity()
     validate_database(database, uid, gid)
     for source, target, mode in ARTIFACTS:
         validate_source(source, mode)
         if Path(target).exists() or Path(target).is_symlink():
             raise InstallError('result outbox target already exists')
-    for path in (CONFIG_PATH, DROPIN_PATH, root):
+    for path in (
+        CONFIG_PATH,
+        SNAPSHOT_CONFIG_PATH,
+        DROPIN_PATH,
+        SNAPSHOT_DROPIN_PATH,
+        root,
+        snapshot_root,
+    ):
         if Path(path).exists() or Path(path).is_symlink():
             raise InstallError('result outbox private target already exists')
-    for unit in (SERVICE, TIMER):
+    for unit in (SNAPSHOT_SERVICE, SERVICE, TIMER):
         if systemctl_value(unit, 'LoadState') != 'not-found':
             raise InstallError('result outbox unit already exists')
     for directory in (LIBEXEC_DIR, CONFIG_DIR, SYSTEMD_DIR, Path(root).parent):
@@ -242,18 +270,22 @@ def install(database, root):
         raise InstallError('result outbox database differs')
     database = database.resolve(strict=True)
     root = Path(root)
+    snapshot_root = database.parent / 'outbox-snapshot'
+    snapshot_database = snapshot_root / 'events.sqlite3'
     ready = root / 'ready'
     delivered = root / 'delivered'
-    user, group, uid, gid = preflight(database, root)
+    user, group, uid, gid = preflight(database, root, snapshot_root)
     created_files = []
     created_directories = []
     try:
         root.mkdir(mode=0o700)
         created_directories.append(root)
+        snapshot_root.mkdir(mode=0o700)
+        created_directories.append(snapshot_root)
         for directory in (ready, delivered):
             directory.mkdir(mode=0o700)
             created_directories.append(directory)
-        for directory in (root, ready, delivered):
+        for directory in (root, snapshot_root, ready, delivered):
             os.chown(directory, uid, gid)
             os.chmod(directory, 0o700)
         for source, target, mode in ARTIFACTS:
@@ -262,7 +294,7 @@ def install(database, root):
         config = (
             json.dumps(
                 {
-                    'database_path': str(database),
+                    'database_path': str(snapshot_database),
                     'delivered_path': str(delivered),
                     'ready_path': str(ready),
                 },
@@ -273,6 +305,19 @@ def install(database, root):
         ).encode('utf-8')
         created_files.append(CONFIG_PATH)
         install_bytes(CONFIG_PATH, config, 0o640, 0, gid)
+        snapshot_config = (
+            json.dumps(
+                {
+                    'snapshot_database_path': str(snapshot_database),
+                    'source_database_path': str(database),
+                },
+                separators=(',', ':'),
+                sort_keys=True,
+            )
+            + '\n'
+        ).encode('utf-8')
+        created_files.append(SNAPSHOT_CONFIG_PATH)
+        install_bytes(SNAPSHOT_CONFIG_PATH, snapshot_config, 0o640, 0, gid)
         DROPIN_PATH.parent.mkdir(mode=0o755)
         created_directories.append(DROPIN_PATH.parent)
         dropin = (
@@ -284,6 +329,17 @@ def install(database, root):
         ).encode('utf-8')
         created_files.append(DROPIN_PATH)
         install_bytes(DROPIN_PATH, dropin, 0o644, 0, 0)
+        SNAPSHOT_DROPIN_PATH.parent.mkdir(mode=0o755)
+        created_directories.append(SNAPSHOT_DROPIN_PATH.parent)
+        snapshot_dropin = (
+            '[Service]\n'
+            f'User={user}\n'
+            f'Group={group}\n'
+            'ReadWritePaths=\n'
+            f'ReadWritePaths={database.parent}\n'
+        ).encode('utf-8')
+        created_files.append(SNAPSHOT_DROPIN_PATH)
+        install_bytes(SNAPSHOT_DROPIN_PATH, snapshot_dropin, 0o644, 0, 0)
         run_systemctl('daemon-reload')
         run_systemctl('disable', '--now', TIMER)
         verifier = load_verifier()

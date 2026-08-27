@@ -4,10 +4,12 @@ A two-server network-observability application that turns device syslog into a
 searchable log archive, durable incident state, local-AI review, and an
 operator-focused Grafana NOC queue.
 
-**Working-system status:** operational and complete through project item 41.
-There is no open numbered implementation item. The public rebuild packages are
-complete, although clean installation on two disposable servers was unavailable
-and remains explicitly unverified rather than being represented as passed.
+**Working-system status:** operational and feature-complete through project item
+41. Reliability item 42 is in progress to replace intermittent direct WAL reads
+in the GX10 result outbox with an atomic validated SQLite snapshot. The public
+rebuild packages are complete, although clean installation on two disposable
+servers was unavailable and remains explicitly unverified rather than being
+represented as passed.
 
 ## What this application does
 
@@ -182,7 +184,7 @@ contracts more reliably. See
 | Normalizer | Deterministic vendor-aware event normalization with capture-first fallback | [`components/normalizer/`](components/normalizer/) |
 | GX10 | Replay-safe ingest, canonical projection, deterministic incidents, local reasoning, side-channel triage, and result delivery | [`components/gx10/`](components/gx10/) |
 
-This documentation checkpoint reran 62 collector tests and 215 GX10 tests. The
+This reliability checkpoint reran 62 collector tests and 221 GX10 tests. The
 completed normalizer/handoff gate records 94 normalizer/worker tests and 14
 collector normalizer-package tests. Operational checkpoints also retain the
 GX10 filesystem contract and the public current-tree/history/link/ref-topology

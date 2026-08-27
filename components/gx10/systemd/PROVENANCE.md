@@ -48,3 +48,14 @@ The service is a hardened non-root oneshot with a three-minute timeout, explicit
 Only the identity-bearing description was changed. The executable, service identity, restart behavior, service environment, enablement target, and absence of pipeline application references are preserved.
 
 The effective live file-descriptor limits are platform/service-manager state rather than explicit directives in the captured fragment. Platform/runtime verification must check effective state instead of inventing an explicit unit directive and presenting it as recovered configuration.
+
+## Stable outbox snapshot target unit
+
+`network-log-gx10-outbox-snapshot.service` is a deliberate item-42 reliability
+artifact, not a rediscovered historical unit. It is a static, no-network,
+capability-free oneshot ordered before and required by the existing result
+outbox. A private drop-in binds the validated runtime identity and source
+directory write scope needed for SQLite WAL sidecar cooperation. The existing
+outbox service retains its prior write scope only to ready/delivered state.
+Installation and production activation remain guarded by exact predecessor,
+protected backup, explicit first-run, and natural-cadence verification.

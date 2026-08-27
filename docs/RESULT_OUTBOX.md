@@ -8,6 +8,16 @@ The version-1 local producer boundary and its active no-network schedule pass. I
 
 The producer opens the SQLite working database read-only and projects only `SUCCEEDED` reasoning runs that have their required append-only result row. Terminal failures and `STARTED` reservations never produce files. The producer does not call Ollama, change reasoning state, open a network socket, or make any incident/packet decision.
 
+Item 42 preserves those semantics while hardening how the producer obtains a
+readable point-in-time view. The working database uses WAL mode; opening it
+from a `ProtectSystem=strict` read-only sandbox can intermittently fail when
+SQLite needs shared-memory sidecar access. A separate no-network snapshot
+oneshot therefore runs first, uses SQLite's online-backup API, validates the
+copy, converts only the copy to rollback-journal mode, and atomically publishes
+it in a dedicated service-owned directory. Both existing producers read that
+stable copy. Snapshot failure prevents outbox execution and never replaces the
+last valid copy.
+
 Every successful run maps to exactly one canonical JSON record and one newline-terminated JSONL file. The filename is versioned and derived from the SHA-256 of the run ID rather than exposing the run ID in the filesystem name. A filename collision fails closed. `ready` and `delivered` are protected sibling directories under one outbox root and one shared lock. Each expected file may be present in at most one state. An exact delivered file suppresses ready-file recreation; duplicate or divergent state fails closed.
 
 The thin collector fields are:
@@ -58,3 +68,14 @@ Three consecutive natural outbox timer cadences passed at approximately 64–65-
 Managed reasoning then naturally advanced from 15 to 16 results. The outbox timer started immediately afterward, created exactly one file, reused the prior 15, wrote only 2378 bytes, and retained zero delivered/recovered/restarts. The prior 15-file digest remained `65a2b2399018840fe96a3d56291e60ea994e60d12fb8a7fc7ff011bafb2ece9c`; all 16 files passed the collector gate and the new aggregate digest is `71955d542f80240fc18b27a481ae65b74f98fa04b7e005e2d9a3e5b646d641be`.
 
 The local-producer milestone is complete. The collector-side durable acceptance ledger closes the upload-success/local-acknowledgment crash window. The later sender boundary passes 186 local and exact correctly laid-out GX10-staged tests, configured-inactive verification, first-live exact raw/provenance proof, distinct replay/conflict isolation, active verification, and natural recurring delivery/collector acceptance/ClickHouse ingestion. Current transport status and rollback behavior are authoritative in `docs/RESULT_TRANSPORT.md`.
+
+## Item-42 stable-snapshot candidate
+
+The reliability candidate adds no record, schema, transport, model, or
+dashboard behavior. Its local and exact GX10-stage suites pass 221 tests. A
+read-only live preflight proves the installed predecessor matches its captured
+service hash and exact repository artifacts. Two generations from a protected
+online database copy pass with unchanged source bytes, `quick_check=ok`, and
+published `journal_mode=delete`. Production installation and natural-cadence
+acceptance remain pending until the candidate checkpoint is published and
+independently verified.

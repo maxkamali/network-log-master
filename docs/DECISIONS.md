@@ -588,3 +588,42 @@ Consequence:
 - known Gemma misses on contradictory and resolved-plus-critical packets remain explicit calibration debt rather than being hidden by a weaker replacement
 - the evaluator is retained for future candidates, but production model/version changes still require a separate versioned compatibility, state-copy, activation, and rollback gate
 - no production model, prompt, caller, schedule, database, result, collector, or dashboard state changed
+
+## ADR-029 - Outbox projection reads an atomic rollback-journal snapshot
+
+**Status:** Accepted as the item-42 production candidate
+
+The result and deterministic-lifecycle outbox producers read a fresh SQLite
+online-backup snapshot rather than opening the mutable WAL database directly
+inside their strict read-only service sandbox.
+
+Why:
+
+- the source database remains healthy and passes integrity checks
+- every reviewed failure is `unable to open database file`, not corruption,
+  schema divergence, or lock contention
+- SQLite WAL readers may need writable-directory access for shared-memory
+  sidecars even when the database URI is opened read-only
+- granting the existing complex outbox producers write scope over the live
+  database directory would weaken their established least-privilege boundary
+- `immutable=1` is unsafe for a database that may change concurrently, and a
+  global rollback-journal conversion would alter all database writers
+
+Consequence:
+
+- a separate exact-hash, no-network oneshot uses SQLite's online-backup API
+  under the existing runtime identity
+- only that narrow helper receives write scope over the validated source
+  directory needed for WAL sidecar cooperation
+- the helper validates the copied schema/invariants, converts the copy to
+  rollback-journal mode, flushes it, and atomically replaces the last snapshot
+- recognized open/busy failures receive at most four bounded retries; schema,
+  integrity, metadata, and path failures remain immediate hard failures
+- failed generation leaves the last valid snapshot untouched, and the outbox
+  service is ordered after and requires successful fresh snapshot generation
+- the existing outbox keeps network isolation and write scope only to its own
+  ready/delivered state; sender, collector, schema, model, and dashboards do not
+  change
+- production acceptance requires a protected predecessor, explicit first run,
+  at least 15 natural error-free cadences, conservation/catch-up verification,
+  and sanitized publication evidence

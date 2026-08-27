@@ -22,16 +22,32 @@ CONFIG_DIR = Path('/etc/network-log-gx10')
 SYSTEMD_DIR = Path('/etc/systemd/system')
 DEFAULT_DATABASE = Path('/var/lib/network-log-gx10/state/events.sqlite3')
 OUTBOX_ROOT = Path('/var/lib/network-log-gx10/result-outbox')
+SNAPSHOT_ROOT = Path('/var/lib/network-log-gx10/outbox-snapshot')
 READY_DIR = OUTBOX_ROOT / 'ready'
 DELIVERED_DIR = OUTBOX_ROOT / 'delivered'
 CONFIG_PATH = CONFIG_DIR / 'result-outbox.json'
+SNAPSHOT_CONFIG_PATH = CONFIG_DIR / 'outbox-snapshot.json'
 MANAGED_CONFIG_PATH = CONFIG_DIR / 'managed-reasoning.json'
 SERVICE = 'network-log-gx10-result-outbox.service'
 TIMER = 'network-log-gx10-result-outbox.timer'
+SNAPSHOT_SERVICE = 'network-log-gx10-outbox-snapshot.service'
 REASONING_SERVICE = 'network-log-gx10-reasoning.service'
 DROPIN_PATH = SYSTEMD_DIR / f'{SERVICE}.d' / '10-runtime.conf'
+SNAPSHOT_DROPIN_PATH = (
+    SYSTEMD_DIR / f'{SNAPSHOT_SERVICE}.d' / '10-runtime.conf'
+)
 SAFE_NAME_RE = re.compile(r'^[A-Za-z0-9_.@-]+$')
 ARTIFACTS = (
+    (
+        GX10_DIR / 'sbin' / 'create-outbox-snapshot.py',
+        LIBEXEC_DIR / 'create-outbox-snapshot.py',
+        0o755,
+    ),
+    (
+        GX10_DIR / 'sbin' / 'run-outbox-snapshot.py',
+        LIBEXEC_DIR / 'run-outbox-snapshot.py',
+        0o755,
+    ),
     (
         GX10_DIR / 'sbin' / 'build-result-outbox.py',
         LIBEXEC_DIR / 'build-result-outbox.py',
@@ -51,6 +67,11 @@ ARTIFACTS = (
         GX10_DIR / 'sbin' / 'run-incident-outbox.py',
         LIBEXEC_DIR / 'run-incident-outbox.py',
         0o755,
+    ),
+    (
+        GX10_DIR / 'systemd' / SNAPSHOT_SERVICE,
+        SYSTEMD_DIR / SNAPSHOT_SERVICE,
+        0o644,
     ),
     (
         GX10_DIR / 'systemd' / SERVICE,
@@ -206,16 +227,32 @@ def load_incident_producer():
     return module
 
 
-def validate_private_runtime(database, root, ready, delivered):
+def validate_private_runtime(
+    database,
+    snapshot_database,
+    snapshot_root,
+    root,
+    ready,
+    delivered,
+):
     user, group, uid, gid = service_identity()
     validate_file(CONFIG_PATH, 0o640, uid=0, gid=gid)
     config = json.loads(CONFIG_PATH.read_text(encoding='utf-8'))
     if config != {
-        'database_path': str(Path(database)),
+        'database_path': str(Path(snapshot_database)),
         'delivered_path': str(Path(delivered)),
         'ready_path': str(Path(ready)),
     }:
         raise ValueError('managed result outbox configuration differs')
+    validate_file(SNAPSHOT_CONFIG_PATH, 0o640, uid=0, gid=gid)
+    snapshot_config = json.loads(
+        SNAPSHOT_CONFIG_PATH.read_text(encoding='utf-8')
+    )
+    if snapshot_config != {
+        'snapshot_database_path': str(Path(snapshot_database)),
+        'source_database_path': str(Path(database)),
+    }:
+        raise ValueError('managed outbox snapshot configuration differs')
     validate_file(DROPIN_PATH, 0o644)
     lines = DROPIN_PATH.read_text(encoding='utf-8').splitlines()
     if lines != [
@@ -226,7 +263,20 @@ def validate_private_runtime(database, root, ready, delivered):
         f'ReadWritePaths={root}',
     ]:
         raise ValueError('managed result outbox drop-in differs')
+    validate_file(SNAPSHOT_DROPIN_PATH, 0o644)
+    snapshot_lines = SNAPSHOT_DROPIN_PATH.read_text(
+        encoding='utf-8'
+    ).splitlines()
+    if snapshot_lines != [
+        '[Service]',
+        f'User={user}',
+        f'Group={group}',
+        'ReadWritePaths=',
+        f'ReadWritePaths={Path(database).parent}',
+    ]:
+        raise ValueError('managed outbox snapshot drop-in differs')
     validate_directory(root, uid, gid)
+    validate_directory(snapshot_root, uid, gid)
     validate_directory(ready, uid, gid)
     validate_directory(delivered, uid, gid)
     allowed = {'ready', 'delivered'}
@@ -240,6 +290,16 @@ def validate_private_runtime(database, root, ready, delivered):
         allowed.add(ledger.name)
     if {path.name for path in Path(root).iterdir()} != allowed:
         raise ValueError('managed result outbox root entries differ')
+    snapshot_allowed = set()
+    snapshot_lock = Path(snapshot_root) / '.outbox-snapshot.lock'
+    if snapshot_lock.exists() or snapshot_lock.is_symlink():
+        validate_file(snapshot_lock, 0o600, uid=uid, gid=gid)
+        snapshot_allowed.add(snapshot_lock.name)
+    if Path(snapshot_database).exists() or Path(snapshot_database).is_symlink():
+        validate_file(snapshot_database, 0o600, uid=uid, gid=gid)
+        snapshot_allowed.add(Path(snapshot_database).name)
+    if {path.name for path in Path(snapshot_root).iterdir()} != snapshot_allowed:
+        raise ValueError('managed outbox snapshot root entries differ')
     database_details = Path(database).stat()
     if database_details.st_uid != uid or database_details.st_gid != gid:
         raise ValueError('managed result outbox database identity differs')
@@ -247,31 +307,50 @@ def validate_private_runtime(database, root, ready, delivered):
 
 
 def validate_units(active):
-    for unit in (SERVICE, TIMER):
+    for unit in (SNAPSHOT_SERVICE, SERVICE, TIMER):
         if systemctl_value(unit, 'LoadState') != 'loaded':
             raise ValueError('managed result outbox unit is not loaded')
         if Path(systemctl_value(unit, 'FragmentPath')) != SYSTEMD_DIR / unit:
             raise ValueError('managed result outbox fragment path differs')
     if systemctl_value(SERVICE, 'DropInPaths') != str(DROPIN_PATH):
         raise ValueError('managed result outbox drop-in state differs')
+    if systemctl_value(SNAPSHOT_SERVICE, 'DropInPaths') != str(
+        SNAPSHOT_DROPIN_PATH
+    ):
+        raise ValueError('managed outbox snapshot drop-in state differs')
     if systemctl_value(TIMER, 'DropInPaths'):
         raise ValueError('managed result outbox timer drop-in differs')
     if systemctl_value(SERVICE, 'UnitFileState') != 'static':
         raise ValueError('managed result outbox service enablement differs')
+    if systemctl_value(SNAPSHOT_SERVICE, 'UnitFileState') != 'static':
+        raise ValueError('managed outbox snapshot enablement differs')
     expected = 'enabled' if active else 'disabled'
     if systemctl_value(TIMER, 'UnitFileState') != expected:
         raise ValueError('managed result outbox timer enablement differs')
     timer_state = systemctl_value(TIMER, 'ActiveState')
     service_state = systemctl_value(SERVICE, 'ActiveState')
+    snapshot_state = systemctl_value(SNAPSHOT_SERVICE, 'ActiveState')
     if active:
-        if timer_state != 'active' or service_state == 'failed':
+        if (
+            timer_state != 'active'
+            or service_state == 'failed'
+            or snapshot_state == 'failed'
+        ):
             raise ValueError('managed result outbox active state differs')
         if systemctl_value(SERVICE, 'Result') != 'success':
             raise ValueError('managed result outbox service result differs')
-    elif timer_state != 'inactive' or service_state != 'inactive':
+    elif (
+        timer_state != 'inactive'
+        or service_state != 'inactive'
+        or snapshot_state != 'inactive'
+    ):
         raise ValueError('managed result outbox inactive state differs')
     if systemctl_value(SERVICE, 'NRestarts') != '0':
         raise ValueError('managed result outbox restart count differs')
+    if systemctl_value(SNAPSHOT_SERVICE, 'NRestarts') != '0':
+        raise ValueError('managed outbox snapshot restart count differs')
+    if active and systemctl_value(SNAPSHOT_SERVICE, 'Result') != 'success':
+        raise ValueError('managed outbox snapshot service result differs')
 
 
 def inventory(directory, records, producer, incident_producer, uid, gid):
@@ -317,14 +396,34 @@ def verify(
     active,
     allow_populated_inactive=False,
 ):
+    database = Path(database)
+    snapshot_root = database.parent / 'outbox-snapshot'
+    snapshot_database = snapshot_root / 'events.sqlite3'
     for source, target, mode in ARTIFACTS:
         validate_file(target, mode, source=source)
-    state = validate_database(database)
-    uid, gid = validate_private_runtime(database, root, ready, delivered)
+    source_state = validate_database(database)
+    uid, gid = validate_private_runtime(
+        database,
+        snapshot_database,
+        snapshot_root,
+        root,
+        ready,
+        delivered,
+    )
     validate_units(active)
+    snapshot_exists = snapshot_database.exists() or snapshot_database.is_symlink()
+    if active and not snapshot_exists:
+        raise ValueError('managed outbox snapshot is absent')
+    state = (
+        validate_database(snapshot_database)
+        if snapshot_exists
+        else source_state
+    )
     producer = load_producer()
     incident_producer = load_incident_producer()
-    records = producer.load_records(database)
+    records = producer.load_records(
+        snapshot_database if snapshot_exists else database
+    )
     ready_names, incident_ready = inventory(
         ready, records, producer, incident_producer, uid, gid
     )

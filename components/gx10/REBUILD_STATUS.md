@@ -22,15 +22,21 @@ Item 29 is complete. Exact published `incident-assessment-v2-r3` passed all 140 
 
 Item 30 is complete. The new result producer/outbox/sender boundary passed protected-copy and local activation gates, durable collector ledger and cross-owner publication, configured-inactive writer setup, first-live raw/provenance proof, exact replay and divergent conflict isolation, 186 local/exact GX10-staged tests, explicit active verification, timer-only recurring activation, and natural collector acceptance/ClickHouse ingestion. This is explicitly new behavior rather than rediscovered historical behavior; it remains independently disableable and preserves all replay, quarantine, and rollback evidence.
 
-Item 42 is the active post-closure reliability gate. Its candidate separates
+Item 42 is complete. Its production implementation separates
 live-WAL access into a narrow exact-hash no-network snapshot service, copies
 only the ten result/lifecycle projection tables in one source transaction,
 publishes an integrity-checked rollback-journal copy atomically, and keeps the
 existing producers restricted to their prior outbox write scope. The initial
 full-copy candidate safely restored the exact predecessor after its activation
 gate exposed excessive per-cycle I/O and a timer-start race. The corrected
-candidate passes 221 local/exact-stage tests, exact predecessor preflight, and
-repeated protected-copy producer/integrity/source-preservation gates.
+implementation passes 223 local tests, exact-stage/predecessor preflight,
+repeated protected-copy producer/integrity/source-preservation gates, guarded
+production activation, and 15 consecutive later timer-only cadences with zero
+SQLite-open failures. Final verification proved an integrity-clean ten-table
+8,589,312-byte snapshot, all five application timers enabled/active, exact
+sender isolation, source integrity, healthy collector services/ledger, and
+1,232 delivered files matching 1,232 immutable ledger rows by filename,
+SHA-256, and size.
 
 Item 36 is complete. The protected production upgrade advances the engine to version 2 with a protocol-specific 24-hour recovery-monitoring deadline for confirmed BGP/OSPF/OSPFv3 incidents while retaining the 15-minute candidate and five-minute other-protocol rules. A relapse reopens the same active correlation identity. Lifecycle producer version 2 derives a dedicated recurrence count from append-only relapse transitions, uses monotonic version-scaled snapshots and version-2 filenames, and retains strict version-1 file compatibility across producer inventory, sender, and collector gate. Exact closure reconciliation matched all 853 authoritative incidents, recurrence sum 3,037, and 526 recurrence-bearing incidents in ClickHouse; the outbox was empty and all four GX10 schedules were enabled/active with zero relevant restarts.
 

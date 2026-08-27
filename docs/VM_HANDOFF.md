@@ -6,7 +6,7 @@ Date: 2026-08-23 PDT
 
 This checkpoint served its migration purpose and is retained only as historical
 evidence. Direct VM execution resumed, item 12 and every later numbered item
-through item 41 are complete, and there is no current `NEXT` item. Do not use
+through item 42 are complete, and there is no current `NEXT` item. Do not use
 the execution order below as present authority. Start with the root `README.md`,
 then use `docs/START_HERE.md` and `docs/CURRENT_STATE.md` for current operation
 and handoff state.

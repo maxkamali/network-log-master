@@ -13140,3 +13140,100 @@ Publish and independently verify the selective correction. Then execute the
 guarded v2 upgrade under a new root-only predecessor backup, require its
 explicit and immediate scheduled cycles to pass, and begin the 15-cadence
 natural stability window only from the first later timer-only cycle.
+
+## 2026-08-26 18:43 PDT - Item 42 selective outbox snapshot production closure passed
+
+### Status
+
+Item 42 is complete and the project again has no numbered `NEXT` item. The
+selective correction checkpoint was published and independently matched on
+GitHub `main` at:
+
+`6a61173263efdaed0f7f916d6e81b7ac568f6480` — `Narrow GX10 outbox snapshot projection`
+
+The committed current tree and all reachable history passed the public
+credential/private-address/workstation-path/current-tree/link/ref-topology
+gate. A fresh release archive of that commit passed all 221 then-current GX10
+tests. Its first live preflight correctly rejected user-owned transfer metadata;
+after only the temporary stage was made root-owned and non-group/world-writable,
+the exact read-only predecessor/candidate preflight passed.
+
+### Guarded production activation
+
+The v2 upgrader created a new root-only predecessor backup and activated the
+selective snapshot boundary. Its explicit snapshot/result/lifecycle cycle and
+the timer's immediate post-enable cycle both passed before the upgrader
+returned success. The source database was not modified, and no credential or
+transport configuration changed.
+
+Immediate independent verification established:
+
+- snapshot and outbox services loaded, inactive between runs, and last result
+  `success`
+- result-outbox timer enabled and active
+- protected predecessor backup present
+- snapshot size 8,589,312 bytes with exactly ten tables
+- snapshot `quick_check=ok` and rollback-journal mode
+- complete active outbox verifier pass
+
+A fresh journal baseline was recorded only after the explicit and immediate
+activation-generated cycles. From that later point, 15 consecutive natural
+timer cadences each emitted all three snapshot/result/lifecycle `PASS` markers.
+There were zero `FAIL` markers and zero `unable to open database file` messages.
+No service was manually invoked during that acceptance window.
+
+### Conservation and health closure
+
+The root-protected live source passed `quick_check=ok`. All five application
+timers—fetch/ingest, correlation, reasoning, result outbox, and result
+sender—were enabled and active. The only failed GX10 unit was the preexisting
+unrelated stale Thunderbird snap mount. The outbox snapshot and result sender
+retained zero restarts/successful last results and their exact least-privilege
+verifiers passed.
+
+At the first cross-host snapshot, GX10's 660 delivered result files equaled 659
+collector-accepted plus one normally settling result; 570 delivered lifecycle
+batches equaled 569 accepted plus one settling batch. Continuous lifecycle
+changes kept the edge moving, so only the sender timer was briefly stopped—not
+disabled—while the collector's ordinary 90-second settling gate completed.
+GX10 retained new local work and no file was deleted or rewritten.
+
+With collector incoming at zero, a canonical sorted inventory over filename,
+SHA-256, and byte size proved exact parity:
+
+```text
+gx10_delivered_files=1232
+collector_immutable_ledger_rows=1232
+inventory_sha256=f043b062edb12bd9e752982cefab7d2c99ac543aca14c512c26319c328ae6268
+COLLECTOR_LEDGER_QUICK_CHECK=ok
+COLLECTOR_RESULT_LIFECYCLE_CONSERVATION=PASS
+```
+
+The already-enabled sender timer was immediately started again. Its resulting
+ordinary service cycle settled with `Result=success`, zero restarts, and the
+configured-active verifier passing. Collector ClickHouse, Vector, Grafana, and
+the result-gate timer remained enabled/active; the gate was inactive between
+runs with `Result=success`, zero restarts, and zero failed collector units.
+
+### Verifier compatibility correction
+
+The broad postcheck found that the sender verifier derived its inaccessible
+database directly from the result-outbox configuration. After item 42, that
+configuration correctly names the snapshot, while the unchanged installed
+sender drop-in still—and correctly—hides the original live database. This was
+a verifier assumption, not a sender or transport failure.
+
+The clean installer and verifier now require the snapshot configuration's
+destination to equal the outbox database and resolve its source as the sender's
+inaccessible database. If no snapshot configuration exists, the legacy direct
+database rule remains unchanged. Two focused regressions prove the valid
+snapshot layout and reject an unbound destination. The corrected verifier
+passed against production in its documented legacy-runtime mode without
+changing the installed sender. The complete GX10 suite now passes 223 tests.
+
+### Closure action
+
+Run the collector/GX10/package/public-repository regression gates, publish this
+item-42 closure checkpoint, independently verify GitHub `main`, and rerun the
+committed all-history public-safety gate. No credential, private connection
+value, event content, or environment identity is recorded here.

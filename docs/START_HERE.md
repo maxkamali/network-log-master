@@ -58,11 +58,12 @@ Use synthetic fixtures and documentation address space when examples require ide
 
 ## Current operating baseline
 
-The working systems are complete through item 41 with no numbered `NEXT` item.
+The working systems are complete through item 42 with no numbered `NEXT` item.
 Collector capture/normalization, the verified GX10 handoff, deterministic
 incidents, local reasoning, hidden uncovered-event triage, validated result
 return, the isolated NOC organization, compact one-click drilldowns, 24-hour
-protocol monitoring, and the rolling interface-flap filter are active.
+protocol monitoring, the rolling interface-flap filter, and the selective
+transactional outbox snapshot are active.
 
 Read `docs/CURRENT_STATE.md` before reopening scope or changing production
 behavior. The append-only journal contains historical intermediate states and

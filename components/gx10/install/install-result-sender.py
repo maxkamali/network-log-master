@@ -20,6 +20,7 @@ LIBEXEC_DIR = Path('/usr/local/libexec/network-log-gx10')
 CONFIG_DIR = Path('/etc/network-log-gx10')
 SYSTEMD_DIR = Path('/etc/systemd/system')
 OUTBOX_CONFIG = CONFIG_DIR / 'result-outbox.json'
+SNAPSHOT_CONFIG = CONFIG_DIR / 'outbox-snapshot.json'
 SENDER_CONFIG = CONFIG_DIR / 'result-sender.json'
 SERVICE = 'network-log-gx10-result-sender.service'
 TIMER = 'network-log-gx10-result-sender.timer'
@@ -119,6 +120,31 @@ def service_identity():
     return user, group, account.pw_uid, group_entry.gr_gid, Path(account.pw_dir)
 
 
+def isolation_database(database, gid, path=SNAPSHOT_CONFIG):
+    path = Path(path)
+    if not path.exists() and not path.is_symlink():
+        return database
+    validate_file(path, 0o640, 0, gid)
+    if path.stat().st_size > 4096:
+        raise InstallError('outbox snapshot configuration is too large')
+    try:
+        data = json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise InstallError('outbox snapshot configuration differs') from exc
+    if not isinstance(data, dict) or set(data) != {
+        'snapshot_database_path',
+        'source_database_path',
+    }:
+        raise InstallError('outbox snapshot configuration differs')
+    snapshot = absolute_path(
+        data['snapshot_database_path'], 'snapshot database path'
+    )
+    source = absolute_path(data['source_database_path'], 'source database path')
+    if snapshot != database or source == snapshot:
+        raise InstallError('outbox snapshot layout differs')
+    return source
+
+
 def load_outbox_config(path=OUTBOX_CONFIG):
     user, group, uid, gid, home = service_identity()
     validate_file(path, 0o640, 0, gid)
@@ -135,6 +161,7 @@ def load_outbox_config(path=OUTBOX_CONFIG):
     }:
         raise InstallError('result outbox configuration differs')
     database = absolute_path(data['database_path'], 'database path')
+    database = isolation_database(database, gid)
     ready = absolute_path(data['ready_path'], 'ready path')
     delivered = absolute_path(data['delivered_path'], 'delivered path')
     if ready == delivered or ready.parent != delivered.parent:

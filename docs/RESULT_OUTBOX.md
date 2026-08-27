@@ -93,4 +93,32 @@ and 15 lifecycle batches for 1,473 incidents on the first isolated pass, then
 exact zero-write reuse on repeat. The source hash stayed unchanged,
 `quick_check=ok`, and `journal_mode=delete`. The guarded upgrader now waits for
 the immediate post-enable timer cycle to finish successfully before acceptance.
-Production v2 activation and 15 later natural cadences remain pending.
+## Item-42 production closure
+
+The exact published selective candidate passed the root-owned release suite and
+read-only predecessor preflight, then activated under a new protected backup.
+Both the explicit outbox cycle and the timer's immediate post-enable cycle
+passed. A fresh baseline taken after those activation-generated runs recorded
+15 consecutive later timer-only cycles; every cycle produced snapshot, result,
+and lifecycle `PASS` markers with zero SQLite-open or failure markers.
+
+The live projection was 8,589,312 bytes, contained exactly ten tables, and
+reported `quick_check=ok` plus rollback-journal mode. The root-protected source
+also reported `quick_check=ok`. All five application timers were enabled and
+active, the sender retained its unchanged write-only transport and explicit
+source-database isolation, and the collector gate retained zero restarts with
+an integrity-clean ledger.
+
+A bounded sender-timer pause allowed the collector's ordinary settling window
+to reach zero incoming files. The complete 1,232-file GX10 delivered inventory
+then matched all 1,232 immutable collector ledger rows by filename, SHA-256,
+and byte size. The already-enabled sender timer was immediately restarted; its
+normal cycle settled successfully and the configured-active verifier passed.
+No result, lifecycle record, database row, credential, transport identity,
+collector schema, model, dashboard, or unrelated schedule was changed.
+
+The final audit also corrected a public sender-verifier assumption: when the
+snapshot configuration is present, the verifier and clean installer resolve
+the original live database as the sender's inaccessible path while requiring
+the outbox database to equal the configured snapshot. Two regressions bring the
+GX10 suite to 223 tests. The installed sender sandbox itself did not change.

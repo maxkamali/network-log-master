@@ -663,3 +663,6 @@ Consequence:
   in two seconds while reproducing 652 results and 1,473 incidents
 - the guarded upgrader must wait for the long-boot timer's immediate first
   scheduled cycle rather than assuming enablement is quiescent
+- the sender remains unable to access the original live database; its installer
+  and verifier resolve that isolation target through the validated snapshot
+  configuration without changing the installed sender sandbox

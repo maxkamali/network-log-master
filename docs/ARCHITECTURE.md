@@ -31,6 +31,7 @@ flowchart LR
         incidents["Canonical projection<br/>and incident correlation"]
         reasoning["Selected incident assessment<br/>through local Gemma"]
         triage["Hidden uncovered-event triage<br/>through local Gemma"]
+        snapshot["Selective transactional<br/>outbox snapshot"]
         outbox["Validated AI result outbox"]
         lifecycle["Changed incident<br/>lifecycle outbox"]
         sender["Recurring one-file sender"]
@@ -45,8 +46,10 @@ flowchart LR
     ingest --> triage
     triage -->|validated positive only| incidents
     incidents --> reasoning
-    incidents --> lifecycle
-    reasoning --> outbox
+    incidents --> snapshot
+    reasoning --> snapshot
+    snapshot --> lifecycle
+    snapshot --> outbox
     lifecycle --> sender
     outbox --> sender
     sender -->|write-only file transport| gate
@@ -70,12 +73,14 @@ Collector: Vector -> raw ClickHouse
                                                       read-only file transport
                                                                    v
 GX10: replay-safe ingest -> canonical projection
-                                  |-> deterministic incident engine -> lifecycle outbox
-                                  |          \-> selected assessment -> AI result outbox
+                                  |-> deterministic incident engine
+                                  |          \-> selected assessment
                                   |
                                   \-> uncovered-event triage
                                              \-> validated positive -> incident engine
 
+                       selective transactional outbox snapshot
+                                           |
                          lifecycle outbox + AI result outbox
                                            |
                                   recurring sender
@@ -131,7 +136,7 @@ Owns:
 
 GX10 is intentionally not the authoritative raw-log archive, dashboard server, or direct ClickHouse writer.
 
-Current production has independent GX10 schedules for read-only backlog fetch and replay-safe local SQLite ingest, canonical projection and deterministic incident correlation, bounded packet creation and strict local-model invocation, AI-result/lifecycle outbox projection, and recurring result delivery. Reasoning results remain append-only and nonauthoritative. The sender uses a dedicated write-only collector identity and cannot access ClickHouse directly.
+Current production has independent GX10 schedules for read-only backlog fetch and replay-safe local SQLite ingest, canonical projection and deterministic incident correlation, bounded packet creation and strict local-model invocation, selective transactional outbox snapshot/projection, and recurring result delivery. The snapshot isolates strict outbox readers from the mutable WAL database while retaining one consistent ten-table view. Reasoning results remain append-only and nonauthoritative. The sender uses a dedicated write-only collector identity and cannot access ClickHouse directly.
 
 ## Current data path
 

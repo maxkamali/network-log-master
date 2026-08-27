@@ -179,6 +179,46 @@ class ResultSenderManagementTests(unittest.TestCase):
         )
         self.assertNotIn('spool-reader.key', text)
 
+    def test_snapshot_layout_keeps_source_database_hidden(self):
+        snapshot = self.root / 'snapshot.sqlite3'
+        source = self.root / 'source.sqlite3'
+        config = self.root / 'outbox-snapshot.json'
+        config.write_text(
+            json.dumps(
+                {
+                    'snapshot_database_path': str(snapshot),
+                    'source_database_path': str(source),
+                }
+            ),
+            encoding='utf-8',
+        )
+        for module in (self.installer, self.verifier):
+            with mock.patch.object(module, 'validate_file'):
+                self.assertEqual(
+                    module.isolation_database(snapshot, 1000, config),
+                    source,
+                )
+
+    def test_snapshot_layout_rejects_unbound_outbox_database(self):
+        config = self.root / 'outbox-snapshot.json'
+        config.write_text(
+            json.dumps(
+                {
+                    'snapshot_database_path': str(self.root / 'other.sqlite3'),
+                    'source_database_path': str(self.root / 'source.sqlite3'),
+                }
+            ),
+            encoding='utf-8',
+        )
+        for module in (self.installer, self.verifier):
+            with (
+                mock.patch.object(module, 'validate_file'),
+                self.assertRaisesRegex(ValueError, 'snapshot layout differs'),
+            ):
+                module.isolation_database(
+                    self.root / 'snapshot.sqlite3', 1000, config
+                )
+
     def test_verifier_distinguishes_inactive_and_active_timer_state(self):
         state = {'user': 'network-log-agent', 'group': 'network-log-agent'}
 

@@ -12,7 +12,7 @@ The public collector and GX10 rebuild packages, component runbooks, cross-system
 
 ## Current operational addendum
 
-The working two-server application is complete through item 41 with no numbered
+The working two-server application is complete through item 42 with no numbered
 `NEXT` item. Post-rebuild production gates activated deterministic incidents,
 bounded Gemma reasoning, hidden fail-closed review of uncovered important
 events, replay-protected AI/lifecycle result return, ClickHouse ingestion, the
@@ -37,7 +37,8 @@ The gate validates:
 - workstation-private paths
 - IPv4 literals limited to loopback/unspecified, documentation networks, and reviewed non-address version literals
 - local Markdown link targets
-- exactly one numbered `NEXT` in `docs/CURRENT_STATE.md`
+- exactly one numbered `NEXT` while work remains, or zero only in an explicitly
+  completed `docs/CURRENT_STATE.md`
 - sensitive paths and secret/private-address patterns across every commit reachable from all refs
 - one local branch (`main`) and zero tags
 
@@ -95,7 +96,8 @@ The later production-normalizer work advanced after the rebuild-acceptance check
 - GX10 natural local result-outbox catch-up: `PASS`; reasoning naturally advanced 15→16 successful results and the immediately following outbox cadence created exactly one 2378-byte file, reused 15, preserved the prior 15-file digest, produced 16-for-16 collector-gate-valid files, retained zero delivered/restarts, and used no credential/transport
 - GX10 stable outbox snapshot candidate: `PASS` locally and from an exact root-owned GX10 stage with 221 tests; captured legacy predecessor and live read-only upgrade preflight exact; active-WAL online-backup, rollback-journal publication, repeat replacement, bounded transient retry, corruption/symlink/interruption preservation, and strict service dependency tests pass; two protected-copy generations retained exact source bytes and produced `quick_check=ok` rollback-journal snapshots; production activation and 15 natural cadences remain pending
 - GX10 full-copy outbox snapshot activation: `ROLLED BACK SAFELY`; the explicit snapshot/outbox cycle passed, but a 2,817,204,224-byte/51-second copy plus immediate long-boot timer trigger exposed unacceptable recurring I/O and an activation-state race; the guarded failure path restored the exact predecessor unit/configuration/database binding and enabled timer, retained `quick_check=ok`, and quarantined interrupted candidate files under the root-only backup
-- GX10 selective outbox snapshot correction: `PASS` locally/exact-stage with 221 tests and exact predecessor preflight; one transaction copied only ten projection tables from a 2,815,123,456-byte protected source into 8,572,928 bytes in two seconds; result projection created 652 valid files, lifecycle projection created 15 batches for 1,473 incidents, repeat execution wrote zero bytes, the source hash remained exact, and the upgrader now waits for the immediate post-enable cycle; production v2 activation and 15 later natural cadences remain pending
+- GX10 selective outbox snapshot correction: `PASS` locally/exact-stage with 221 tests and exact predecessor preflight; one transaction copied only ten projection tables from a 2,815,123,456-byte protected source into 8,572,928 bytes in two seconds; result projection created 652 valid files, lifecycle projection created 15 batches for 1,473 incidents, repeat execution wrote zero bytes, the source hash remained exact, and the upgrader waits for the immediate post-enable cycle
+- GX10 selective outbox snapshot production closure: `PASS` after guarded v2 activation, explicit and immediate scheduled cycles, 15 consecutive later timer-only snapshot/result/lifecycle passes, zero open/failure signatures, a live ten-table 8,589,312-byte integrity-clean rollback-journal snapshot, source `quick_check=ok`, exact unchanged sender isolation, all five application timers enabled/active, healthy zero-restart collector gate, and exact 1,232-file delivered/immutable-ledger filename-digest-size parity; the two sender-verifier snapshot-layout regressions bring the GX10 suite to 223 tests
 - GX10 configured/active-verifiable sender candidate: `PASS` with 186 current local tests (and 185 at the last exact configured-inactive GX10 stage) after optional-key-comment, captured-private-runtime, canonical-render, and inactive/active-state regression corrections; exact legacy-fetch hash/AST binding, fixed-tool/key-role/pinned-host contracts, atomic config-last private-state installation, idempotent exact reuse, partial/divergent-state refusal, created-only failure cleanup, explicit disabled/inactive versus enabled/active timer verification, and no SFTP invocation during configuration
 - collector dedicated result-writer authorizer candidate: `PASS` with five local and five exact collector-staged tests covering single-line append, exact root-only predecessor backup, exact reuse, duplicate refusal, private-key-input refusal, and byte-for-byte rollback after injected SSH validation failure
 - configured-inactive production result sender: `PASS` with dedicated GX10 identity/pin/config, exact idempotent reuse, temporary-input removal, disabled/inactive zero-transport sender, exact collector predecessor-plus-one-line authorization, active outbox at 58 results/57 ready/zero delivered, zero deterministic lag, healthy original pipeline/result gate/Vector/ClickHouse, and published bounded first-live/replay plan

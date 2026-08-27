@@ -5,11 +5,11 @@ searchable log archive, durable incident state, local-AI review, and an
 operator-focused Grafana NOC queue.
 
 **Working-system status:** operational and feature-complete through project item
-41. Reliability item 42 is in progress to replace intermittent direct WAL reads
-in the GX10 result outbox with an atomic validated SQLite snapshot. The public
-rebuild packages are complete, although clean installation on two disposable
-servers was unavailable and remains explicitly unverified rather than being
-represented as passed.
+42. The GX10 result outbox now reads an atomic validated ten-table SQLite
+projection instead of opening the mutable WAL database from its strict sandbox.
+The public rebuild packages are complete, although clean installation on two
+disposable servers was unavailable and remains explicitly unverified rather
+than being represented as passed.
 
 ## What this application does
 
@@ -84,6 +84,7 @@ flowchart LR
         select["Deterministic wake policy"]
         triage["Hidden uncovered-event triage<br/>through local Gemma"]
         assess["Selected incident assessment<br/>through local Gemma"]
+        snapshot["Selective transactional<br/>outbox snapshot"]
         outbox["Lifecycle and AI-result outboxes"]
         sender["Bounded write-only sender"]
     end
@@ -99,8 +100,9 @@ flowchart LR
     triage -->|validated positive only| incidents
     incidents --> select
     select --> assess
-    incidents --> outbox
-    assess -->|structured assessment| outbox
+    incidents --> snapshot
+    assess -->|structured assessment| snapshot
+    snapshot --> outbox
     outbox --> sender
     sender -->|one file at a time| gate
     gate --> results
@@ -119,12 +121,16 @@ Collector: Vector -> raw ClickHouse
                   -> durable backlog -> normalizer -> verified handoff
                                                         | read-only
                                                         v
-GX10: ingest -> canonical events -> deterministic incidents -> lifecycle outbox
-                    |                    |                         |
-                    | uncovered review   | selected assessment     |
-                    +-------> local Gemma model -> AI result ------+
-                                                                  |
-                                                    write-only sender
+GX10: ingest -> canonical events -> deterministic incidents
+                    |                    | selected assessment
+                    | uncovered review   v
+                    +-------> local Gemma model
+                                         |
+                         selective transactional snapshot
+                                         |
+                              lifecycle + AI-result outboxes
+                                         |
+                                  write-only sender
                                                                   v
 Collector: validation + replay ledger -> ClickHouse -> Grafana -> NOC operator
 ```
@@ -184,7 +190,7 @@ contracts more reliably. See
 | Normalizer | Deterministic vendor-aware event normalization with capture-first fallback | [`components/normalizer/`](components/normalizer/) |
 | GX10 | Replay-safe ingest, canonical projection, deterministic incidents, local reasoning, side-channel triage, and result delivery | [`components/gx10/`](components/gx10/) |
 
-This reliability checkpoint reran 62 collector tests and 221 GX10 tests. The
+This reliability checkpoint reran 62 collector tests and 223 GX10 tests. The
 completed normalizer/handoff gate records 94 normalizer/worker tests and 14
 collector normalizer-package tests. Operational checkpoints also retain the
 GX10 filesystem contract and the public current-tree/history/link/ref-topology

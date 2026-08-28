@@ -133,6 +133,11 @@ Current validation policy includes:
 - rejected files are quarantined with a reason
 - the active version-1 ledger records immutable accepted filename/content identity beyond ready-file retention
 
+Accepted ready-result payloads are deliberately preserved until a future
+delivery-confirmed archive design is separately validated. Vector's file source
+therefore has an explicit 65,536-descriptor systemd limit rather than the
+inherited 1,024-descriptor process limit.
+
 Validated records are then ingested into ClickHouse and become available to Grafana.
 
 No historical GX10 application producer for this boundary was discovered. The reconstructed item-30 producer, outbox, dedicated write-only sender, collector validation/replay ledger, and ClickHouse ingestion path are active after protected first-live, exact-replay, divergent-conflict, natural recurring-delivery, and final conservation/provenance gates. The live original and enhanced AI incident dashboards read accepted records through the existing read-only Grafana datasource. New results project Device directly; immutable legacy records use the private run-to-device lookup where available. See `docs/RESULT_OUTBOX.md`, `docs/RESULT_TRANSPORT.md`, and `docs/GRAFANA.md`.
@@ -148,7 +153,7 @@ authoritative incidents      -> changed lifecycle batches
 
 The sender remains one-file-per-cycle and uses the existing write-only identity. The collector gate validates both record families, its immutable filename/content ledger applies to both, and Vector routes them to separate ClickHouse tables. Lifecycle records cannot enter `ai_updates` and AI records cannot enter `incident_updates`.
 
-The enhanced dashboard is the deterministic NOC queue. Active Events ignores the dashboard time range so unresolved non-interface work persists; Resolved Events uses `resolved_at` within the selected range. Interface entities are excluded from both windows. Interface Flaps is a separate read-only raw-log aggregation that shows only device/interface pairs with at least 10 exact interface-down transitions in the rolling preceding 60 minutes, regardless of the dashboard picker, and removes them automatically below threshold. Confirmed recovered BGP/OSPF/OSPFv3 incidents remain active for a 24-hour monitoring window, display `MONITORING`, and reuse the same incident/issue-occurrence counter if they relapse before resolution. Operators can search each window and filter Active/Resolved by severity. Resolution remains engine-driven; Grafana does not mutate incident state. See `docs/NOC_WORKFLOW.md`.
+The enhanced dashboard is the deterministic NOC queue. Active Events ignores the dashboard time range so unresolved non-interface work persists; Resolved Events uses `resolved_at` within the selected range. Interface entities are excluded from both windows. Interface Flaps is a separate read-only raw-log aggregation that shows only device/interface pairs with at least 10 exact interface-down transitions in the rolling preceding 60 minutes, regardless of the dashboard picker, and removes them automatically below threshold. Confirmed recovered BGP/OSPF/OSPFv3 incidents, including one-observation protocol candidates that expire without a second adverse observation, remain active for a 24-hour monitoring window, display `MONITORING`, and reuse the same incident/issue-occurrence counter if they relapse before resolution. Operators can search each window and filter Active/Resolved by severity. Resolution remains engine-driven; Grafana does not mutate incident state. See `docs/NOC_WORKFLOW.md`.
 
 ## Hidden AI detection side channel
 

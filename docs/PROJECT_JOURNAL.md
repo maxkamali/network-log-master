@@ -13259,3 +13259,74 @@ They are not recoverable and held no authoritative state. Both root-protected
 production rollback backups, the failed full-copy evidence retained under its
 backup, all delivered/accepted records, and every live application artifact
 remain intact.
+
+## 2026-08-27 - Post-closure result-ingestion and protocol-monitoring correction
+
+### Authorization and rollback boundary
+
+The operator authorized the production correction and requested a durable
+rollback point before any new change. The annotated Git tag
+`pre-collector-lifecycle-repair-20260827` was created at the pre-change
+published main commit and independently verified on GitHub before source or
+production changes. The tested release source was then published as
+`c9dfc98e4623623ab89c0034a1aac4b95066bc1a`. Both production deployments retain
+separate root-only predecessor backups; neither backup path nor any private
+connection or credential value is recorded here.
+
+### Diagnosis
+
+Read-only comparison found non-interface incidents shown as active in Grafana
+even though their GX10 authoritative rows were already resolved. The collector
+had more than 2,300 immutable accepted result JSONL files in its deliberately
+preserved ready cache, while the running Vector process had inherited a soft
+`RLIMIT_NOFILE` of 1,024. Vector therefore logged `Too many open files` while
+globbing/fingerprinting the ready source and while delivering lifecycle updates.
+The configured systemd upper limit was not the active process limit.
+
+Independent engine inspection also found that the existing 24-hour BGP/OSPF/
+OSPFv3 policy applied after `OPEN -> RECOVERING`, but a single protocol
+degradation could instead follow `CANDIDATE -> RESOLVED` after 15 minutes. That
+contradicted the required monitoring behavior and prevented a later relapse
+from being counted as another occurrence of the same monitored issue.
+
+### Implemented correction and validation
+
+The collector release adds only a root-owned Vector systemd drop-in with
+`LimitNOFILE=65536`; no Vector YAML, accepted result, ledger, ClickHouse table,
+dashboard, credential, or account changed. Deployment took a protected
+predecessor snapshot, restarted Vector, and would have removed only the newly
+installed drop-in and restored Vector automatically if restart validation had
+failed. It succeeded. Postcheck found Vector active with the 65,536 limit and
+more than 2,300 open ready-file descriptors—well below the new bound—with no
+new file-descriptor or lifecycle-sink errors after restart.
+
+The GX10 release advances the incident engine to version 3. It adds the
+append-only `CANDIDATE -> RECOVERING` transition for BGP/OSPF/OSPFv3 candidates:
+explicit recovery starts monitoring immediately, and a candidate deadline with
+no second adverse event starts monitoring at that deterministic deadline. A
+later adverse event reopens the same correlation and preserves occurrence and
+recurrence accounting; resolution occurs only after the 24-hour monitored
+period. Non-protocol candidate behavior is unchanged. The correlation and
+managed-AI release hash pins were updated atomically with the engine.
+
+The complete local GX10 suite passed 224 tests. Focused collector tests passed
+for the new installer/verifier contract; the unrelated normalizer package test
+cannot import under this VM's Python 3.9 because it requires the standard
+library dataclass `slots` support from newer Python. GX10 production deployment
+paused only the correlation timer, retained a protected predecessor copy,
+installed exact release bytes, ran a successful managed-correlation invocation,
+and restored the enabled/active timer. SQLite `quick_check` remained `ok`.
+No synthetic event was injected and historical incidents were not rewritten;
+therefore no existing row was falsely relabeled as version 3 merely to produce
+an artificial live proof.
+
+### Deferred retention design
+
+The ready cache remains intentionally preserved. A trial configuration showed
+that enabling global Vector acknowledgements would warn that the UDP source
+cannot support acknowledgements, so it was not deployed. A background archive
+or deletion policy was also deliberately not introduced: gate acceptance alone
+does not prove the exact file has durably reached ClickHouse, and moving it
+before that proof could create silent loss during a Vector restart. The larger
+descriptor limit restores safe current operation; a future delivery-confirmed,
+reversible archival design is a separately scoped change.

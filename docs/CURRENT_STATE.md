@@ -1,6 +1,6 @@
 # Current State
 
-Last verified project checkpoint: 2026-08-26.
+Last verified project checkpoint: 2026-08-27.
 
 This file is the authority for current execution order. Exactly one item is marked `NEXT` while project execution remains; a completed state has none.
 
@@ -63,6 +63,26 @@ signatures. The live 8,589,312-byte copy has exactly ten tables,
 isolation, all five application timers, collector health, and an exact
 1,232-file delivered-to-ledger inventory digest passed. The only failed GX10
 unit remains the unrelated preexisting stale Thunderbird snap mount.
+
+Post-closure result-ingestion and protocol-monitoring correction: `DONE`.
+The collector Vector process had inherited a soft 1,024-file descriptor limit
+while deliberately preserving more than 2,300 immutable accepted AI-result
+files. It therefore stopped discovering/ingesting a portion of lifecycle
+results. The live Vector service now has an exact systemd `LimitNOFILE=65536`
+override under a protected predecessor backup; it restarted successfully and
+reopened the preserved ready files. No ready payload, ledger row, ClickHouse
+row, dashboard, or credential was removed or changed. A separate
+delivery-confirmed archival design remains deferred: moving or deleting a
+ready file without a per-file ClickHouse delivery proof could cause data loss
+during a restart.
+
+GX10 incident-engine version 3 corrects the remaining OSPF/BGP/OSPFv3 edge
+case: a one-observation protocol candidate now enters `RECOVERING` instead of
+resolving after 15 minutes, then remains monitored for 24 hours. A relapse in
+that interval returns the same incident to `OPEN` and increments its existing
+occurrence/recurrence accounting. The release passed the complete GX10 test
+suite and a successful live managed-correlation invocation, with a protected
+predecessor copy retained. Existing historical rows were not rewritten.
 
 Post-closure hidden AI detection side channel: `DONE`. GX10 now batches deterministic signatures for uncovered severity 0–4 events plus novel/repeated severity-5 notices, asks the pinned local `gemma4:latest` model for one strict incident/ignore/insufficient decision per signature, and creates ordinary `event_signature` incidents only from validated positive decisions. Model failure retains a pending batch and never creates an incident. Positive incidents use the existing lifecycle, outbox, collector table, dashboard windows, search, and drilldown; no dashboard resource or query changed. Automatic learned coverage is limited to severity 0–3 and requires three consistent confidence-70+ decisions spanning at least 30 minutes with no contradictory decision. Production activated under an online protected SQLite backup after 215 tests, an exact staged-server pass, one safe length-limited shadow failure, and one 24-decision shadow success. Initial active evidence contains 33 incident and 15 ignore decisions, 35 ordinary lifecycle incidents, zero active learned rules, clean SQLite integrity, healthy GX10 schedules, and collector acceptance of the 45-record lifecycle batch.
 

@@ -2,7 +2,7 @@
 
 ## Status and authority boundary
 
-The version-1 incident engine completed execution-order item 25. Its private working-database-copy, cursor-reset replay, independent deterministic rebuild, and guarded unscheduled working-system migration gates pass. Item 26 later completed the separate managed production invocation gate: initial backfill and three scheduled zero-lag cadences passed while the original fetch/ingest timer continued advancing. The protected pre-migration backup remains retained. Item 36 advances the repository candidate to engine version 2 solely for the forward-only protocol-monitoring policy; production remains on the verified predecessor until that candidate is published and protected deployment passes.
+The version-1 incident engine completed execution-order item 25. Its private working-database-copy, cursor-reset replay, independent deterministic rebuild, and guarded unscheduled working-system migration gates pass. Item 26 later completed the separate managed production invocation gate: initial backfill and three scheduled zero-lag cadences passed while the original fetch/ingest timer continued advancing. The protected pre-migration backup remains retained. Item 36 introduced engine version 2's forward-only protocol-monitoring policy. The later protected version-3 corrective release extends that policy to one-observation BGP/OSPF/OSPFv3 candidates; it is active after complete-suite and live managed-correlation verification.
 
 The engine consumes only classification-version-4 rows created by the canonical normalized-field projector. It does not parse raw messages, infer identity with an LLM, call Ollama, or emit AI results. Canonical normalized records remain observation authority; deterministic SQLite state remains incident identity and lifecycle authority.
 
@@ -37,10 +37,12 @@ The permitted transitions are deliberately narrower than the diagram's visual gr
 - the first adverse observation creates `CANDIDATE`
 - an explicit down/failed/disabled/idle state transition opens immediately
 - other degradation requires a second adverse observation within 15 minutes of the first
-- a candidate with no qualifying second adverse observation resolves at its fixed 15-minute deadline
+- a non-protocol candidate with no qualifying second adverse observation resolves at its fixed 15-minute deadline
+- a BGP, OSPF, or OSPFv3 candidate with no qualifying second adverse observation instead enters `RECOVERING` at that deadline and begins 24-hour monitoring
 - recovery evidence moves an open incident to `RECOVERING`
+- recovery evidence for a BGP, OSPF, or OSPFv3 candidate likewise enters `RECOVERING` rather than resolving directly
 - adverse evidence during recovery reopens the same incident as a relapse
-- confirmed BGP, OSPF, and OSPFv3 recovery remains `RECOVERING` for 24 continuous healthy hours from the recovery transition; the dashboard presents this as `MONITORING`
+- BGP, OSPF, and OSPFv3 monitoring remains `RECOVERING` for 24 continuous healthy hours from either the recovery transition or the candidate deadline; the dashboard presents this as `MONITORING`
 - other recovering incidents retain the five-minute quiet-period rule
 - adverse evidence after resolution creates a new deterministic incident instance
 

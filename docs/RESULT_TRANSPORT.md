@@ -29,6 +29,13 @@ The gate verifies ledger ownership, mode `0640`, single-link metadata, schema ve
 
 At startup the gate validates every existing ready JSONL file. Missing rows are inserted before incoming enumeration; an existing row with different file evidence fails the entire service. This bootstraps historical ready files and recovers a crash after ready publication but before ledger commit.
 
+Ready payloads are currently preserved rather than archived or deleted. Vector
+keeps one descriptor for every discovered ready file, so its service has an
+explicit `LimitNOFILE=65536` override. This restores ingestion headroom without
+claiming that gate acceptance proves ClickHouse delivery. Any future archive or
+removal mechanism must prove exact per-file ClickHouse delivery first and be
+separately reversible.
+
 First acceptance uses this durable order:
 
 1. validate stable incoming metadata and exact bytes

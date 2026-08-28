@@ -20,7 +20,7 @@ DB = (
     if load_runtime_config is not None
     else None
 )
-ENGINE_VERSION = 2
+ENGINE_VERSION = 3
 PROJECTION_VERSION = 4
 CURSOR_KEY = "incident_engine_v1_last_event_id"
 BATCH_SIZE = 1000
@@ -71,6 +71,7 @@ SEVERITY_RANK = {
 ALLOWED_TRANSITIONS = {
     (None, "CANDIDATE"),
     ("CANDIDATE", "OPEN"),
+    ("CANDIDATE", "RECOVERING"),
     ("CANDIDATE", "RESOLVED"),
     ("OPEN", "RECOVERING"),
     ("RECOVERING", "OPEN"),
@@ -688,24 +689,62 @@ def update_incident_with_evidence(
             )
             transitions += 1
     elif status == "CANDIDATE" and kind == "recovery":
-        append_transition(
-            connection,
-            incident,
-            "CANDIDATE",
-            "RESOLVED",
-            row["id"],
-            "recovered_before_open",
-            row["timestamp"],
-            row["timestamp_epoch_ms"],
-        )
-        connection.execute(
-            """
-            UPDATE incidents
-            SET status = 'RESOLVED', resolved_at = ?, updated_at = ?
-            WHERE incident_id = ?
-            """,
-            (row["timestamp"], row["timestamp"], incident),
-        )
+        if uses_protocol_monitoring(updated):
+            append_transition(
+                connection,
+                incident,
+                "CANDIDATE",
+                "RECOVERING",
+                row["id"],
+                "protocol_candidate_recovery_monitoring",
+                row["timestamp"],
+                row["timestamp_epoch_ms"],
+            )
+            connection.execute(
+                """
+                UPDATE incidents
+                SET
+                    status = 'RECOVERING',
+                    recovering_at = ?,
+                    engine_version = ?,
+                    updated_at = ?
+                WHERE incident_id = ?
+                """,
+                (
+                    row["timestamp"],
+                    ENGINE_VERSION,
+                    row["timestamp"],
+                    incident,
+                ),
+            )
+        else:
+            append_transition(
+                connection,
+                incident,
+                "CANDIDATE",
+                "RESOLVED",
+                row["id"],
+                "recovered_before_open",
+                row["timestamp"],
+                row["timestamp_epoch_ms"],
+            )
+            connection.execute(
+                """
+                UPDATE incidents
+                SET
+                    status = 'RESOLVED',
+                    resolved_at = ?,
+                    engine_version = ?,
+                    updated_at = ?
+                WHERE incident_id = ?
+                """,
+                (
+                    row["timestamp"],
+                    ENGINE_VERSION,
+                    row["timestamp"],
+                    incident,
+                ),
+            )
         transitions += 1
     elif status == "OPEN" and kind == "recovery":
         append_transition(
@@ -801,7 +840,41 @@ def sweep_timeouts(
         else:
             deadline, reason = recovery_deadline(current)
         if deadline <= watermark_ms:
-            resolve_at_deadline(connection, current, reason, deadline)
+            if (
+                current["status"] == "CANDIDATE"
+                and uses_protocol_monitoring(current)
+            ):
+                occurred_at = iso_from_epoch(deadline)
+                append_transition(
+                    connection,
+                    current["incident_id"],
+                    "CANDIDATE",
+                    "RECOVERING",
+                    None,
+                    "protocol_candidate_monitoring",
+                    occurred_at,
+                    deadline,
+                )
+                connection.execute(
+                    """
+                    UPDATE incidents
+                    SET
+                        status = 'RECOVERING',
+                        recovering_at = ?,
+                        engine_version = ?,
+                        updated_at = ?
+                    WHERE incident_id = ?
+                    """,
+                    (
+                        occurred_at,
+                        ENGINE_VERSION,
+                        occurred_at,
+                        current["incident_id"],
+                    ),
+                )
+                refresh_context(connection, current["incident_id"])
+            else:
+                resolve_at_deadline(connection, current, reason, deadline)
             transitions += 1
     return transitions
 

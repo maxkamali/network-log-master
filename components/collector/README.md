@@ -377,6 +377,8 @@ The live transport verifier passed with `TRANSPORT_VERIFY=PASS`.
 - AI-result validation gate
 - result-gate service/timer
 - result-gate filesystem access override
+- Vector descriptor-limit override for the preserved immutable ready-result
+  cache
 - GX10 spool-retention implementation
 - retention service/timer
 

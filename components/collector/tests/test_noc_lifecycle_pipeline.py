@@ -64,6 +64,24 @@ class NocLifecyclePipelineTests(unittest.TestCase):
             grants,
         )
 
+    def test_ready_result_cache_has_explicit_descriptor_headroom(self):
+        installer = (
+            COLLECTOR / 'install/install-runtime.sh'
+        ).read_text(encoding='utf-8')
+        verifier = (
+            COLLECTOR / 'install/verify-runtime.sh'
+        ).read_text(encoding='utf-8')
+        dropin = (
+            COLLECTOR
+            / 'systemd/vector.service.d/50-result-ready-no-file-cap.conf'
+        ).read_text(encoding='utf-8')
+        self.assertIn('LimitNOFILE=65536', dropin)
+        self.assertIn(
+            'vector.service.d/50-result-ready-no-file-cap.conf',
+            installer,
+        )
+        self.assertIn('vector_nofile=65536', verifier)
+
 
 if __name__ == '__main__':
     unittest.main()

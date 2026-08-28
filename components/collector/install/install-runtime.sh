@@ -306,6 +306,7 @@ for path in \
     "$CERTBOT_DIR/renewal-hooks/deploy/10-grafana-cert.in" \
     "$SBIN_DIR/ai-results-gate" \
     "$SBIN_DIR/vector-ai-agent-retention-policy" \
+    "$SYSTEMD_DIR/vector.service.d/50-result-ready-no-file-cap.conf" \
     "$SYSTEMD_DIR/ai-results-gate.service" \
     "$SYSTEMD_DIR/ai-results-gate.timer" \
     "$SYSTEMD_DIR/vector-ai-agent-retention-policy.service" \
@@ -619,6 +620,20 @@ install \
 
 echo
 echo "=== INSTALL VECTOR CONFIGURATION ==="
+
+install \
+    -d \
+    -o root \
+    -g root \
+    -m 0755 \
+    /etc/systemd/system/vector.service.d
+
+install \
+    -o root \
+    -g root \
+    -m 0644 \
+    "$SYSTEMD_DIR/vector.service.d/50-result-ready-no-file-cap.conf" \
+    /etc/systemd/system/vector.service.d/50-result-ready-no-file-cap.conf
 
 install \
     -d \

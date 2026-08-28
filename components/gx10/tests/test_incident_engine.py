@@ -425,7 +425,7 @@ class IncidentEngineTests(unittest.TestCase):
             self.rows(
                 'SELECT status, occurrence_count, engine_version FROM incidents'
             ),
-            [('RECOVERING', 4, 2)],
+            [('RECOVERING', 4, self.engine.ENGINE_VERSION)],
         )
         self.assertEqual(
             self.rows(
@@ -516,7 +516,7 @@ class IncidentEngineTests(unittest.TestCase):
             [('RESOLVED',)],
         )
 
-    def test_candidate_timeout_and_suppressed_event(self):
+    def test_protocol_candidate_timeout_monitors_for_24_hours(self):
         start = 1787551200000
         self.add_event(
             start,
@@ -538,6 +538,33 @@ class IncidentEngineTests(unittest.TestCase):
         self.assertEqual(self.run_engine(), 0)
         self.assertEqual(
             self.rows('SELECT status FROM incidents'),
+            [('RECOVERING',)],
+        )
+        self.assertEqual(
+            self.rows(
+                """
+                SELECT reason FROM incident_transitions
+                ORDER BY transition_sequence DESC LIMIT 1
+                """
+            ),
+            [('protocol_candidate_monitoring',)],
+        )
+        self.assertEqual(
+            self.rows('SELECT COUNT(*) FROM incident_evidence')[0][0],
+            1,
+        )
+
+        self.add_event(
+            start + 24 * 60 * 60_000 + 16 * 60_000,
+            entity_type=None,
+            entity_key=None,
+            signal='observation',
+            state=None,
+            attention=0,
+        )
+        self.assertEqual(self.run_engine(), 0)
+        self.assertEqual(
+            self.rows('SELECT status FROM incidents'),
             [('RESOLVED',)],
         )
         self.assertEqual(
@@ -547,11 +574,52 @@ class IncidentEngineTests(unittest.TestCase):
                 ORDER BY transition_sequence DESC LIMIT 1
                 """
             ),
-            [('candidate_timeout',)],
+            [('protocol_monitoring_period',)],
+        )
+
+    def test_protocol_candidate_recovery_enters_monitoring(self):
+        start = 1787551200000
+        key = 'OSPF|router-a.example.invalid|1|192.0.2.20'
+        self.add_event(
+            start,
+            signal='degradation',
+            state='retransmissions',
+            protocol='ospf',
+            family='ospf',
+            entity_type='ospf_neighbor',
+            entity_key=key,
+        )
+        recovery = self.add_event(
+            start + 60_000,
+            signal='recovery',
+            state='up',
+            protocol='ospf',
+            family='ospf',
+            entity_type='ospf_neighbor',
+            entity_key=key,
+        )
+        self.assertEqual(self.run_engine(), 0)
+        self.assertEqual(
+            self.rows('SELECT status, occurrence_count FROM incidents'),
+            [('RECOVERING', 2)],
         )
         self.assertEqual(
-            self.rows('SELECT COUNT(*) FROM incident_evidence')[0][0],
-            1,
+            self.rows(
+                """
+                SELECT from_status, to_status, event_id, reason
+                FROM incident_transitions
+                ORDER BY transition_sequence
+                """
+            ),
+            [
+                (None, 'CANDIDATE', 1, 'first_adverse_evidence'),
+                (
+                    'CANDIDATE',
+                    'RECOVERING',
+                    recovery,
+                    'protocol_candidate_recovery_monitoring',
+                ),
+            ],
         )
 
     def test_candidate_deadline_precedes_late_recovery(self):

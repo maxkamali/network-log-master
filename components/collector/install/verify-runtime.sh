@@ -137,7 +137,22 @@ $SBIN_DIR/ai-results-gate /usr/local/sbin/ai-results-gate
 $SYSTEMD_DIR/ai-results-gate.service /etc/systemd/system/ai-results-gate.service
 $SYSTEMD_DIR/ai-results-gate.timer /etc/systemd/system/ai-results-gate.timer
 $SYSTEMD_DIR/ai-results-gate.service.d/10-rw-paths.conf /etc/systemd/system/ai-results-gate.service.d/10-rw-paths.conf
+$SYSTEMD_DIR/vector.service.d/50-result-ready-no-file-cap.conf /etc/systemd/system/vector.service.d/50-result-ready-no-file-cap.conf
 EOF
+
+vector_nofile="$(
+    systemctl show vector.service -p LimitNOFILE --value
+)"
+
+case "$vector_nofile" in
+    65536|65536:*)
+        ;;
+    *)
+        die "Vector descriptor limit differs"
+        ;;
+esac
+
+echo "vector_nofile=65536"
 
 echo
 echo "=== RETENTION CONTRACT ==="

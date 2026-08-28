@@ -13641,3 +13641,21 @@ waived disposable paired-host execution passed, that the external GX10 bundle
 can be regenerated from Git, or that the exact manual/API NOC sequence has been
 executed on fresh infrastructure. Those are explicit empirical/external-input
 boundaries, not missing documentation or hidden implementation memory.
+
+## 2026-08-28 - Final documentation publication verification
+
+The complete correction was committed as
+`5f56ed0a465e63a122c56ec71511f18ea29b3832` (`Make rebuild documentation
+execution-ready`) and published to GitHub `main`. An independent remote-ref read
+returned that exact commit.
+
+The annotated rollback tag `pre-documentation-final-20260828` was published as
+tag object `a481d57ec4ef89e4515d9ae3d1ced901d9c3d0bf` and independently peeled to the
+intended pre-change commit
+`c828f2b5bbb94af65d2f562e338cb119280e2fd3`.
+
+After the content commit, documentation validation passed again. The complete
+public current tree and reachable history passed with the required private
+external publication denylist, and the independent in-memory SSH-identifier
+denylist passed without printing its terms. No production system was contacted
+or changed during publication.

@@ -61,7 +61,8 @@ When importing code from another repository or live checkout:
 ## Continuity/documentation gates
 
 - [ ] `docs/CURRENT_STATE.md` accurately reflects current implementation state
-- [ ] `docs/CURRENT_STATE.md` contains exactly one item marked `NEXT`
+- [ ] `docs/CURRENT_STATE.md` contains exactly one numbered `NEXT` while work
+      remains, or an explicit completed-state declaration with none
 - [ ] the completed sub-section has an append-only entry in `docs/PROJECT_JOURNAL.md`
 - [ ] component `REBUILD_STATUS.md` is updated when its verified rebuild state changes
 - [ ] durable architecture decisions are reflected in `docs/DECISIONS.md`

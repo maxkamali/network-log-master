@@ -34,9 +34,9 @@ The service is a hardened non-root oneshot with no network access, a private dro
 
 ## Managed reasoning target units
 
-`network-log-gx10-reasoning.service` and `.timer` are deliberate item-29 implementation candidates, not rediscovered historical units. They preserve both active deterministic schedules unchanged and provide a third separately disableable `packet build -> one local inference` boundary.
+`network-log-gx10-reasoning.service` and `.timer` are deliberate item-29 implementation artifacts, not rediscovered historical units. They preserve both active deterministic schedules unchanged and provide a third separately disableable `packet build -> one local inference` boundary.
 
-The service is a hardened non-root oneshot with a three-minute timeout, explicit CPU/memory/task limits, write access limited by a private drop-in to the validated database parent, and address-family plus IP policy limited to Unix sockets and IPv4 loopback. The corrected timer uses a five-minute start-relative initial delay and five-minute inactive cadence, avoiding a boot-relative trigger that could be immediately due when enabled on a long-running host. Repository installation does not enable it; protected-copy, inactive-install/correction, initial bounded activation, and scheduled-cadence gates remain separate.
+The service is a hardened non-root oneshot with a three-minute timeout, explicit CPU/memory/task limits, write access limited by a private drop-in to the validated database parent, and address-family plus IP policy limited to Unix sockets and IPv4 loopback. The corrected timer uses a five-minute start-relative initial delay and five-minute inactive cadence, avoiding a boot-relative trigger that could be immediately due when enabled on a long-running host. Repository installation does not enable it; the separately protected inactive-install/correction, initial bounded activation, and scheduled-cadence gates passed on the working system.
 
 ## Ollama service
 

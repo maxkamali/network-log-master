@@ -249,7 +249,14 @@ CANDIDATE -> OPEN -> RECOVERING -> RESOLVED
 
 Incident state retains append-only evidence/transitions, first/last seen times, occurrence and canonical repeat counters, entity identity, current state, and exact 60-minute/180-minute/24-hour rolling context summaries.
 
-Confirmed BGP/OSPF/OSPFv3 incidents remain `RECOVERING` for 24 continuous healthy hours after recovery; operator presentation labels that state `MONITORING`. A correlated adverse relapse during the window reopens the same incident and increments its derived recurrence count. Other protocols retain the five-minute recovery quiet period, and unconfirmed candidates retain the 15-minute qualification deadline.
+BGP/OSPF/OSPFv3 incidents remain `RECOVERING` for 24 continuous healthy hours
+after recovery; operator presentation labels that state `MONITORING`. A
+one-observation protocol candidate that reaches its 15-minute qualification
+deadline also enters `RECOVERING` and starts the same 24-hour window rather than
+resolving. A correlated adverse relapse during the window reopens the same
+incident and increments its derived recurrence count. Non-protocol candidates
+still resolve at their 15-minute qualification deadline, and other open
+protocols retain the five-minute recovery quiet period.
 
 The local LLM consumes immutable incident packets and returns append-only structured analysis; it does not become the canonical incident database.
 

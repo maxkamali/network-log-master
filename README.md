@@ -36,8 +36,9 @@ driven by observed state, and the application does not make network changes.
 `AI Incident Analysis - Enhanced` is the operational queue:
 
 - **Active Events** shows unresolved non-interface incidents. Recovered
-  BGP/OSPF/OSPFv3 incidents remain in `MONITORING` for 24 continuous healthy
-  hours so a quick relapse reopens the same incident and increments its
+  BGP/OSPF/OSPFv3 incidents—and one-observation protocol candidates that reach
+  their qualification deadline—remain in `MONITORING` for 24 continuous
+  healthy hours so a quick relapse reopens the same incident and increments its
   occurrence count.
 - **Interface Flaps** shows a device/interface only after at least 10 exact
   interface-down transitions in the rolling preceding 60 minutes. Single downs,

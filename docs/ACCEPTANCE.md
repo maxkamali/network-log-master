@@ -112,7 +112,13 @@ The later production-normalizer work advanced after the rebuild-acceptance check
   production health; and zero installation, writer credential, or collector
   transmission
 - GX10 inactive managed result-outbox package: `PASS` in repository/exact-stage/private-copy rehearsal with 157 total tests, exact-hash runner, isolated no-network service, disabled timer, bounded write scope, guarded empty install, independent verification, exact installed-runner production/replay, unchanged copy source, and forced post-install failure cleanup
-- GX10 inactive managed result-outbox working-system install: `PASS` after safe public-default-path refusal/zero-target cleanup and exact private-runtime portability correction; 14 current results, zero ready/delivered files, disabled timer, never-invoked service, exact installed sources/configuration/ownership, effective private network/Unix-only/bounded-write scope, healthy zero-lag preexisting schedules, and zero credential/transport
+- GX10 inactive managed result-outbox working-system install: `PASS` after safe
+  public-default-path refusal/zero-target cleanup and exact private-runtime
+  portability correction; 14 then-current results, zero ready/delivered files,
+  disabled timer, never-invoked service, exact installed
+  sources/configuration/ownership, effective private network/Unix-only/bounded-
+  write scope, healthy zero-lag preexisting schedules, and zero
+  credential/transport
 - GX10 protected local result-outbox activator candidate: `PASS` after service-ownership/resume correction with 159 local/exact GX10-staged tests and two full retained-copy rehearsals proving exact five-table reasoning digest, 12-for-12 initial files, inactive/active cardinality verification, outbox timer enablement, reasoning timer restoration, unchanged copy, and zero credential/transmission; first working activation safely retained 15 files with timer disabled/reasoning restored before the verifier correction
 - GX10 protected local result-outbox activation: `PASS` as a historical
   activation checkpoint with exact reasoning digest preservation, 15 successful
@@ -128,7 +134,13 @@ The later production-normalizer work advanced after the rebuild-acceptance check
   full-copy activation rolled back safely and the selective-snapshot production
   closure below supersedes its then-pending activation/cadence work
 - GX10 full-copy outbox snapshot activation: `ROLLED BACK SAFELY`; the explicit snapshot/outbox cycle passed, but a 2,817,204,224-byte/51-second copy plus immediate long-boot timer trigger exposed unacceptable recurring I/O and an activation-state race; the guarded failure path restored the exact predecessor unit/configuration/database binding and enabled timer, retained `quick_check=ok`, and quarantined interrupted candidate files under the root-only backup
-- GX10 selective outbox snapshot correction: `PASS` locally/exact-stage with 221 tests and exact predecessor preflight; one transaction copied only ten projection tables from a 2,815,123,456-byte protected source into 8,572,928 bytes in two seconds; result projection created 652 valid files, lifecycle projection created 15 batches for 1,473 incidents, repeat execution wrote zero bytes, the source hash remained exact, and the upgrader waits for the immediate post-enable cycle
+- GX10 selective outbox snapshot correction: `PASS` locally/exact-stage with
+  221 tests and exact predecessor preflight; one transaction copied only ten
+  projection tables from a 2,815,123,456-byte protected source into 8,572,928
+  bytes in two seconds; result projection created 652 valid files, lifecycle
+  projection created 15 batches for 1,473 incidents, repeat execution wrote
+  zero bytes, the source hash remained exact, and the candidate upgrader was
+  designed to wait for its immediate post-enable cycle
 - GX10 selective outbox snapshot production closure: `PASS` after guarded v2 activation, explicit and immediate scheduled cycles, 15 consecutive later timer-only snapshot/result/lifecycle passes, zero open/failure signatures, a live ten-table 8,589,312-byte integrity-clean rollback-journal snapshot, source `quick_check=ok`, exact unchanged sender isolation, all five application timers enabled/active, healthy zero-restart collector gate, and exact 1,232-file delivered/immutable-ledger filename-digest-size parity; the two sender-verifier snapshot-layout regressions bring the GX10 suite to 223 tests
 - GX10 configured/active-verifiable sender candidate: `PASS` with the
   then-current 186-test local gate (and 185 at the last exact
@@ -162,6 +174,11 @@ GitHub verification during the acceptance run established:
 - zero public tags
 - remote default branch: `main`
 - public `main` matched the locally validated published checkpoint before the final acceptance changes
+
+That zero-tag result is historical evidence from the acceptance run. Later
+operator-requested rollback checkpoints introduced annotated tags; the current
+public gate permits only the constrained `pre-<scope>-YYYYMMDD` form documented
+above.
 
 The item-15 acceptance checkpoint was published and independently matched at:
 

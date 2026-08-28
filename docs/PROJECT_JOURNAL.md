@@ -13442,3 +13442,64 @@ and stale-summary gates passed. All 22 documentation/public-validator tests and
 `git diff --check` passed. The full current-tree, reachable-history, link,
 execution-authority, and rollback-tag public-safety gate passed before
 publication.
+
+## 2026-08-27 - Third semantic documentation audit
+
+### Scope and rollback
+
+Performed a third documentation-only scan from published checkpoint
+`0228ced42772d4b81cbbbfd6169d9bc2d5c54a51`. That commit is the exact rollback
+boundary for this pass. No production host, service, database, dashboard,
+account, credential, model, runtime file, or private operator input was read or
+changed.
+
+### Overlooked contradictions corrected
+
+- the collector overview still documented the superseded first-interface-event
+  queue rule; it now records the live rolling rule of at least ten exact down
+  transitions in 60 minutes and explicitly hides single or persistently down
+  ports
+- the current NOC/contract summaries omitted the version-3 rule that moves a
+  one-observation BGP/OSPF/OSPFv3 candidate into the 24-hour monitoring state at
+  its qualification deadline instead of resolving it
+- the two-server rebuild and GX10 clean-machine runbooks stopped at the
+  rediscovered base fetch/ingest system and incorrectly presented the later
+  normalizer, correlation, reasoning, triage, outbox, sender, and lifecycle/NOC
+  layers as absent or future; the runbooks now distinguish the base installer
+  from the separately guarded full current-system extension sequence
+- the reasoning-packet document still described its item-27 empty/unscheduled
+  checkpoint as current even though item 29 activated managed packet building
+  and inference
+- multiple decision records retained inactive-stage status after the managed
+  reasoning, result producer, recurring sender, and end-to-end provenance gates
+  passed; their historical evidence remains intact while current status now
+  points to the later gated activation
+- ADR-029's rejected full-database snapshot remained labeled an accepted
+  production candidate even though ADR-030 superseded it; it is now explicitly
+  marked superseded and retained as failure-safe design evidence
+- the normalizer and managed-correlation documents still called completed
+  activation steps the next/later gate, and three collector current-state
+  sections called operator-waived clean-machine execution a future gate; those
+  now distinguish completed work from retained empirical risk
+- historical zero-public-tag evidence was clarified against the current policy
+  that permits constrained annotated rollback tags, and the publication
+  checklist now allows either exactly one `NEXT` while work remains or an
+  explicit completed state with none
+
+### Maintainability hardening
+
+The documentation validator now protects the current interface threshold,
+one-observation protocol monitoring, managed reasoning activation, full
+two-server reconstruction scope, post-base GX10 phase, active sender status,
+waived clean-host wording, and current-vs-historical decision statuses. A new
+negative test proves missing current-contract language fails validation. The
+combined documentation/public-validator suite is now 23 tests.
+
+### Validation
+
+- documentation entry path, local links/anchors, document shape, complete
+  reference index, stale-summary rejection, and current-contract checks passed
+- all 23 documentation/public-validator tests passed
+- `git diff --check` passed
+- the full current-tree, all-reachable-history, link, execution-authority, and
+  rollback-tag topology public-repository gate passed

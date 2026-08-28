@@ -2,7 +2,9 @@
 
 The normalizer converts capture-first records into deterministic structured network observations while preserving raw replayability.
 
-This directory is the active development home for the normalizer inside the master repository. Its standalone repository history was imported here with a history-preserving Git subtree merge.
+This directory is the canonical source home for the normalizer inside the
+master repository. Its standalone repository history was imported here with a
+history-preserving Git subtree merge.
 
 Consolidation checkpoint:
 

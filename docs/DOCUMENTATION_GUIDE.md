@@ -43,9 +43,11 @@ decide which one may own a changed fact.
   [`AI_DETECTION_SIDE_CHANNEL.md`](AI_DETECTION_SIDE_CHANNEL.md).
 - Result return: [`RESULT_OUTBOX.md`](RESULT_OUTBOX.md) and
   [`RESULT_TRANSPORT.md`](RESULT_TRANSPORT.md).
-- Rebuild and publication: [`TWO_SERVER_REBUILD.md`](TWO_SERVER_REBUILD.md),
-  [`ACCEPTANCE.md`](ACCEPTANCE.md), and
-  [`PUBLICATION_CHECKLIST.md`](PUBLICATION_CHECKLIST.md).
+- Rebuild, security, and publication:
+  [`TWO_SERVER_REBUILD.md`](TWO_SERVER_REBUILD.md),
+  [`ACCEPTANCE.md`](ACCEPTANCE.md),
+  [`PUBLICATION_CHECKLIST.md`](PUBLICATION_CHECKLIST.md), and root
+  [`SECURITY.md`](../SECURITY.md).
 - Planning and evidence: [`ROADMAP.md`](ROADMAP.md),
   [`DETECTION_COVERAGE_BACKLOG.md`](DETECTION_COVERAGE_BACKLOG.md), and
   [`PROJECT_JOURNAL.md`](PROJECT_JOURNAL.md).

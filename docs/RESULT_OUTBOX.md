@@ -57,9 +57,21 @@ The managed package contains an exact-hash runner, an independently disableable 
 
 An exact GX10-staged private-copy rehearsal installed into an isolated root without touching systemd, generated all 12 copy results through the installed runner, reused 11 ready plus one delivered without recreation, preserved the database hash, and removed every managed artifact after a forced post-install verification failure.
 
-The corrected working-system install derived the protected database/root without printing them, installed exact bytes, and independently verified 14 current successful results with zero ready/delivered files. The new timer is disabled, the service is inactive and never invoked, effective private networking/Unix-only/write scope passes, all three preexisting schedules remain healthy, and no credential or transmission exists.
+At the corrected inactive-install checkpoint, the working-system installer
+derived the protected database/root without printing them, installed exact
+bytes, and independently verified 14 then-current successful results with zero
+ready/delivered files. The timer was disabled, the service was inactive and
+never invoked, effective private networking/Unix-only/write scope passed, all
+three preexisting schedules remained healthy, and no credential or transmission
+existed at that stage.
 
-The protected activator now passes 159 local and exact GX10-staged tests plus two full retained-copy rehearsals. It temporarily disables only managed reasoning, hashes all five reasoning tables, runs exactly one local outbox cycle while the outbox timer is disabled, requires an exact post-cycle table digest and one ready file per successful result, enables the outbox timer only after independent verification, and restores reasoning in both success/failure paths.
+The subsequent protected activator candidate passed 159 local and exact
+GX10-staged tests plus two full retained-copy rehearsals. Its contract
+temporarily disables only managed reasoning, hashes all five reasoning tables,
+runs exactly one local outbox cycle while the outbox timer is disabled, requires
+an exact post-cycle table digest and one ready file per successful result,
+enables the outbox timer only after independent verification, and restores
+reasoning on both success and failure paths.
 
 The first working-system activation safely created 15 ready files, then stopped because the root-run independent verifier incorrectly compared service-owned file UID to its own UID. Failure handling left the outbox timer disabled, restored reasoning active/enabled, retained all exact ready files, and transmitted nothing. The corrected verifier validates against the derived service UID/GID; the activator accepts exact populated-but-disabled state and safely fills only any results added before resume. A new focused ownership test and second protected-copy rehearsal pass.
 
@@ -91,8 +103,9 @@ protected 2,815,123,456-byte source, it produced an 8,572,928-byte snapshot in
 two seconds. Both existing producers passed against that copy: 652 result files
 and 15 lifecycle batches for 1,473 incidents on the first isolated pass, then
 exact zero-write reuse on repeat. The source hash stayed unchanged,
-`quick_check=ok`, and `journal_mode=delete`. The guarded upgrader now waits for
-the immediate post-enable timer cycle to finish successfully before acceptance.
+`quick_check=ok`, and `journal_mode=delete`. The guarded candidate upgrader was
+changed to wait for the immediate post-enable timer cycle to finish successfully
+before acceptance.
 ## Item-42 production closure
 
 The exact published selective candidate passed the root-owned release suite and

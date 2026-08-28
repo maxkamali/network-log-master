@@ -92,4 +92,7 @@ The successful initial backfill ended at event ID `955874` with zero projection 
 
 Three later scheduled gates ended at event IDs `956240`, `956338`, and `956413`. Every gate independently passed SQLite/schema/unit/private-runtime verification with zero projection lag, zero incident lag, and zero service restarts. Counts were monotonic, third-gate state contained `9251` canonical rows, `24` incidents, `508` evidence rows, `551` transitions, and `4` active incidents, and the original fetch/ingest timer advanced during the observation window. A final prepublication verification later reached event ID `956995` with both lags still zero and both timers active.
 
-The next gate is deterministic LLM wake selection and compact incident-packet construction. No inference or result-return schedule is added by item 26.
+At item-26 closure, the next gate was deterministic LLM wake selection and
+compact incident-packet construction; item 26 itself added no inference or
+result-return schedule. Items 27 through 30 later completed the separately
+gated packet, inference, result-production, and recurring result-return path.

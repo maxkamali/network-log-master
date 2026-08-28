@@ -33,6 +33,7 @@ ENTRY_REFERENCES = {
         'CURRENT_STATE.md',
         'DOCUMENTATION_GUIDE.md',
     ),
+    'docs/DOCUMENTATION_GUIDE.md': ('../SECURITY.md', 'PROJECT_JOURNAL.md'),
 }
 STALE_SUMMARIES = {
     'README.md': ('complete through project item 42',),
@@ -43,9 +44,94 @@ STALE_SUMMARIES = {
         'natural timer cadence evidence remains pending',
         'production activation and 15 natural cadences remain pending',
     ),
-    'docs/DECISIONS.md': ('compatibility correction pending',),
+    'docs/DECISIONS.md': (
+        'compatibility correction pending',
+        'item 12n remains partial across the environment transition',
+        'accepted and implemented unscheduled',
+        'accepted; configured-inactive production gate passed',
+        'accepted as the item-42 production candidate',
+        'future work may proceed to production-normalizer integration design',
+    ),
+    'docs/CURRENT_STATE.md': (
+        'clean-machine end-to-end execution remains a later collector validation gate',
+    ),
     'components/gx10/REBUILD_STATUS.md': (
         'remaining local-producer stability gate',
+        'nothing is installed and no writer credential or transmission was used',
+        'no credential or transmission exists; timer-only cadence evidence is next',
+    ),
+    'components/collector/README.md': (
+        'queue placement uses `entity_type = interface`',
+        'current active rebuild-capture milestone',
+    ),
+    'docs/NORMALIZER_MIGRATION.md': (
+        'current_state.md` now advances to the managed projection',
+    ),
+    'docs/RESULT_OUTBOX.md': (
+        'the new timer is disabled',
+        'the guarded upgrader now waits',
+    ),
+    'docs/TWO_SERVER_REBUILD.md': (
+        'current reconstructed gx10 does not install or use',
+        'current gx10 rebuild has no discovered result producer',
+        'confirmation that no gx10 result producer',
+    ),
+    'components/gx10/CLEAN_MACHINE_RUNBOOK.md': (
+        'it remains a separate future implementation decision',
+    ),
+    'docs/RESULT_TRANSPORT.md': ('## remaining gates',),
+    'docs/REASONING_PACKETS.md': (
+        'the packet table is empty, the builder has never run',
+    ),
+    'docs/PUBLICATION_CHECKLIST.md': (
+        'contains exactly one item marked `next`',
+    ),
+    'components/collector/normalizer/README.md': (
+        'promotion of gx10 to normalized output is a separate later gate',
+    ),
+    'components/collector/REBUILD_STATUS.md': (
+        'not part of the clean-machine reconstruction path',
+    ),
+    'docs/MANAGED_CORRELATION.md': (
+        'the next gate is deterministic llm wake selection',
+    ),
+    'components/gx10/systemd/PROVENANCE.md': (
+        'item-29 implementation candidates',
+    ),
+}
+REQUIRED_CURRENT_CONTRACTS = {
+    'components/collector/README.md': (
+        'at least 10 exact interface-down transitions',
+        'a single down or a port that remains down is intentionally hidden',
+    ),
+    'docs/DATA_CONTRACTS.md': (
+        'one-observation protocol candidate',
+        'rather than\nresolving',
+    ),
+    'docs/REASONING_PACKETS.md': (
+        'item 29 later activated packet building',
+        'MANAGED_REASONING.md',
+    ),
+    'docs/TWO_SERVER_REBUILD.md': (
+        'current functional target',
+        'not a complete\nreconstruction of the current application',
+    ),
+    'components/gx10/CLEAN_MACHINE_RUNBOOK.md': (
+        'Phase 11: current post-base extensions',
+        'including Phase 11',
+    ),
+    'components/gx10/README.md': (
+        'not directly scheduled, but invoked by the active managed-reasoning owner',
+        'post-rediscovery implementation artifacts',
+    ),
+    'docs/DECISIONS.md': (
+        'item 12n is complete',
+        'accepted and active through item 30',
+        'current state is recorded in `docs/current_state.md`',
+    ),
+    'components/gx10/systemd/PROVENANCE.md': (
+        'item-29 implementation artifacts',
+        'scheduled-cadence gates passed on the working system',
     ),
 }
 
@@ -163,9 +249,18 @@ def validate_entry_contract() -> None:
                 raise ValueError(f'{relative}: stale current-summary wording')
 
 
+def validate_current_contracts() -> None:
+    for relative, required_values in REQUIRED_CURRENT_CONTRACTS.items():
+        text = (ROOT / relative).read_text(encoding='utf-8').casefold()
+        for value in required_values:
+            if value.casefold() not in text:
+                raise ValueError(f'{relative}: missing current contract wording')
+
+
 def main() -> int:
     try:
         validate_entry_contract()
+        validate_current_contracts()
         validate_links()
         validate_markdown_shape()
         validate_reference_index()

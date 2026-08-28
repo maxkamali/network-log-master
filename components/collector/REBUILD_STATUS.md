@@ -16,7 +16,7 @@ deferred. The current production baseline and residual risk are maintained in
 `docs/CURRENT_STATE.md`; the delivery-confirmed archive proposal is maintained
 only in `docs/ROADMAP.md`.
 
-The later production-normalizer extension is implemented separately under `components/collector/normalizer/`. It is not part of the clean-machine reconstruction path and is not invoked by that installer. Shadow mode was separately authorized and activated on 2026-08-23. Its catch-up/steady-state evidence and the forward-only handoff design/rehearsal passed. On 2026-08-24 the separate handoff package completed its guarded immutable-floor production activation with exact collector/GX10 hash and cardinality parity; the raw backlog and exact mount-only rollback remain preserved. See `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` and `docs/NORMALIZER_HANDOFF.md`.
+The later production-normalizer extension is implemented separately under `components/collector/normalizer/`. It is not part of the base collector installer; a full current-system reconstruction must also execute its separately guarded normalizer and handoff gates. Shadow mode was separately authorized and activated on 2026-08-23. Its catch-up/steady-state evidence and the forward-only handoff design/rehearsal passed. On 2026-08-24 the separate handoff package completed its guarded immutable-floor production activation with exact collector/GX10 hash and cardinality parity; the raw backlog and exact mount-only rollback remain preserved. See `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` and `docs/NORMALIZER_HANDOFF.md`.
 
 Item 34 is complete. The additive `observability.incident_updates` table, least-privilege grants, strict lifecycle gate, exclusive Vector route, and enhanced-only Grafana replacement are active under protected predecessors. Initial ingestion produced 804 latest incidents: 26 active non-flap events, 10 active flaps, and 768 resolved, with zero missing Device/entity values, zero lifecycle timestamp violations, and zero lifecycle rows in `ai_updates`. All six dashboard resources reread exact and all thirteen current original/enhanced queries passed; the original dashboard remained byte-exact.
 
@@ -437,6 +437,10 @@ Validated public-ref topology:
 
 - one public branch: `main`
 - zero public tags
+
+This is historical item-10 evidence. Later protected production work added
+annotated rollback tags; current topology policy permits only the constrained
+`pre-<scope>-YYYYMMDD` form and still requires the single `main` branch.
 
 Current tracked-state validation confirmed:
 

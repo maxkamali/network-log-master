@@ -39,6 +39,9 @@ Current state:
 - item 33 added a backward-compatible Device projection to new result files while preserving exact legacy ready/delivered bytes; its 192-test checkpoint passed and all production schedules retained zero restarts
 - item 34 added an inference-independent incident lifecycle producer, strict shared transport validation, and the collector NOC projection; its then-current suite passed 200 tests and both outbox/sender timers remained enabled and healthy
 - item 36 activated forward-only 24-hour monitoring for confirmed BGP/OSPF/OSPFv3 recovery, strict version-2 lifecycle recurrence projection with version-1 compatibility, and managed exact-hash upgrades
+- the later incident-engine version-3 correction extends that monitoring rule
+  to one-observation BGP/OSPF/OSPFv3 candidates; a candidate reaches
+  `RECOVERING` rather than resolving at its 15-minute deadline
 - the hidden AI detection side channel is active for uncovered important events; validated positives become ordinary deterministic incidents, failures remain pending, and guarded learned coverage is limited to severity 0–3
 - current validation status is maintained in `docs/CURRENT_STATE.md`; exact
   milestone test totals remain in the append-only project journal
@@ -70,14 +73,14 @@ Run the safe repository validation with:
 
 ## Captured application implementations
 
-The three rediscovered live custom applications and deliberate post-rediscovery deterministic candidates are under `sbin/` with deployment values removed:
+The three rediscovered live custom applications and deliberate post-rediscovery implementation artifacts are under `sbin/` with deployment values removed:
 
 - `fetch-spool.py`
 - `ingest-spool.py`
 - `enrich-events.py` — compatibility filename now containing the canonical normalized-field projector
 - `incident-engine.py` — deterministic incident identity, evidence, lifecycle, repeat, and rolling-context engine
 - `build-reasoning-packets.py` — deterministic wake selection and bounded append-only packet construction; no inference
-- `run-local-reasoning.py` — exact model/prompt/run binding and strict loopback structured inference; installed but not scheduled
+- `run-local-reasoning.py` — exact model/prompt/run binding and strict loopback structured inference; not directly scheduled, but invoked by the active managed-reasoning owner
 - `build-result-outbox.py` — installed read-only versioned successful-result projection to one canonical local JSONL file per run, including deterministic Device identity for new files and exact legacy-byte reuse
 - `build-incident-outbox.py` — installed read-only changed-incident projection to content-addressed lifecycle batches of at most 100 records and 256 KiB
 - `run-result-outbox.py` — installed exact-hash managed producer runner with no transport capability
@@ -131,7 +134,7 @@ The separately managed offline chain is:
 
 `correlation timer -> canonical projection -> deterministic incident engine`
 
-`install/install-applications.py` installs the application/configuration files and pipeline/correlation/reasoning units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting correlation or local reasoning. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database. `install/migrate-incident-engine.py`, `migrate-reasoning-packets.py`, `migrate-local-reasoning.py`, and `migrate-ai-triage.py` provide separately guarded existing-database extensions under protected backups. `install/install-correlation.py`, `activate-correlation.py`, and `verify-correlation.py` implement the deterministic managed-invocation gate documented in `docs/MANAGED_CORRELATION.md`. `install/install-managed-reasoning.py`, `activate-managed-reasoning.py`, and `verify-managed-reasoning.py` implement the bounded local-model schedule, one-call coordinator, hidden triage artifacts, and exact compatibility upgrades documented in `docs/MANAGED_REASONING.md` and `docs/AI_DETECTION_SIDE_CHANNEL.md`. `install/install-result-outbox.py`, `verify-result-outbox.py`, and `activate-result-outbox.py` implement the no-network local result-outbox boundary documented in `docs/RESULT_OUTBOX.md`; they install no sender or credential.
+`install/install-applications.py` installs the application/configuration files and pipeline/correlation/reasoning units atomically without overwriting divergent files. It validates database/config ownership and modes, runs `systemd-analyze verify`, and reloads systemd without enabling or starting correlation or local reasoning. `install/retire-transitional-enrichment.py` separately performs an exact-old-hash, no-scheduler-reference live upgrade with a root-only rollback copy; it neither runs the projector nor writes the application database. `install/migrate-incident-engine.py`, `migrate-reasoning-packets.py`, `migrate-local-reasoning.py`, and `migrate-ai-triage.py` provide separately guarded existing-database extensions under protected backups. `install/install-correlation.py`, `activate-correlation.py`, and `verify-correlation.py` implement the deterministic managed-invocation gate documented in `docs/MANAGED_CORRELATION.md`. `install/install-managed-reasoning.py`, `activate-managed-reasoning.py`, and `verify-managed-reasoning.py` implement the bounded local-model schedule, one-call coordinator, hidden triage artifacts, and exact compatibility upgrades documented in `docs/MANAGED_REASONING.md` and `docs/AI_DETECTION_SIDE_CHANNEL.md`. `install/install-result-outbox.py`, `verify-result-outbox.py`, `activate-result-outbox.py`, and `upgrade-result-outbox-snapshot.py` implement the no-network local result-outbox/snapshot boundary documented in `docs/RESULT_OUTBOX.md`. The separately gated `install-result-sender.py`, `configure-result-sender.py`, and `verify-result-sender.py` implement the write-only transport documented in `docs/RESULT_TRANSPORT.md`; private transport inputs remain outside the repository.
 
 See [`systemd/PROVENANCE.md`](systemd/PROVENANCE.md) for live/public hashes and
 the exact sanitation boundary.

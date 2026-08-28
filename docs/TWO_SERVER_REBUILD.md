@@ -37,6 +37,16 @@ component runbooks. Do not enable an extension by inference during a base
 rebuild, and do not claim its end-to-end result path until its dedicated gate
 has passed.
 
+A rebuild of the **current functional target** therefore has two layers:
+
+1. reconstruct and verify the captured base `fetch -> ingest` path
+2. install and independently activate the documented normalization handoff,
+   deterministic correlation, managed reasoning/hidden triage, selective
+   outbox snapshot, lifecycle/result producers, and write-only sender gates
+
+Completing only the first layer is a base-runtime rebuild, not a complete
+reconstruction of the current application.
+
 ## Host prerequisites
 
 Collector:
@@ -67,10 +77,13 @@ Prepare independent least-privilege key material for the two collector transport
    - role is read-only
 2. AI-result writer:
    - public authorized key is supplied to the collector rebuild
-   - role is write-only
-   - the current reconstructed GX10 does not install or use the matching private key because no GX10 result producer was discovered
+   - matching private key and pinned collector metadata are supplied privately
+     to the separately gated GX10 sender configuration
+   - role is write-only and cannot read collector logs or ClickHouse
 
-Do not reuse one keypair for both roles. Do not interpret creation of the result-writer boundary as proof of a working GX10 result producer.
+Do not reuse one keypair for both roles. Creating either identity alone is not
+proof of a working end-to-end transport; require the dedicated sender,
+acceptance-ledger, ClickHouse, replay, and conflict gates.
 
 ## Rebuild order
 
@@ -137,11 +150,32 @@ After at least one timer interval:
 
 Do not invoke canonical projection ad hoc merely to make the end-to-end path look longer. Follow the component runbook's separate inactive install, initial backfill, zero-lag verification, and correlation-timer activation gate.
 
-### 7. Verify the independent collector result boundary
+### 7. Activate and verify the post-base application gates
 
-The collector runtime verifier covers the write-only transport, validation gate, ClickHouse AI-update storage, and Grafana presentation prerequisites.
+First complete Phase 9 and Phase 10 of the GX10 runbook for deterministic
+correlation and managed local reasoning. Then follow the separately gated
+contracts in:
 
-Do not claim an end-to-end GX10 AI-result round trip. The current GX10 rebuild has no discovered result producer or observability-pipeline Ollama caller.
+- `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`
+- `docs/NORMALIZER_HANDOFF.md`
+- `docs/AI_DETECTION_SIDE_CHANNEL.md`
+- `docs/RESULT_OUTBOX.md`
+- `docs/RESULT_TRANSPORT.md`
+- `docs/NOC_WORKFLOW.md`
+
+Require the collector normalizer's isolated activation and verified forward-
+only GX10 handoff before retiring the raw view. Then require the selective
+outbox snapshot, AI-result and incident-lifecycle
+producers, disabled/inactive sender installation, dedicated collector writer
+authorization, private sender configuration, explicit active verification, and
+natural one-file delivery. Prove exact collector acceptance, one ClickHouse row
+per accepted result, lifecycle-only routing to `incident_updates`, replay
+isolation, divergent same-name conflict isolation, and dashboard queries.
+
+The public artifacts and protected working-system gates exist, but this entire
+sequence has not been executed on disposable clean hosts. Follow every current
+installer/verifier and stop on disagreement; do not treat the historical
+rediscovery absence as an instruction to omit reconstructed extensions.
 
 ## Required completion evidence
 
@@ -152,11 +186,19 @@ A disposable two-server rebuild is complete only when the operator records:
 - GX10 package/platform/preactivation/activation/runtime/Ollama pass markers
 - restricted backlog transport success
 - one successful automatic fetch/ingest cycle
+- normalized forward-only handoff identity/hash parity with raw rollback
+  retained
 - successful managed-correlation inactive install, initial backfill, and at least three zero-lag scheduled cadences
+- successful managed-reasoning and hidden-triage activation with bounded
+  fail-closed model behavior
+- successful selective snapshot, result/lifecycle outbox, configured sender,
+  one-file delivery, collector acceptance, ClickHouse provenance, replay, and
+  divergent-conflict gates
 - replay/idempotency result
 - rerun of both independent runtime verifiers
 - confirmation that the correlation timer is separately disableable and the original fetch/ingest timer remains healthy
-- confirmation that no GX10 result producer or application-specific Ollama caller was invented
+- confirmation that every reconstructed extension matches its versioned public
+  contract and remains independently disableable
 
 Record only public-safe outcomes and hashes. Never record private addresses, ports, usernames, credentials, keys, known-hosts contents, production log rows, or model blob contents.
 

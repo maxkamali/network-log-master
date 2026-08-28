@@ -106,9 +106,10 @@ NORMALIZER_SHADOW_INSTALL=STAGED
 normalizer_shadow_timer=disabled,inactive
 ```
 
-## Activation boundary
+## Historical item-19 activation boundary
 
-Item 19 does not provide an automatic activation command. A later explicitly authorized shadow-deployment step must:
+Item 19 did not provide an automatic activation command. Its separately
+authorized shadow-deployment step had to:
 
 1. revalidate live source metadata and current Vector health
 2. verify the platform inventory privately
@@ -118,7 +119,10 @@ Item 19 does not provide an automatic activation command. A later explicitly aut
 6. run the independent verifier with `--mode active`
 7. confirm Vector, ClickHouse, and the current GX10 backlog remain unchanged
 
-Promotion of GX10 to normalized output is a separate later gate.
+The later GX10 normalized-output promotion and handoff gates are complete.
+Current state and retained rollback boundaries are recorded in
+[`docs/CURRENT_STATE.md`](../../../docs/CURRENT_STATE.md) and
+[`docs/NORMALIZER_HANDOFF.md`](../../../docs/NORMALIZER_HANDOFF.md).
 
 ## Handoff staging procedure
 

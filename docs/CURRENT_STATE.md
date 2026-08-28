@@ -221,7 +221,7 @@ Detailed component state is in `components/collector/REBUILD_STATUS.md`.
 
 ## Grafana dashboard reconstruction
 
-Status: `DONE` for capture, restore mechanism, and clean-machine runtime-installer integration; clean-machine end-to-end execution remains a later collector validation gate.
+Status: `DONE` for capture, restore mechanism, and clean-machine runtime-installer integration. Clean-machine end-to-end execution was unavailable and waived by the operator; it remains empirically unverified.
 
 Six current dashboards are captured as Grafana 13 `dashboard.grafana.app/v2` resources.
 
@@ -253,7 +253,7 @@ The clean-machine runtime installer restores the six captured dashboards after H
 
 ## Grafana administrator bootstrap
 
-Status: `DONE` for clean-machine installer wiring; clean-machine end-to-end execution remains a later collector validation gate.
+Status: `DONE` for clean-machine installer wiring. Clean-machine end-to-end execution was unavailable and waived by the operator; it remains empirically unverified.
 
 `install-runtime.sh` now:
 
@@ -275,7 +275,7 @@ The clean-machine runtime installer itself has not been executed against the wor
 
 ## Package-install no-autostart protection
 
-Status: `DONE` for clean-machine package/runtime installer wiring and synthetic behavioral proof; clean-machine end-to-end execution remains a later collector validation gate.
+Status: `DONE` for clean-machine package/runtime installer wiring and synthetic behavioral proof. Clean-machine end-to-end execution was unavailable and waived by the operator; it remains empirically unverified.
 
 `install-packages.sh` establishes the package-install safety boundary before apt transactions begin:
 

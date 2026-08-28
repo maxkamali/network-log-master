@@ -2,9 +2,18 @@
 
 ## Status and authority boundary
 
-Execution-order item 27 is complete. The exact reasoning schema and packet-builder artifact are installed on the working GX10 system under a new protected pre-reasoning backup. The packet table is empty, the builder has never run on the working database, and no service or timer invokes it.
+Execution-order item 27 established the deterministic schema and packet-builder
+boundary. At item-27 closure, the new production table was empty and the
+builder was deliberately unscheduled. Item 29 later activated packet building
+only through the independently managed reasoning schedule; that current owner
+is documented in [`MANAGED_REASONING.md`](MANAGED_REASONING.md). Packet identity,
+wake policy, bounded content, and append-only behavior remain authoritative
+here.
 
-The candidate converts deterministic incident state into an append-only queue of compact reasoning packets. It does not call Ollama, select a model, define a prompt, accept model output, write to the collector, or alter incident identity/lifecycle truth.
+The builder converts deterministic incident state into an append-only queue of
+compact reasoning packets. It does not call Ollama, select a model, define a
+prompt, accept model output, write to the collector, or alter incident identity/
+lifecycle truth.
 
 ## Deterministic wake policy
 

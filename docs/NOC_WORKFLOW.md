@@ -10,7 +10,14 @@ The original `AI Incident Analysis` dashboard remains unchanged as the assessmen
 
 The enhanced dashboard has three mutually understandable operational windows:
 
-- **Active Events** — unresolved non-interface incidents. This query deliberately ignores the dashboard time picker, so a persistent incident remains visible until the deterministic engine resolves it. Confirmed recovered BGP/OSPF/OSPFv3 incidents remain here for 24 continuous healthy hours and display `MONITORING`. `Event Details` shows the latest stored AI summary when available and a deterministic event/entity/current-state description otherwise.
+- **Active Events** — unresolved non-interface incidents. This query
+  deliberately ignores the dashboard time picker, so a persistent incident
+  remains visible until the deterministic engine resolves it. Recovered BGP/
+  OSPF/OSPFv3 incidents and one-observation protocol candidates that reach
+  their qualification deadline remain here for 24 continuous healthy hours and
+  display `MONITORING`. `Event Details` shows the latest stored AI summary when
+  available and a deterministic event/entity/current-state description
+  otherwise.
 - **Interface Flaps** — a rolling raw-log rate view. A device/interface pair appears only after at least 10 `%ETHPORT-5-IF_DOWN_LINK_FAILURE` transitions in the preceding 60 minutes, independent of the dashboard time picker. A single down event, a port that goes down and stays down, and lower-rate reboot/bounce noise remain hidden. The row leaves automatically when its rolling count falls below 10.
 - **Resolved Events** — the latest state of resolved non-interface incidents whose `resolved_at` timestamp falls inside the selected dashboard range. Interface lifecycle history remains retained and searchable in raw logs, but is intentionally absent from this operator queue.
 

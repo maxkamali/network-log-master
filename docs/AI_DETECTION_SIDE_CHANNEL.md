@@ -164,7 +164,8 @@ Each model member contains bounded facts:
 - whether a prior valid decision exists
 
 No batch exceeds 32 KiB or 24 signatures. Overflow remains pending in priority
-order. Read-only sizing of the current 24-hour workload, after the two existing
+order. Design-time read-only sizing of the observed 24-hour workload, after the
+two existing
 explicit ICMPv6 suppression rules, found 2,630 eligible severity 0-3 rows,
 179 device/event-code groups, an average of 4.77 groups per five-minute window,
 and an observed maximum of 16. The cap therefore covers the observed peak with

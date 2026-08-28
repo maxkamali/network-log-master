@@ -52,6 +52,9 @@ class DocumentationValidatorTests(unittest.TestCase):
                 'DOCUMENTATION_GUIDE.md',
                 encoding='utf-8',
             )
+            (root / 'docs/DOCUMENTATION_GUIDE.md').write_text(
+                '../SECURITY.md PROJECT_JOURNAL.md', encoding='utf-8'
+            )
             (root / 'docs/AI_HANDOFF.md').write_text(
                 'complete through execution-order item 41', encoding='utf-8'
             )
@@ -80,6 +83,19 @@ class DocumentationValidatorTests(unittest.TestCase):
                     mock.patch.object(VALIDATOR, 'GUIDE', guide):
                 with self.assertRaisesRegex(ValueError, 'unindexed document'):
                     VALIDATOR.validate_reference_index()
+
+    def test_entry_contract_rejects_missing_current_contract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for relative, values in VALIDATOR.REQUIRED_CURRENT_CONTRACTS.items():
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('\n'.join(values), encoding='utf-8')
+            target = root / 'docs/TWO_SERVER_REBUILD.md'
+            target.write_text('current functional target\n', encoding='utf-8')
+            with mock.patch.object(VALIDATOR, 'ROOT', root):
+                with self.assertRaisesRegex(ValueError, 'current contract'):
+                    VALIDATOR.validate_current_contracts()
 
 
 if __name__ == '__main__':

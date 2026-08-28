@@ -288,7 +288,7 @@ Require zero projection lag, zero incident lag, successful service result, zero 
 
 ## Phase 10: managed local-reasoning activation
 
-Proceed only after managed correlation has passed its multi-cadence gate and the exact local-model candidate has separately passed synthetic and protected current-state-copy evaluation.
+Proceed only after managed correlation has passed its multi-cadence gate and the exact selected local-model version has separately passed synthetic and protected current-state-copy evaluation.
 
 Create a protected recovery directory, then install the managed reasoning binding while leaving its timer disabled:
 
@@ -329,7 +329,40 @@ Verify active state after multiple independent reasoning timer cadences:
         --active \
         --private-runtime
 
-Require zero deterministic lag, zero unreconciled `STARTED` runs, zero service restarts, consistent success/result counts, bounded one-run-per-cadence advancement, and continued health of the original fetch/ingest and correlation timers. Keep collector result return disabled; it is a later gate.
+Require zero deterministic lag, zero unreconciled `STARTED` runs, zero service restarts, consistent success/result counts, bounded one-run-per-cadence advancement, and continued health of the original fetch/ingest and correlation timers. Keep collector result return disabled until the separately guarded Phase 11 gates.
+
+## Phase 11: current post-base extensions
+
+Phase 10 is not the complete current application. The active production target
+also includes the hidden uncovered-event triage coordinator, selective
+transactional outbox snapshot, AI-result and incident-lifecycle producers, and
+the independently disableable write-only sender. These are deliberate
+reconstructed extensions, not rediscovered predecessor behavior.
+
+Complete them only through their dedicated guarded installers and verifiers:
+
+1. verify the managed-reasoning installation includes the exact triage schema,
+   coordinator, prompt, and fail-closed scheduling contract in
+   `docs/AI_DETECTION_SIDE_CHANNEL.md`
+2. install and activate the no-network result/lifecycle outbox with
+   `install-result-outbox.py`, `activate-result-outbox.py`, and
+   `verify-result-outbox.py`
+3. upgrade to and verify the selective transactional snapshot with
+   `upgrade-result-outbox-snapshot.py`; do not retain the rejected full-database
+   recurring-copy design
+4. install the result sender inactive, authorize its distinct public key on the
+   collector, configure the private GX10 identity/pin inputs, and require the
+   configured-inactive verifier before transport
+5. follow `docs/RESULT_TRANSPORT.md` for bounded first-live delivery, exact
+   replay, divergent same-name conflict isolation, active timer verification,
+   natural delivery, collector acceptance-ledger, and ClickHouse provenance
+6. verify deterministic lifecycle delivery and every current NOC query through
+   `docs/NOC_WORKFLOW.md`
+
+No disposable GX10 host has executed this complete extension sequence. Treat
+that as retained empirical risk: use the current scripts' `--help`, exact
+verifiers, private operator inputs, and protected rollback boundaries; stop on
+any mismatch instead of translating historical production commands by memory.
 
 ## Failure and rerun rules
 
@@ -339,12 +372,15 @@ Require zero deterministic lag, zero unreconciled `STARTED` runs, zero service r
 - A partially copied model store may be resumed only when every existing artifact is exact. Divergent files require operator investigation; the importer never replaces them.
 - Preactivation refuses a used database, spool content, SQLite sidecars, active units, enabled runtime units, unit drop-ins, or altered installed artifacts.
 - Do not use this runbook to repair or modify the working reference GX10.
-- Do not add a result-return producer as part of base reconstruction. It remains a separate future implementation decision.
+- Do not enable result return as part of base activation. It is a separately
+  implemented current extension and must pass Phase 11's independent gates.
 - The application installer places the item-26 correlation and item-29 reasoning runner/unit files, but the base clean-runtime activator deliberately leaves both timers disabled.
 - Use Phase 9 and `docs/MANAGED_CORRELATION.md` before Phase 10. Use Phase 10 and `docs/MANAGED_REASONING.md` only after deterministic correlation and local-model copy gates pass and operator authorization is explicit.
 
 ## Current validation status
 
-Repository-only synthetic validation is complete. End-to-end execution of this runbook on a disposable Ubuntu 24.04 arm64 GX10-class host remains outstanding because no such validation target is currently available.
+Repository-only synthetic validation is complete. End-to-end execution of this
+runbook—including Phase 11—on a disposable Ubuntu 24.04 arm64 GX10-class host
+remains outstanding because no such validation target is currently available.
 
 Do not report clean-machine validation complete until the full runbook has passed on that disposable target and the result has been journaled.

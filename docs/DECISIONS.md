@@ -236,12 +236,12 @@ Consequence:
 - direct credential availability is not blanket authorization for destructive or difficult-to-reverse actions
 - destructive/high-risk production changes, material architecture/scope decisions, and unresolved ambiguity requiring operator intent still require human involvement
 - existing publication, sanitation, validation, journal, and single-`NEXT` continuity rules remain unchanged
-- item 12N remains partial across the environment transition because its external-tool detector reported zero dependencies despite previously proven SFTP and Zstandard use; that narrow check must be corrected and rerun before 12N is accepted as complete
+- item 12N was partial at the environment transition because its first external-tool detector missed previously proven SFTP and Zstandard use; the corrected detector and dependency/provenance rerun later passed, so item 12N is complete
 - the durable transition/resume evidence is recorded in `docs/VM_HANDOFF.md`
 
 ## ADR-015 - Reconstruction preserves absent orchestration
 
-**Status:** Accepted
+**Status:** Accepted as a rediscovery/reconstruction boundary; later extensions were separately authorized and implemented
 
 Public rebuild artifacts and current-state documentation must reproduce only the runtime connections proven during rediscovery. The presence of an executable, service, model store, or transport boundary is not sufficient evidence that another component calls it.
 
@@ -253,13 +253,13 @@ Why:
 - the collector result-return boundary exists but has no discovered GX10 producer
 - silently connecting these separately present capabilities would create new architecture and mislabel it as recovered current behavior
 
-Consequence:
+Historical reconstruction consequence:
 
-- the GX10 rebuild installs deterministic enrichment but does not schedule it
-- the Ollama rebuild reproduces infrastructure/model state but creates no pipeline caller
-- the collector rebuild reproduces the write-only result boundary but the GX10 rebuild installs no result-writer key or producer
-- architecture, data-contract, operations, and rebuild documents distinguish current reconstructed behavior from future target behavior
-- future incident-engine, wake-policy, Ollama-caller, and result-producer work requires its own design, tests, migration, and rollback gates
+- the initial GX10 base rebuild installed deterministic enrichment but did not schedule it
+- the initial Ollama base rebuild reproduced infrastructure/model state but created no pipeline caller
+- the initial collector base rebuild reproduced the write-only result boundary while the GX10 base rebuild installed no result-writer key or producer
+- architecture, data-contract, operations, and rebuild documents distinguish rediscovered behavior from deliberately added behavior
+- the later incident engine, wake policy, Ollama caller, result producer, and sender received their own decisions, tests, migrations, activation evidence, and rollback gates; their current state is recorded in `docs/CURRENT_STATE.md`
 
 ## ADR-016 - Unavailable clean-host execution is waived with residual risk
 
@@ -278,7 +278,7 @@ Consequence:
 
 - clean collector, clean GX10, and clean two-server execution are recorded as `WAIVED BY OPERATOR`, not `PASS`
 - the rebuild/documentation milestone is accepted with explicit residual risk for project-sequencing purposes
-- future work may proceed to production-normalizer integration design
+- this waiver allowed the project to proceed to production-normalizer integration design; that later integration and handoff work is complete
 - no installer may be run against a working reference system merely to replace the missing disposable-host evidence
 - if suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded
 
@@ -351,7 +351,7 @@ Consequence:
 - enabled local suppression rules are overlaid deterministically in existing rule order
 - new projected rows use classification version 4; historical version-3 rows remain unchanged
 - a transactional cursor makes projection append-only, bounded, resumable, and idempotent
-- projection remains absent from the proven automatic `timer -> fetch -> ingest` chain until a later explicit scheduling decision
+- projection remained absent from the proven automatic `timer -> fetch -> ingest` chain until item 26 made a later explicit scheduling decision
 - the live retirement used exact old/new hashes, zero-scheduler-reference preconditions, atomic replacement, a root-only rollback copy, and an unchanged-database postcheck
 - item 26 later made that explicit scheduling decision through a separate managed correlation unit without altering the original fetch/ingest chain
 
@@ -359,7 +359,7 @@ Consequence:
 
 **Status:** Accepted and implemented
 
-GX10 incident identity, evidence membership, lifecycle, repeat accounting, and rolling context are owned by a deterministic SQLite engine over canonical classification-version-4 projections. A local model may later explain or summarize this state but cannot create identity or mutate lifecycle truth.
+GX10 incident identity, evidence membership, lifecycle, repeat accounting, and rolling context are owned by a deterministic SQLite engine over canonical classification-version-4 projections. A local model may explain or summarize this state but cannot create identity or mutate lifecycle truth; item 29 now invokes that model through a separately managed, nonauthoritative schedule.
 
 Why:
 
@@ -406,7 +406,7 @@ Consequence:
 
 ## ADR-022 - Reasoning wakes and packets are deterministic append-only facts
 
-**Status:** Accepted and implemented; later compatibility correction passed
+**Status:** Accepted and active through the separately managed item-29 reasoning schedule
 
 LLM wake selection and compact incident-packet construction are owned by a deterministic versioned builder over incident/evidence/transition state. The builder records immutable packet facts before any inference caller exists.
 
@@ -427,11 +427,11 @@ Consequence:
 - critical, lifecycle, interface-flap, OSPF-retransmission, and meaningful-update rules use fixed priorities and event-time cooldowns
 - initially resolved incidents are skipped; candidates require an independently qualifying critical or OSPF condition
 - each packet is canonical JSON, SHA-256 bound, maximum 32 KiB, and contains bounded fact slices without raw messages or source paths
-- protected copy/migration gates passed; the exact schema/builder are installed with zero packets/invocations/scheduler references, while inference and result production remain absent
+- at item-27 closure, protected copy/migration gates passed with the exact schema/builder installed and zero packets, invocations, or scheduler references; item 29 later activated the separately managed builder/inference schedule and item 30 activated result return
 
 ## ADR-023 - Local reasoning runs are version-bound, crash-safe, and nonauthoritative
 
-**Status:** Accepted and implemented unscheduled
+**Status:** Accepted and active through the separately managed item-29 reasoning schedule
 
 Each local-model invocation is bound to one immutable reasoning packet, exact captured model manifest/config, exact prompt/output-schema hashes, and an attempt number. A durable run reservation is committed before contacting loopback Ollama; only strict structured output may become an append-only result.
 
@@ -483,7 +483,7 @@ Consequence:
 
 ## ADR-025 - Result projection is read-only, one-run-per-file, and provenance-complete
 
-**Status:** Accepted; repository/protected-copy gates complete
+**Status:** Accepted and active through the item-30 result-return path and item-42 snapshot hardening
 
 Successful append-only reasoning results are projected through a separate versioned read-only producer. Version 1 emits exactly one canonical newline-terminated JSON record per file and derives the public filename from a truncated SHA-256 of the run ID.
 
@@ -505,10 +505,10 @@ Consequence:
 - the repository/exact GX10 stage and protected-copy gates pass with 151 tests, 12-for-12 result generation, one simulated delivered transition, and exact 11-ready/one-delivered replay
 - the separately managed package adds an exact-hash runner, private-network/Unix-only oneshot, disabled timer, guarded empty installer, independent verifier, and complete failure cleanup; its isolated exact-tree rehearsal passes with 157 tests
 - exact producer/runner/service/timer/configuration plus ready/delivered directories are installed; corrected protected activation retains 15 exact collector-valid ready files, zero delivered, and an active no-network timer
-- no writer credential or sender is installed, and the boundary has not connected or transmitted to the collector
-- local activation must pause only managed reasoning, bind all five reasoning tables to one before/after digest, run exactly one producer cycle while the outbox timer is disabled, enable that timer only after cardinality verification, and restore reasoning on every path
-- local production is accepted only after multiple natural exact-no-op cadences and one natural reasoning-success/outbox-file catch-up preserve all prior file bytes
-- a later sender must define durable acknowledgment semantics before it may remove or retransmit a local ready file
+- at the inactive item-30 staging boundary, no writer credential or sender was installed and no collector transmission had occurred
+- local activation paused only managed reasoning, bound all five reasoning tables to one before/after digest, ran exactly one producer cycle with the outbox timer disabled, enabled that timer only after cardinality verification, and restored reasoning on every path
+- local production passed multiple natural exact-no-op cadences and one natural reasoning-success/outbox-file catch-up while preserving all prior file bytes
+- ADR-027 and item 30 later supplied and activated the separately gated durable-acknowledgment sender; ADR-030 and item 42 hardened the producer's read snapshot without changing this projection contract
 
 ## ADR-026 - Collector acceptance identity is durable beyond ready-file retention
 
@@ -533,11 +533,11 @@ Consequence:
 - exact and divergent replays are both quarantined with different reasons and never republished to ready
 - the ledger remains authoritative after a ready file is removed, so deterministic sender replay cannot create a second ClickHouse ingestion
 - the sender may move a local ready file to delivered after successful transport completion; collector acceptance/rejection remains independently observable
-- installation and production sender transmission remain separate gates
+- installation and production sender transmission were separate gates; item 30 later completed the recurring sender and end-to-end acceptance/provenance gates
 
 ## ADR-027 - Result sending is single-file, exact-byte, and transport-acknowledged
 
-**Status:** Accepted; configured-inactive production gate passed
+**Status:** Accepted and active through item 30
 
 The GX10 sender transmits at most one oldest ready result per cycle under the same lock used by the no-network producer. It uploads the existing canonical file under its unchanged deterministic basename and moves it locally to delivered only after the bounded SFTP process returns success.
 
@@ -567,6 +567,7 @@ Consequence:
 - partial or divergent private state is refused; postinstall verification failure removes only newly created inputs; exact existing state is reusable
 - configured verification requires exact private metadata/values/pin plus the unchanged disabled/inactive package and active outbox, and neither configuration nor verification invokes SFTP
 - collector authorization appends only the matching public Ed25519 key after preserving exact predecessor bytes in a root-only backup; duplicate/divergent state is refused, SSH configuration is validated without restart, and a later failure restores the predecessor exactly
+- item 30 subsequently passed first-live, exact-replay, divergent-conflict, recurring-schedule, natural-delivery, collector-acceptance, and ClickHouse-provenance gates; the current sender is active
 
 ## ADR-028 - Gemma remains selected after repeatable Nemotron comparison
 
@@ -591,7 +592,7 @@ Consequence:
 
 ## ADR-029 - Outbox projection reads an atomic rollback-journal snapshot
 
-**Status:** Accepted as the item-42 production candidate
+**Status:** Superseded by ADR-030 after the first production cycle; retained as failure-safe design evidence
 
 The result and deterministic-lifecycle outbox producers read a fresh SQLite
 online-backup snapshot rather than opening the mutable WAL database directly

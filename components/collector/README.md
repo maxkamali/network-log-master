@@ -1,8 +1,11 @@
 # Collector Component
 
-The collector/log-server component is the durable observability control point and the current active rebuild-capture milestone.
+The collector/log-server component is the durable observability control point.
+Its numbered rebuild-capture milestone is complete.
 
-For the exact verified checkpoint and resume order, read [`REBUILD_STATUS.md`](REBUILD_STATUS.md) and then `docs/CURRENT_STATE.md` at the repository root.
+For the exact verified checkpoint and resume order, read
+[`REBUILD_STATUS.md`](REBUILD_STATUS.md) and then
+[`docs/CURRENT_STATE.md`](../../docs/CURRENT_STATE.md).
 
 ## Responsibilities
 
@@ -21,7 +24,18 @@ The collector owns:
 - long-lived data retention
 - unknown-event inventory and replay material
 
-The enhanced Grafana resource is the deterministic NOC queue over `observability.incident_updates`: Active Events, Interface Flaps, and Resolved Events each have server-side search; Active and Resolved also have server-side severity filtering. Queue placement uses `entity_type = interface` so even a first interface-down observation appears only under Interface Flaps. Active Event detail uses the latest stored AI summary when available and deterministic fallback otherwise. The item-36 candidate displays recovered BGP/OSPF/OSPFv3 incidents as `MONITORING` during their 24-hour deterministic window and presents distinct issue episodes from the version-2 recurrence projection. The original AI dashboard remains unchanged as the assessment-history fallback. See `docs/NOC_WORKFLOW.md`.
+The enhanced Grafana resource is the deterministic NOC queue over lifecycle
+state and raw-log evidence. Active Events and Resolved Events exclude every
+interface entity. Interface Flaps independently shows a device/interface only
+after at least 10 exact interface-down transitions in the rolling preceding 60
+minutes; a single down or a port that remains down is intentionally hidden.
+Every window has server-side search, while Active and Resolved also have
+server-side severity filtering. Active Event detail uses the latest stored AI
+summary when available and deterministic fallback otherwise. Recovered BGP/
+OSPF/OSPFv3 incidents display `MONITORING` during their 24-hour deterministic
+window and present distinct issue episodes from lifecycle producer version 2.
+The original AI dashboard remains unchanged as the assessment-history fallback.
+See [`docs/NOC_WORKFLOW.md`](../../docs/NOC_WORKFLOW.md).
 
 ## Rebuild objective
 
@@ -288,7 +302,12 @@ Do not execute `install-runtime.sh` against the working reference collector. It 
 
 `normalizer/` contains the separately gated production-normalizer shadow package. It reads settled `/var/spool/vector-ai` files without modifying them and writes atomic schema-version-1 normalized files plus a durable ledger under separate paths.
 
-This extension is not invoked by the clean-machine collector rebuild installer because the rebuild package preserves the reconstructed current behavior. Its own staging installer is guarded, verifies exact artifacts/dependencies, installs a hardened oneshot/timer, and deliberately leaves the timer disabled and inactive.
+This extension is not invoked by the base clean-machine collector installer.
+A complete reconstruction of the current functional system must follow its
+separate normalizer/handoff gates after the base collector is healthy. Its own
+staging installer is guarded, verifies exact artifacts/dependencies, installs a
+hardened oneshot/timer, and deliberately leaves the timer disabled and inactive
+until explicit activation.
 
 See [`normalizer/README.md`](normalizer/README.md) and
 [`docs/NORMALIZER_PRODUCTION_INTEGRATION.md`](../../docs/NORMALIZER_PRODUCTION_INTEGRATION.md).

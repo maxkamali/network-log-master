@@ -2,7 +2,15 @@
 
 ## Status
 
-Execution-order item 29 and the later result-return and hidden-triage extensions are complete. Exact published `incident-assessment-v2-r3` passed the historical 140-test item-29 gate, same-packet protected-copy inference, exact inactive upgrade, one fresh-backup protected production drain, and three natural timer cadences through the unchanged strict validator. Item 30 subsequently activated replay-protected result return. The current 215-test GX10 boundary uses `run-managed-ai.py` as the one-call coordinator: existing incident-assessment backlog has priority, otherwise the same five-minute managed slot may review one bounded uncovered-event batch. Deterministic lag is zero and the independent schedules remain healthy.
+Execution-order item 29 and the later result-return and hidden-triage extensions
+are complete. Exact published `incident-assessment-v2-r3` passed the historical
+140-test item-29 gate, same-packet protected-copy inference, exact inactive
+upgrade, one fresh-backup protected production drain, and three natural timer
+cadences through the unchanged strict validator. Item 30 subsequently activated
+replay-protected result return. The active boundary uses `run-managed-ai.py` as
+the one-call coordinator: existing incident-assessment backlog has priority;
+otherwise the same five-minute managed slot may review one bounded uncovered-
+event batch. Current validation status belongs in `docs/CURRENT_STATE.md`.
 
 The incident-assessment branch documented here remains this separately disableable chain:
 
@@ -96,7 +104,15 @@ Twenty-four focused item-29 tests proved:
 - separately disableable, hardened, loopback-only service/timer policy
 - explicit private-rehearsal transport forwarding without changing the production CLI path
 
-The historical item-29 gate passed `140` GX10 tests, including the item-28 generation-schema compatibility assertion. Protected current-production-state-copy rehearsal, unscheduled working-system installation, the exact inactive timer correction, protected initial production activation, bounded-backlog current-state-copy rehearsal, exact inactive runner upgrade, protected corrected resume, and the later prompt-compatibility correction all passed without weakening validation. The current complete GX10 suite passes `215` tests and includes the active item-30 result-return path plus the hidden-triage coordinator. Item 29 itself remains independently disableable from both later extensions.
+The historical item-29 gate passed `140` GX10 tests, including the item-28
+generation-schema compatibility assertion. Protected current-production-state-
+copy rehearsal, unscheduled working-system installation, the exact inactive
+timer correction, protected initial production activation, bounded-backlog
+current-state-copy rehearsal, exact inactive runner upgrade, protected corrected
+resume, and the later prompt-compatibility correction all passed without
+weakening validation. Later suites include the active item-30 result-return path
+and hidden-triage coordinator; their exact totals remain historical journal
+evidence. Item 29 remains independently disableable from both later extensions.
 
 ## Protected current-state-copy evidence
 

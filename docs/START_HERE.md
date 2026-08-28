@@ -10,17 +10,17 @@ If you are new to the application, begin with the root [`README.md`](../README.m
 
 Read and verify in this order before changing implementation:
 
-1. `docs/ARCHITECTURE.md` — understand the intended two-server system and ownership boundaries.
-2. `docs/CURRENT_STATE.md` — establish what is actually complete, what is incomplete, and the strict execution order. This file is the authority for the single `NEXT` item while work remains and the completed state when none remains.
-3. The relevant component rebuild statuses — `components/collector/REBUILD_STATUS.md` and `components/gx10/REBUILD_STATUS.md`; both component reconstruction milestones are closed.
-4. The latest entries in `docs/PROJECT_JOURNAL.md` — understand recent decisions, failed approaches, validation evidence, and checkpoint history.
-5. `docs/DECISIONS.md` — review durable architecture decisions that constrain implementation choices.
-6. `docs/DATA_CONTRACTS.md`, `docs/OPERATIONS.md`, and `docs/TWO_SERVER_REBUILD.md` — confirm data, operational, and cross-host rebuild contracts.
-7. `docs/ACCEPTANCE.md` — confirm what passed and which unavailable disposable-host executions were waived with residual risk.
-8. Component-specific documentation for the area being reviewed. For the completed result-return boundary, read `docs/RESULT_OUTBOX.md`, `docs/RESULT_TRANSPORT.md`, `components/gx10/README.md`, and `components/collector/REBUILD_STATUS.md`.
-9. `docs/DETECTION_COVERAGE_BACKLOG.md` — review important captured event types that still require deterministic parser and incident-lifecycle coverage.
-10. `docs/AI_DETECTION_SIDE_CHANNEL.md` — review the active hidden AI review of uncovered important events and the guarded severity 0-3 learned-coverage boundary.
-11. `docs/DOCUMENTATION_GUIDE.md` — when changing documentation, use the authority map and update checklist rather than duplicating current facts.
+1. [`ARCHITECTURE.md`](ARCHITECTURE.md) — understand the intended two-server system and ownership boundaries.
+2. [`CURRENT_STATE.md`](CURRENT_STATE.md) — establish what is actually complete, what is incomplete, and the strict execution order. This file is the authority for the single `NEXT` item while work remains and the completed state when none remains.
+3. The relevant component rebuild statuses — [`components/collector/REBUILD_STATUS.md`](../components/collector/REBUILD_STATUS.md) and [`components/gx10/REBUILD_STATUS.md`](../components/gx10/REBUILD_STATUS.md); both component reconstruction milestones are closed.
+4. The latest entries in [`PROJECT_JOURNAL.md`](PROJECT_JOURNAL.md) — understand recent decisions, failed approaches, validation evidence, and checkpoint history.
+5. [`DECISIONS.md`](DECISIONS.md) — review durable architecture decisions that constrain implementation choices.
+6. [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md), [`OPERATIONS.md`](OPERATIONS.md), and [`TWO_SERVER_REBUILD.md`](TWO_SERVER_REBUILD.md) — confirm data, operational, and cross-host rebuild contracts.
+7. [`ACCEPTANCE.md`](ACCEPTANCE.md) — confirm what passed and which unavailable disposable-host executions were waived with residual risk.
+8. Component-specific documentation for the area being reviewed. For the completed result-return boundary, read [`RESULT_OUTBOX.md`](RESULT_OUTBOX.md), [`RESULT_TRANSPORT.md`](RESULT_TRANSPORT.md), [`components/gx10/README.md`](../components/gx10/README.md), and [`components/collector/REBUILD_STATUS.md`](../components/collector/REBUILD_STATUS.md).
+9. [`DETECTION_COVERAGE_BACKLOG.md`](DETECTION_COVERAGE_BACKLOG.md) — review important captured event types that still require deterministic parser and incident-lifecycle coverage.
+10. [`AI_DETECTION_SIDE_CHANNEL.md`](AI_DETECTION_SIDE_CHANNEL.md) — review the active hidden AI review of uncovered important events and the guarded severity 0-3 learned-coverage boundary.
+11. [`DOCUMENTATION_GUIDE.md`](DOCUMENTATION_GUIDE.md) — when changing documentation, use the authority map and update checklist rather than duplicating current facts.
 12. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
 
 Do not infer a new execution order from the journal. `docs/CURRENT_STATE.md` is the execution authority.

@@ -66,7 +66,11 @@ The first working-system install safely stopped before preflight on a public-def
 
 Protected local activation passes after the service-ownership/resume correction. The exact five-table reasoning digest remained unchanged, 15 current results map to 15 service-owned collector-valid ready files, zero delivered, and the outbox timer is active with zero restarts. A coordinated closure reached zero projection/incident lag, restored pipeline/reasoning timers, and retained all schedules healthy. No credential or transmission exists; timer-only cadence evidence is next.
 
-Three consecutive natural outbox timer cadences at 11:48:44, 11:49:48, and 11:50:53 UTC each created zero, reused all 15, wrote zero bytes, and retained zero delivered/recovered/restarts. No service was invoked manually. Natural one-file catch-up after the pending reasoning backlog advances is the remaining local-producer stability gate.
+Three consecutive natural outbox timer cadences at 11:48:44, 11:49:48, and
+11:50:53 UTC each created zero, reused all 15, wrote zero bytes, and retained
+zero delivered/recovered/restarts. No service was invoked manually. The
+one-file catch-up described immediately below subsequently closed that
+local-producer stability gate.
 
 That local-only gate passed at 11:53:17–11:53:20 UTC: managed reasoning naturally advanced 15→16 results, then the natural outbox cadence created exactly one file, reused the prior 15, and wrote only the new 2378-byte record. The prior 15-file digest remained exact; all 16 files passed the collector gate, delivered/restarts remained zero, and no credential/transmission existed at that checkpoint. The later item-30 transport gates are summarized above.
 

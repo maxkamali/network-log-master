@@ -85,23 +85,60 @@ The later production-normalizer work advanced after the rebuild-acceptance check
 - forward-only GX10 handoff and rollback synthetic rehearsal: `PASS`
 - live GX10 handoff cutover: `PASS` with immutable-floor identity continuity, exact collector/GX10 hash and record-count parity, zero duplicate event identities, and retained raw-view rollback
 - transitional GX10 parser retirement: `PASS` with exact-hash replacement, zero scheduler references, canonical projection live-copy rehearsal, historical version-3 preservation, unchanged live database, and protected rollback
-- deterministic GX10 incident engine: `PASS` with 63 current tests, guarded schema/artifact migration, private live-copy execution, cursor-reset idempotency, independent exact-state reproduction, unscheduled working-system installation, protected pre-migration backup, unchanged automatic chain, and successful ordinary post-migration fetch/ingest cadence
+- deterministic GX10 incident engine: `PASS` with the then-current 63-test
+  milestone gate, guarded schema/artifact migration, private live-copy execution,
+  cursor-reset idempotency, independent exact-state reproduction, unscheduled
+  working-system installation, protected pre-migration backup, unchanged
+  automatic chain, and successful ordinary post-migration fetch/ingest cadence
 - managed GX10 correlation activation: `PASS` with 80 current GX10 tests, private-copy backfill/no-op/failure isolation, guarded inactive install, fail-closed production activation correction, full initial backfill, active zero-lag verification, three scheduled zero-lag cadences, zero correlation restarts, monotonic deterministic state, and continued original fetch/ingest timer advancement
 - deterministic GX10 wake/packet boundary: `PASS` with 94 current GX10 tests, fixed event-time policy/priority, bounded canonical packets, recursive raw/source-key exclusion, append-only tamper detection, protected production-state-copy build/no-op/replay/independent reproduction/threshold/lifecycle/rollback evidence, and guarded empty unscheduled working-system installation under protected backup
 - versioned GX10 local-reasoning boundary: `PASS` at item-28 closure with the then-current 115 GX10 tests, exact model/prompt/run/result provenance, strict structured output, calibrated synthetic OSPF/interface/BGP results, protected-copy success/invalid/unavailable/interrupted/no-op evidence, unchanged deterministic copy truth, and guarded empty unscheduled working-system installation with zero packet/model/prompt/run/result rows, zero scheduler references, and no production inference at that gate
-- managed GX10 reasoning activation: `PASS` with 140 current GX10 tests, exact separately disableable schedule, protected-copy and guarded activation gates, bounded backlog control, one safely preserved terminal invalid output, immutable portable prompt revision `r3`, exact inactive compatibility upgrade, fresh-backup protected resume, and three natural fixed-packet drain cadences with one success/result each, zero new failures/`STARTED` rows/restarts, deterministic zero lag, and healthy independent schedules
-- GX10 result-outbox repository/protected-copy candidate: `PASS` with 151 current GX10 tests locally and on an exact GX10-staged tree; one canonical collector-valid JSONL file per successful run; complete result and model/prompt/packet/request/run provenance; failure exclusion; shared-lock ready/delivered state with recreation suppression and duplicate-state refusal; divergence/lock/tamper/symlink refusal; atomic interruption/resume and strict partial recovery; 12-for-12 protected-copy creation followed by one simulated delivery and exact 11-ready/one-delivered reuse; unchanged copy and live production health; and zero installation, writer credential, or collector transmission
+- managed GX10 reasoning activation: `PASS` with the then-current 140-test
+  milestone gate, exact separately disableable schedule, protected-copy and
+  guarded activation gates, bounded backlog control, one safely preserved
+  terminal invalid output, immutable portable prompt revision `r3`, exact
+  inactive compatibility upgrade, fresh-backup protected resume, and three
+  natural fixed-packet drain cadences with one success/result each, zero new
+  failures/`STARTED` rows/restarts, deterministic zero lag, and healthy
+  independent schedules
+- GX10 result-outbox repository/protected-copy candidate: `PASS` with the
+  then-current 151-test gate locally and on an exact GX10-staged tree; one
+  canonical collector-valid JSONL file per successful run; complete result and
+  model/prompt/packet/request/run provenance; failure exclusion; shared-lock
+  ready/delivered state with recreation suppression and duplicate-state refusal;
+  divergence/lock/tamper/symlink refusal; atomic interruption/resume and strict
+  partial recovery; 12-for-12 protected-copy creation followed by one simulated
+  delivery and exact 11-ready/one-delivered reuse; unchanged copy and live
+  production health; and zero installation, writer credential, or collector
+  transmission
 - GX10 inactive managed result-outbox package: `PASS` in repository/exact-stage/private-copy rehearsal with 157 total tests, exact-hash runner, isolated no-network service, disabled timer, bounded write scope, guarded empty install, independent verification, exact installed-runner production/replay, unchanged copy source, and forced post-install failure cleanup
 - GX10 inactive managed result-outbox working-system install: `PASS` after safe public-default-path refusal/zero-target cleanup and exact private-runtime portability correction; 14 current results, zero ready/delivered files, disabled timer, never-invoked service, exact installed sources/configuration/ownership, effective private network/Unix-only/bounded-write scope, healthy zero-lag preexisting schedules, and zero credential/transport
 - GX10 protected local result-outbox activator candidate: `PASS` after service-ownership/resume correction with 159 local/exact GX10-staged tests and two full retained-copy rehearsals proving exact five-table reasoning digest, 12-for-12 initial files, inactive/active cardinality verification, outbox timer enablement, reasoning timer restoration, unchanged copy, and zero credential/transmission; first working activation safely retained 15 files with timer disabled/reasoning restored before the verifier correction
-- GX10 protected local result-outbox activation: `PASS` with exact reasoning digest preservation, 15 successful results/15 service-owned collector-gate-valid ready files, zero delivered, deterministic aggregate file digest, active no-network timer, zero restarts, zero projection/incident lag, restored healthy pipeline/reasoning schedules, and zero credential/transmission; natural timer cadence evidence remains pending
+- GX10 protected local result-outbox activation: `PASS` as a historical
+  activation checkpoint with exact reasoning digest preservation, 15 successful
+  results/15 service-owned collector-gate-valid ready files, zero delivered,
+  deterministic aggregate file digest, active no-network timer, zero restarts,
+  zero projection/incident lag, restored healthy pipeline/reasoning schedules,
+  and zero credential/transmission; the following natural-cadence checkpoints
+  closed the then-pending evidence
 - GX10 natural local result-outbox no-op stability: `PASS` across three consecutive timer-only cadences at approximately 64–65-second intervals; each created zero, exactly reused all 15 ready files, wrote zero bytes, retained zero delivered/recovered/restarts, and used no credential/transport
 - GX10 natural local result-outbox catch-up: `PASS`; reasoning naturally advanced 15→16 successful results and the immediately following outbox cadence created exactly one 2378-byte file, reused 15, preserved the prior 15-file digest, produced 16-for-16 collector-gate-valid files, retained zero delivered/restarts, and used no credential/transport
-- GX10 stable outbox snapshot candidate: `PASS` locally and from an exact root-owned GX10 stage with 221 tests; captured legacy predecessor and live read-only upgrade preflight exact; active-WAL online-backup, rollback-journal publication, repeat replacement, bounded transient retry, corruption/symlink/interruption preservation, and strict service dependency tests pass; two protected-copy generations retained exact source bytes and produced `quick_check=ok` rollback-journal snapshots; production activation and 15 natural cadences remain pending
+- GX10 stable outbox snapshot candidate: `PASS` as historical candidate evidence
+  locally and from an exact root-owned GX10 stage with 221 tests; the later
+  full-copy activation rolled back safely and the selective-snapshot production
+  closure below supersedes its then-pending activation/cadence work
 - GX10 full-copy outbox snapshot activation: `ROLLED BACK SAFELY`; the explicit snapshot/outbox cycle passed, but a 2,817,204,224-byte/51-second copy plus immediate long-boot timer trigger exposed unacceptable recurring I/O and an activation-state race; the guarded failure path restored the exact predecessor unit/configuration/database binding and enabled timer, retained `quick_check=ok`, and quarantined interrupted candidate files under the root-only backup
 - GX10 selective outbox snapshot correction: `PASS` locally/exact-stage with 221 tests and exact predecessor preflight; one transaction copied only ten projection tables from a 2,815,123,456-byte protected source into 8,572,928 bytes in two seconds; result projection created 652 valid files, lifecycle projection created 15 batches for 1,473 incidents, repeat execution wrote zero bytes, the source hash remained exact, and the upgrader waits for the immediate post-enable cycle
 - GX10 selective outbox snapshot production closure: `PASS` after guarded v2 activation, explicit and immediate scheduled cycles, 15 consecutive later timer-only snapshot/result/lifecycle passes, zero open/failure signatures, a live ten-table 8,589,312-byte integrity-clean rollback-journal snapshot, source `quick_check=ok`, exact unchanged sender isolation, all five application timers enabled/active, healthy zero-restart collector gate, and exact 1,232-file delivered/immutable-ledger filename-digest-size parity; the two sender-verifier snapshot-layout regressions bring the GX10 suite to 223 tests
-- GX10 configured/active-verifiable sender candidate: `PASS` with 186 current local tests (and 185 at the last exact configured-inactive GX10 stage) after optional-key-comment, captured-private-runtime, canonical-render, and inactive/active-state regression corrections; exact legacy-fetch hash/AST binding, fixed-tool/key-role/pinned-host contracts, atomic config-last private-state installation, idempotent exact reuse, partial/divergent-state refusal, created-only failure cleanup, explicit disabled/inactive versus enabled/active timer verification, and no SFTP invocation during configuration
+- GX10 configured/active-verifiable sender candidate: `PASS` with the
+  then-current 186-test local gate (and 185 at the last exact
+  configured-inactive GX10 stage) after optional-key-comment,
+  captured-private-runtime, canonical-render, and inactive/active-state
+  regression corrections; exact legacy-fetch hash/AST binding,
+  fixed-tool/key-role/pinned-host contracts, atomic config-last private-state
+  installation, idempotent exact reuse, partial/divergent-state refusal,
+  created-only failure cleanup, explicit disabled/inactive versus
+  enabled/active timer verification, and no SFTP invocation during configuration
 - collector dedicated result-writer authorizer candidate: `PASS` with five local and five exact collector-staged tests covering single-line append, exact root-only predecessor backup, exact reuse, duplicate refusal, private-key-input refusal, and byte-for-byte rollback after injected SSH validation failure
 - configured-inactive production result sender: `PASS` with dedicated GX10 identity/pin/config, exact idempotent reuse, temporary-input removal, disabled/inactive zero-transport sender, exact collector predecessor-plus-one-line authorization, active outbox at 58 results/57 ready/zero delivered, zero deterministic lag, healthy original pipeline/result gate/Vector/ClickHouse, and published bounded first-live/replay plan
 - collector cross-owner durable-publication correction candidate: `PASS` with 11 local and 11 exact collector-runtime tests; gate-owned fsynced copy, source/copy evidence revalidation, same-owner no-overwrite publication marker, exact interruption recovery, first-acceptance inode separation, and retained empty ledger/ready/rejected production state after the protected-hardlink refusal

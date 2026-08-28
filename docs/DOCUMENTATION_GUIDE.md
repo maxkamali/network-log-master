@@ -18,6 +18,40 @@ to its authority instead of repeating changing facts in many files.
 | Understand why a choice exists | `docs/DECISIONS.md` | the linked journal checkpoint |
 | Review historical evidence | latest `docs/PROJECT_JOURNAL.md` entries | older entries only when required |
 
+## Reference index
+
+Use this compact index to locate a document; use the authority map below to
+decide which one may own a changed fact.
+
+- Entry and state: [`START_HERE.md`](START_HERE.md),
+  [`CURRENT_STATE.md`](CURRENT_STATE.md), and the compatibility handoff
+  [`AI_HANDOFF.md`](AI_HANDOFF.md).
+- Architecture and contracts: [`ARCHITECTURE.md`](ARCHITECTURE.md),
+  [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md), and
+  [`DECISIONS.md`](DECISIONS.md).
+- Operations and NOC: [`OPERATIONS.md`](OPERATIONS.md),
+  [`NOC_WORKFLOW.md`](NOC_WORKFLOW.md), [`GRAFANA.md`](GRAFANA.md), and
+  [`CLICKHOUSE.md`](CLICKHOUSE.md).
+- Normalization and handoff: [`NORMALIZER_MIGRATION.md`](NORMALIZER_MIGRATION.md),
+  [`NORMALIZER_PRODUCTION_INTEGRATION.md`](NORMALIZER_PRODUCTION_INTEGRATION.md),
+  and [`NORMALIZER_HANDOFF.md`](NORMALIZER_HANDOFF.md).
+- Incident and reasoning pipeline: [`INCIDENT_ENGINE.md`](INCIDENT_ENGINE.md),
+  [`MANAGED_CORRELATION.md`](MANAGED_CORRELATION.md),
+  [`REASONING_PACKETS.md`](REASONING_PACKETS.md),
+  [`LOCAL_REASONING.md`](LOCAL_REASONING.md),
+  [`MANAGED_REASONING.md`](MANAGED_REASONING.md), and
+  [`AI_DETECTION_SIDE_CHANNEL.md`](AI_DETECTION_SIDE_CHANNEL.md).
+- Result return: [`RESULT_OUTBOX.md`](RESULT_OUTBOX.md) and
+  [`RESULT_TRANSPORT.md`](RESULT_TRANSPORT.md).
+- Rebuild and publication: [`TWO_SERVER_REBUILD.md`](TWO_SERVER_REBUILD.md),
+  [`ACCEPTANCE.md`](ACCEPTANCE.md), and
+  [`PUBLICATION_CHECKLIST.md`](PUBLICATION_CHECKLIST.md).
+- Planning and evidence: [`ROADMAP.md`](ROADMAP.md),
+  [`DETECTION_COVERAGE_BACKLOG.md`](DETECTION_COVERAGE_BACKLOG.md), and
+  [`PROJECT_JOURNAL.md`](PROJECT_JOURNAL.md).
+- Historical migration record: [`VM_HANDOFF.md`](VM_HANDOFF.md). It is not
+  current execution authority.
+
 ## Authority map
 
 | Fact type | Canonical owner | Update when |

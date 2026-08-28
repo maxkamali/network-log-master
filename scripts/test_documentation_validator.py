@@ -59,6 +59,28 @@ class DocumentationValidatorTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'stale current-summary'):
                     VALIDATOR.validate_entry_contract()
 
+    def test_markdown_shape_rejects_unbalanced_fence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'broken.md'
+            path.write_text('# Title\n\n```text\nopen\n', encoding='utf-8')
+            with mock.patch.object(VALIDATOR, 'ROOT', Path(directory)):
+                with self.assertRaisesRegex(ValueError, 'unbalanced Markdown'):
+                    VALIDATOR.validate_markdown_shape((path,))
+
+    def test_reference_index_rejects_unlisted_document(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            docs = root / 'docs'
+            docs.mkdir()
+            guide = docs / 'DOCUMENTATION_GUIDE.md'
+            guide.write_text('# Documentation Guide\n', encoding='utf-8')
+            (docs / 'UNLISTED.md').write_text('# Unlisted\n', encoding='utf-8')
+            with mock.patch.object(VALIDATOR, 'ROOT', root), \
+                    mock.patch.object(VALIDATOR, 'DOCS_DIR', docs), \
+                    mock.patch.object(VALIDATOR, 'GUIDE', guide):
+                with self.assertRaisesRegex(ValueError, 'unindexed document'):
+                    VALIDATOR.validate_reference_index()
+
 
 if __name__ == '__main__':
     unittest.main()

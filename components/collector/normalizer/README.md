@@ -10,9 +10,13 @@ Bounded live verification: complete for historical catch-up plus five normal-cad
 
 This package stages the deterministic Python normalizer as a separate collector-local shadow worker plus an independently packaged forward handoff publisher. The guarded production activation changed only the GX10 read-only SFTP bind view; Vector, ClickHouse, `/var/spool/vector-ai`, shadow history, and existing GX10 identities remain unchanged.
 
-The architecture and promotion/rollback gates are in `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`.
+The architecture and promotion/rollback gates are in
+[`docs/NORMALIZER_PRODUCTION_INTEGRATION.md`](../../../docs/NORMALIZER_PRODUCTION_INTEGRATION.md).
 
-The forward-only handoff design, synthetic rehearsal, and live activation are complete in `docs/NORMALIZER_HANDOFF.md`. Its launcher and hardened units remain excluded from the shadow manifest and are instead installed through the separate exact-hash handoff manifest.
+The forward-only handoff design, synthetic rehearsal, and live activation are
+complete in [`docs/NORMALIZER_HANDOFF.md`](../../../docs/NORMALIZER_HANDOFF.md).
+Its launcher and hardened units remain excluded from the shadow manifest and
+are instead installed through the separate exact-hash handoff manifest.
 
 ## Artifacts
 

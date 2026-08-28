@@ -9,6 +9,8 @@ from urllib.parse import unquote
 
 
 ROOT = Path(__file__).resolve().parents[1]
+DOCS_DIR = ROOT / 'docs'
+GUIDE = DOCS_DIR / 'DOCUMENTATION_GUIDE.md'
 MARKDOWN_LINK_RE = re.compile(r'\[[^\]]+\]\(([^)]+)\)')
 HEADING_RE = re.compile(r'(?m)^#{1,6}\s+(.+?)\s*#*\s*$')
 INLINE_LINK_RE = re.compile(r'\[([^\]]+)\]\([^)]+\)')
@@ -35,8 +37,16 @@ ENTRY_REFERENCES = {
 STALE_SUMMARIES = {
     'README.md': ('complete through project item 42',),
     'docs/START_HERE.md': ('complete through item 42',),
-    'docs/ACCEPTANCE.md': ('complete through item 42',),
     'docs/AI_HANDOFF.md': ('complete through execution-order item 41',),
+    'docs/ACCEPTANCE.md': (
+        'complete through item 42',
+        'natural timer cadence evidence remains pending',
+        'production activation and 15 natural cadences remain pending',
+    ),
+    'docs/DECISIONS.md': ('compatibility correction pending',),
+    'components/gx10/REBUILD_STATUS.md': (
+        'remaining local-producer stability gate',
+    ),
 }
 
 
@@ -91,6 +101,50 @@ def validate_links() -> None:
                     )
 
 
+def repository_markdown_files() -> tuple[Path, ...]:
+    files = [ROOT / 'README.md']
+    for directory in (DOCS_DIR, ROOT / 'components'):
+        files.extend(
+            path for path in directory.rglob('*.md')
+            if not any(part.startswith('.') for part in path.relative_to(ROOT).parts)
+        )
+    return tuple(sorted(set(files)))
+
+
+def validate_markdown_shape(files: tuple[Path, ...] | None = None) -> None:
+    for path in files or repository_markdown_files():
+        text = path.read_text(encoding='utf-8')
+        if len(re.findall(r'(?m)^#\s+\S', text)) != 1:
+            raise ValueError(
+                f'{path.relative_to(ROOT)}: expected exactly one level-1 title'
+            )
+        open_fence = None
+        for line in text.splitlines():
+            stripped = line.lstrip()
+            marker = stripped[:3]
+            if marker not in ('```', '~~~'):
+                continue
+            if open_fence is None:
+                open_fence = marker
+            elif marker == open_fence:
+                open_fence = None
+        if open_fence is not None:
+            raise ValueError(
+                f'{path.relative_to(ROOT)}: unbalanced Markdown code fence'
+            )
+
+
+def validate_reference_index() -> None:
+    guide_text = GUIDE.read_text(encoding='utf-8')
+    for path in sorted(DOCS_DIR.glob('*.md')):
+        if path == GUIDE:
+            continue
+        if f']({path.name})' not in guide_text:
+            raise ValueError(
+                f'docs/DOCUMENTATION_GUIDE.md: unindexed document {path.name}'
+            )
+
+
 def validate_entry_contract() -> None:
     for relative in REQUIRED_FILES:
         if not (ROOT / relative).is_file():
@@ -113,8 +167,11 @@ def main() -> int:
     try:
         validate_entry_contract()
         validate_links()
+        validate_markdown_shape()
+        validate_reference_index()
         print('DOCUMENTATION_ENTRY_PATH=PASS')
         print('DOCUMENTATION_LINKS_AND_ANCHORS=PASS')
+        print('DOCUMENTATION_SHAPE_AND_INDEX=PASS')
         print('DOCUMENTATION_VALIDATION=PASS')
         return 0
     except (OSError, UnicodeError, ValueError) as exc:

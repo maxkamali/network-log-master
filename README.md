@@ -130,7 +130,8 @@ GX10: ingest -> canonical events -> deterministic incidents
                               lifecycle + AI-result outboxes
                                          |
                                   write-only sender
-                                                                  v
+                                         |
+                                         v
 Collector: validation + replay ledger -> ClickHouse -> Grafana -> NOC operator
 ```
 
@@ -185,9 +186,9 @@ contracts more reliably. See
 
 | Component | Responsibility | Source |
 |---|---|---|
-| Collector | Syslog ingress, raw retention, normalization, ClickHouse, Grafana, validation and replay protection | [`components/collector/`](components/collector/) |
-| Normalizer | Deterministic vendor-aware event normalization with capture-first fallback | [`components/normalizer/`](components/normalizer/) |
-| GX10 | Replay-safe ingest, canonical projection, deterministic incidents, local reasoning, side-channel triage, and result delivery | [`components/gx10/`](components/gx10/) |
+| Collector | Syslog ingress, raw retention, normalization, ClickHouse, Grafana, validation and replay protection | [`components/collector/README.md`](components/collector/README.md) |
+| Normalizer | Deterministic vendor-aware event normalization with capture-first fallback | [`components/normalizer/README.md`](components/normalizer/README.md) |
+| GX10 | Replay-safe ingest, canonical projection, deterministic incidents, local reasoning, side-channel triage, and result delivery | [`components/gx10/README.md`](components/gx10/README.md) |
 
 Component and repository validation are versioned with the implementation.
 Current verification status belongs in
@@ -227,6 +228,7 @@ completed state.
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — completed milestone sequence
 - [`docs/PROJECT_JOURNAL.md`](docs/PROJECT_JOURNAL.md) — append-only engineering history
 - [`docs/DOCUMENTATION_GUIDE.md`](docs/DOCUMENTATION_GUIDE.md) — documentation ownership and update rules
+- [`components/README.md`](components/README.md) — component boundary map
 - [`SECURITY.md`](SECURITY.md) — public-repository security policy
 
 ## Rebuild and security boundary

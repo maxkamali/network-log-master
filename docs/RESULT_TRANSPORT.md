@@ -127,7 +127,12 @@ After exact-replay closure was published, the same installed-identity/core/confi
 
 The public verifier then gained an explicit active configured-state mode and passed 186 tests locally. An initial GX10 stage omitted the repository-relative collector sibling and failed only the 11 cross-boundary imports; no production state was touched. The corrected exact published repository layout passed all 186 tests on GX10. Exact inactive full preflight passed before `systemctl enable --now` changed only the sender timer. Immediate active verification passed and the first natural cycle moved one file. Two more natural cycles followed, for delivered `1 -> 4` with the active producer/outbox remaining internally consistent. The first natural result then settled, created the second immutable ledger/ready identity, and was proven as the second exact complete ClickHouse row; the next two natural files remained normally in flight at the activation checkpoint. Sender restarts remained zero and every preexisting schedule/service passed.
 
-Item 33 later added the backward-compatible Device projection. Exact predecessor copies were retained, existing ready/delivered bytes were reused without rewrite, the producer/sender wrappers were updated to exact new hashes, and the current 192-test GX10 suite passes. Replay identity, filenames, provenance, deterministic incident state, and the write-only transport boundary remain unchanged.
+Item 33 later added the backward-compatible Device projection. Exact
+predecessor copies were retained, existing ready/delivered bytes were reused
+without rewrite, the producer/sender wrappers were updated to exact new hashes,
+and the item-33 192-test gate passed. Replay identity, filenames, provenance,
+deterministic incident state, and the write-only transport boundary remain
+unchanged.
 
 Item 34 added the independent changed-incident producer, strict lifecycle batch validation, collector-exclusive lifecycle routing, and deterministic NOC presentation. The first production pass exported 804 incidents in nine bounded files; all were delivered through the existing sender and ingested without any lifecycle row entering `ai_updates`. Natural scheduled changes continued through the same path. The active installed outbox and sender verifiers pass, both timers remain enabled/active, and existing AI-result bytes and identities were not rewritten.
 

@@ -13391,3 +13391,54 @@ Future changes use `docs/DOCUMENTATION_GUIDE.md` and update only the documents
 that own the affected facts. Delivery-confirmed result archival remains the
 only documented deferred hardening item and remains outside the completed
 numbered sequence.
+
+## 2026-08-27 - Second documentation consistency and reachability audit
+
+### Scope and rollback
+
+Performed a deeper documentation-only audit from published checkpoint
+`e2e65abe4d5c4117b8e863adfca1a1b350dc48d8`. That commit is the exact rollback
+boundary for this pass. No production host, service, database, dashboard,
+account, credential, model, or runtime file was changed.
+
+### Reconciliation findings
+
+- two acceptance checkpoints still described natural cadence and snapshot
+  activation work as pending even though later entries in the same document
+  recorded their completion; they now read explicitly as historical stages
+  closed or superseded by the later evidence
+- ADR-022 still said its compatibility correction was pending after the
+  immutable `r3` correction had passed; its status now records that closure
+- the GX10 rebuild status still called an already-completed natural catch-up
+  the remaining gate; it now points to the immediately following closure
+- current component and subsystem summaries carried superseded 192/215-test
+  totals; mutable test totals were removed from current summaries and retained
+  only as clearly labeled historical milestone evidence
+- `AI_HANDOFF.md` duplicated a long current-state snapshot that had already
+  drifted; it is now a compact compatibility handoff that delegates current
+  facts to `CURRENT_STATE.md`, operator behavior to `NOC_WORKFLOW.md`, runtime
+  behavior to `OPERATIONS.md`, and exact evidence to the journal
+- the root plain-text flow had a displaced transport arrow; its collector
+  return path is now visually continuous
+
+### Navigation and validation hardening
+
+- added a single categorized reference index to `DOCUMENTATION_GUIDE.md`
+  covering every top-level document, with the historical VM handoff explicitly
+  separated from current authority
+- converted the recovery order and component/subsystem references to real
+  relative Markdown links; recursive traversal from `README.md` now reaches all
+  41 public Markdown documents in the documentation/component tree
+- expanded the documentation validator to require exactly one level-one title,
+  balanced Markdown code fences, complete top-level document indexing, valid
+  local links/anchors, and rejection of the newly identified stale phrases
+- expanded the combined validator suite from 20 to 22 tests with negative
+  coverage for unbalanced fences and unindexed documents
+
+### Validation
+
+The documentation entry path, links, anchors, document shape, complete index,
+and stale-summary gates passed. All 22 documentation/public-validator tests and
+`git diff --check` passed. The full current-tree, reachable-history, link,
+execution-authority, and rollback-tag public-safety gate passed before
+publication.

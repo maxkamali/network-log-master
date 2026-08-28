@@ -406,7 +406,7 @@ Consequence:
 
 ## ADR-022 - Reasoning wakes and packets are deterministic append-only facts
 
-**Status:** Accepted and implemented; compatibility correction pending
+**Status:** Accepted and implemented; later compatibility correction passed
 
 LLM wake selection and compact incident-packet construction are owned by a deterministic versioned builder over incident/evidence/transition state. The builder records immutable packet facts before any inference caller exists.
 

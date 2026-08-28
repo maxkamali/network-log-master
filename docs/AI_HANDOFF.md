@@ -32,31 +32,18 @@ Stop and reconcile meaningful disagreement instead of guessing.
 
 ## Current durable state
 
-The numbered project sequence is complete with no remaining numbered `NEXT`
-item. The rolling interface-flap filter, forward-only 24-hour OSPF/BGP
-monitoring policy, backward-compatible lifecycle producer version 2 recurrence
-projection, additive collector column, enhanced-dashboard `MONITORING`/issue-
-occurrence presentation, isolated NOC Viewer access boundary, one-minute NOC
-rotation playlist, compact one-click Explore drilldowns, protocol-candidate
-monitoring correction, and Vector descriptor-limit protection are active under
-protected predecessors.
+Do not maintain a second current-state summary in this file. Read
+[`CURRENT_STATE.md`](CURRENT_STATE.md) for the production baseline, residual
+risk, and execution authority. Read [`NOC_WORKFLOW.md`](NOC_WORKFLOW.md) for
+operator queue behavior, [`OPERATIONS.md`](OPERATIONS.md) for runtime behavior,
+and the latest [`PROJECT_JOURNAL.md`](PROJECT_JOURNAL.md) entries for exact
+validation and deployment evidence.
 
-- The collector normalization shadow path and forward-only verified handoff are active; raw history and the exact rollback boundary remain preserved.
-- GX10 fetch/ingest, canonical projection, deterministic incident correlation, managed Gemma reasoning, AI-result projection, deterministic incident-lifecycle projection, and the recurring one-file write-only sender are active under independent schedules.
-- The collector validation gate and immutable acceptance ledger accept strict AI-result and lifecycle record families. Vector routes them exclusively to `observability.ai_updates` and `observability.incident_updates`.
-- Six Grafana 13 dashboard resources are captured and live. The original `AI Incident Analysis` resource remains byte-exact. `AI Incident Analysis - Enhanced` is the deterministic NOC queue with Active Events, Interface Flaps, and Resolved Events windows.
-- The item-34 production closure began with 804 lifecycle incidents in nine batches and passed 26 active non-flap, 10 active flap, 768 resolved, complete Device identity, clean timestamp invariants, and zero lifecycle rows in the AI table. Natural scheduled updates continued through the same path.
-- Item-35 aggregate diagnosis proved 22 active interface incidents with zero state changes were appearing in Active Events because the original presentation used the narrower `interface_flap` evidence flag. The protected enhanced-only correction is now live and exact: two non-interface incidents remain in Active Events, all 34 active interface incidents appear in Interface Flaps, and the two current Active rows use deterministic detail fallback because no stored AI summary exists for them yet.
-- Item 36 leaves the 15-minute unconfirmed-candidate rule and five-minute non-OSPF/BGP recovery quiet period unchanged. Confirmed BGP/OSPF/OSPFv3 recovery instead retains the same incident in `RECOVERING` for 24 continuous healthy hours; Grafana labels that state `MONITORING`. A relapse returns the same correlation identity to `OPEN`; producer version 2 derives `recurrence_count` from append-only relapse transitions while legacy version-1 lifecycle files remain valid. Production closure reconciled 853 latest version-2 incidents and an exact recurrence sum of 3,037 across 526 recurring incidents; existing resolved BGP/OSPF/OSPFv3 rows remained resolved.
-- Item 36 passed 205 GX10 tests, 56 collector tests, nine public-validator tests, the GX10 filesystem contract, all public current-tree/history/link/ref gates, exact six-resource Grafana reread, and all thirteen live dashboard queries. No confirmed protocol incident entered recovery during activation, so the 24-hour timing proof remains deterministic test evidence rather than a synthetic production row.
-- Item 37 adds a separate Grafana NOC organization with one dedicated Viewer, only `NOC View` and `AI Incident Analysis - Enhanced`, and only their two read-only datasource copies. The Viewer home/star settings, non-scoped dashboard denial, save denial, Explore compatibility, all fourteen NOC panel queries, exact unchanged six-dashboard main organization, Grafana database integrity, and service health passed. Grafana OSS cannot enforce the requested exact per-user navigation allowlist; do not represent organization/resource isolation as custom menu enforcement.
-- Item 38 adds one `NOC Rotation` playlist in the isolated NOC organization: stable dashboard UIDs in `NOC View` then enhanced-analysis order, one minute per dashboard, and a validated auto-fit play route. Viewer read/start access and create denial passed, `NOC View` remains the login home, the main organization contains no playlist, and all six main dashboard resources remain exact.
-- Item 39 added `View matching logs` to every cell in all three enhanced event tables. Item 41 retains that incident-ID lookup for Active and Resolved and replaces the flap lookup with the exact device/interface rolling-hour query. Every current target is compact, read-only, organization-local, newest first, and capped at 1,000 rows.
-- Item 40 starts every enhanced and NOC View Explore lookup with its SQL editor collapsed and makes the four existing NOC View links single-click. Main and isolated NOC copies retain organization 1 and 2 respectively. All affected link queries remain read-only and unchanged; protected replacement, main exact reread, organization-scoped NOC reread, database integrity, query execution, and service-health gates passed.
-- Item 41 excludes interface entities from both incident windows and derives Interface Flaps directly from `observability.grafana_logs`: one exact NX-OS interface-down transition is one observation, grouped by device/interface across the rolling preceding 60 minutes, with a visible threshold of 10. Persistent single-down ports and lower-rate bounces stay hidden; rows leave automatically below threshold. The flap row's compact one-click Explore link uses hidden hex row keys and the same rolling hour. Main and NOC dry-runs/replacements, exact rereads, all queries/drilldowns, database integrity, two-resource-only change scope, and service health passed. No lifecycle, GX10, schema, ingestion, or model change occurred.
-- Clean-machine execution on disposable collector and GX10 hosts remains waived by the operator and empirically unverified. Do not relabel that qualification as passed.
-
-For NOC queue behavior, search/filter semantics, state movement, and the deliberate absence of manual resolution, read `docs/NOC_WORKFLOW.md`.
+The only handoff-level disposition retained here is that the numbered project
+sequence is complete with no numbered `NEXT`, while disposable clean-host
+execution remains waived and empirically unverified. If either statement
+disagrees with `CURRENT_STATE.md`, stop and reconcile this file rather than
+copying additional current details into it.
 
 ## Protected boundaries
 
@@ -75,5 +62,6 @@ For NOC queue behavior, search/filter semantics, state movement, and the deliber
 - exercise negative, replay, idempotency, and fail-closed paths
 - use dry-run API validation before dashboard replacement
 - update `docs/CURRENT_STATE.md`, component status files, and append-only `docs/PROJECT_JOURNAL.md` with every completed validated subsection
+- use `docs/DOCUMENTATION_GUIDE.md` to update only the documents that own the changed facts
 - run `docs/PUBLICATION_CHECKLIST.md` before public commits
 - independently verify GitHub after every published checkpoint

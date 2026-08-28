@@ -290,7 +290,10 @@ Do not execute `install-runtime.sh` against the working reference collector. It 
 
 This extension is not invoked by the clean-machine collector rebuild installer because the rebuild package preserves the reconstructed current behavior. Its own staging installer is guarded, verifies exact artifacts/dependencies, installs a hardened oneshot/timer, and deliberately leaves the timer disabled and inactive.
 
-See `normalizer/README.md` and `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`. Do not deploy it to the working collector without a later explicit shadow-deployment authorization.
+See [`normalizer/README.md`](normalizer/README.md) and
+[`docs/NORMALIZER_PRODUCTION_INTEGRATION.md`](../../docs/NORMALIZER_PRODUCTION_INTEGRATION.md).
+The documented production activation is complete; do not redeploy or modify it
+without a new explicit authorization and protected gate.
 
 Preserved behavior includes:
 

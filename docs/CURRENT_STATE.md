@@ -96,6 +96,15 @@ Post-closure hidden AI detection side channel: `DONE`. GX10 now batches determin
 
 Post-closure operator documentation baseline: `DONE`. The operator confirmed the current production behavior meets the desired functional baseline. The root `README.md` is the canonical plain-language application overview with operator workflow, dual-server diagram, AI authority boundary, current validation status, and navigation map. `START_HERE`, architecture, roadmap, handoff, component status, and acceptance documentation are reconciled to the active system. `docs/DOCUMENTATION_GUIDE.md` defines document ownership and update rules for future changes.
 
+Post-closure current-system rebuild documentation readiness: `DONE`. The
+collector-first cross-host ordering, private-input contract, staged extension
+activation, disabled sender boundary, NOC reconstruction, and reboot acceptance
+are centralized in `docs/TWO_SERVER_REBUILD.md`; component runbooks own their
+host-local commands. Documentation validation now rejects orphaned maintained
+pages and key stale/current contract regressions. This improves repository
+rebuild readiness without claiming that the still-waived disposable clean-host
+execution passed.
+
 The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
 ## Platform state
@@ -336,7 +345,7 @@ Detailed reconstruction authority is now in:
 
 `components/gx10/REBUILD_STATUS.md`
 
-The completed public package provides:
+The historical base package and the later active extensions together provide:
 
 - synthetic operator-input template and neutral runtime identity/path contract
 - guarded filesystem/SSH-material bootstrap and protected runtime configuration
@@ -348,7 +357,8 @@ The completed public package provides:
 - reference-like/nonempty-state preactivation refusal
 - dual-confirmation activation with full blob hashing and failure rollback
 - complete clean-machine runbook and two-server integration runbook
-- 94 passing GX10 tests
+- separately gated correlation, managed reasoning/triage, selective snapshot,
+  result/lifecycle outbox, and write-only sender activation artifacts
 - `GX10_FILESYSTEM_CONTRACT_VALIDATION=PASS`
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 
@@ -357,19 +367,19 @@ The known application hashes remain:
 - fetch: `662ef297a900b107a12d252f21524db20816244b0c74320a6990c299db3fec6b`
 - ingest: `6d9509c320a8beaf409264ca461b54336dc231dafd0f4d0f1b74f3a155c8b618`
 - deterministic enrichment: `6cd979c286410e7cae00b76c14b515798ac16791875a7db21cdf688085e3f7e0`
-- canonical projection candidate: `f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079`
+- active canonical projection: `f3ae8984f72b1fe8ec6c44fb14d2011976e9e2ba200b7e46fd2003e5117b2079`
 - managed correlation runner: `dde1aff929ec52957250ebd86bac01f88554caf20117b95463bc0313e00722c4`
 - managed correlation service unit: `5dc2525f241f4d0574f695001d11c6cd8e5ff2f5d5597e16afadbedd6ebe0708`
 - managed correlation timer unit: `af4e5d582eaf76b79e5a0a4acbbe7bff9f2cc6643c36fbc8e9ea81ed7367e73c`
 - pipeline service unit: `0f8e99bb4101e52e028dcedfb98f3998b2ebc4008adac0d38c04aa1716ebecbb`
 - pipeline timer unit: `5371995539846d4cca6014a70548e95c942e9f601d0736b06f4bda61c1ccc0f5`
 
-Rediscovery conclusions retained as the historical baseline; later implemented changes are separately journaled:
+Rediscovery conclusions retained as the historical baseline; later implemented changes are active and separately journaled:
 
 - automatic pipeline behavior discovered before reconstruction was `timer -> fetch -> ingest`
 - deterministic enrichment had no discovered historical scheduler; item 26 later added the separate managed `projection -> incident` schedule
-- Ollama/model infrastructure exists but no observability-pipeline caller has been identified
-- the collector result-return boundary exists; no historical GX10 producer was identified, and the reconstructed item-30 producer plus inactive sender package are new, separately gated behavior rather than rediscovered history
+- Ollama/model infrastructure existed but no observability-pipeline caller was identified during rediscovery; the separately managed Gemma reasoning/triage caller is now active
+- the collector result-return boundary existed but no historical GX10 producer was identified; the reconstructed item-30 producer and recurring sender are active, separately gated behavior rather than rediscovered history
 - missing historical bootstrap/install provenance should be reconstructed from captured effective contracts rather than invented and presented as discovered history
 
 ## Direct-access execution environment

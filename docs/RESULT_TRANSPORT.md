@@ -39,13 +39,20 @@ separately reversible.
 First acceptance uses this durable order:
 
 1. validate stable incoming metadata and exact bytes
-2. create the same-inode ready name without overwriting an existing destination
-3. persist the ready directory
-4. remove the incoming name and persist the incoming directory
-5. insert and synchronously commit the immutable acceptance row
-6. persist the ready directory again
+2. copy the bytes into a gate-owned temporary file in the ready directory and
+   `fsync` it
+3. revalidate both the source and copied bytes against the original evidence
+4. create a same-owner, no-overwrite publication marker from the gate-owned
+   temporary file to the ready name and persist the directory
+5. remove the incoming name, persist the incoming directory, remove the marker,
+   and persist ready again
+6. insert and synchronously commit the immutable acceptance row
 
-If interruption occurs between creating the ready name and removing the incoming name, the next cycle accepts only the explained two-link same-inode state, removes the incoming link, and resumes reconciliation. Unexplained hard links fail closed.
+The writer-owned incoming inode is never linked directly into the ready
+directory. A crash can leave a recognizable same-owner ready/marker relation;
+recovery accepts only that relation plus exact matching incoming bytes before
+cleanup and ledger reconciliation. Unexplained links or divergent evidence fail
+closed.
 
 ## Duplicate outcomes
 
@@ -70,7 +77,7 @@ Its SFTP subprocess uses a fixed executable and argument vector without a shell.
 
 Transport failure leaves ready unchanged. After transport success, the sender revalidates the source and atomically renames it into delivered under the shared producer/sender lock, then synchronizes both directories and postvalidates the exact bytes. An injected interruption after transport success left ready unchanged; the next cycle issued the exact same upload batch and then completed the local transition.
 
-Eleven local and eleven exact GX10-staged tests cover strict command construction, exact-byte/name movement, one-file bound, oldest-first ordering, no-op, transport failure isolation, post-transport interruption/retry, duplicate state, divergent content, private-file metadata, shared-lock contention, and delivered-state validation. All transports are injected test doubles; the core has never contacted the collector.
+Eleven local and eleven exact GX10-staged tests cover strict command construction, exact-byte/name movement, one-file bound, oldest-first ordering, no-op, transport failure isolation, post-transport interruption/retry, duplicate state, divergent content, private-file metadata, shared-lock contention, and delivered-state validation. In those synthetic tests, transports are injected doubles and the core does not contact the collector.
 
 ## Inactive managed package
 

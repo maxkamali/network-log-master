@@ -1,219 +1,226 @@
 # Two-Server Rebuild Runbook
 
-## Purpose
+## Purpose and authority
 
-This runbook coordinates the collector and GX10 component runbooks at the system boundary. It does not duplicate their installation commands.
+This is the single authority for the ordered reconstruction of the current functional target
+across a clean collector and a clean GX10. Component
+runbooks own their host-specific commands; this document owns ordering,
+cross-host inputs, inter-host acceptance, and rollback boundaries.
 
-Use:
+Use the same reviewed repository revision on both hosts. Never mix artifacts
+from different commits. Do not run clean-machine installers on a working
+reference system.
 
-- `components/collector/README.md` for the clean collector
-- `components/gx10/CLEAN_MACHINE_RUNBOOK.md` for the clean GX10
+The rebuild has two layers:
 
-Both machines must use the same reviewed repository revision. Never mix artifacts from different commits.
-
-## What the current rebuild reproduces
-
-The current reconstructed automatic path is:
-
-```text
-devices
-  -> collector Vector ingest
-  -> collector ClickHouse raw storage
-  -> collector compressed hourly backlog
-  -> restricted read-only SFTP
-  -> GX10 scheduled fetch
-  -> GX10 replay-safe SQLite ingest
-```
-
-The collector also has a separate write-only AI-result transport, validation gate, ClickHouse sink, and Grafana presentation boundary.
-
-The clean-machine base package intentionally reproduces the captured
-fetch-to-ingest boundary first. Historical rediscovery found no predecessor
-producer for the result-return boundary, no automatic canonical normalized-
-field projection, and no application-specific Ollama caller. The active
-production system now has separately gated extensions for those capabilities;
-their activation is documented in `docs/CURRENT_STATE.md` and the relevant
-component runbooks. Do not enable an extension by inference during a base
-rebuild, and do not claim its end-to-end result path until its dedicated gate
-has passed.
-
-A rebuild of the **current functional target** therefore has two layers:
-
-1. reconstruct and verify the captured base `fetch -> ingest` path
-2. install and independently activate the documented normalization handoff,
-   deterministic correlation, managed reasoning/hidden triage, selective
-   outbox snapshot, lifecycle/result producers, and write-only sender gates
+1. the captured base `collector backlog -> GX10 fetch -> replay-safe ingest`
+2. current reconstructed extensions: normalizer/handoff, deterministic
+   correlation, managed reasoning and hidden triage, selective outbox snapshot,
+   lifecycle/result producers, write-only sender, and NOC presentation
 
 Completing only the first layer is a base-runtime rebuild, not a complete
 reconstruction of the current application.
+
+## Private-input contract
+
+Keep every populated input outside the checkout in root-owned, non-group/world
+writable storage. A private file must be a regular single-link file with mode
+`0400` or `0600` unless the consuming installer documents another mode. Never
+echo a value, copy it into Git, or put it in a command transcript.
+
+| Input | Consumer | Form and lifecycle | Purpose |
+| --- | --- | --- | --- |
+| Collector base inputs | collector runtime installer | Existing ten inputs in `components/collector/README.md`; retained through collector verification | ClickHouse/Grafana passwords, public host/certificate parameters, SSH port, and both authorized-key files |
+| `PLATFORM_INVENTORY_FILE` | normalizer shadow installer | Root-owned private schema-v1 inventory; retained | Trusted device/platform mapping |
+| `HANDOFF_PLAN_FILE` | normalizer handoff installer | Root-owned private schema-v1 plan; immutable floor selected after shadow catch-up | Forward-only normalized handoff boundary |
+| Backlog-reader key and known-hosts | GX10 base | Distinct private key plus pin; retained | Read-only collector backlog access |
+| Result-writer private key | GX10 sender configuration | Distinct private key staged briefly from protected storage; retained only in service-owned target | Write-only collector result access |
+| Reasoning recovery target | GX10 reasoning activation | Protected absent backup path | Pre-activation recovery evidence |
+| Snapshot recovery directory | GX10 snapshot upgrade | Protected absent child directory | Snapshot upgrader backup |
+| Grafana administrator and reader credentials | NOC reconstruction | Existing private collector inputs; retained | Organization, datasource, and Viewer setup |
+| NOC Viewer username, password file, and organization name | NOC reconstruction | Operator-selected private inputs | Isolated NOC access layer |
+| Rollback locations | collector/GX10/NOC steps | Root-owned locations outside checkout | Exact predecessor or configuration recovery artifacts |
+
+The two SSH roles are independent:
+
+1. the **backlog reader** can only read the collector spool;
+2. the **result writer** can only publish validated result files.
+
+Do not reuse their keys. On a clean collector, the writer public key is already
+installed by the base runtime installer; the later authorizer is for controlled
+existing-host upgrades, not a mandatory second clean-rebuild mutation.
 
 ## Host prerequisites
 
 Collector:
 
 - clean Debian 13 amd64 host
-- package/ACME network access and required inbound syslog, HTTPS, ACME, and restricted SSH/SFTP reachability
-- the ten private/environment-specific inputs listed in the collector runbook
+- package, ACME, syslog, HTTPS, and restricted SSH/SFTP reachability
+- the collector base inputs and extension inputs above
 
 GX10:
 
 - clean Ubuntu 24.04 arm64 GX10-class host
-- captured kernel, NVIDIA driver, and CUDA compiler baseline
-- exact pinned application packages
-- exact captured Ollama binary
-- exact offline six-model store
-- outbound reachability to the collector's restricted read-only SFTP boundary
-- the protected inputs listed in the GX10 runbook
+- captured kernel, NVIDIA driver, CUDA compiler baseline, pinned packages,
+  exact Ollama binary, and exact offline model store
+- reachability to both collector transport roles
+- the GX10 base and extension inputs above
 
-Firewall/nftables policy is deliberately operator-owned and outside the public repository. Satisfy the functional connectivity requirements without publishing deployment allowlists.
+Firewall policy remains operator-owned. Meet functional connectivity without
+publishing deployment addresses or allowlists.
 
-## Transport-key relationship
+## Ordered reconstruction
 
-Prepare independent least-privilege key material for the two collector transport roles:
+### 1. Freeze the revision and validate inputs
 
-1. backlog reader:
-   - public authorized key is supplied to the collector rebuild
-   - matching private key and pinned known-hosts file are supplied to the GX10 rebuild
-   - role is read-only
-2. AI-result writer:
-   - public authorized key is supplied to the collector rebuild
-   - matching private key and pinned collector metadata are supplied privately
-     to the separately gated GX10 sender configuration
-   - role is write-only and cannot read collector logs or ClickHouse
+On both hosts, clone the same reviewed commit and require a clean checkout.
+Run repository-only validators before making host changes. Verify private files
+exist, have safe metadata, and satisfy each installer’s `--check`/preflight
+without printing their contents.
 
-Do not reuse one keypair for both roles. Creating either identity alone is not
-proof of a working end-to-end transport; require the dedicated sender,
-acceptance-ledger, ClickHouse, replay, and conflict gates.
+### 2. Rebuild the collector base
 
-## Rebuild order
+Follow `components/collector/README.md` through package installation, runtime
+installation, safe SSH-port activation, and independent verification. Require:
 
-### 1. Select and verify one repository revision
+- `COLLECTOR_PACKAGE_VERIFY=PASS`
+- `COLLECTOR_RUNTIME_INSTALL=PASS`
+- `COLLECTOR_RUNTIME_VERIFY=PASS`
 
-Choose the reviewed milestone commit and use it for both hosts. Require a clean checkout before running either component audit.
+Do not continue until the raw backlog exists and the read-only backlog role is
+reachable. The collector base also installs the write-only result role, result
+gate, ClickHouse schema, main Grafana resources, and their verifiers.
 
-### 2. Rebuild and verify the collector first
+### 3. Rebuild and activate the GX10 base
 
-Follow `components/collector/README.md` through:
-
-- package installation and `COLLECTOR_PACKAGE_VERIFY=PASS`
-- runtime installation and `COLLECTOR_RUNTIME_INSTALL=PASS`
-- safe nonstandard SSH-port activation
-- independent `COLLECTOR_RUNTIME_VERIFY=PASS`
-
-Do not proceed to GX10 until the collector backlog exists, its read-only transport is reachable, and the collector runtime verifier passes.
-
-### 3. Prepare GX10 transport inputs from the verified collector
-
-Outside both repositories:
-
-- retain the backlog-reader private key
-- generate a pinned known-hosts file for the verified collector endpoint
-- record the collector endpoint, nonstandard port, and read-only username in the protected GX10 operator-input file
-
-Never place these values or files in Git.
-
-### 4. Rebuild GX10 without activation
-
-Follow `components/gx10/CLEAN_MACHINE_RUNBOOK.md` through the preactivation phase:
+Follow `components/gx10/CLEAN_MACHINE_RUNBOOK.md` through base preactivation
+and activation. Require:
 
 - `GX10_REBUILD_PACKAGE_VALIDATION=PASS`
 - `GX10_PLATFORM_VERIFY=PASS`
-- filesystem/configuration/database/application installation
-- exact Ollama binary and offline model-store installation
 - `GX10_RUNTIME_PREACTIVATION_VERIFY=PASS`
-- offline `GX10_OLLAMA_VERIFY=PASS`
-
-The GX10 spool and four application-state tables must still be empty at this point.
-
-### 5. Activate GX10
-
-Review the protected collector endpoint before supplying the second activation confirmation.
-
-The activator enables Ollama first and the fetch/ingest timer second. It never enables canonical projection.
-
-Require:
-
+- `GX10_OLLAMA_VERIFY=PASS`
 - `GX10_RUNTIME_ACTIVATION=PASS`
 - `GX10_RUNTIME_ACTIVE_VERIFY=PASS`
-- active `GX10_OLLAMA_VERIFY=PASS`
 
-### 6. Verify the automatic cross-server path
+At preactivation, all verifier-enumerated initialized application state,
+cursors, spool files, and SQLite sidecars must be empty. Do not hard-code a
+table count.
 
-After at least one timer interval:
+### 4. Prove one raw base cycle
 
-- confirm the GX10 timer remains active
-- inspect the fetch/ingest service result and recent logs
-- confirm eligible collector backlog files are fetched through the read-only role
-- confirm successfully ingested files move from GX10 incoming to processed state
-- confirm replay does not duplicate `(source_file, record_number)` observations
-- rerun both independent runtime verifiers
+Wait for at least one scheduled fetch/ingest cycle. Confirm a read-only spool
+file was fetched, ingested, moved to processed state, and cannot duplicate
+`(source_file, record_number)` on replay. The original fetch/ingest timer must
+remain healthy throughout every later extension step.
 
-Do not invoke canonical projection ad hoc merely to make the end-to-end path look longer. Follow the component runbook's separate inactive install, initial backfill, zero-lag verification, and correlation-timer activation gate.
+### 5. Activate normalizer shadow before GX10 correlation
 
-### 7. Activate and verify the post-base application gates
+Install and verify the normalizer shadow package with the private inventory,
+then enable only its shadow timer. Require staged and active verifier success,
+shadow catch-up, and zero pending work before choosing the handoff floor.
 
-First complete Phase 9 and Phase 10 of the GX10 runbook for deterministic
-correlation and managed local reasoning. Then follow the separately gated
-contracts in:
+Choose an immutable inclusive source path at least ten minutes in the future
+and beyond the highest path already consumed by GX10. Stage the handoff
+publisher and verify it before altering GX10’s read-only view.
 
-- `docs/NORMALIZER_PRODUCTION_INTEGRATION.md`
-- `docs/NORMALIZER_HANDOFF.md`
-- `docs/AI_DETECTION_SIDE_CHANNEL.md`
-- `docs/RESULT_OUTBOX.md`
-- `docs/RESULT_TRANSPORT.md`
-- `docs/NOC_WORKFLOW.md`
+### 6. Perform the bind-only normalized handoff
 
-Require the collector normalizer's isolated activation and verified forward-
-only GX10 handoff before retiring the raw view. Then require the selective
-outbox snapshot, AI-result and incident-lifecycle
-producers, disabled/inactive sender installation, dedicated collector writer
-authorization, private sender configuration, explicit active verification, and
-natural one-file delivery. Prove exact collector acceptance, one ClickHouse row
-per accepted result, lifecycle-only routing to `incident_updates`, replay
-isolation, divergent same-name conflict isolation, and dashboard queries.
+Stop or pause GX10 only long enough to stabilize the handoff view. Preserve the
+raw bind configuration, switch GX10 to the verified normalized read-only bind,
+and run the prepared/cutover verifier. Resume schedules, process one normalized
+cycle, and require exact file hash and record-count parity. The rollback is a
+GX10 pause followed by restoration of the raw read-only bind and replay check;
+raw and shadow files are never rewritten.
 
-The public artifacts and protected working-system gates exist, but this entire
-sequence has not been executed on disposable clean hosts. Follow every current
-installer/verifier and stop on disagreement; do not treat the historical
-rediscovery absence as an instruction to omit reconstructed extensions.
+### 7. Activate deterministic correlation
+
+Only after normalized handoff parity passes, perform the inactive install,
+initial backfill, and active multi-cadence verification in Phase 9 of the GX10
+runbook. Require zero projection and incident lag, a healthy original timer,
+and a separately disableable correlation timer.
+
+### 8. Activate managed reasoning and hidden triage
+
+Follow Phase 10 of the GX10 runbook and `docs/AI_DETECTION_SIDE_CHANNEL.md`.
+Managed reasoning owns both selected incident assessment and hidden uncovered
+event triage. Require bounded one-run-per-cadence behavior, zero unreconciled
+`STARTED` runs, no service restarts, and continued health of fetch/ingest and
+correlation. Gemma failure leaves model work pending/no-result; it must not
+block raw capture, fetch/ingest, or deterministic incident state.
+
+### 9. Activate snapshot, outbox, and sender
+
+Follow Phase 11 of the GX10 runbook exactly:
+
+1. install and verify the local result/lifecycle outbox while inactive;
+2. activate and verify it without network transport;
+3. preflight and apply the selective rollback-journal snapshot upgrade;
+4. install the sender inactive and verify staged state;
+5. configure its distinct private writer identity while the timer is disabled;
+6. prove one bounded first-live file and collector acceptance;
+7. prove exact replay and divergent same-name conflict isolation;
+8. enable the sender timer and prove natural cadence health.
+
+Require one collector ledger identity and exactly one matching ClickHouse row
+for a first-live file. Lifecycle records must route only to
+`incident_updates`; AI records must route only to `ai_updates`.
+
+### 10. Restore main Grafana resources and the NOC layer
+
+The collector installer restores six main-organization resources and verifies
+their queries. Then follow `docs/GRAFANA.md` to create the isolated NOC
+organization, Viewer, two read-only datasources, two organization-local
+dashboards, home/star settings, Explore compatibility, and one-minute playlist.
+NOC provisioning is currently a documented manual/API procedure, not a
+permanent automated helper; verify every requested permission boundary.
+
+### 11. Full acceptance and staggered reboot
+
+Run every host/component verifier plus the normalizer, handoff, sender, gate,
+dashboard, NOC, and data-flow checks listed below. Let oneshot services settle,
+reboot the collector first, verify it, then reboot GX10 and verify it. A reboot
+pass requires all expected services/timers enabled, no unexpected restart
+growth, zero deterministic lag, and conserved outbox/ready/delivered/ledger
+state.
 
 ## Required completion evidence
 
-A disposable two-server rebuild is complete only when the operator records:
+Record only public-safe outcome markers, versions, and public artifact hashes:
 
-- exact repository revision used on both hosts
-- collector package/runtime pass markers
-- GX10 package/platform/preactivation/activation/runtime/Ollama pass markers
-- restricted backlog transport success
-- one successful automatic fetch/ingest cycle
-- normalized forward-only handoff identity/hash parity with raw rollback
-  retained
-- successful managed-correlation inactive install, initial backfill, and at least three zero-lag scheduled cadences
-- successful managed-reasoning and hidden-triage activation with bounded
-  fail-closed model behavior
-- successful selective snapshot, result/lifecycle outbox, configured sender,
-  one-file delivery, collector acceptance, ClickHouse provenance, replay, and
-  divergent-conflict gates
-- replay/idempotency result
-- rerun of both independent runtime verifiers
-- confirmation that the correlation timer is separately disableable and the original fetch/ingest timer remains healthy
-- confirmation that every reconstructed extension matches its versioned public
-  contract and remains independently disableable
+- shared repository revision and clean checkouts
+- collector package/runtime, transport, result-gate, ClickHouse, and Grafana
+  verification markers
+- GX10 package/platform/preactivation/activation/Ollama markers
+- raw-cycle success and normalized handoff parity with raw rollback retained
+- correlation, reasoning/triage, snapshot, outbox, and sender verifier markers
+- first-live delivery, exact replay, divergent-conflict, and natural sender
+  cadence evidence
+- one-row-per-accepted-result ClickHouse provenance and lifecycle routing
+- main dashboard and isolated NOC inventory/query/permission verification
+- collector-then-GX10 reboot recovery
 
-Record only public-safe outcomes and hashes. Never record private addresses, ports, usernames, credentials, keys, known-hosts contents, production log rows, or model blob contents.
+Never record addresses, ports, usernames, credentials, keys, known-hosts
+contents, production log rows, or model blobs.
+
+## Failure and rollback rules
+
+Stop at the first failed gate. Do not weaken installer refusals, verifier
+checks, or service guards merely to continue.
+
+- Base rebuild failures require correcting the input/environment and
+  reprovisioning a clean host when the installer refuses a used state.
+- Correlation, reasoning, outbox, and sender rollback is disable-only unless a
+  dedicated guarded rollback exists; preserve databases, ledgers, ready files,
+  quarantine, and backups.
+- Normalizer rollback is the protected raw-bind restoration described above.
+- Do not restore an old SQLite backup over newer ingest state.
+- Do not add architecture beyond the versioned current target during a rebuild.
 
 ## Deferred execution status
 
-Repository reconstruction, synthetic tests, live read-only parity checks, and operator documentation are complete.
-
-Disposable-host execution remains empirically unverified for both components because suitable clean validation systems are not available. The operator waived that gate for project sequencing with residual risk retained. Therefore the project must not claim that the full two-server clean rebuild passed.
-
-## Failure rule
-
-Stop at the first failed gate and follow the component runbook's recovery policy.
-
-- Do not weaken clean-host refusals or service guards.
-- Do not run either clean-machine installer against a reference system.
-- Do not bypass collector database-existence refusal.
-- Do not bypass GX10 empty-state, offline-model, or dual-confirmation activation gates.
-- Do not add missing future architecture during reconstruction validation.
+Repository reconstruction, synthetic tests, and read-only-reference checks are
+complete. Disposable clean-host execution remains `WAIVED BY OPERATOR` and
+empirically unverified because suitable systems are unavailable. This runbook
+is the procedure to execute when they become available; it must not be cited as
+proof that a full two-server clean rebuild already passed.

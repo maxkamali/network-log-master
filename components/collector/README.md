@@ -418,6 +418,17 @@ The published durable collector capture checkpoint is:
 
 For the detailed list of completed validations, known incomplete work, and clean-machine resume sequence, read [`REBUILD_STATUS.md`](REBUILD_STATUS.md).
 
+## Post-base current extensions
+
+The collector base is not the full current application. After base verification,
+the coordinated two-server procedure installs the normalizer shadow/handoff,
+then activates GX10 correlation, managed reasoning/triage, selective snapshot,
+result/lifecycle outbox, and the already-provisioned write-only sender. The
+collector also supports the documented manual/API reconstruction of the
+isolated NOC organization. Use [`docs/TWO_SERVER_REBUILD.md`](../../docs/TWO_SERVER_REBUILD.md)
+for order, private inputs, cross-host verification, and rollback; do not infer
+extension activation from the base installer alone.
+
 ## Collector execution status
 
 `docs/CURRENT_STATE.md` is the authority for project execution order.
@@ -430,9 +441,10 @@ The public collector rebuild-package and documentation milestone is closed after
 
 Clean-machine end-to-end collector rebuild validation was unavailable and explicitly waived by the operator for project sequencing because a disposable clean Debian 13 amd64 system is not available. This validation remains empirically unverified and is not claimed as passed.
 
-Collector and GX10 public reconstruction milestones are closed. Project-wide two-server documentation and acceptance reconciliation follows under `docs/CURRENT_STATE.md`.
-
-Do not skip ahead without updating `docs/CURRENT_STATE.md` first.
+Collector and GX10 public reconstruction milestones, including project-wide
+two-server documentation and acceptance reconciliation, are closed. Current
+status and residual clean-host risk are in `docs/CURRENT_STATE.md`; any future
+work must explicitly reopen scope there before implementation begins.
 
 ## Implementation contracts
 

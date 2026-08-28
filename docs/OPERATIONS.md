@@ -171,6 +171,8 @@ The managed reasoning owner also reviews canonical events that have no determini
 
 Validated positive decisions enter the same incident/outbox/collector/dashboard path as every other non-interface incident. They carry the real device, event-code-bearing entity name, AI title/detail, projected operational category, and `event-triage` transport protocol label. After 60 minutes without matching evidence they enter `RECOVERING`; after a further 15 minutes they resolve. A return before resolution reopens and increments the same correlation. Ignored and insufficient events remain available only in raw logs.
 
+Managed reasoning and hidden triage retain pending/no-result work when the model is unavailable or its output is invalid. Their retry state is isolated from raw capture, local ingest, deterministic correlation, and result delivery.
+
 Repeated model decisions can create a learned exact-event-code rule only for severity 0–3 after three consistent confidence-70+ positives spanning at least 30 minutes with no contradictory decision. Rules never contain generated code or commands and can only select the same fixed incident bridge. Severity 4/5 is always model-reviewed and never auto-promoted.
 
 ## Grafana operational boundary
@@ -213,7 +215,8 @@ The complete collector runbook is `components/collector/README.md`. Clean-machin
 
 The GX10 rebuild package separates guarded installation, offline model import, preactivation verification, dual-confirmation activation, and active runtime verification. Its complete runbook is `components/gx10/CLEAN_MACHINE_RUNBOOK.md`. Clean-machine execution was unavailable and is waived for project sequencing with residual risk retained.
 
-`docs/TWO_SERVER_REBUILD.md` coordinates the required collector-first order, independent transport-key roles, cross-server inputs, activation point, and acceptance evidence.
+`docs/TWO_SERVER_REBUILD.md` is the authoritative cross-host rebuild order,
+private-input contract, activation sequence, and acceptance evidence.
 
 Rebuild inputs that are private or environment-specific are supplied by the operator through environment values and/or private files. They are not stored in the public repository.
 
@@ -227,7 +230,8 @@ Operator documentation should state the required functional connectivity, for ex
 
 - network devices must be able to deliver syslog to the collector's configured UDP/TCP syslog listeners
 - operators/GX10 must reach the configured restricted SSH/SFTP service
-- GX10 needs only the read-only backlog role for the currently reconstructed automatic path
+- GX10 needs the independent read-only backlog role and write-only result role
+  for the current functional target
 - users must reach Grafana HTTPS
 - certificate issuance/renewal must satisfy the chosen ACME validation requirements, including temporary HTTP validation reachability when applicable
 
@@ -238,14 +242,41 @@ Do not encode production firewall allowlists or addresses in the public reposito
 The system should fail in the direction of preserving evidence:
 
 - parser failure -> keep generic observation
-- model unavailable -> retain deterministic incident/evidence state
-- Ollama/model infrastructure unavailable -> fetch/ingest remains a separate deterministic path; no current pipeline caller is claimed
+- model unavailable -> retain deterministic incident/evidence state; managed
+  reasoning and hidden triage retain pending/no-result work for later retry
+- Ollama/model infrastructure unavailable -> raw capture, fetch/ingest,
+  canonical projection, deterministic incidents, lifecycle export, and existing
+  result delivery remain independent; no AI-created incident is fabricated
 - malformed AI output -> reject/quarantine, do not write directly to ClickHouse
 - transport interruption -> retry from durable file/checkpoint state
 - replay -> no duplicate canonical records
 - dashboard restore uncertainty -> validate through API/dry-run rather than mutate Grafana database state directly
 - rebuild mismatch -> stop and reconcile against verified live behavior rather than guessing
-- missing GX10 result producer or Ollama caller -> preserve the absence; do not fabricate connectivity to make validation appear end-to-end
+- missing or divergent current GX10 caller, producer, snapshot, or sender
+  artifact -> fail closed, preserve durable state, and reconcile against the
+  versioned repository contract; do not restore a rediscovery-era absence
+
+## Routine health, safe disable, and reboot checks
+
+The collector verifier covers Vector, ClickHouse, Grafana, HTTPS/Certbot,
+restricted transport, the result gate, and retention. The current extensions
+also require normalizer shadow/handoff timer health and a valid read-only bind
+view. The GX10 verifier family covers the base pipeline, Ollama, correlation,
+managed reasoning/triage, selective snapshot/outbox, and result sender.
+
+Use the component verifiers rather than inferring health only from service
+activity. Before a planned reboot, let oneshot services settle and record only
+public-safe markers. Reboot the collector first; verify collector services,
+both transport roles, normalizer/handoff, dashboards, and NOC access. Then
+reboot GX10; verify Ollama and the base, correlation, reasoning, outbox, and
+sender timers, zero lag, no unfinished reasoning runs, and conserved
+ready/delivered/acceptance-ledger state.
+
+Each extension is independently disableable. Disable correlation, managed
+reasoning, outbox, or sender rather than altering its database, files, ledger,
+quarantine, or backup. The normalizer rollback is GX10 pause plus restoration
+of the protected raw read-only bind. Never restore an old SQLite backup over
+newer ingest state.
 
 ## Operational change rule
 

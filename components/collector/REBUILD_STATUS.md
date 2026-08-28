@@ -483,33 +483,19 @@ Final validation marker:
 
 The public collector rebuild-package/documentation milestone is therefore closed.
 
-Clean-machine end-to-end collector rebuild execution remains a separate validation gate.
+Clean-machine end-to-end collector rebuild execution is `WAIVED BY OPERATOR`
+and empirically unverified; it is retained residual risk rather than a current
+execution gate.
 
-## Detailed remaining collector work
+## Historical next milestone at collector closure
 
-Use `docs/CURRENT_STATE.md` for the authoritative ordering/status. The remaining collector work currently consists of:
+At the original collector item-10 closure, GX10 still required the capture and
+rebuild work listed here. That milestone later completed, including platform
+packages, Ollama/model handling, spool fetch, replay-safe SQLite ingest,
+normalization/correlation, managed reasoning/triage, result return, verifiers,
+and operator documentation. The current GX10 status is authoritative in
+`components/gx10/REBUILD_STATUS.md` and the coordinated current rebuild order
+is `docs/TWO_SERVER_REBUILD.md`.
 
-- waived by operator: clean-machine end-to-end collector rebuild validation remains empirically unverified; execute it if a disposable Debian 13 amd64 system later becomes available
-
-## GX10 remaining milestone
-
-GX10 still needs the same complete capture/rebuild treatment.
-
-Known areas that still require durable public artifacts and validation include:
-
-- Ubuntu/runtime package reconstruction
-- NVIDIA/GB10 environment dependencies
-- Ollama configuration
-- model configuration
-- spool fetcher
-- SFTP transport
-- local SQLite state schema
-- deterministic ingest/idempotency
-- deterministic enrichment/classification
-- systemd service/timer configuration
-- local inference integration
-- result-return path
-- verification scripts
-- operator rebuild documentation
-
-The final project is complete only when both the collector and GX10 can be reconstructed from this public repository plus operator-supplied environment values.
+The only retained collector qualification is the waived, empirically
+unverified clean-machine execution described above.

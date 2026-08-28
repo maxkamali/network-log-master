@@ -242,9 +242,9 @@ Because GX10 idempotency is keyed by source file and record number, cutover and 
 10. `DONE` — staged the validated exact-hash handoff package, completed the documented immutable-floor bind-only cutover, proved collector/GX10 hash and cardinality parity, resumed schedules, and retained the exact raw-view rollback boundary
 11. `DONE` — reviewed the bounded multi-cadence normalized-handoff window and replaced transitional GX10 vendor/message reparsing with an unscheduled canonical-field projector under exact hashes and protected rollback while preserving local suppression policy and historical rows
 
-## Non-goals
+## Historical initial-cutover non-goals
 
-The completed cutover phase did not:
+The initial normalizer cutover did not yet:
 
 - change live Vector inputs or raw ClickHouse delivery
 - infer platforms from message text at runtime; the installed worker trusts only the protected private inventory
@@ -252,3 +252,8 @@ The completed cutover phase did not:
 - enable a GX10 AI-result producer
 - retire transitional GX10 parsing
 - run clean-machine rebuild installers against reference systems
+
+Items 24 through 30 later activated the canonical projector, deterministic
+incident engine, managed reasoning/triage, result/lifecycle producers, and
+write-only sender. Those later current extensions are not non-goals of a full
+rebuild; their ordered activation is in `docs/TWO_SERVER_REBUILD.md`.

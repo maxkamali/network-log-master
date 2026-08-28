@@ -15,7 +15,7 @@ Read and verify in this order before changing implementation:
 3. The relevant component rebuild statuses — [`components/collector/REBUILD_STATUS.md`](../components/collector/REBUILD_STATUS.md) and [`components/gx10/REBUILD_STATUS.md`](../components/gx10/REBUILD_STATUS.md); both component reconstruction milestones are closed.
 4. The latest entries in [`PROJECT_JOURNAL.md`](PROJECT_JOURNAL.md) — understand recent decisions, failed approaches, validation evidence, and checkpoint history.
 5. [`DECISIONS.md`](DECISIONS.md) — review durable architecture decisions that constrain implementation choices.
-6. [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md), [`OPERATIONS.md`](OPERATIONS.md), and [`TWO_SERVER_REBUILD.md`](TWO_SERVER_REBUILD.md) — confirm data, operational, and cross-host rebuild contracts.
+6. [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md), [`OPERATIONS.md`](OPERATIONS.md), and [`TWO_SERVER_REBUILD.md`](TWO_SERVER_REBUILD.md) — confirm data and operational contracts, then use the latter as the authoritative collector-first cross-host rebuild order and private-input inventory.
 7. [`ACCEPTANCE.md`](ACCEPTANCE.md) — confirm what passed and which unavailable disposable-host executions were waived with residual risk.
 8. Component-specific documentation for the area being reviewed. For the completed result-return boundary, read [`RESULT_OUTBOX.md`](RESULT_OUTBOX.md), [`RESULT_TRANSPORT.md`](RESULT_TRANSPORT.md), [`components/gx10/README.md`](../components/gx10/README.md), and [`components/collector/REBUILD_STATUS.md`](../components/collector/REBUILD_STATUS.md).
 9. [`DETECTION_COVERAGE_BACKLOG.md`](DETECTION_COVERAGE_BACKLOG.md) — review important captured event types that still require deterministic parser and incident-lifecycle coverage.

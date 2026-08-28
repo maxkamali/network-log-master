@@ -49,7 +49,7 @@ GX10's existing primary key on `source_files.remote_path` and uniqueness key on 
 
 ## Repository implementation
 
-The repository-only candidate consists of:
+The current handoff package consists of:
 
 - `components/normalizer/src/network_log_normalizer/handoff.py`
 - `components/normalizer/tests/test_handoff.py`
@@ -75,7 +75,7 @@ The publisher has no network access, source-spool write access, ClickHouse path,
 
 ## Required private runtime layout
 
-The later guarded staging step must create or verify:
+A clean rebuild or a guarded restaging step must create or verify:
 
 | Purpose | Path | Required boundary |
 |---|---|---|

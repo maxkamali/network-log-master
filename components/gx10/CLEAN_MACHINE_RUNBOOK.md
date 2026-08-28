@@ -4,22 +4,34 @@
 
 This runbook reconstructs the currently proven GX10 state on a clean Ubuntu 24.04 arm64 host.
 
+It reconstructs two deliberate layers:
+
+1. the recovered base runtime; and
+2. the current reconstructed correlation, managed AI/triage, result/lifecycle
+   outbox, selective snapshot, and write-only sender extensions.
+
 It reproduces:
 
 - the dedicated runtime identity and protected filesystem
 - read-only SFTP backlog fetch
 - replay-safe local SQLite ingest
 - canonical normalized-field projection and deterministic incident processing behind a separate managed offline schedule
-- the inert deterministic wake-policy/compact-packet schema and builder without scheduling or inference
+- deterministic wake-policy/compact-packet schema and builder through the
+  separately managed reasoning owner
 - the exact reconstructed SQLite base, deterministic incident extension, and two functional suppression patterns
 - the original automatic `timer -> fetch -> ingest` chain
 - the captured Ollama executable, service, loopback listener, and six-model store
+- hidden uncovered-event triage, selective snapshot, result/lifecycle outbox,
+  and independently disableable write-only sender through their guarded phases
 
-It does not invent:
+It does not claim to rediscover historical provenance that was not recovered:
 
-- an application-specific Ollama caller
-- a GX10 producer for the collector result-return boundary
 - historical kernel, NVIDIA, CUDA, Ollama, or SQLite bootstrap provenance that was not recovered
+
+Historical rediscovery found no predecessor application-specific Ollama caller
+or GX10 result producer. The repository-managed caller, triage, producer, and
+sender below are active reconstructed extensions and must be installed only
+through their own gates.
 
 Never run these clean-machine installers against the working reference system.
 
@@ -30,14 +42,19 @@ Prepare these outside the repository:
 1. a clean Ubuntu 24.04 arm64 GX10-class host
 2. the captured NVIDIA-capable kernel, driver, and CUDA compiler baseline recorded in `install/versions.env`
 3. root access and working Ubuntu package repositories containing the exact pinned package versions
-4. network reachability from GX10 to the collector's read-only SFTP boundary
+4. network reachability from GX10 to both collector transport roles
 5. the collector host, port, and read-only transport username
-6. a dedicated SFTP private key and known-hosts file, each mode `0400` or `0600`
+6. a dedicated backlog-reader private key and known-hosts file, each mode `0400` or `0600`
 7. the exact captured Ollama binary:
    - size `35792104` bytes
    - SHA-256 `26f44ca89143f2326a3aad98b2cb5e8b5af9397aef7001cd8d022e90d6e0b55e`
 8. an offline Ollama `models` directory containing the captured six manifests and all referenced blobs
 9. a clean checkout of this public repository
+10. a distinct root-owned result-writer Ed25519 private key for the later
+    sender configuration; its public half must already be present in the
+    collector base authorized-keys input
+11. protected absent locations for the reasoning pre-activation backup and the
+    selective snapshot upgrade backup directory
 
 Firewall reconstruction is out of scope. The operator is responsible for allowing only the required outbound collector transport and for retaining the Ollama listener on loopback.
 
@@ -54,6 +71,12 @@ The populated file must define:
 - `GX10_SFTP_KNOWN_HOSTS_FILE`
 - `OLLAMA_BINARY_FILE`
 - `OLLAMA_MODEL_STORE_DIR`
+
+The later sender configuration also needs a separately protected result-writer
+identity. Do not put that key in this base input file or repository. Stage it
+only from protected temporary storage when Phase 11C requests it; the
+configurator installs the service-owned copy and removes attempt-created
+temporary state after verification.
 
 Do not place the populated file, private key, known-hosts file, Ollama binary, or model store inside the Git checkout.
 
@@ -205,7 +228,9 @@ Expected marker:
 
 `GX10_OLLAMA_VERIFY=PASS`
 
-At this point all application units must still be inactive, Ollama and the timer must be disabled, the spool must be empty, and the application database must contain no runtime rows.
+At this point all application units must still be inactive, Ollama and the
+timer must be disabled, and every verifier-enumerated application table,
+cursor, spool file, and SQLite sidecar must be empty.
 
 Before continuing, review the protected collector host, port, and username in the external input file. Activation starts the timer and authorizes automatic read-only fetch followed by local ingest.
 
@@ -286,9 +311,14 @@ Verify active state after at least three independent correlation timer cadences:
 
 Require zero projection lag, zero incident lag, successful service result, zero restarts, monotonic incident aggregates, and continued advancement of the original fetch/ingest timer. Do not invoke the packet builder or enable any Ollama application caller in this phase.
 
-## Phase 10: managed local-reasoning activation
+## Phase 10: managed AI and hidden-triage activation
 
 Proceed only after managed correlation has passed its multi-cadence gate and the exact selected local-model version has separately passed synthetic and protected current-state-copy evaluation.
+
+This phase activates the selected incident-assessment path and the hidden
+uncovered-event triage path under the same managed owner. Deterministic
+incidents retain priority; unavailable or invalid model work remains pending or
+records a no-result without blocking raw capture, ingest, or correlation.
 
 Create a protected recovery directory, then install the managed reasoning binding while leaving its timer disabled:
 
@@ -331,38 +361,136 @@ Verify active state after multiple independent reasoning timer cadences:
 
 Require zero deterministic lag, zero unreconciled `STARTED` runs, zero service restarts, consistent success/result counts, bounded one-run-per-cadence advancement, and continued health of the original fetch/ingest and correlation timers. Keep collector result return disabled until the separately guarded Phase 11 gates.
 
-## Phase 11: current post-base extensions
+## Phase 11: current result/lifecycle extensions
 
-Phase 10 is not the complete current application. The active production target
-also includes the hidden uncovered-event triage coordinator, selective
-transactional outbox snapshot, AI-result and incident-lifecycle producers, and
-the independently disableable write-only sender. These are deliberate
-reconstructed extensions, not rediscovered predecessor behavior.
+Phase 10 is not the complete current application. This phase installs the
+active no-network result/lifecycle projection, the selective snapshot used by
+that projection, and the independently disableable write-only sender. It also
+depends on the hidden triage contract already installed by managed reasoning.
 
-Complete them only through their dedicated guarded installers and verifiers:
+### 11A. Install and activate the local outbox
 
-1. verify the managed-reasoning installation includes the exact triage schema,
-   coordinator, prompt, and fail-closed scheduling contract in
-   `docs/AI_DETECTION_SIDE_CHANNEL.md`
-2. install and activate the no-network result/lifecycle outbox with
-   `install-result-outbox.py`, `activate-result-outbox.py`, and
-   `verify-result-outbox.py`
-3. upgrade to and verify the selective transactional snapshot with
-   `upgrade-result-outbox-snapshot.py`; do not retain the rejected full-database
-   recurring-copy design
-4. install the result sender inactive, authorize its distinct public key on the
-   collector, configure the private GX10 identity/pin inputs, and require the
-   configured-inactive verifier before transport
-5. follow `docs/RESULT_TRANSPORT.md` for bounded first-live delivery, exact
-   replay, divergent same-name conflict isolation, active timer verification,
-   natural delivery, collector acceptance-ledger, and ClickHouse provenance
-6. verify deterministic lifecycle delivery and every current NOC query through
-   `docs/NOC_WORKFLOW.md`
+Install the outbox while its managed timer remains inactive:
 
-No disposable GX10 host has executed this complete extension sequence. Treat
-that as retained empirical risk: use the current scripts' `--help`, exact
-verifiers, private operator inputs, and protected rollback boundaries; stop on
-any mismatch instead of translating historical production commands by memory.
+    components/gx10/install/install-result-outbox.py \
+        --confirm-install-inactive-result-outbox
+
+Expected marker:
+
+`GX10_RESULT_OUTBOX_INACTIVE_INSTALL=PASS`
+
+Verify the inactive installation:
+
+    components/gx10/install/verify-result-outbox.py --installed
+
+Expected marker:
+
+`GX10_MANAGED_RESULT_OUTBOX_VERIFY=PASS`
+
+Activate the protected local producer. It has no network capability:
+
+    components/gx10/install/activate-result-outbox.py \
+        --confirm-activate-local-result-outbox
+    components/gx10/install/verify-result-outbox.py --active
+
+Expected activation marker:
+
+`GX10_RESULT_OUTBOX_LOCAL_ACTIVATION=PASS`
+
+### 11B. Upgrade to the selective snapshot
+
+Choose an absent child directory below a root-owned protected recovery parent.
+First preflight without writing:
+
+    components/gx10/install/upgrade-result-outbox-snapshot.py \
+        --backup-dir "$GX10_OUTBOX_SNAPSHOT_BACKUP_DIR" --check
+
+Expected marker:
+
+`GX10_RESULT_OUTBOX_SNAPSHOT_UPGRADE_CHECK=PASS`
+
+Apply only after the outbox is healthy and the protected backup target has been
+reviewed:
+
+    components/gx10/install/upgrade-result-outbox-snapshot.py \
+        --backup-dir "$GX10_OUTBOX_SNAPSHOT_BACKUP_DIR" \
+        --confirm-live-outbox-snapshot-upgrade
+    components/gx10/install/verify-result-outbox.py --active
+
+Expected upgrade marker:
+
+`GX10_RESULT_OUTBOX_SNAPSHOT_UPGRADE=PASS`
+
+The producer now reads the selective rollback-journal snapshot, not the mutable
+working database. Do not retain the rejected recurring full-database-copy
+design.
+
+### 11C. Install and configure the sender while disabled
+
+The clean collector base already installed the matching result-writer public
+key. Do not append it again unless repairing an existing collector through the
+separate guarded authorizer.
+
+Install and verify the sender while it remains staged and inactive:
+
+    components/gx10/install/install-result-sender.py \
+        --confirm-install-inactive-result-sender
+    components/gx10/install/verify-result-sender.py --staged
+
+Expected install marker:
+
+`GX10_RESULT_SENDER_INACTIVE_INSTALL=PASS`
+
+Stage the distinct protected writer key temporarily at the documented
+root-readable path, then configure the disabled sender using the rendered
+runtime configuration:
+
+    components/gx10/install/configure-result-sender.py \
+        --identity-input /run/network-log-result-writer.key \
+        --runtime-config /etc/network-log-gx10/runtime.json \
+        --confirm-configure-disabled-result-sender
+    components/gx10/install/verify-result-sender.py --configured \
+        --runtime-config /etc/network-log-gx10/runtime.json
+
+Expected configuration marker:
+
+`GX10_RESULT_SENDER_CONFIGURED_INACTIVE=PASS`
+
+The configured sender must still be disabled/inactive and must not invoke SFTP
+during configuration. The verifier proves the separately installed service
+identity, known-hosts pin, canonical configuration, and zero-transport state.
+
+### 11D. Prove transport before recurring delivery
+
+Follow `docs/RESULT_TRANSPORT.md` for the bounded first-live delivery. Keep the
+sender timer disabled, require at least one ready file, start exactly one sender
+service cycle, and prove one ready-to-delivered transition, one collector
+acceptance-ledger identity, and exactly one corresponding ClickHouse row.
+
+Then prove exact replay and same-name divergent conflict isolation before
+enabling the recurring timer:
+
+    systemctl enable --now network-log-gx10-result-sender.timer
+    components/gx10/install/verify-result-sender.py --configured --active \
+        --runtime-config /etc/network-log-gx10/runtime.json
+
+Require natural timer cadences with zero sender restarts. Lifecycle batches
+must route only to `incident_updates`; AI records must route only to
+`ai_updates`. Verify all current NOC queries through `docs/NOC_WORKFLOW.md`.
+
+## Phase 12: full-system acceptance and reboot recovery
+
+Before declaring a clean rebuild complete, run every base, normalizer/handoff,
+correlation, managed-reasoning/triage, snapshot/outbox, sender, collector-gate,
+dashboard, and NOC verifier required by `docs/TWO_SERVER_REBUILD.md`. Let
+oneshot services settle, reboot the collector first and verify it, then reboot
+GX10 and verify it. Require enabled expected timers, zero deterministic lag,
+zero unreconciled `STARTED` runs, no unexpected restarts, and conserved
+outbox/ready/delivered/ledger state.
+
+No disposable GX10 host has executed this complete extension sequence. This is
+retained empirical risk: stop on any mismatch rather than translating
+historical production commands by memory.
 
 ## Failure and rerun rules
 

@@ -106,6 +106,28 @@ NORMALIZER_SHADOW_INSTALL=STAGED
 normalizer_shadow_timer=disabled,inactive
 ```
 
+## Clean-rebuild shadow activation
+
+After the staged installer passes and the collector base is healthy, enable
+only the shadow timer and require active verification before staging the
+handoff:
+
+```text
+sudo systemctl enable --now network-log-normalizer-shadow.timer
+sudo components/collector/normalizer/verify-shadow.py --mode active
+```
+
+Expected marker:
+
+```text
+NORMALIZER_SHADOW_RUNTIME_VERIFY=PASS
+```
+
+Require historical catch-up and zero pending/incomplete/missing/orphaned or
+mutated evidence before selecting a future handoff floor. The full cross-host
+order, including GX10 pause and bind-only cutover, is authoritative in
+`docs/TWO_SERVER_REBUILD.md`.
+
 ## Historical item-19 activation boundary
 
 Item 19 did not provide an automatic activation command. Its separately

@@ -26,7 +26,9 @@ Current state:
 - secure backlog fetch and durable ingest are operational
 - replay/idempotency protections exist in the ingest path
 - normalized schema-version-1 projection is implemented as the deliberate replacement for transitional vendor/message reparsing
-- a deterministic version-1 incident engine and append-only schema are implemented, validated, and active on the working system under protected backup
+- the version-1 incident identity/schema contract is implemented, validated,
+  and active; the later version-3 engine policy extends protocol monitoring to
+  one-observation BGP/OSPF/OSPFv3 candidates
 - a separate offline managed `projection -> incident` runner/service/timer passed initial production backfill and three zero-lag scheduled cadences with exact hashes, bounded cursor convergence, resource limits, telemetry, and state-preserving disable behavior
 - the original automatic chain remains `timer -> fetch -> ingest`; the correlation chain is independently scheduled and disableable
 - Ollama is active with six complete model manifests. No historical application-specific caller was discovered; the repository-managed bounded Gemma caller and hidden uncovered-event triage are now active additions.
@@ -39,16 +41,17 @@ Current state:
 - item 33 added a backward-compatible Device projection to new result files while preserving exact legacy ready/delivered bytes; its 192-test checkpoint passed and all production schedules retained zero restarts
 - item 34 added an inference-independent incident lifecycle producer, strict shared transport validation, and the collector NOC projection; its then-current suite passed 200 tests and both outbox/sender timers remained enabled and healthy
 - item 36 activated forward-only 24-hour monitoring for confirmed BGP/OSPF/OSPFv3 recovery, strict version-2 lifecycle recurrence projection with version-1 compatibility, and managed exact-hash upgrades
-- the later incident-engine version-3 correction extends that monitoring rule
-  to one-observation BGP/OSPF/OSPFv3 candidates; a candidate reaches
-  `RECOVERING` rather than resolving at its 15-minute deadline
+- a one-observation BGP/OSPF/OSPFv3 candidate reaches `RECOVERING` rather
+  than resolving at its 15-minute deadline under the active version-3 policy
 - the hidden AI detection side channel is active for uncovered important events; validated positives become ordinary deterministic incidents, failures remain pending, and guarded learned coverage is limited to severity 0–3
 - current validation status is maintained in `docs/CURRENT_STATE.md`; exact
   milestone test totals remain in the append-only project journal
 
 The normalized production handoff, multi-cadence stability window, and live-copy projection rehearsal now provide the retirement gate. Historical version-3 enrichment rows remain evidence and are not deleted.
 
-Live-system rediscovery is complete. The authoritative reconstruction checkpoint, captured contracts, preserved absences, and next implementation order are in `REBUILD_STATUS.md`.
+Live-system rediscovery is complete. The authoritative reconstruction
+checkpoint, captured contracts, preserved historical absences, and current
+component state are in `REBUILD_STATUS.md`.
 
 The complete installation and activation sequence is in
 [`CLEAN_MACHINE_RUNBOOK.md`](CLEAN_MACHINE_RUNBOOK.md). Use that runbook only

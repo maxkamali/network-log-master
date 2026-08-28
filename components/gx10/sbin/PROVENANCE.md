@@ -65,7 +65,7 @@ The incident engine owns deterministic identity/lifecycle over classification-ve
 
 `build-reasoning-packets.py`, `run-local-reasoning.py`, and `run-managed-reasoning.py` are deliberate post-rediscovery implementation artifacts. They are not represented as captured historical applications.
 
-The packet builder owns deterministic wake selection and compact append-only facts. The local caller binds one immutable packet to exact model/prompt/output versions and records only strict canonical interpretation. The item-29 wrapper validates all stage hashes, holds an independent cycle lock, refuses unreconciled `STARTED` state, runs the packet builder once, permits at most one inference reservation, and emits only aggregate backlog/run/result health. It remains a repository-only candidate until protected-copy and activation gates pass.
+The packet builder owns deterministic wake selection and compact append-only facts. The local caller binds one immutable packet to exact model/prompt/output versions and records only strict canonical interpretation. The item-29 wrapper validates all stage hashes, holds an independent cycle lock, refuses unreconciled `STARTED` state, runs the packet builder once, permits at most one inference reservation, and emits only aggregate backlog/run/result health. Protected-copy, activation, and scheduled-cadence gates passed; this managed reasoning/triage owner is active.
 
 ## Stable outbox snapshot addition
 
@@ -79,4 +79,20 @@ integrity, copies only the ten tables used by result/lifecycle projection,
 validates the copied schema and terminal-state invariants, and publishes the
 rollback-journal projection atomically. It cannot open a network socket, make
 incident/model decisions, copy raw-event bulk, or alter result/lifecycle
-records. Production activation remains separately gated.
+records. Production activation passed; the active outbox reads the resulting
+selective rollback-journal projection rather than the mutable source database.
+
+## Current application artifact matrix
+
+| Artifact group | Origin | Installer/verifier owner | Active boundary | Rollback behavior |
+| --- | --- | --- | --- | --- |
+| fetch and replay-safe ingest | captured | base installer/runtime verifier | base fetch/ingest timer | preserve processed state; repair only on a clean host |
+| canonical projection and incidents | reconstructed | correlation installer/verifier | correlation timer | disable timer and retain working state |
+| packets, reasoning, and hidden triage | reconstructed | managed-reasoning installer/verifier | reasoning timer | disable timer and retain append-only packet/run truth |
+| selective snapshot and result/lifecycle outbox | reconstructed | snapshot/outbox installers and verifiers | snapshot before outbox timer | disable extension; retain snapshot, files, and cursors |
+| write-only result sender | reconstructed | sender installer/configurator/verifier | sender timer | disable timer; retain ready/delivered files and collector evidence |
+
+`run-managed-ai.py` coordinates the active reasoning/triage policy;
+`build-result-outbox.py` and `build-incident-outbox.py` are the two local
+producers; `send-result-outbox.py` performs only bounded transport. Exact
+commands and markers are in `CLEAN_MACHINE_RUNBOOK.md`.

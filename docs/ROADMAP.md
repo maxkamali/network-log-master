@@ -1,6 +1,6 @@
 # Roadmap
 
-The project advances through deterministic, validated gates. `docs/CURRENT_STATE.md` is the authority for the exact current execution order and the single `NEXT` item. This roadmap describes the broader milestone sequence.
+The project advances through deterministic, validated gates. `docs/CURRENT_STATE.md` is the authority for the exact current execution order and contains one `NEXT` only while work remains; a completed state has none. This roadmap describes the broader milestone sequence.
 
 ## Milestone 1 - Deterministic normalizer consolidation
 

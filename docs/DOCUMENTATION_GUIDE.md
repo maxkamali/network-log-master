@@ -13,7 +13,7 @@ to its authority instead of repeating changing facts in many files.
 | Understand the application | `README.md` | `docs/ARCHITECTURE.md` |
 | Resume or change work | `docs/START_HERE.md` | `docs/CURRENT_STATE.md`, relevant component/status files |
 | Operate the running system | `docs/OPERATIONS.md` | `docs/NOC_WORKFLOW.md`, `docs/GRAFANA.md` |
-| Rebuild both hosts | `docs/TWO_SERVER_REBUILD.md` | component runbooks and `docs/ACCEPTANCE.md` |
+| Rebuild both hosts | `docs/TWO_SERVER_REBUILD.md` | component runbooks, `docs/GRAFANA.md`, and `docs/ACCEPTANCE.md` |
 | Understand a subsystem | its dedicated document | source README and tests |
 | Understand why a choice exists | `docs/DECISIONS.md` | the linked journal checkpoint |
 | Review historical evidence | latest `docs/PROJECT_JOURNAL.md` entries | older entries only when required |
@@ -65,6 +65,7 @@ decide which one may own a changed fact.
 | Future/deferred work | `docs/ROADMAP.md` | a proposal is accepted, deferred, started, or completed |
 | Durable design choice | `docs/DECISIONS.md` | an architecture decision is accepted, superseded, or reversed |
 | Evidence, commands, validation, and rollback record | `docs/PROJECT_JOURNAL.md` | every completed bounded change |
+| Cross-host order and private-input inventory | `docs/TWO_SERVER_REBUILD.md` | a transport role, activation order, or rebuild input changes |
 | Component implementation and clean rebuild details | component README/status files | component code, installer, or verifier changes |
 
 Do not copy a changing status, test count, production inventory, or pending
@@ -81,6 +82,7 @@ Before merging a bounded change, update only the rows that apply:
 | Code/configuration behavior | relevant component README and subsystem contract |
 | Live deployment or rollback | `CURRENT_STATE`, `OPERATIONS` when operator behavior changes, and journal |
 | Dashboard/access workflow | `NOC_WORKFLOW` and/or `GRAFANA`, plus journal |
+| Cross-host rebuild inputs/order | `TWO_SERVER_REBUILD`, relevant component runbooks, and journal |
 | Data schema/transport contract | `DATA_CONTRACTS` plus affected subsystem contract |
 | Architecture decision | `ARCHITECTURE`, `DECISIONS`, and journal |
 | Future idea with no implementation | `ROADMAP` only |

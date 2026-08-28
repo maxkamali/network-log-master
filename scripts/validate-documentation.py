@@ -91,6 +91,7 @@ STALE_SUMMARIES = {
     ),
     'components/collector/REBUILD_STATUS.md': (
         'not part of the clean-machine reconstruction path',
+        'gx10 still needs the same complete capture/rebuild treatment',
     ),
     'docs/MANAGED_CORRELATION.md': (
         'the next gate is deterministic llm wake selection',
@@ -98,6 +99,21 @@ STALE_SUMMARIES = {
     'components/gx10/systemd/PROVENANCE.md': (
         'item-29 implementation candidates',
     ),
+    'docs/OPERATIONS.md': (
+        'no current pipeline caller is claimed',
+        'missing gx10 result producer or ollama caller',
+    ),
+    'docs/INCIDENT_ENGINE.md': ('remain later milestones',),
+    'docs/REASONING_PACKETS.md': ('remain separate later items',),
+    'docs/ACCEPTANCE.md': ('next stability/retirement gate',),
+    'docs/GRAFANA.md': (
+        'item 40 requests compact explore panes',
+        'the exact current grafana integration task',
+    ),
+    'components/collector/README.md': (
+        'project-wide two-server documentation and acceptance reconciliation follows',
+    ),
+    'components/gx10/README.md': ('next implementation order',),
 }
 REQUIRED_CURRENT_CONTRACTS = {
     'components/collector/README.md': (
@@ -107,6 +123,9 @@ REQUIRED_CURRENT_CONTRACTS = {
     'docs/DATA_CONTRACTS.md': (
         'one-observation protocol candidate',
         'rather than\nresolving',
+        'reasoning-v1.sql',
+        'inference-v1.sql',
+        'triage-v1.sql',
     ),
     'docs/REASONING_PACKETS.md': (
         'item 29 later activated packet building',
@@ -115,10 +134,14 @@ REQUIRED_CURRENT_CONTRACTS = {
     'docs/TWO_SERVER_REBUILD.md': (
         'current functional target',
         'not a complete\nreconstruction of the current application',
+        'activate normalizer shadow before gx10 correlation',
+        'verifier-enumerated initialized application state',
+        'result-writer private key',
     ),
     'components/gx10/CLEAN_MACHINE_RUNBOOK.md': (
-        'Phase 11: current post-base extensions',
-        'including Phase 11',
+        'phase 11: current result/lifecycle extensions',
+        'gx10_result_sender_configured_inactive=pass',
+        'phase 12: full-system acceptance and reboot recovery',
     ),
     'components/gx10/README.md': (
         'not directly scheduled, but invoked by the active managed-reasoning owner',
@@ -132,6 +155,22 @@ REQUIRED_CURRENT_CONTRACTS = {
     'components/gx10/systemd/PROVENANCE.md': (
         'item-29 implementation artifacts',
         'scheduled-cadence gates passed on the working system',
+    ),
+    'docs/OPERATIONS.md': (
+        'read-only backlog role and write-only result role',
+        'managed reasoning and hidden triage retain pending/no-result work',
+    ),
+    'docs/RESULT_TRANSPORT.md': (
+        'gate-owned temporary file',
+        'same-owner, no-overwrite publication marker',
+    ),
+    'docs/RESULT_OUTBOX.md': (
+        'selective rollback-journal snapshot',
+        'nonempty bounded `device`',
+    ),
+    'docs/ARCHITECTURE.md': (
+        'uncovered-event selector',
+        'only no incident evidence',
     ),
 }
 
@@ -187,6 +226,20 @@ def validate_links() -> None:
                     )
 
 
+def local_markdown_links(source: Path) -> tuple[Path, ...]:
+    """Return in-repository Markdown targets linked by one document."""
+    result: list[Path] = []
+    text = source.read_text(encoding='utf-8')
+    for match in MARKDOWN_LINK_RE.finditer(text):
+        raw_target = match.group(1).strip()
+        if raw_target.startswith(('http://', 'https://', 'mailto:')):
+            continue
+        target, _ = resolve_link(source, raw_target)
+        if target.suffix.lower() == '.md' and target.is_file():
+            result.append(target)
+    return tuple(result)
+
+
 def repository_markdown_files() -> tuple[Path, ...]:
     files = [ROOT / 'README.md']
     for directory in (DOCS_DIR, ROOT / 'components'):
@@ -195,6 +248,31 @@ def repository_markdown_files() -> tuple[Path, ...]:
             if not any(part.startswith('.') for part in path.relative_to(ROOT).parts)
         )
     return tuple(sorted(set(files)))
+
+
+def validate_documentation_reachability() -> None:
+    """Ensure the entry README can navigate to every maintained Markdown page."""
+    entry = ROOT / 'README.md'
+    expected = set(repository_markdown_files())
+    reachable: set[Path] = set()
+    pending = [entry]
+    while pending:
+        source = pending.pop()
+        if source in reachable:
+            continue
+        reachable.add(source)
+        pending.extend(
+            target for target in local_markdown_links(source)
+            if target not in reachable
+        )
+    missing = sorted(
+        path.relative_to(ROOT).as_posix() for path in expected - reachable
+    )
+    if missing:
+        raise ValueError(
+            'README.md: unreachable maintained Markdown documents: '
+            + ', '.join(missing)
+        )
 
 
 def validate_markdown_shape(files: tuple[Path, ...] | None = None) -> None:
@@ -264,9 +342,11 @@ def main() -> int:
         validate_links()
         validate_markdown_shape()
         validate_reference_index()
+        validate_documentation_reachability()
         print('DOCUMENTATION_ENTRY_PATH=PASS')
         print('DOCUMENTATION_LINKS_AND_ANCHORS=PASS')
         print('DOCUMENTATION_SHAPE_AND_INDEX=PASS')
+        print('DOCUMENTATION_REACHABILITY=PASS')
         print('DOCUMENTATION_VALIDATION=PASS')
         return 0
     except (OSError, UnicodeError, ValueError) as exc:

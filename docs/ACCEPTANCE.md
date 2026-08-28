@@ -160,7 +160,9 @@ The later production-normalizer work advanced after the rebuild-acceptance check
 - recurring production result sender activation: `PASS` with 186 local and exact correctly laid-out GX10-staged tests, explicit inactive/active configured verification, exact inactive preflight, timer-only enablement, three natural ready-to-delivered transitions, first natural durable collector acceptance and exact complete ClickHouse row, two bounded settling arrivals, unchanged exact-replay/conflict evidence, zero sender restarts, and healthy zero-lag preexisting schedules/services
 - final end-to-end production/repository closure: `PASS` with active conservation `10 delivered = 8 accepted + 2 settling`, exactly one complete ClickHouse row for each of eight accepted results, unchanged one-pair exact-replay/one-pair conflict evidence, zero sender restarts/deterministic lag, healthy both-host schedules/services, 186 GX10 + 30 collector + 14 shadow-package + 11 gate-package + 94 normalizer + nine validator tests, current-tree/history/link/ref sanitation, reconciled current documentation, and no deletion of rollback/quarantine evidence; disposable clean-host qualification remains explicitly waived/unverified
 
-The exact forward-identity contract, live evidence, retained rollback, and next stability/retirement gate are in `docs/NORMALIZER_HANDOFF.md` and `docs/CURRENT_STATE.md`.
+The exact forward-identity contract, completed stability/retirement evidence,
+and retained rollback are in `docs/NORMALIZER_HANDOFF.md` and
+`docs/CURRENT_STATE.md`.
 
 ## Public history and remote topology
 

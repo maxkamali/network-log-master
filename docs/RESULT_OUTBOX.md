@@ -6,7 +6,12 @@ The version-1 local producer boundary and its active no-network schedule pass. I
 
 ## Boundary
 
-The producer opens the SQLite working database read-only and projects only `SUCCEEDED` reasoning runs that have their required append-only result row. Terminal failures and `STARTED` reservations never produce files. The producer does not call Ollama, change reasoning state, open a network socket, or make any incident/packet decision.
+The current producer opens the selective rollback-journal snapshot read-only and
+projects only `SUCCEEDED` reasoning runs that have their required append-only
+result row. Terminal failures and `STARTED` reservations never produce files.
+The producer does not call Ollama, change reasoning state, open a network
+socket, or make any incident/packet decision. Direct working-database reads
+were the pre-item-42 behavior and are historical only.
 
 Item 42 preserves those semantics while hardening how the producer obtains a
 readable point-in-time view. The working database uses WAL mode; opening it
@@ -24,11 +29,19 @@ Every successful run maps to exactly one canonical JSON record and one newline-t
 
 The thin collector fields are:
 
-- `timestamp`, `incident_id`, `run_id`, `model`, and `type`
+- `timestamp`, `incident_id`, `run_id`, `device`, `model`, and `type`
 - `status`, `severity`, `first_seen`, `last_seen`, and `occurrence_count`
 - `title`, `body`, and `tags`
 
-The complete canonical reasoning result is retained under `result`; it is not reduced to only the thin presentation fields. `provenance` retains the packet/result/request hashes, model version/reference/manifest/config, provider, prompt and output-schema hashes/versions, run attempt/timestamps, and canonical run diagnostics. The collector's existing Vector transform retains the complete input line as `raw_json`.
+New producer records require a nonempty bounded `device`. Exact immutable
+legacy version-1 records that predate Device projection remain valid and are
+reused without rewrite. The complete canonical reasoning result is retained
+under `result`; it is not reduced to only the thin presentation fields.
+`provenance` retains the packet/result/request hashes, model
+version/reference/manifest/config, provider, prompt and output-schema
+hashes/versions, run attempt/timestamps, and canonical run diagnostics. The
+collector's existing Vector transform retains the complete input line as
+`raw_json`.
 
 ## Fail-closed checks
 

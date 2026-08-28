@@ -97,6 +97,37 @@ class DocumentationValidatorTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'current contract'):
                     VALIDATOR.validate_current_contracts()
 
+    def test_current_contracts_cover_rebuild_extensions(self):
+        self.assertIn(
+            'activate normalizer shadow before gx10 correlation',
+            VALIDATOR.REQUIRED_CURRENT_CONTRACTS['docs/TWO_SERVER_REBUILD.md'],
+        )
+        self.assertIn(
+            'phase 12: full-system acceptance and reboot recovery',
+            VALIDATOR.REQUIRED_CURRENT_CONTRACTS[
+                'components/gx10/CLEAN_MACHINE_RUNBOOK.md'
+            ],
+        )
+
+    def test_reachability_rejects_orphaned_component_document(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            docs = root / 'docs'
+            components = root / 'components'
+            docs.mkdir()
+            components.mkdir()
+            (root / 'README.md').write_text('# Root\n', encoding='utf-8')
+            (docs / 'DOCUMENTATION_GUIDE.md').write_text(
+                '# Guide\n', encoding='utf-8'
+            )
+            orphan = components / 'ORPHAN.md'
+            orphan.write_text('# Orphan\n', encoding='utf-8')
+            with mock.patch.object(VALIDATOR, 'ROOT', root), \
+                    mock.patch.object(VALIDATOR, 'DOCS_DIR', docs), \
+                    mock.patch.object(VALIDATOR, 'GUIDE', docs / 'DOCUMENTATION_GUIDE.md'):
+                with self.assertRaisesRegex(ValueError, 'unreachable'):
+                    VALIDATOR.validate_documentation_reachability()
+
 
 if __name__ == '__main__':
     unittest.main()

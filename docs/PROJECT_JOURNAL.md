@@ -13503,3 +13503,52 @@ combined documentation/public-validator suite is now 23 tests.
 - `git diff --check` passed
 - the full current-tree, all-reachable-history, link, execution-authority, and
   rollback-tag topology public-repository gate passed
+
+## 2026-08-27 - Current-system rebuild documentation readiness
+
+### Scope and rollback
+
+Performed a documentation-only rebuild-readiness reconciliation from annotated
+local rollback tag `pre-rebuild-doc-readiness-20260827`
+(`989d0cb9dd3442afa711f867d1dd5cacb37ce55b`). No production host, service,
+database, Grafana resource, account, credential, private operator input, model,
+or runtime file was read or changed.
+
+### Current reconstruction authority
+
+- made `docs/TWO_SERVER_REBUILD.md` the explicit current two-host
+  reconstruction authority: private inputs, independent reader/writer roles,
+  collector-first ordering, normalizer shadow before correlation, controlled
+  handoff, managed reasoning/hidden triage, snapshot/outbox/sender activation,
+  manual/API NOC reconstruction, and staggered reboot acceptance
+- expanded the GX10 clean-machine runbook with exact staged current-extension
+  phases for managed AI/triage, selective snapshot, no-network outbox, disabled
+  sender configuration, bounded first-live proof, natural cadence, and full
+  reboot recovery
+- reconciled architecture, data contracts, operations, result contracts,
+  Grafana guidance, component provenance, component rebuild status, and the
+  root overview so the deterministic incident path precedes the bounded hidden
+  AI side channel and current extensions are not mistaken for missing future
+  work
+- retained the empirical clean-host limitation as `WAIVED BY OPERATOR` rather
+  than claiming a full clean two-server execution passed
+
+### Documentation maintenance hardening
+
+- strengthened the documentation validator with current-contract checks for
+  schema extensions, reader/writer separation, managed pending/no-result
+  behavior, durable result publication, device preservation, full extension
+  ordering, and reboot recovery
+- added reachability validation from `README.md` across every maintained
+  Markdown document and negative regression coverage for an orphaned component
+  document
+
+### Validation
+
+- `python3 scripts/validate-documentation.py` passed all entry, link/anchor,
+  shape/index, reachability, and current-contract gates
+- `python3 -m unittest scripts/test_documentation_validator.py
+  scripts/test_public_repository_validator.py` passed 25 tests
+- `python3 scripts/validate-public-repository.py` passed current-tree,
+  reachable-history, link, reference-topology, and public-safety gates
+- `git diff --check` passed

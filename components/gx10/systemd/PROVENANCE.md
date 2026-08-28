@@ -24,7 +24,9 @@ The service/timer behavior and all other directives are retained from the live f
 
 The sanitizer required fetch then ingest `ExecStart` order, exactly two known writable path roles, zero environment directives, no unknown absolute paths, and no IPv4 literals.
 
-Deterministic enrichment remains absent from the service by design because no live automatic invocation was discovered.
+The captured base service contains no historical automatic deterministic
+enrichment invocation. The active reconstructed projector runs instead through
+the separate managed correlation unit below.
 
 ## Managed correlation target units
 
@@ -57,5 +59,20 @@ capability-free oneshot ordered before and required by the existing result
 outbox. A private drop-in binds the validated runtime identity and source
 directory write scope needed for SQLite WAL sidecar cooperation. The existing
 outbox service retains its prior write scope only to ready/delivered state.
-Installation and production activation remain guarded by exact predecessor,
+Installation and production activation passed through exact predecessor,
 protected backup, explicit first-run, and natural-cadence verification.
+
+## Current extension-unit matrix
+
+| Unit family | Purpose | Enablement owner | Verification | Safe rollback |
+| --- | --- | --- | --- | --- |
+| `network-log-gx10.timer` | base fetch and ingest | base activator | runtime verifier | preserve state; disable only for controlled maintenance |
+| `network-log-gx10-correlation.timer` | projection then deterministic incidents | correlation activator | correlation verifier | disable timer, retain state |
+| `network-log-gx10-reasoning.timer` | selected reasoning and hidden triage | managed-reasoning activator | managed-reasoning verifier | disable timer, retain append-only facts |
+| `network-log-gx10-outbox-snapshot.service` | fresh selective projection | outbox snapshot upgrade | outbox/snapshot verifier | retain last valid snapshot and backup |
+| `network-log-gx10-result-outbox.timer` | local result/lifecycle publication | outbox activator | outbox verifier | disable timer, retain files/cursor |
+| `network-log-gx10-result-sender.timer` | one-file write-only delivery | sender activator | sender verifier | disable timer, retain ready/delivered evidence |
+
+The snapshot oneshot is required before the outbox service; the sender has no
+access to the original working database. Current clean-machine commands and
+pass markers are in `../CLEAN_MACHINE_RUNBOOK.md`.

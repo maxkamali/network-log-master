@@ -81,6 +81,7 @@ flowchart LR
         ingest["Read-only fetch and<br/>replay-safe ingest"]
         project["Canonical event projection"]
         incidents["Deterministic incident<br/>correlation and lifecycle"]
+        uncovered["Uncovered-event selector"]
         select["Deterministic wake policy"]
         triage["Hidden uncovered-event triage<br/>through local Gemma"]
         assess["Selected incident assessment<br/>through local Gemma"]
@@ -96,7 +97,8 @@ flowchart LR
     normalize -->|verified read-only files| ingest
     ingest --> project
     project --> incidents
-    project --> triage
+    incidents --> uncovered
+    uncovered -->|only no incident evidence| triage
     triage -->|validated positive only| incidents
     incidents --> select
     select --> assess
@@ -123,8 +125,12 @@ Collector: Vector -> raw ClickHouse
                                                         v
 GX10: ingest -> canonical events -> deterministic incidents
                     |                    | selected assessment
-                    | uncovered review   v
-                    +-------> local Gemma model
+                    |                    v
+                    |              local Gemma model
+                    v
+             uncovered-event selector -> local Gemma model
+                    | validated positive
+                    +-------------------> deterministic incidents
                                          |
                          selective transactional snapshot
                                          |
@@ -238,7 +244,9 @@ The repository is designed so two clean servers plus operator-supplied private
 environment values are sufficient to reconstruct the system without relying on
 conversation history. The public artifacts include implementation, guarded
 installers, configuration templates, data contracts, runbooks, and independent
-verifiers.
+verifiers. The coordinated order and complete private-input inventory are in
+[`docs/TWO_SERVER_REBUILD.md`](docs/TWO_SERVER_REBUILD.md); environment values
+remain outside the checkout.
 
 The full disposable two-server rebuild was not executed because suitable spare
 systems were unavailable. The operator accepted that residual risk for project

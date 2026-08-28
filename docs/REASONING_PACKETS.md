@@ -125,6 +125,10 @@ Protected backup evidence:
 
 The protected backup path and production database/runtime identities remain private.
 
-Item 28 owns model/prompt/run versioning and structured inference output. It must consume immutable packet truth without modifying it and must begin repository/copy-only.
-
-Model selection, prompt versioning, structured output, inference failure handling, and collector result return remain separate later items.
+At item-27 closure, item 28 was the later model/prompt/run and structured
+inference boundary. Items 28 through 30 subsequently completed strict output,
+inference failure handling, managed reasoning/triage, local producers, and
+collector result return. These current owners consume immutable packet truth
+without modifying it; see `LOCAL_REASONING.md`, `MANAGED_REASONING.md`,
+`AI_DETECTION_SIDE_CHANNEL.md`, `RESULT_OUTBOX.md`, and
+`RESULT_TRANSPORT.md`.

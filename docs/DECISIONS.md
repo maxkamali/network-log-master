@@ -667,3 +667,34 @@ Consequence:
 - the sender remains unable to access the original live database; its installer
   and verifier resolve that isolation target through the validated snapshot
   configuration without changing the installed sender sandbox
+
+## ADR-031 - Hidden AI review admits only bounded uncovered-event positives
+
+**Status:** Accepted and active
+
+The managed reasoning owner may review important canonical events only after
+deterministic incident ownership has established that they are uncovered. A
+validated positive can bridge into an ordinary deterministic incident; model
+output never owns that incident's identity, lifecycle, recurrence, or
+resolution.
+
+Why:
+
+- deterministic coverage cannot anticipate every meaningful event code;
+- a bounded side channel provides human-visible coverage without creating a new
+  operator-facing event class or bypassing the existing NOC workflow;
+- preserving strict admission and replay rules keeps model failure from
+  fabricating incident truth.
+
+Consequence:
+
+- eligibility is limited to canonical events with no deterministic incident
+  evidence; deterministic correlation remains first in the flow;
+- batches are signature-bounded, invoke at most one local model call per
+  cadence, and remain pending when Gemma is unavailable or invalid;
+- only validated positive decisions enter the fixed ordinary incident bridge;
+  negative and insufficient decisions remain raw-log evidence only;
+- learned exact-event coverage is limited to severity 0–3 after repeatable,
+  consistent positive decisions and can select only the same fixed bridge;
+- `docs/AI_DETECTION_SIDE_CHANNEL.md` owns the detailed contract and
+  `docs/NOC_WORKFLOW.md` owns the resulting operator presentation.

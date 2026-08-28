@@ -115,4 +115,9 @@ Item 26 completed every managed-invocation gate:
 
 Incident state is now durable production working state. Do not use the destructive empty-state rollback; disable only the correlation schedule and retain state if rollback is needed.
 
-An Ollama caller, deterministic wake policy, compact incident packet, AI-result producer, and result-return schedule remain later milestones.
+At item-26 closure, the Ollama caller, deterministic wake policy, compact
+incident packet, AI-result producer, and result-return schedule were later
+milestones. Items 27 through 30 subsequently completed those boundaries.
+Current ownership is documented in `REASONING_PACKETS.md`,
+`MANAGED_REASONING.md`, `AI_DETECTION_SIDE_CHANNEL.md`, `RESULT_OUTBOX.md`,
+and `RESULT_TRANSPORT.md`.

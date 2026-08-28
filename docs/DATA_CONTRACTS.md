@@ -129,7 +129,7 @@ Transport/file rules:
 - size and SHA-256 are recorded in `source_files`
 - `(source_file, record_number)` is the local replay/idempotency key
 
-## GX10 SQLite working-state contract - current
+## GX10 SQLite working-state contract - recovered base and current extensions
 
 The recovered base contains exactly:
 
@@ -141,16 +141,25 @@ The recovered base contains exactly:
 - 13 explicit indexes
 - 3 foreign keys
 
-The exact recovered-base DDL is `components/gx10/sql/initialize.sql`. Item 25 deliberately extends that base with:
+The exact recovered-base DDL is `components/gx10/sql/initialize.sql`. The
+current working database also has versioned extension groups. Their owning DDL
+is authoritative; the list below is intentionally grouped rather than reduced
+to one fragile table total:
 
-- `incidents`
-- `incident_evidence`
-- `incident_transitions`
-- 5 explicit incident indexes
-- 5 incident foreign keys
-- 4 append-only enforcement triggers
+- deterministic incident state: `incidents`, `incident_evidence`, and
+  `incident_transitions`, with incident indexes, foreign keys, and append-only
+  enforcement triggers in `components/gx10/sql/incident-v1.sql`
+- deterministic reasoning packets: the append-only packet/wake schema in
+  `components/gx10/sql/reasoning-v1.sql`
+- versioned inference runs/results: the strict reservation/result schema in
+  `components/gx10/sql/inference-v1.sql`
+- hidden uncovered-event triage: signatures, batches, decisions, learned
+  coverage, and related state in `components/gx10/sql/triage-v1.sql`
 
-The extension DDL is `components/gx10/sql/incident-v1.sql`. The database is replaceable working state rather than the authoritative raw archive.
+The database is replaceable working state rather than the authoritative raw
+archive. The initializer and every extension verifier own the exact live
+inventory; clean-machine preactivation requires all initialized application
+state, cursors, spool files, and SQLite sidecars to be empty.
 
 Automatic writes are separated by schedule. The original fetch/ingest chain writes transport state and `recent_events`. The managed offline correlation chain projects version-4 rows only from exact normalized schema-version-1 fields plus the existing local suppression rules, then advances deterministic incident state from only those version-4 rows. Historical classification-version-3 enrichment remains preserved; no vendor/message reparsing occurs in the managed chain. Both stage cursors are transactionally advanced and independently required to reach zero lag after each successful managed cycle.
 

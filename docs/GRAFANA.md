@@ -81,7 +81,9 @@ The installer:
 - runs the independent verifier after restore
 - uses Python `-B` for restore and verification so runtime execution does not create `__pycache__` artifacts in the repository
 
-Clean-machine end-to-end execution remains part of the later collector rebuild validation gate.
+Clean-machine end-to-end execution remains `WAIVED BY OPERATOR` and
+empirically unverified; this repository procedure is not evidence that the
+collector rebuild has already been executed on disposable hardware.
 
 ## Administrator bootstrap
 
@@ -156,7 +158,9 @@ Grafana OSS normally withholds Explore from Viewers. The working deployment enab
 
 Grafana OSS does not provide a per-user custom navigation role. The Viewer role hides administration, connection management, and persistent editing, but an exact left-menu allowlist of only Home, Bookmarks, Starred, Dashboards, and Explore is not enforceable in this edition; other standard Viewer-accessible product sections may remain visible. Exact custom navigation/RBAC would require an edition or customization that supports it.
 
-For reconstruction after Grafana and the main organization are healthy:
+For reconstruction after Grafana and the main organization are healthy, use the
+supported Grafana API/CLI under the private administrator credential and record
+only public-safe outcome markers:
 
 1. create a separate NOC organization
 2. create the operator-selected account as a Viewer belonging only to that organization
@@ -164,9 +168,19 @@ For reconstruction after Grafana and the main organization are healthy:
 4. copy only the two approved dashboards and bind any organization-specific drilldown links to the NOC organization
 5. grant View, set `NOC View` as home, and star both dashboards
 6. enable Viewer Explore compatibility and restart Grafana through the normal protected service path
-7. verify organization isolation, dashboard/datasource inventory, save denial, non-scoped dashboard denial, every panel query, and unchanged main-organization resources
+7. create the one-minute `NOC Rotation` playlist using the two stable dashboard
+   UIDs, and verify the Viewer can read/start but cannot create or modify it
+8. verify organization isolation, exactly two approved dashboards and two
+   read-only datasources, home/star preferences, save denial, non-scoped
+   dashboard denial, every panel query, Explore access, and unchanged
+   main-organization resources
 
 Account passwords and datasource credentials are operator-owned private inputs and must not enter this public repository.
+
+There is no permanent idempotent NOC bootstrap helper in the repository yet.
+This is a documented manual/API reconstruction boundary, not an automated
+claim. A future helper must create/reuse only its own organization resources,
+fail closed on divergence, and verify the same inventory and permission rules.
 
 ## NOC rotation playlist
 
@@ -204,7 +218,7 @@ Active and Resolved expose Device and Incident ID. Interface Flaps exposes Devic
 
 Every query is a bounded `SELECT` through the existing read-only datasource and avoids exposing complete `raw_json` provenance. The permanent redacted verifier executes the original seven plus enhanced six panels through Grafana's datasource API and reports only frame/row counts. Active windows deliberately do not age out with the time picker; Resolved uses the selected resolution-time range.
 
-Item 39 added incident-scoped `View matching logs` links to the three enhanced tables. Item 41 retains that incident-ID lookup for Active and Resolved. The rolling Interface Flaps table instead opens an exact device/interface lookup over the preceding 60 minutes, using hidden hex-encoded row keys so interface names cannot alter SQL structure. Every query remains read-only, newest first, and capped at 1,000 rows. Main-organization links use organization 1; the isolated NOC copy must use organization 2. Item 40 requests compact Explore panes so the SQL editor starts collapsed.
+Item 39 added incident-scoped `View matching logs` links to the three enhanced tables. Item 41 retains that incident-ID lookup for Active and Resolved. The rolling Interface Flaps table instead opens an exact device/interface lookup over the preceding 60 minutes, using hidden hex-encoded row keys so interface names cannot alter SQL structure. Every query remains read-only, newest first, and capped at 1,000 rows. Main-organization links use organization 1; the isolated NOC copy must use organization 2. Item 40 implemented compact Explore panes so the SQL editor starts collapsed.
 
 Item 40 also marks the existing Severity Breakdown, Top Devices, OSPF Events, and BGP Events links in `NOC View` as one-click targets. Their destination SQL, selected dashboard time range, read-only datasource, and 1,000-row limit remain unchanged. Their Explore panes also start compact. Grafana permits only one one-click link per visualization; each affected panel has exactly one.
 
@@ -229,7 +243,7 @@ Item-40 production validation passed main-organization `dryRun=All`, exact six-r
 
 Item-41 production validation used the explicit native `org-2` namespace rather than relying on the active administrator organization. Main and NOC `dryRun=All` passes persisted nothing; the protected replacements changed exactly the two organization-local enhanced resources and zero other resources. Exact main six-resource and NOC enhanced rereads passed, all six enhanced queries plus sampled Active/Flap/Resolved drilldowns passed in each organization, and all three NOC links retain `orgId=2`. Both live and rollback databases pass integrity checks; Grafana, ClickHouse, Vector, and the result gate remain active with zero restarts.
 
-Item-35 production validation passed pre/post execution of all thirteen live datasource queries, `dryRun=All`, enhanced-only replacement, and exact reread of all six resources. The current active split is two non-interface Active Events and 34 Interface Flaps, with zero interface entities in Active Events. Neither current Active row has a stored AI summary, so both display the deterministic detail fallback. The resolved statistic is labeled `Resolved` while retaining its selected-range semantics, and the original dashboard remains byte-exact.
+At item-35 closure, production validation passed pre/post execution of all thirteen live datasource queries, `dryRun=All`, enhanced-only replacement, and exact reread of all six resources. That checkpoint observed two non-interface Active Events and 34 Interface Flaps, with zero interface entities in Active Events. Those counts are historical; current queue counts are dynamic. Neither then-current Active row had a stored AI summary, so both displayed the deterministic detail fallback. The resolved statistic is labeled `Resolved` while retaining its selected-range semantics, and the original dashboard remains byte-exact.
 
 Item-36 production validation passed the ordered collector-first deployment, exact six-resource reread, all thirteen original/enhanced queries, enhanced-only replacement, recurrence parity, and unchanged existing resolved protocol history. Active Events maps deterministic `RECOVERING` to `MONITORING` only for BGP/OSPF/OSPFv3 and displays distinct issue episodes as lifecycle `recurrence_count + 1`; the additive default-zero collector column keeps immutable version-1 history queryable.
 
@@ -250,4 +264,5 @@ When changing Grafana state:
 - avoid modifying the raw storage schema solely for formatting convenience
 - preserve verified working HTTPS/plugin/datasource behavior unless evidence justifies a change
 
-The exact current Grafana integration task is tracked in `docs/CURRENT_STATE.md`.
+Current Grafana state and residual clean-host risk are tracked in
+`docs/CURRENT_STATE.md`; there is no separate current Grafana integration task.

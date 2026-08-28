@@ -28,7 +28,9 @@ flowchart LR
 
     subgraph gx10["GX10 / local inference"]
         ingest["Read-only fetch<br/>and replay-safe ingest"]
-        incidents["Canonical projection<br/>and incident correlation"]
+        projection["Canonical event projection"]
+        incidents["Deterministic incident<br/>correlation and lifecycle"]
+        uncovered["Uncovered-event selector"]
         reasoning["Selected incident assessment<br/>through local Gemma"]
         triage["Hidden uncovered-event triage<br/>through local Gemma"]
         snapshot["Selective transactional<br/>outbox snapshot"]
@@ -42,8 +44,10 @@ flowchart LR
     vector --> backlog
     backlog --> normalizer
     normalizer -->|read-only file transport| ingest
-    ingest --> incidents
-    ingest --> triage
+    ingest --> projection
+    projection --> incidents
+    incidents --> uncovered
+    uncovered -->|only no incident evidence| triage
     triage -->|validated positive only| incidents
     incidents --> reasoning
     incidents --> snapshot
@@ -73,11 +77,17 @@ Collector: Vector -> raw ClickHouse
                                                       read-only file transport
                                                                    v
 GX10: replay-safe ingest -> canonical projection
-                                  |-> deterministic incident engine
-                                  |          \-> selected assessment
                                   |
-                                  \-> uncovered-event triage
-                                             \-> validated positive -> incident engine
+                                  v
+                       deterministic incident engine
+                         | selected assessment
+                         v
+                    local Gemma model
+
+                       uncovered-event selector
+                         | only no incident evidence
+                         v
+                    uncovered-event triage -> validated positive -> incident engine
 
                        selective transactional outbox snapshot
                                            |
@@ -151,8 +161,9 @@ Devices
            -> GX10 restricted read-only fetch
            -> local durable replay-safe ingest
            -> scheduled canonical projection
-           -> hidden fail-closed review of uncovered important events
            -> deterministic incident correlation/lifecycle
+           -> deterministic uncovered-event selection
+           -> hidden fail-closed review of uncovered important events
            -> changed deterministic lifecycle outbox
            -> deterministic versioned reasoning packets
            -> bounded local inference through loopback Ollama

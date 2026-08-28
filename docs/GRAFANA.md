@@ -59,7 +59,8 @@ Published scripts:
 Restore behavior:
 
 - server-owned metadata such as creation timestamps, generation, resource version, and server UID is not forced from the captured resource
-- captured name, namespace, labels/annotations, `spec`, and required resource shape are preserved
+- captured name, namespace, `spec`, and required resource shape are preserved
+- server/account-owned annotations, labels, UIDs, generations, timestamps, and status are rejected from repository captures and stripped from restore payloads
 - an existing exact-match dashboard is left unchanged
 - replacement is refused unless explicitly enabled
 - no delete operation is part of the rebuild flow
@@ -158,29 +159,233 @@ Grafana OSS normally withholds Explore from Viewers. The working deployment enab
 
 Grafana OSS does not provide a per-user custom navigation role. The Viewer role hides administration, connection management, and persistent editing, but an exact left-menu allowlist of only Home, Bookmarks, Starred, Dashboards, and Explore is not enforceable in this edition; other standard Viewer-accessible product sections may remain visible. Exact custom navigation/RBAC would require an edition or customization that supports it.
 
-For reconstruction after Grafana and the main organization are healthy, use the
-supported Grafana API/CLI under the private administrator credential and record
-only public-safe outcome markers:
+### NOC reconstruction input contract
 
-1. create a separate NOC organization
-2. create the operator-selected account as a Viewer belonging only to that organization
-3. copy only the two required datasource definitions using an operator-owned private read-only password input
-4. copy only the two approved dashboards and bind any organization-specific drilldown links to the NOC organization
-5. grant View, set `NOC View` as home, and star both dashboards
-6. enable Viewer Explore compatibility and restart Grafana through the normal protected service path
-7. create the one-minute `NOC Rotation` playlist using the two stable dashboard
-   UIDs, and verify the Viewer can read/start but cannot create or modify it
-8. verify organization isolation, exactly two approved dashboards and two
-   read-only datasources, home/star preferences, save denial, non-scoped
-   dashboard denial, every panel query, Explore access, and unchanged
-   main-organization resources
+Perform this procedure on the collector only after the main Grafana installer
+and its six-dashboard verifier pass. The operator supplies these values outside
+the checkout:
 
-Account passwords and datasource credentials are operator-owned private inputs and must not enter this public repository.
+- a server-administrator login and a one-line password file mode `0600` or tighter
+- a new, dedicated NOC login, display name, email address, and
+  separate one-line password file mode `0600` or tighter
+- the private collector-side ClickHouse host value and the existing read-only
+  Grafana-reader password file
+- the selected NOC organization name
+- an empty private staging directory such as
+  `/operator/private/noc-dashboard-stage`
 
-There is no permanent idempotent NOC bootstrap helper in the repository yet.
-This is a documented manual/API reconstruction boundary, not an automated
-claim. A future helper must create/reuse only its own organization resources,
-fail closed on divergence, and verify the same inventory and permission rules.
+The password files, rendered datasource requests, API responses, backups, and
+staged NOC captures are private inputs. Keep them outside Git, never pass a
+password as a command argument, never print an authorization header, and delete
+the private staging material when verification is complete. API clients must
+connect through `https://127.0.0.1:443`; the server-administrator endpoints use
+Basic authentication loaded from the private file in process memory.
+
+Before mutation, require `GET /api/health` success, record the main
+organization's six dashboard `spec` hashes, and take a consistent private
+SQLite backup with the SQLite `.backup` operation. Run `PRAGMA quick_check` on
+the backup, record its mode/owner, and save the current Grafana systemd drop-in
+inventory. A full API response may contain server/account identity and therefore
+must not be copied into this repository.
+
+### Exact organization and account sequence
+
+Use these server-administrator requests. Stop on any unexpected status or
+pre-existing resource; do not silently adopt or alter an unrelated account or
+organization.
+
+1. Look up the organization with `GET /api/orgs/name/{url-encoded-name}`. If it
+   is absent, create it with `POST /api/orgs` and payload
+   `{"name":"<NOC_ORGANIZATION_NAME>"}`. Record whether this run created it and
+   the returned numeric organization ID. If creation is forbidden, stop rather
+   than loosening global settings ad hoc.
+2. Ensure the server administrator can configure the new organization with
+   `POST /api/orgs/{orgId}/users` and payload
+   `{"loginOrEmail":"<SERVER_ADMIN_LOGIN>","role":"Admin"}`. A pre-existing
+   membership must already be Admin.
+3. Look up the dedicated login. If absent, create it with
+   `POST /api/admin/users` and this shape; the password value is read from the
+   private file only while assembling the in-memory request:
+
+   ```json
+   {
+     "name": "<NOC_DISPLAY_NAME>",
+     "email": "<NOC_EMAIL>",
+     "login": "<NOC_LOGIN>",
+     "password": "<NOC_PASSWORD_FROM_PRIVATE_FILE>",
+     "OrgId": 12345
+   }
+   ```
+
+   Here `12345` is a documentation placeholder; the actual request value is the
+   numeric organization ID returned by Grafana, encoded as a JSON integer.
+4. Ensure membership with `POST /api/orgs/{orgId}/users` and payload
+   `{"loginOrEmail":"<NOC_LOGIN>","role":"Viewer"}`. Verify with
+   `GET /api/users/{userId}/orgs` that this dedicated user belongs to exactly
+   the NOC organization as Viewer. If an existing login belongs anywhere else,
+   fail closed; do not remove or repurpose it automatically.
+
+Admin-only endpoints above use server-administrator Basic authentication.
+Every organization-scoped legacy request below includes
+`X-Grafana-Org-Id: <NOC_ORG_ID>`. Native resource requests instead use the
+explicit namespace `org-<NOC_ORG_ID>`; never rely on the administrator's
+currently selected organization.
+
+### Exact datasource and dashboard sequence
+
+Create exactly two datasource resources. For each entry in
+`components/collector/grafana/provisioning/datasources/clickhouse.yaml.in`, send
+`POST /api/datasources` with the entry's exact `name`, `uid`, `type`, `access`,
+`isDefault`, `basicAuth`, `withCredentials`, `editable`, and `jsonData` object.
+Replace only `jsonData.host` with the private collector-side value, and add
+`secureJsonData` with this in-memory shape:
+
+```json
+{"password":"<GRAFANA_READER_PASSWORD_FROM_PRIVATE_FILE>"}
+```
+
+If `GET /api/datasources/uid/{uid}` already succeeds, compare every public field
+to the template and require `secureJsonFields.password` to be configured; fail
+on divergence rather than overwriting it. For each datasource require
+`GET /api/datasources/uid/{uid}/health` success. The final inventory must contain
+only UIDs `efvaztlrk8ow0a` and `bfvik20ilwoaof`.
+
+Build the two organization-scoped dashboard resources in the private staging
+directory:
+
+```text
+python3 -B components/collector/grafana/scripts/build-noc-organization-captures.py \
+  --org-id <NOC_ORG_ID> \
+  --output-dir /operator/private/noc-dashboard-stage
+```
+
+The helper accepts only an organization ID greater than one, copies only
+`noc-view.json` and `ai-incident-analysis-enhanced.json`, changes their namespace
+to `org-<NOC_ORG_ID>`, rewrites only explicit `orgId=1` drilldown parameters,
+strips server-owned metadata/status, refuses repository-local output, and writes
+private mode-`0600` files. It does not contact Grafana.
+
+Use the existing guarded resource client first with `--dry-run`, then without
+it only after both dry-run responses match. The two-resource directory requires
+`--expected-count 2`:
+
+```text
+python3 -B components/collector/grafana/scripts/restore-dashboards.py \
+  --dashboard-dir /operator/private/noc-dashboard-stage \
+  --expected-count 2 \
+  --username <SERVER_ADMIN_LOGIN> \
+  --password-file <GRAFANA_ADMIN_PASSWORD_FILE> \
+  --dry-run
+```
+
+Repeat without `--dry-run` to create missing resources. Do not use `--replace`
+during reconstruction; an existing divergent NOC resource is a stop condition.
+The two stable dashboard UIDs are `ad9vtst` and
+`ai-incident-analysis-enhanced`.
+
+For each dashboard, snapshot `GET /api/dashboards/uid/{uid}/permissions`, then
+set the isolated default role with `POST /api/dashboards/uid/{uid}/permissions`
+and exact payload:
+
+```json
+{"items":[{"role":"Viewer","permission":1}]}
+```
+
+This endpoint replaces omitted permissions, so use it only for a newly created,
+isolated NOC dashboard and retain the private pre-change response for rollback.
+
+### Explore, preferences, and playlist
+
+Install a root-owned mode-`0644` systemd drop-in for `grafana-server.service`
+containing only:
+
+```ini
+[Service]
+Environment=GF_USERS_VIEWERS_CAN_EDIT=true
+```
+
+Validate the unit, reload systemd, restart Grafana through the protected service
+path, and require HTTPS health before continuing. This is the global OSS
+compatibility setting that gives Viewer accounts Explore and temporary editing;
+organization isolation and read-only datasource credentials remain the actual
+data boundary.
+
+Authenticate as the NOC user for user-owned requests. Set the home page with
+`PUT /api/user/preferences` and payload
+`{"homeDashboardUID":"ad9vtst"}`. Star both dashboards with
+`POST /api/user/stars/dashboard/uid/ad9vtst` and
+`POST /api/user/stars/dashboard/uid/ai-incident-analysis-enhanced`.
+
+Create the rotation as the NOC organization administrator, using
+`POST /apis/playlist.grafana.app/v1/namespaces/org-<NOC_ORG_ID>/playlists`:
+
+```json
+{
+  "kind": "Playlist",
+  "apiVersion": "playlist.grafana.app/v1",
+  "metadata": {"name": "noc-rotation"},
+  "spec": {
+    "title": "NOC Rotation",
+    "interval": "1m",
+    "items": [
+      {"type": "dashboard_by_uid", "value": "ad9vtst"},
+      {"type": "dashboard_by_uid", "value": "ai-incident-analysis-enhanced"}
+    ]
+  }
+}
+```
+
+If the stable resource already exists, require an exact `spec` match and leave
+it unchanged. The Viewer starts it through
+`/playlists/play/noc-rotation?autofitpanels=true`; kiosk mode is an optional
+playback URL flag, not stored playlist state.
+
+### Reconstruction verification and rollback
+
+Verification is independent of the creation requests:
+
+1. run `verify-dashboards.py` against the private staging directory with
+   `--expected-count 2`
+2. authenticate as the NOC Viewer and run
+   `verify-ai-dashboard-queries.py` once for each staged dashboard; it executes
+   every panel query and every nonempty named or indexed one-click drilldown and
+   emits only frame/row counts
+3. require NOC-user API inventory of exactly two dashboards, two datasources,
+   one playlist, two stars, the NOC home UID, and only one organization membership
+4. require Viewer Explore and playlist read/start success, dashboard save,
+   datasource mutation, playlist creation, and non-NOC dashboard lookup denial
+5. recompute the main six dashboard `spec` hashes and require exact pre-change
+   equality; also rerun the normal six-dashboard verifier
+
+The two scoped dashboard/query checks are:
+
+```text
+python3 -B components/collector/grafana/scripts/verify-dashboards.py \
+  --dashboard-dir /operator/private/noc-dashboard-stage \
+  --expected-count 2 \
+  --username <NOC_LOGIN> \
+  --password-file <NOC_PASSWORD_FILE>
+
+python3 -B components/collector/grafana/scripts/verify-ai-dashboard-queries.py \
+  --dashboard /operator/private/noc-dashboard-stage/noc-view.json \
+  --dashboard /operator/private/noc-dashboard-stage/ai-incident-analysis-enhanced.json \
+  --username <NOC_LOGIN> \
+  --password-file <NOC_PASSWORD_FILE>
+```
+
+On partial failure, first resolve any timeout with a read-after-write GET. Delete
+only resources recorded as created by this run, in reverse order: playlist,
+dashboards, datasources, dedicated user, then organization. Restore a changed
+permission document or systemd drop-in from its private pre-change copy, reload,
+restart, and recheck health. Never delete or replace a pre-existing divergent
+resource. If API rollback cannot restore a database-consistent state, stop
+Grafana and restore the verified SQLite backup only with explicit operator
+approval; do not perform a live database overwrite.
+
+Account passwords, datasource credentials, rendered payloads, numeric runtime
+organization IDs, and server-returned metadata remain operator-owned private
+inputs. Commit only redacted PASS/FAIL markers and canonical dashboard `spec`
+hashes after reviewing whether those hashes disclose environment-derived state.
 
 ## NOC rotation playlist
 
@@ -218,7 +423,7 @@ Active and Resolved expose Device and Incident ID. Interface Flaps exposes Devic
 
 Every query is a bounded `SELECT` through the existing read-only datasource and avoids exposing complete `raw_json` provenance. The permanent redacted verifier executes the original seven plus enhanced six panels through Grafana's datasource API and reports only frame/row counts. Active windows deliberately do not age out with the time picker; Resolved uses the selected resolution-time range.
 
-Item 39 added incident-scoped `View matching logs` links to the three enhanced tables. Item 41 retains that incident-ID lookup for Active and Resolved. The rolling Interface Flaps table instead opens an exact device/interface lookup over the preceding 60 minutes, using hidden hex-encoded row keys so interface names cannot alter SQL structure. Every query remains read-only, newest first, and capped at 1,000 rows. Main-organization links use organization 1; the isolated NOC copy must use organization 2. Item 40 implemented compact Explore panes so the SQL editor starts collapsed.
+Item 39 added incident-scoped `View matching logs` links to the three enhanced tables. Item 41 retains that incident-ID lookup for Active and Resolved. The rolling Interface Flaps table instead opens an exact device/interface lookup over the preceding 60 minutes, using hidden hex-encoded row keys so interface names cannot alter SQL structure. Every query remains read-only, newest first, and capped at 1,000 rows. Repository captures target the clean-install main organization; the staging helper rewrites isolated NOC copies to the runtime NOC organization ID. Item 40 implemented compact Explore panes so the SQL editor starts collapsed.
 
 Item 40 also marks the existing Severity Breakdown, Top Devices, OSPF Events, and BGP Events links in `NOC View` as one-click targets. Their destination SQL, selected dashboard time range, read-only datasource, and 1,000-row limit remain unchanged. Their Explore panes also start compact. Grafana permits only one one-click link per visualization; each affected panel has exactly one.
 
@@ -239,9 +444,9 @@ Item-33 production validation passed distinct create/dry-run, exact six-resource
 
 Item-34 production validation passed enhanced-only replacement dry-run, exact six-resource reread, all thirteen current live datasource queries, 804 latest lifecycle rows with complete Device identity, exclusive interface-flap presentation, and zero lifecycle records in `ai_updates`. The original dashboard remained byte-exact. See `docs/NOC_WORKFLOW.md` for queue semantics.
 
-Item-40 production validation passed main-organization `dryRun=All`, exact six-resource reread, and organization-scoped legacy rereads for the isolated NOC copies. The native v2 `default` namespace exposes the main resources even while the administrator is scoped to organization 2, so NOC mutations and verification must use the organization-scoped dashboard endpoint. Both enhanced panel/query and sampled incident-drilldown passes succeeded, all four NOC View drilldown queries executed through the read-only datasource, and main/NOC links retained organization 1/2 respectively. The live and rollback Grafana databases passed integrity checks; Grafana, ClickHouse, Vector, and the result gate remained healthy with zero restarts.
+Item-40 production validation passed main-organization `dryRun=All`, exact six-resource reread, and organization-scoped legacy rereads for the isolated NOC copies. The native v2 `default` namespace exposes the main resources even while the administrator is scoped elsewhere, so NOC mutations and verification must use the explicit runtime organization namespace. Both enhanced panel/query and sampled incident-drilldown passes succeeded, all four NOC View drilldown queries executed through the read-only datasource, and main/NOC links retained their respective organization scopes. The live and rollback Grafana databases passed integrity checks; Grafana, ClickHouse, Vector, and the result gate remained healthy with zero restarts.
 
-Item-41 production validation used the explicit native `org-2` namespace rather than relying on the active administrator organization. Main and NOC `dryRun=All` passes persisted nothing; the protected replacements changed exactly the two organization-local enhanced resources and zero other resources. Exact main six-resource and NOC enhanced rereads passed, all six enhanced queries plus sampled Active/Flap/Resolved drilldowns passed in each organization, and all three NOC links retain `orgId=2`. Both live and rollback databases pass integrity checks; Grafana, ClickHouse, Vector, and the result gate remain active with zero restarts.
+Item-41 production validation used the explicit native runtime NOC namespace rather than relying on the active administrator organization. Main and NOC `dryRun=All` passes persisted nothing; the protected replacements changed exactly the two organization-local enhanced resources and zero other resources. Exact main six-resource and NOC enhanced rereads passed, all six enhanced queries plus sampled Active/Flap/Resolved drilldowns passed in each organization, and all three NOC links retained the runtime NOC organization scope. Both live and rollback databases pass integrity checks; Grafana, ClickHouse, Vector, and the result gate remain active with zero restarts.
 
 At item-35 closure, production validation passed pre/post execution of all thirteen live datasource queries, `dryRun=All`, enhanced-only replacement, and exact reread of all six resources. That checkpoint observed two non-interface Active Events and 34 Interface Flaps, with zero interface entities in Active Events. Those counts are historical; current queue counts are dynamic. Neither then-current Active row had a stored AI summary, so both displayed the deterministic detail fallback. The resolved statistic is labeled `Resolved` while retaining its selected-range semantics, and the original dashboard remains byte-exact.
 

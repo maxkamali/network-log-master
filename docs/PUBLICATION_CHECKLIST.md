@@ -17,12 +17,15 @@ Use this checklist before every public commit that adds or changes operational m
 - [ ] synthetic device names only
 - [ ] IPv4 examples use `192.0.2.0/24`, `198.51.100.0/24`, or `203.0.113.0/24`
 - [ ] IPv6 examples use `2001:db8::/32`
+- [ ] IPv6 unspecified/loopback literals appear only in local-listener examples
 - [ ] examples preserve event/configuration structure without preserving production identity
 - [ ] production sample hashes, screenshots, or other indirect identity-bearing artifacts are not published unless explicitly reviewed safe
 
 ## Engineering gates
 
 - [ ] run `scripts/validate-public-repository.py`
+- [ ] for live-derived work, run it with a private external
+      `NETWORK_LOG_PUBLIC_DENYLIST_FILE` and require `PASS`, not `NOT_CONFIGURED`
 - [ ] run the sanitation gate's synthetic unit tests under `scripts/`
 - [ ] stage only intended files
 - [ ] run secret/sanitation scanning against staged and tracked content
@@ -31,6 +34,7 @@ Use this checklist before every public commit that adds or changes operational m
 - [ ] run the complete relevant test/verifier suite
 - [ ] run whitespace/diff validation
 - [ ] inspect the staged diff manually
+- [ ] inspect author/committer metadata on every ref intended for publication
 - [ ] confirm documentation matches the verified implementation state
 - [ ] preserve known-good behavior unless an intentional behavior change is documented and validated
 
@@ -41,11 +45,15 @@ For installers, renderers, verifiers, and captured configuration:
 - [ ] clean-machine scripts are clearly distinguished from live/reference-system verification scripts
 - [ ] no clean-machine installer is accidentally executed against a working reference system
 - [ ] environment-specific values are placeholders, renderer inputs, or operator-owned file inputs
+- [ ] Grafana captures contain only portable name/namespace metadata, `spec`,
+      and empty `status`; no server UID, timestamp, generation, annotation, or label
 - [ ] secrets are not placed directly in command-line arguments where a safer stdin/file mechanism exists
 - [ ] package versions and externally required dependencies are explicit
 - [ ] service startup order and dependency assumptions are documented
 - [ ] temporary/bootstrap exposure is minimized, especially before credentials/TLS configuration is established
 - [ ] rebuild verification is independent enough to detect drift rather than merely echo installer assumptions
+- [ ] hashes cover only a documented sanitized projection and have been reviewed
+      for indirect environment identity
 
 ## Migration gates
 

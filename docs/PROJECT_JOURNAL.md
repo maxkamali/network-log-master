@@ -13552,3 +13552,92 @@ or runtime file was read or changed.
 - `python3 scripts/validate-public-repository.py` passed current-tree,
   reachable-history, link, reference-topology, and public-safety gates
 - `git diff --check` passed
+
+## 2026-08-28 - Final reconstruction documentation and evidence-tool audit
+
+### Scope and rollback
+
+Completed a fresh, independent repository-wide audit of current documentation,
+clean-versus-upgrade runbooks, retained captures, publication policy, and the
+commands needed to prove a first live result after reconstruction. The exact
+pre-change rollback point is annotated tag
+`pre-documentation-final-20260828`: tag object
+`a481d57ec4ef89e4515d9ae3d1ced901d9c3d0bf`, peeled commit
+`c828f2b5bbb94af65d2f562e338cb119280e2fd3`.
+
+No production host, service, database, dashboard, account, model, credential,
+or runtime file was changed. Private publication-denylist and SSH-configuration
+values were checked only in memory by the non-echoing repository validator;
+their contents were neither printed nor copied into the checkout.
+
+### Rebuild contract and documentation corrections
+
+- corrected the acceptance contract so it no longer claims that two arbitrary
+  bare hosts plus addresses and credentials are sufficient; the authoritative
+  input set now explicitly includes an application-clean compatible GX10 and
+  the external captured kernel/driver/CUDA, exact Ollama, six-model offline
+  store, and pinned-package bundle that the repository verifies but cannot
+  truthfully acquire or provision
+- centralized the complete private-input inventory and cross-host order in
+  `docs/TWO_SERVER_REBUILD.md`, including backlog endpoint identity, distinct
+  reader/writer keys, Grafana administrator identity, NOC display/email fields,
+  collector-side ClickHouse endpoint, and the administrator evidence-transfer
+  channel
+- reconciled base-versus-current inventories, current six-dashboard and
+  thirteen-query state, deterministic wake/packet selection, ordinary
+  inference versus hidden-triage failure behavior, lifecycle routing, and the
+  completed zero-`NEXT` state across the overview, architecture, operations,
+  decisions, roadmap, component status, and acceptance documents
+- documented the exact NOC organization/account/datasource/preference/star/
+  playlist sequence, non-default administrator login, guarded private capture
+  builder, two-resource restore/verification commands, and reversible Viewer
+  Explore boundary
+- sanitized three retained Grafana resources by removing server-owned
+  metadata/status while preserving their dashboard `spec` bytes exactly
+
+### Executable reconstruction evidence
+
+- added GX10 first-live prepare/preflight/finalize evidence capture and a
+  collector verifier that binds one sender transition to the immutable
+  acceptance ledger, exact ready bytes, exclusive route, and one AI row or
+  exactly `record_count` lifecycle rows in ClickHouse
+- documented a non-root sudo-administrator, byte-compared, mode-`0600`,
+  transient evidence transfer that does not broaden either application SFTP
+  role and cleans only attempt-created staging
+- added explicit collector raw-versus-normalized-handoff transport verification
+  modes and wired the choice through the runtime verifier
+- closed the normalizer handoff rollback, reboot-order, first-live, temporary
+  writer-key cleanup, clean-install outbox, and legacy-upgrade boundaries with
+  exact commands and fail-closed stops
+- strengthened the dashboard API clients, drilldown verifier, documentation
+  validator, and public-repository validator with regression tests for the
+  contradictions and leakage classes found during this audit
+
+### Final repository evidence before publication
+
+- documentation validation passed all entry-path, link/anchor, shape/index,
+  reachability, and semantic-current-contract gates
+- the combined documentation/public-validator suite passed 41 tests
+- public current-tree, reachable-history, link, and ref-topology checks passed;
+  the private external denylist and independent in-memory SSH-identifier
+  denylist each passed without exposing their terms
+- the full GX10 suite passed 233 tests; the full collector suite passed 82;
+  Grafana helper tests passed 10; normalizer tests passed 94
+- package gates passed: GX10 rebuild and filesystem contracts, collector result
+  gate with 14 gate plus 15 first-live provenance tests, and normalizer shadow
+  with 14 tests
+- real private-directory NOC staging produced exactly two mode-`0600` captures;
+  all three sanitized retained dashboards preserved their prior canonical
+  `spec` content
+- all 142 repository Python files parsed, all 17 JSON files parsed, modified
+  shell files passed syntax checks, `git diff --check` passed, and strict Git
+  object verification completed without corruption
+
+### Residual risk
+
+The repository now contains the known application-layer procedure and evidence
+tools for the complete documented input set. It still does not claim that the
+waived disposable paired-host execution passed, that the external GX10 bundle
+can be regenerated from Git, or that the exact manual/API NOC sequence has been
+executed on fresh infrastructure. Those are explicit empirical/external-input
+boundaries, not missing documentation or hidden implementation memory.

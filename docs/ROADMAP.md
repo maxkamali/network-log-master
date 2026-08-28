@@ -24,7 +24,7 @@ The later production cutover completed under Milestone 5 without changing this h
 
 Status: `DONE` for the public rebuild package and documentation; clean-machine end-to-end validation was unavailable and explicitly waived by the operator with residual risk retained.
 
-Goal: reconstruct the working collector from public artifacts plus operator-supplied environment values.
+Historical milestone goal: reconstruct the base collector from public artifacts plus operator-supplied environment values.
 
 Completed capture includes:
 
@@ -47,13 +47,13 @@ Completed capture includes:
 
 The installer structural, credential-exposure, public-safety, operator-documentation, and final sanitation gates are complete. Clean-machine collector rebuild validation remains empirically unverified.
 
-Exit gate: another engineer/AI can reconstruct the current collector on a clean server from the repository plus operator-supplied environment values without undocumented implementation memory.
+Exit gate completed for this milestone: another engineer/AI can reconstruct the base collector on a clean server from the repository plus operator-supplied environment values without undocumented implementation memory. The later normalizer, lifecycle-ingestion, and NOC extensions are required for the present functional target and are ordered by `docs/TWO_SERVER_REBUILD.md`.
 
 ## Milestone 3 - GX10 rebuild capture
 
 Status: `DONE` for the public rebuild package and documentation; clean-machine end-to-end validation was unavailable and explicitly waived by the operator with residual risk retained.
 
-Goal: capture and reconstruct the currently functional GX10 implementation before adding new incident-engine architecture.
+Historical milestone goal: capture and reconstruct the then-functional base GX10 implementation before adding the incident engine, reasoning, triage, snapshot, outbox, and sender extensions.
 
 Completed capture includes:
 
@@ -70,7 +70,7 @@ Completed capture includes:
 - validation/verifier scripts
 - operator rebuild documentation
 
-Exit gate: another engineer/AI can reconstruct the current functional GX10 on a clean server from the repository plus operator-supplied environment values.
+Exit gate completed for this milestone: another engineer/AI can reconstruct the base GX10 application layer on a compatible clean server from the repository plus the external platform/runtime artifacts and private deployment values now centralized in `docs/TWO_SERVER_REBUILD.md`. Milestones 5–10 and the current component/two-server runbooks layer the extensions required for the present functional target.
 
 ## Milestone 4 - Two-server rebuild acceptance
 
@@ -87,15 +87,18 @@ Status: `ACCEPTED WITH RESIDUAL RISK`; repository-only and read-only-reference a
 
 Exit gate:
 
-> Two clean servers, this public repository, and operator-supplied environment values are sufficient to reconstruct the current functional system.
+> Two application-clean compatible servers, this public repository, the
+> documented external GX10 prerequisite bundle, and operator-supplied private
+> deployment values are sufficient to reconstruct the then-current base
+> two-server system captured by Milestones 2–4.
 
-The operator accepted this exit gate for project-sequencing purposes based on repository-only, synthetic, and read-only-reference evidence. Actual clean-host execution remains unproven and should still be performed if suitable systems later become available.
+The operator accepted this historical exit gate for project-sequencing purposes based on repository-only, synthetic, and read-only-reference evidence. Actual clean-host execution remains unproven and should still be performed if suitable systems later become available. The current full-system reconstruction contract additionally includes the later completed milestones and is centralized in `docs/TWO_SERVER_REBUILD.md`.
 
 ## Milestone 5 - Production normalizer integration
 
 Status: `DONE`
 
-After the current system is reconstructable:
+After the then-base two-server capture became reconstructable:
 
 1. `DONE` — design collector-side normalizer production integration
 2. `DONE` — implement the repository-side durable shadow worker, validation, packaging, and rollback safeguards

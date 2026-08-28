@@ -171,7 +171,7 @@ The managed reasoning owner also reviews canonical events that have no determini
 
 Validated positive decisions enter the same incident/outbox/collector/dashboard path as every other non-interface incident. They carry the real device, event-code-bearing entity name, AI title/detail, projected operational category, and `event-triage` transport protocol label. After 60 minutes without matching evidence they enter `RECOVERING`; after a further 15 minutes they resolve. A return before resolution reopens and increments the same correlation. Ignored and insufficient events remain available only in raw logs.
 
-Managed reasoning and hidden triage retain pending/no-result work when the model is unavailable or its output is invalid. Their retry state is isolated from raw capture, local ingest, deterministic correlation, and result delivery.
+Ordinary incident assessment records an immutable terminal no-result when the model is unavailable or its output is invalid; that versioned reservation is not retried automatically. Hidden triage instead retains its immutable batch pending for bounded retry and creates no incident while it waits. Both failure paths are isolated from raw capture, local ingest, deterministic correlation, and result delivery.
 
 Repeated model decisions can create a learned exact-event-code rule only for severity 0–3 after three consistent confidence-70+ positives spanning at least 30 minutes with no contradictory decision. Rules never contain generated code or commands and can only select the same fixed incident bridge. Severity 4/5 is always model-reviewed and never auto-promoted.
 
@@ -242,8 +242,9 @@ Do not encode production firewall allowlists or addresses in the public reposito
 The system should fail in the direction of preserving evidence:
 
 - parser failure -> keep generic observation
-- model unavailable -> retain deterministic incident/evidence state; managed
-  reasoning and hidden triage retain pending/no-result work for later retry
+- model unavailable -> retain deterministic incident/evidence state; ordinary
+  incident assessment records an immutable terminal no-result with no automatic
+  retry, while hidden triage retains its batch pending for bounded retry
 - Ollama/model infrastructure unavailable -> raw capture, fetch/ingest,
   canonical projection, deterministic incidents, lifecycle export, and existing
   result delivery remain independent; no AI-created incident is fabricated
@@ -258,11 +259,17 @@ The system should fail in the direction of preserving evidence:
 
 ## Routine health, safe disable, and reboot checks
 
-The collector verifier covers Vector, ClickHouse, Grafana, HTTPS/Certbot,
-restricted transport, the result gate, and retention. The current extensions
-also require normalizer shadow/handoff timer health and a valid read-only bind
-view. The GX10 verifier family covers the base pipeline, Ollama, correlation,
-managed reasoning/triage, selective snapshot/outbox, and result sender.
+The collector runtime verifier covers Vector, ClickHouse, Grafana,
+HTTPS/Certbot, restricted transport, the result gate, and retention. Its default
+`raw` transport view is the clean base boundary. The current post-handoff system
+must use `verify-runtime.sh --transport-view handoff`, which fail-closes on any
+source, ownership, ACL, mount-option, or `/etc/fstab` difference. The current
+extensions also require normalizer shadow health and a stable paused
+`verify-network-log-normalizer-handoff --mode cutover` pass before the handoff
+timer is restarted. The GX10 verifier family covers the base pipeline, Ollama,
+correlation, managed reasoning/triage, selective snapshot/outbox, and result
+sender. Do not run the base-only GX10 runtime verifier after the extension
+timers are active; use the current-state matrix in `docs/TWO_SERVER_REBUILD.md`.
 
 Use the component verifiers rather than inferring health only from service
 activity. Before a planned reboot, let oneshot services settle and record only

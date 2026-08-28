@@ -16,6 +16,10 @@ from urllib.request import Request, urlopen
 
 API_VERSION = "dashboard.grafana.app/v2"
 KIND = "Dashboard"
+PORTABLE_METADATA_KEYS = frozenset({
+    "name",
+    "namespace",
+})
 
 
 class DashboardApiError(RuntimeError):
@@ -123,6 +127,17 @@ def load_captures(
             or {}
         )
 
+        unexpected_metadata = (
+            set(metadata)
+            - PORTABLE_METADATA_KEYS
+        )
+
+        if unexpected_metadata:
+            raise DashboardApiError(
+                f"{path.name}: server-owned metadata "
+                "is not portable"
+            )
+
         if not metadata.get("name"):
             raise DashboardApiError(
                 f"{path.name}: metadata.name missing"
@@ -136,6 +151,12 @@ def load_captures(
         if "status" not in document:
             raise DashboardApiError(
                 f"{path.name}: status missing"
+            )
+
+        if document["status"] != {}:
+            raise DashboardApiError(
+                f"{path.name}: server-owned status "
+                "must be empty"
             )
 
         captures.append(
@@ -169,19 +190,14 @@ def clean_payload(
         ),
     }
 
-    for key in [
-        "annotations",
-        "labels",
-    ]:
-        if key in metadata:
-            clean_metadata[key] = metadata[key]
-
     return {
         "apiVersion": captured["apiVersion"],
         "kind": captured["kind"],
         "metadata": clean_metadata,
         "spec": captured["spec"],
-        "status": captured["status"],
+        # Native-resource status is server-owned.  Captures keep the
+        # required empty object, and restores never replay live status.
+        "status": {},
     }
 
 

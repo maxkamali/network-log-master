@@ -29,9 +29,20 @@ Do not infer a new execution order from the journal. `docs/CURRENT_STATE.md` is 
 
 The rebuild/documentation project is complete only when:
 
-> Two clean servers, this public repository, and operator-supplied environment values are sufficient for another engineer or AI to reconstruct the current functional system without undocumented implementation memory.
+> Two application-clean compatible servers, this public repository,
+> operator-supplied private deployment values, and the GX10 prerequisite
+> artifact bundle defined in `TWO_SERVER_REBUILD.md` are sufficient for another
+> engineer or AI to reconstruct the current functional system without
+> undocumented implementation memory.
 
 Environment-specific values such as credentials, addresses, usernames, SSH keys, certificate private keys, and similar identity-bearing values are intentionally supplied by the operator at rebuild time and are not part of the public repository.
+
+“Application-clean” does not mean an arbitrary bare GX10. The repository
+verifies but does not acquire or provision the captured kernel/driver/CUDA
+baseline, exact Ollama executable, offline model blobs, or pinned-package
+sources. A handoff that supplies only IPs and credentials will stop at GX10
+platform preflight. Use the single authoritative input inventory in
+`TWO_SERVER_REBUILD.md`.
 
 ## Public-repository boundary
 

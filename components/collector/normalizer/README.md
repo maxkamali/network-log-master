@@ -159,6 +159,36 @@ sudo env \
 
 The installer revalidates the complete active shadow runtime, exact repository hashes, future floor, existing identities/paths, empty ACL-protected handoff root, protected installed plan, hardened units, empty initialized handoff ledger, and independent staged mode. It does not enable or start the handoff timer and does not change the GX10 bind mount.
 
+Recheck that exact staged boundary through the installed verifier:
+
+```text
+sudo /usr/local/sbin/verify-network-log-normalizer-handoff --mode staged
+```
+
+Expected markers:
+
+```text
+normalizer_handoff_mode=staged
+NORMALIZER_HANDOFF_RUNTIME_VERIFY=PASS
+```
+
+## Clean-rebuild handoff activation
+
+Do not infer activation from historical production prose. On a clean rebuild,
+the public unit names are exact:
+
+- GX10 base pipeline: `network-log-gx10.service` and
+  `network-log-gx10.timer`
+- collector shadow: `network-log-normalizer-shadow.service` and
+  `network-log-normalizer-shadow.timer`
+- collector publisher: `network-log-normalizer-handoff.service` and
+  `network-log-normalizer-handoff.timer`
+
+Use the ordered collector/GX10 commands, protected `/etc/fstab` predecessor,
+stable `prepared`/`cutover` verifier pauses, bounded manual GX10 cycle, and
+exact raw-bind rollback in `docs/NORMALIZER_HANDOFF.md`. Do not enable the
+handoff timer or alter the read-only bind by a shorter ad hoc sequence.
+
 To stop shadow execution without deleting evidence:
 
 ```text

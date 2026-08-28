@@ -48,17 +48,29 @@ def main() -> int:
         type=Path,
     )
 
+    parser.add_argument(
+        "--expected-count",
+        type=int,
+        default=EXPECTED_DASHBOARD_COUNT,
+        help="fail unless the capture directory has this exact count",
+    )
+
     args = parser.parse_args()
 
     captures = load_captures(
         args.dashboard_dir
     )
 
+    if args.expected_count < 1:
+        raise DashboardApiError(
+            "expected count must be positive"
+        )
+
     if len(captures) != \
-            EXPECTED_DASHBOARD_COUNT:
+            args.expected_count:
         raise DashboardApiError(
             "expected exactly "
-            f"{EXPECTED_DASHBOARD_COUNT} "
+            f"{args.expected_count} "
             "dashboard captures"
         )
 

@@ -4,6 +4,14 @@
 
 The version-1 local producer boundary and its active no-network schedule pass. Item 30 later completed the separate transport boundary: the full GX10 suite reached 186 local/exact-stage tests, the recurring sender was activated only after first-live and replay/conflict proof, and natural results now move from ready to delivered while the collector ledger and ClickHouse preserve exact provenance. The producer itself remains network-isolated and independent of the sender.
 
+For a clean host, `install-result-outbox.py` directly installs the current
+selective-snapshot service, snapshot configuration/root, both local producers,
+and their timer in inactive state. The separate
+`upgrade-result-outbox-snapshot.py` accepts only the exact active legacy direct-
+database predecessor and requires every snapshot target to be absent. It is an
+existing-host migration tool, not a clean-rebuild phase, and must not be run
+after the current clean installer.
+
 ## Boundary
 
 The current producer opens the selective rollback-journal snapshot read-only and

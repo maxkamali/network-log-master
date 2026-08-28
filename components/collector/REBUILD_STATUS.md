@@ -18,9 +18,16 @@ only in `docs/ROADMAP.md`.
 
 The later production-normalizer extension is implemented separately under `components/collector/normalizer/`. It is not part of the base collector installer; a full current-system reconstruction must also execute its separately guarded normalizer and handoff gates. Shadow mode was separately authorized and activated on 2026-08-23. Its catch-up/steady-state evidence and the forward-only handoff design/rehearsal passed. On 2026-08-24 the separate handoff package completed its guarded immutable-floor production activation with exact collector/GX10 hash and cardinality parity; the raw backlog and exact mount-only rollback remain preserved. See `docs/NORMALIZER_PRODUCTION_INTEGRATION.md` and `docs/NORMALIZER_HANDOFF.md`.
 
+The current public tree also retains the reconstructed clean-rebuild first-live
+provenance verifier. It is package-gated with the durable result gate and binds
+private prepared/finalized GX evidence to the immutable ledger, accepted ready
+bytes, exclusive ClickHouse route, exact row cardinality, and thin projections.
+This closes the former missing-tool boundary; disposable paired-host execution
+remains waived and empirically unverified. See `docs/RESULT_TRANSPORT.md`.
+
 Item 34 is complete. The additive `observability.incident_updates` table, least-privilege grants, strict lifecycle gate, exclusive Vector route, and enhanced-only Grafana replacement are active under protected predecessors. Initial ingestion produced 804 latest incidents: 26 active non-flap events, 10 active flaps, and 768 resolved, with zero missing Device/entity values, zero lifecycle timestamp violations, and zero lifecycle rows in `ai_updates`. All six dashboard resources reread exact and all thirteen current original/enhanced queries passed; the original dashboard remained byte-exact.
 
-Item 35 is complete. Aggregate diagnosis proved 22 active interface/`ethport` rows with zero state changes were outside the narrower `interface_flap` flag. After public checkpoint verification, all thirteen live queries passed, `dryRun=All` selected only the enhanced resource, and protected replacement plus exact six-resource reread passed. The live queues now contain two non-interface Active Events and all 34 active interface incidents under Interface Flaps, with zero interface leakage. Active Event detail uses the latest AI summary when available and deterministic fallback otherwise; both current rows use fallback. The resolved statistic is labeled simply `Resolved`, and the original dashboard remains byte-exact.
+Item 35 is complete. Aggregate diagnosis proved 22 active interface/`ethport` rows with zero state changes were outside the narrower `interface_flap` flag. After public checkpoint verification, all thirteen live queries passed, `dryRun=All` selected only the enhanced resource, and protected replacement plus exact six-resource reread passed. At that item-35 checkpoint—before item 41 replaced the flap presentation—the queues contained two non-interface Active Events and all 34 active interface incidents under Interface Flaps, with zero interface leakage; those counts are historical evidence, not a current queue inventory. Active Event detail used the latest AI summary when available and deterministic fallback otherwise; both then-current rows used fallback. The resolved statistic is labeled simply `Resolved`, and the original dashboard remains byte-exact.
 
 Item 36 is complete. The additive default-zero `recurrence_count` column and strict version-1/version-2 collector gate were activated before the GX10 producer upgrade. Sixteen version-2 lifecycle files were accepted through the normal 90-second settling boundary during initial inventory plus live advancement. Exact closure state contained 853 latest incidents, all producer version 2, with recurrence sum 3,037 across 526 recurrence-bearing incidents. Grafana `dryRun=All` selected only the enhanced resource; protected replacement, exact six-resource reread, and all thirteen original/enhanced queries passed before and after full reconciliation. The enhanced dashboard now displays protocol recovery as `MONITORING` and Occurrences as distinct issue episodes. The original dashboard remains byte-exact.
 
@@ -36,7 +43,11 @@ After each completed validated collector sub-section, append and push a `docs/PR
 
 ## Rebuild objective
 
-Two clean servers, this public repository, and operator-supplied environment values must be sufficient to reconstruct the functional deployment without undocumented implementation knowledge.
+The collector package must reproduce the collector on a clean compatible host
+from this public repository plus its documented private deployment inputs. The
+complete two-server contract additionally requires the external GX10
+prerequisite bundle inventoried in `docs/TWO_SERVER_REBUILD.md`; this collector
+status file does not claim that addresses and credentials alone rebuild GX10.
 
 Deployment-specific secrets, credentials, addresses, SSH keys, certificate private keys, and private identity values are intentionally not stored in this repository.
 
@@ -105,7 +116,8 @@ Important behavior preserved:
 - current normalization/transforms
 - ClickHouse syslog sink
 - ClickHouse AI-update sink
-- AI result ingestion
+- ClickHouse incident-lifecycle sink
+- AI-result and incident-lifecycle ingestion with mutually exclusive routing
 - durable compressed GX10 spool output
 - existing disabled ClickHouse sink health checks
 - existing Vector validation behavior
@@ -124,6 +136,7 @@ Captured database objects:
 
 - `observability.syslog`
 - `observability.ai_updates`
+- `observability.incident_updates`, including the additive default-zero recurrence column
 - `observability.grafana_logs`
 
 Captured access policy includes:
@@ -184,7 +197,7 @@ Firewall/nftables reconstruction is intentionally outside this capture milestone
 
 ## Grafana dashboards
 
-Four dashboards are captured as native Grafana 13 unified-resource documents using:
+All six current dashboards are captured as native Grafana 13 unified-resource documents using:
 
 `dashboard.grafana.app/v2`
 
@@ -194,6 +207,8 @@ Captured files:
 - `logs-dash.json`
 - `noc-view.json`
 - `noc-view-copy-backup.json`
+- `ai-incident-analysis.json`
+- `ai-incident-analysis-enhanced.json`
 
 Production API testing proved:
 

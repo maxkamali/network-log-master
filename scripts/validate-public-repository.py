@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import ipaddress
+import json
 import os
 import re
 import subprocess
@@ -16,6 +17,14 @@ IPV4_RE = re.compile(
     r'(?![0-9])'
 )
 HISTORY_IPV4_PATTERN = r'([0-9]{1,3}\.){3}[0-9]{1,3}'
+IPV6_CANDIDATE_RE = re.compile(
+    r'(?<![0-9A-Fa-f:])(?:[0-9A-Fa-f]{0,4}:){2,7}'
+    r'[0-9A-Fa-f]{0,4}(?![0-9A-Fa-f:])'
+)
+HISTORY_IPV6_PATTERN = (
+    r'([0-9A-Fa-f]{1,4}:){2,7}[0-9A-Fa-f]{0,4}'
+    r'|::[0-9A-Fa-f]{1,4}(:[0-9A-Fa-f]{0,4}){0,6}'
+)
 MARKDOWN_LINK_RE = re.compile(r'\[[^\]]+\]\(([^)]+)\)')
 ROLLBACK_TAG_RE = re.compile(r'^pre-[a-z0-9]+(?:-[a-z0-9]+)*-[0-9]{8}$')
 ALLOWED_NETWORKS = tuple(
@@ -28,7 +37,20 @@ ALLOWED_NETWORKS = tuple(
         '203.0.113.0/24',
     )
 )
+ALLOWED_IPV6_NETWORKS = tuple(
+    ipaddress.ip_network(value)
+    for value in (
+        '::/128',
+        '::1/128',
+        '2001:db8::/32',
+    )
+)
 NON_ADDRESS_VERSION_LITERALS = {'26.3.17.110'}
+LOCAL_DENYLIST_ENV = 'NETWORK_LOG_PUBLIC_DENYLIST_FILE'
+GRAFANA_DASHBOARD_DIRECTORY = PurePosixPath(
+    'components/collector/grafana/dashboards'
+)
+PORTABLE_GRAFANA_METADATA_KEYS = {'name', 'namespace'}
 PRIVATE_KEY_MARKERS = (
     '-----BEGIN ' + 'OPENSSH PRIVATE KEY-----',
     '-----BEGIN ' + 'RSA PRIVATE KEY-----',
@@ -140,31 +162,137 @@ def allowed_ipv4(value):
     return any(address in network for network in ALLOWED_NETWORKS)
 
 
+def ipv6_literals(text):
+    """Yield syntactically valid IPv6 literals from prose or source text."""
+    for match in IPV6_CANDIDATE_RE.finditer(text):
+        try:
+            address = ipaddress.ip_address(match.group(0))
+        except ValueError:
+            continue
+        if isinstance(address, ipaddress.IPv6Address):
+            yield address
+
+
+def allowed_ipv6(address):
+    return any(address in network for network in ALLOWED_IPV6_NETWORKS)
+
+
 def safe_credential_assignment(value):
-    cleaned = value.strip().strip('"\'`')
+    raw = value.strip()
+    quoted = (
+        len(raw) >= 2
+        and raw[0] in '"\'`'
+        and raw[-1] == raw[0]
+    )
+    cleaned = raw[1:-1] if quoted else raw
     lowered = cleaned.lower()
-    if len(cleaned) < 8:
+    if not cleaned:
         return True
     if (
-        cleaned.startswith(('$', '{', '<', '@', '/operator/', '/run/', '/etc/'))
-        or 'example' in lowered
-        or 'placeholder' in lowered
-        or 'redacted' in lowered
-        or 'replace_me' in lowered
+        re.fullmatch(r'\$\{?[A-Z][A-Z0-9_]*\}?', cleaned)
+        or re.fullmatch(r'__[A-Z][A-Z0-9_]*__', cleaned)
+        or re.fullmatch(r'<[A-Z][A-Z0-9_. -]*>', cleaned)
+        or re.fullmatch(r'(?i)SECRET\[[A-Za-z0-9_.-]+\]', cleaned)
     ):
         return True
-    if re.fullmatch(r'[A-Za-z_][A-Za-z0-9_.]*\(', cleaned):
+    if quoted:
+        # Quoted values are data, not code indirections. Only the explicit
+        # placeholders above are safe to publish.
+        return False
+    if cleaned.startswith(('/operator/', '/run/', '/etc/')):
         return True
-    if re.fullmatch(r'(?i)SECRET\[[A-Za-z0-9_.-]+\]', cleaned):
+    if re.fullmatch(
+        r'(?:[A-Za-z_][A-Za-z0-9_]*\.)*'
+        r'[A-Za-z_][A-Za-z0-9_]*\([^\r\n]*',
+        cleaned,
+    ):
         return True
-    if re.fullmatch(r'[A-Za-z_][A-Za-z0-9_.]*(?:\([^)]*\))?', cleaned):
-        return (
-            '_' in cleaned
-            or '.' in cleaned
-            or '(' in cleaned
-            or lowered in {'password', 'passwd', 'passphrase', 'secret', 'token'}
-        )
+    if re.fullmatch(
+        r'(?:args|config|settings|secrets)\.'
+        r'[A-Za-z_][A-Za-z0-9_]*',
+        cleaned,
+    ):
+        return True
+    if re.fullmatch(
+        r'os\.environ\[["\'][A-Z][A-Z0-9_]*["\']\]',
+        cleaned,
+    ):
+        return True
+    if re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', cleaned):
+        return lowered in {
+            'bytes',
+            'password',
+            'passwd',
+            'passphrase',
+            'secret',
+            'str',
+            'token',
+        }
     return False
+
+
+def validate_grafana_dashboard_capture(path, text, label):
+    try:
+        relative = PurePosixPath(path.relative_to(ROOT).as_posix())
+    except (TypeError, ValueError):
+        return
+    if relative.parent != GRAFANA_DASHBOARD_DIRECTORY or path.suffix != '.json':
+        return
+    try:
+        document = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f'{label}: malformed dashboard capture') from exc
+    if document.get('apiVersion') != 'dashboard.grafana.app/v2':
+        raise ValueError(f'{label}: unexpected dashboard apiVersion')
+    if document.get('kind') != 'Dashboard':
+        raise ValueError(f'{label}: unexpected dashboard kind')
+    metadata = document.get('metadata')
+    if not isinstance(metadata, dict) or not metadata.get('name'):
+        raise ValueError(f'{label}: dashboard metadata.name missing')
+    if set(metadata) != PORTABLE_GRAFANA_METADATA_KEYS:
+        raise ValueError(f'{label}: dashboard contains server-owned metadata')
+    if not metadata.get('namespace'):
+        raise ValueError(f'{label}: dashboard metadata.namespace missing')
+    if document.get('status') != {}:
+        raise ValueError(f'{label}: dashboard contains server-owned status')
+    if 'spec' not in document:
+        raise ValueError(f'{label}: dashboard spec missing')
+
+
+def load_local_denylist():
+    configured = os.environ.get(LOCAL_DENYLIST_ENV)
+    if not configured:
+        return ()
+    path = Path(configured)
+    if path.is_symlink() or not path.is_file():
+        raise ValueError('local denylist must be a regular non-symlink file')
+    resolved = path.resolve()
+    try:
+        resolved.relative_to(ROOT.resolve())
+    except ValueError:
+        pass
+    else:
+        raise ValueError('local denylist must be outside the repository')
+    if resolved.stat().st_mode & 0o077:
+        raise ValueError('local denylist must not be group/world accessible')
+    terms = []
+    for raw_line in resolved.read_text(encoding='utf-8', errors='strict').splitlines():
+        term = raw_line.strip()
+        if not term or term.startswith('#'):
+            continue
+        if len(term) < 3 or any(character in '\0\r\n' for character in term):
+            raise ValueError('local denylist contains an invalid term')
+        terms.append(term.casefold())
+    if not terms:
+        raise ValueError('local denylist contains no terms')
+    return tuple(dict.fromkeys(terms))
+
+
+def validate_local_denylist_text(text, label, terms):
+    folded = text.casefold()
+    if any(term in folded for term in terms):
+        # Never place the private term itself in output or an exception.
+        raise ValueError(f'{label}: environment-specific publication finding')
 
 
 def validate_extended_sensitive_text(text, label):
@@ -193,9 +321,13 @@ def validate_text(path, text, label):
     for match in IPV4_RE.finditer(text):
         if not allowed_ipv4(match.group(0)):
             raise ValueError(f'{label}: non-public IPv4 literal')
+    for address in ipv6_literals(text):
+        if not allowed_ipv6(address):
+            raise ValueError(f'{label}: non-public IPv6 literal')
+    validate_grafana_dashboard_capture(path, text, label)
 
 
-def validate_current_tree(files):
+def validate_current_tree(files, local_terms=()):
     for path in files:
         relative = path.relative_to(ROOT).as_posix()
         if path.is_symlink() or not path.is_file():
@@ -207,6 +339,7 @@ def validate_current_tree(files):
         except UnicodeDecodeError as exc:
             raise ValueError(f'{relative}: unexpected binary artifact') from exc
         validate_text(path, text, relative)
+        validate_local_denylist_text(text, relative, local_terms)
 
 
 def validate_markdown_links(files):
@@ -284,6 +417,42 @@ def history_grep(pattern):
     return problems
 
 
+def validate_history_local_denylist(terms):
+    if not terms:
+        return
+    commits = git('rev-list', '--all').stdout.decode('ascii').splitlines()
+    patterns = ('\n'.join(terms) + '\n').encode('utf-8')
+    for commit in commits:
+        result = subprocess.run(
+            [
+                'git',
+                'grep',
+                '-I',
+                '-l',
+                '-i',
+                '-F',
+                '-f',
+                '-',
+                commit,
+                '--',
+            ],
+            cwd=ROOT,
+            check=False,
+            input=patterns,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if result.returncode not in (0, 1):
+            raise subprocess.CalledProcessError(result.returncode, result.args)
+        if result.returncode == 0:
+            raw = result.stdout.decode('utf-8', errors='strict').splitlines()[0]
+            path = raw.split(':', 1)[-1]
+            raise ValueError(
+                'history environment-specific publication finding: '
+                f'{commit[:12]}:{path}'
+            )
+
+
 def validate_history_content():
     secret_pattern = '|'.join(
         (
@@ -313,7 +482,7 @@ def validate_history_content():
             '(^|[^A-Za-z0-9_])('
             + 'pass' + 'word|passwd|passphrase|secret|api[_-]?key|'
             'access[_-]?token|auth[_-]?token|client[_-]?secret)'
-            '[[:space:]]*[=:][[:space:]]*[^[:space:]]{3,}',
+            '[[:space:]]*[=:][[:space:]]*[^[:space:],;#]+',
         )
     )
     for commit, path, line in history_grep(extended_pattern):
@@ -327,6 +496,12 @@ def validate_history_content():
         for match in IPV4_RE.finditer(line):
             if not allowed_ipv4(match.group(0)):
                 raise ValueError(f'history IPv4 finding: {commit[:12]}:{path}')
+
+    ipv6_findings = history_grep(HISTORY_IPV6_PATTERN)
+    for commit, path, line in ipv6_findings:
+        for address in ipv6_literals(line):
+            if not allowed_ipv6(address):
+                raise ValueError(f'history IPv6 finding: {commit[:12]}:{path}')
 
 
 def validate_ref_topology():
@@ -353,18 +528,24 @@ def validate_ref_topology():
 def main():
     try:
         files = repository_files()
+        local_terms = load_local_denylist()
         if not files:
             raise ValueError('repository inventory is empty')
-        validate_current_tree(files)
+        validate_current_tree(files, local_terms)
         validate_markdown_links(files)
         validate_execution_authority()
         validate_history_paths()
         validate_history_content()
+        validate_history_local_denylist(local_terms)
         validate_ref_topology()
         print('PUBLIC_REPOSITORY_CURRENT_TREE=PASS')
         print('PUBLIC_REPOSITORY_HISTORY=PASS')
         print('PUBLIC_REPOSITORY_LINKS=PASS')
         print('PUBLIC_REPOSITORY_REF_TOPOLOGY=PASS')
+        print(
+            'PUBLIC_REPOSITORY_LOCAL_DENYLIST='
+            + ('PASS' if local_terms else 'NOT_CONFIGURED')
+        )
         print('PUBLIC_REPOSITORY_VALIDATION=PASS')
         return 0
     except (

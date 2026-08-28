@@ -31,6 +31,7 @@ flowchart LR
         projection["Canonical event projection"]
         incidents["Deterministic incident<br/>correlation and lifecycle"]
         uncovered["Uncovered-event selector"]
+        wake["Deterministic wake policy<br/>and packet builder"]
         reasoning["Selected incident assessment<br/>through local Gemma"]
         triage["Hidden uncovered-event triage<br/>through local Gemma"]
         snapshot["Selective transactional<br/>outbox snapshot"]
@@ -46,10 +47,12 @@ flowchart LR
     normalizer -->|read-only file transport| ingest
     ingest --> projection
     projection --> incidents
-    incidents --> uncovered
+    projection --> uncovered
+    incidents -.->|exclude existing incident evidence| uncovered
     uncovered -->|only no incident evidence| triage
     triage -->|validated positive only| incidents
-    incidents --> reasoning
+    incidents --> wake
+    wake -->|selected assessment only| reasoning
     incidents --> snapshot
     reasoning --> snapshot
     snapshot --> lifecycle
@@ -80,13 +83,17 @@ GX10: replay-safe ingest -> canonical projection
                                   |
                                   v
                        deterministic incident engine
-                         | selected assessment
+                         | deterministic wake policy
+                         v
+                    bounded reasoning packet
+                         | selected assessment only
                          v
                     local Gemma model
 
-                       uncovered-event selector
-                         | only no incident evidence
-                         v
+              canonical projection -> uncovered-event selector
+              incident evidence -- exclusion check -------^
+                                      | only no incident evidence
+                                      v
                     uncovered-event triage -> validated positive -> incident engine
 
                        selective transactional outbox snapshot
@@ -100,15 +107,19 @@ GX10: replay-safe ingest -> canonical projection
 Collector: validation + replay ledger -> incident state + AI updates -> Grafana -> operator
 ```
 
-The deterministic layers own event identity, normalization, incident state, wake decisions, and replay safety. For already-correlated incidents, the LLM produces nonauthoritative explanation records. A separate fail-closed side channel may admit an otherwise uncovered important event only after a validated positive decision; it becomes an ordinary deterministic incident whose later lifecycle is not model-owned. The two file transports use independent least-privilege identities, and GX10 has no direct ClickHouse write path.
+The deterministic layers own event identity, normalization, incident state, wake decisions, bounded packet construction, and replay safety. Only incidents selected by that wake/packet boundary reach ordinary local reasoning, where the LLM produces nonauthoritative explanation records. A separate fail-closed side channel may admit an otherwise uncovered important event only after a validated positive decision; it becomes an ordinary deterministic incident whose later lifecycle is not model-owned. The two file transports use independent least-privilege identities, and GX10 has no direct ClickHouse write path.
 
 ## Rebuildability contract
 
 The current reconstruction/documentation effort is complete only when:
 
-> Two clean servers, this public repository, and operator-supplied environment values are sufficient for another engineer or AI to reconstruct the current functional system without undocumented implementation memory.
+> Two application-clean compatible servers, this public repository,
+> operator-supplied private deployment values, and the GX10 prerequisite
+> artifact bundle named by `TWO_SERVER_REBUILD.md` are sufficient for another
+> engineer or AI to reconstruct the current functional system without
+> undocumented implementation memory.
 
-The public repository therefore owns implementation logic, non-sensitive configuration, rebuild scripts, verifiers, data contracts, and operator instructions. Environment-specific identity and secrets remain operator-supplied at rebuild time.
+The public repository therefore owns implementation logic, non-sensitive configuration, rebuild scripts, verifiers, data contracts, and operator instructions. Environment-specific identity and secrets remain operator-supplied at rebuild time. The externally provisioned GX10 kernel/driver/CUDA baseline, exact Ollama executable, offline model store, and pinned package sources are explicit rebuild inputs rather than repository-produced outputs.
 
 This rebuildability contract does not require publishing production addresses, credentials, usernames, SSH keys, certificate private keys, firewall allowlists, customer-identifying data, or other private deployment identity.
 
@@ -278,6 +289,11 @@ Transitional logic is retired deliberately rather than rewritten in place withou
 
 ## Reconstruction rule
 
-Before adding new architecture to a component, first capture enough of the currently functional implementation that a clean machine can reproduce it from this repository plus operator-supplied environment values. This prevents modernization work from destroying the only known working implementation history.
+Before adding new architecture to a component, first capture enough of the currently functional implementation that an application-clean compatible machine can reproduce it from this repository plus the documented private and external prerequisite inputs. This prevents modernization work from destroying the only known working implementation history.
 
-Both component reconstruction packages and operator runbooks now satisfy the repository-only portion of that rule. Full clean-host execution remains empirically unverified and was explicitly waived by the operator for project sequencing because disposable targets are unavailable. `docs/TWO_SERVER_REBUILD.md` defines the cross-system order and acceptance evidence.
+Both component reconstruction packages and operator runbooks now satisfy the
+repository-authored application-layer portion of that rule for the documented
+input set. Full clean-host execution remains empirically unverified and was
+explicitly waived by the operator for project sequencing because disposable
+targets are unavailable. `docs/TWO_SERVER_REBUILD.md` defines the authoritative
+inputs, cross-system order, and acceptance evidence.

@@ -72,6 +72,11 @@ The packet builder owns deterministic wake selection and compact append-only fac
 `create-outbox-snapshot.py` and `run-outbox-snapshot.py` are deliberate item-42
 reliability artifacts. They are not rediscovered historical applications.
 
+The current clean installer publishes this snapshot boundary directly in
+inactive state. `upgrade-result-outbox-snapshot.py` instead authenticates and
+replaces only the exact active legacy direct-database predecessor; it is
+existing-host migration provenance and is not part of a clean installation.
+
 The exact-hash runner binds private source/snapshot paths through a root-owned
 configuration and invokes only the local snapshot producer. The producer opens
 the validated service-owned WAL source in one read transaction, validates its
@@ -91,8 +96,20 @@ selective rollback-journal projection rather than the mutable source database.
 | packets, reasoning, and hidden triage | reconstructed | managed-reasoning installer/verifier | reasoning timer | disable timer and retain append-only packet/run truth |
 | selective snapshot and result/lifecycle outbox | reconstructed | snapshot/outbox installers and verifiers | snapshot before outbox timer | disable extension; retain snapshot, files, and cursors |
 | write-only result sender | reconstructed | sender installer/configurator/verifier | sender timer | disable timer; retain ready/delivered files and collector evidence |
+| first-live sender evidence | reconstructed | clean-runbook GX capture plus collector verifier | one manual pre-activation qualification cycle only | retain root-only prepared/finalized evidence through reboot acceptance; never mutate outbox truth during verification |
 
 `run-managed-ai.py` coordinates the active reasoning/triage policy;
 `build-result-outbox.py` and `build-incident-outbox.py` are the two local
 producers; `send-result-outbox.py` performs only bounded transport. Exact
 commands and markers are in `CLEAN_MACHINE_RUNBOOK.md`.
+
+The clean-rebuild first-live proof is implemented by
+`install/capture-first-live-evidence.py` and the collector-side
+`verify-first-live-provenance.py`. It is a reconstructed qualification boundary,
+not a rediscovered historical application or an active daemon. The GX helper
+imports only the installed sender core after exact repository-byte comparison,
+acquires the same lock, inventories as the runtime identity, and writes bounded
+root-only canonical evidence. The collector helper independently binds that
+evidence to the immutable ledger, accepted ready bytes, exclusive ClickHouse
+route, raw JSON multiset, and thin projections. Exact commands and the private
+administrator-transfer boundary are in `docs/RESULT_TRANSPORT.md`.

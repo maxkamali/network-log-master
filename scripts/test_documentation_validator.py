@@ -108,6 +108,60 @@ class DocumentationValidatorTests(unittest.TestCase):
                 'components/gx10/CLEAN_MACHINE_RUNBOOK.md'
             ],
         )
+        self.assertIn(
+            'components/collector/sbin/verify-first-live-provenance.py',
+            VALIDATOR.REQUIRED_CURRENT_CONTRACTS[
+                'docs/RESULT_TRANSPORT.md'
+            ],
+        )
+        self.assertIn(
+            'build-noc-organization-captures.py',
+            VALIDATOR.REQUIRED_CURRENT_CONTRACTS['docs/GRAFANA.md'],
+        )
+
+    def test_current_contracts_cover_semantic_boundaries(self):
+        self.assertIn(
+            'ordinary incident assessment records an immutable terminal no-result',
+            VALIDATOR.REQUIRED_CURRENT_CONTRACTS['docs/OPERATIONS.md'],
+        )
+        self.assertIn(
+            'hidden triage instead retains its immutable batch pending for bounded retry',
+            VALIDATOR.REQUIRED_CURRENT_CONTRACTS['docs/OPERATIONS.md'],
+        )
+        self.assertIn(
+            'historical base reconstruction order',
+            VALIDATOR.REQUIRED_CURRENT_CONTRACTS[
+                'components/gx10/REBUILD_STATUS.md'
+            ],
+        )
+        self.assertIn(
+            'all six current dashboards are captured',
+            VALIDATOR.REQUIRED_CURRENT_CONTRACTS[
+                'components/collector/REBUILD_STATUS.md'
+            ],
+        )
+
+    def test_stale_summary_checks_keep_merged_entries(self):
+        acceptance = VALIDATOR.STALE_SUMMARIES['docs/ACCEPTANCE.md']
+        self.assertIn('complete through item 42', acceptance)
+        self.assertIn('next stability/retirement gate', acceptance)
+        collector = VALIDATOR.STALE_SUMMARIES['components/collector/README.md']
+        self.assertIn('queue placement uses `entity_type = interface`', collector)
+        self.assertIn(
+            'project-wide two-server documentation and acceptance reconciliation follows',
+            collector,
+        )
+        transport = VALIDATOR.STALE_SUMMARIES['docs/RESULT_TRANSPORT.md']
+        self.assertIn('## remaining gates', transport)
+        self.assertIn('the candidate gate creates', transport)
+        self.assertIn('not reconstructable from the public tree', transport)
+        clean_runbook = VALIDATOR.STALE_SUMMARIES[
+            'components/gx10/CLEAN_MACHINE_RUNBOOK.md'
+        ]
+        self.assertIn(
+            'repository currently lacks the retained two-host qualification package',
+            clean_runbook,
+        )
 
     def test_reachability_rejects_orphaned_component_document(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -126,6 +180,29 @@ class DocumentationValidatorTests(unittest.TestCase):
                     mock.patch.object(VALIDATOR, 'DOCS_DIR', docs), \
                     mock.patch.object(VALIDATOR, 'GUIDE', docs / 'DOCUMENTATION_GUIDE.md'):
                 with self.assertRaisesRegex(ValueError, 'unreachable'):
+                    VALIDATOR.validate_documentation_reachability()
+
+    def test_reachability_rejects_orphaned_root_document(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'README.md').write_text('# Root\n', encoding='utf-8')
+            (root / 'FUTURE.md').write_text('# Future\n', encoding='utf-8')
+            with mock.patch.object(VALIDATOR, 'ROOT', root):
+                with self.assertRaisesRegex(ValueError, 'FUTURE.md'):
+                    VALIDATOR.validate_documentation_reachability()
+
+    def test_reachability_rejects_orphan_outside_standard_directories(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            notes = root / 'future'
+            notes.mkdir()
+            (root / 'README.md').write_text('# Root\n', encoding='utf-8')
+            (notes / 'ROADMAP-NOTE.md').write_text(
+                '# Roadmap note\n',
+                encoding='utf-8',
+            )
+            with mock.patch.object(VALIDATOR, 'ROOT', root):
+                with self.assertRaisesRegex(ValueError, 'future/ROADMAP-NOTE.md'):
                     VALIDATOR.validate_documentation_reachability()
 
 

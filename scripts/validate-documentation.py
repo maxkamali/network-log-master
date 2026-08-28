@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import unquote
@@ -39,11 +40,6 @@ STALE_SUMMARIES = {
     'README.md': ('complete through project item 42',),
     'docs/START_HERE.md': ('complete through item 42',),
     'docs/AI_HANDOFF.md': ('complete through execution-order item 41',),
-    'docs/ACCEPTANCE.md': (
-        'complete through item 42',
-        'natural timer cadence evidence remains pending',
-        'production activation and 15 natural cadences remain pending',
-    ),
     'docs/DECISIONS.md': (
         'compatibility correction pending',
         'item 12n remains partial across the environment transition',
@@ -51,6 +47,10 @@ STALE_SUMMARIES = {
         'accepted; configured-inactive production gate passed',
         'accepted as the item-42 production candidate',
         'future work may proceed to production-normalizer integration design',
+        'authority for strict execution order and must contain exactly one `next` item',
+        'deterministic enrichment exists but has no discovered automatic invocation',
+        'ollama is active with six complete models but has no discovered application-specific observability-pipeline caller',
+        'the collector result-return boundary exists but has no discovered gx10 producer',
     ),
     'docs/CURRENT_STATE.md': (
         'clean-machine end-to-end execution remains a later collector validation gate',
@@ -59,10 +59,16 @@ STALE_SUMMARIES = {
         'remaining local-producer stability gate',
         'nothing is installed and no writer credential or transmission was used',
         'no credential or transmission exists; timer-only cadence evidence is next',
+        '## deterministic incident candidate',
+        'the version-1 candidate consumes only classification-version-4 projections',
+        'ollama/model infrastructure is present without an identified observability-pipeline caller',
+        'the collector result-return boundary is present without an identified gx10 producer',
     ),
     'components/collector/README.md': (
         'queue placement uses `entity_type = interface`',
         'current active rebuild-capture milestone',
+        'original seven plus enhanced eight ai dashboard queries',
+        'project-wide two-server documentation and acceptance reconciliation follows',
     ),
     'docs/NORMALIZER_MIGRATION.md': (
         'current_state.md` now advances to the managed projection',
@@ -75,13 +81,18 @@ STALE_SUMMARIES = {
         'current reconstructed gx10 does not install or use',
         'current gx10 rebuild has no discovered result producer',
         'confirmation that no gx10 result producer',
+        'public tree currently lacks that retained two-host evidence package',
+        'one activation-blocking retained-tooling gap remains explicit',
+        'until the first-live verifier exists and passes',
     ),
     'components/gx10/CLEAN_MACHINE_RUNBOOK.md': (
         'it remains a separate future implementation decision',
+        'repository currently lacks the retained two-host qualification package',
+        'until the minimal evidence-capture/verifier contract',
     ),
-    'docs/RESULT_TRANSPORT.md': ('## remaining gates',),
     'docs/REASONING_PACKETS.md': (
         'the packet table is empty, the builder has never run',
+        'remain separate later items',
     ),
     'docs/PUBLICATION_CHECKLIST.md': (
         'contains exactly one item marked `next`',
@@ -92,6 +103,8 @@ STALE_SUMMARIES = {
     'components/collector/REBUILD_STATUS.md': (
         'not part of the clean-machine reconstruction path',
         'gx10 still needs the same complete capture/rebuild treatment',
+        'four dashboards are captured',
+        'the live queues now contain',
     ),
     'docs/MANAGED_CORRELATION.md': (
         'the next gate is deterministic llm wake selection',
@@ -102,23 +115,41 @@ STALE_SUMMARIES = {
     'docs/OPERATIONS.md': (
         'no current pipeline caller is claimed',
         'missing gx10 result producer or ollama caller',
+        'managed reasoning and hidden triage retain pending/no-result work',
+        'reasoning and hidden triage retain pending/no-result work for later retry',
     ),
     'docs/INCIDENT_ENGINE.md': ('remain later milestones',),
-    'docs/REASONING_PACKETS.md': ('remain separate later items',),
-    'docs/ACCEPTANCE.md': ('next stability/retirement gate',),
+    'docs/ACCEPTANCE.md': (
+        'complete through item 42',
+        'natural timer cadence evidence remains pending',
+        'production activation and 15 natural cadences remain pending',
+        'next stability/retirement gate',
+        'strict first-live result provenance remains an explicit retained-tooling gap',
+        'without that helper, the clean rebuild must stop',
+    ),
     'docs/GRAFANA.md': (
         'item 40 requests compact explore panes',
         'the exact current grafana integration task',
     ),
-    'components/collector/README.md': (
-        'project-wide two-server documentation and acceptance reconciliation follows',
-    ),
     'components/gx10/README.md': ('next implementation order',),
+    'docs/RESULT_TRANSPORT.md': (
+        '## remaining gates',
+        'the candidate gate creates',
+        'not reconstructable from the public tree',
+        'until that retained package is implemented',
+        'configured inactive with zero transport',
+    ),
+    'docs/ROADMAP.md': (
+        'reconstruct the current collector on a clean server',
+        'reconstruct the current functional gx10 on a clean server',
+    ),
 }
 REQUIRED_CURRENT_CONTRACTS = {
     'components/collector/README.md': (
         'at least 10 exact interface-down transitions',
         'a single down or a port that remains down is intentionally hidden',
+        'clickhouse syslog, ai-update, and incident-lifecycle sinks',
+        'current original seven plus enhanced six ai dashboard queries',
     ),
     'docs/DATA_CONTRACTS.md': (
         'one-observation protocol candidate',
@@ -137,20 +168,28 @@ REQUIRED_CURRENT_CONTRACTS = {
         'activate normalizer shadow before gx10 correlation',
         'verifier-enumerated initialized application state',
         'result-writer private key',
+        'prepare -> collector\npreflight -> one manual send -> finalize -> collector final',
+        'exactly `record_count` matching rows for a lifecycle batch',
     ),
     'components/gx10/CLEAN_MACHINE_RUNBOOK.md': (
         'phase 11: current result/lifecycle extensions',
         'gx10_result_sender_configured_inactive=pass',
+        'capture-first-live-evidence.py prepare',
+        'collector_first_live_provenance=pass',
         'phase 12: full-system acceptance and reboot recovery',
     ),
     'components/gx10/README.md': (
         'not directly scheduled, but invoked by the active managed-reasoning owner',
         'post-rediscovery implementation artifacts',
+        'ordinary incident assessment records unavailable or invalid model work as an immutable terminal no-result',
+        'hidden uncovered-event triage instead retains its batch pending for bounded retry',
     ),
     'docs/DECISIONS.md': (
         'item 12n is complete',
         'accepted and active through item 30',
         'current state is recorded in `docs/current_state.md`',
+        'exactly one `next` item while work remains and none after explicit completion',
+        'the reconstructed result/lifecycle producers and recurring sender are active now',
     ),
     'components/gx10/systemd/PROVENANCE.md': (
         'item-29 implementation artifacts',
@@ -158,11 +197,16 @@ REQUIRED_CURRENT_CONTRACTS = {
     ),
     'docs/OPERATIONS.md': (
         'read-only backlog role and write-only result role',
-        'managed reasoning and hidden triage retain pending/no-result work',
+        'ordinary incident assessment records an immutable terminal no-result',
+        'hidden triage instead retains its immutable batch pending for bounded retry',
     ),
     'docs/RESULT_TRANSPORT.md': (
         'gate-owned temporary file',
         'same-owner, no-overwrite publication marker',
+        'the active gate maintains `.accepted-v1.sqlite3`',
+        'components/gx10/install/capture-first-live-evidence.py prepare',
+        'components/collector/sbin/verify-first-live-provenance.py',
+        'a lifecycle batch requires exactly its\n`record_count` rows',
     ),
     'docs/RESULT_OUTBOX.md': (
         'selective rollback-journal snapshot',
@@ -171,6 +215,51 @@ REQUIRED_CURRENT_CONTRACTS = {
     'docs/ARCHITECTURE.md': (
         'uncovered-event selector',
         'only no incident evidence',
+        'projection --> uncovered',
+        'exclude existing incident evidence',
+        'deterministic wake policy<br/>and packet builder',
+        'wake -->|selected assessment only| reasoning',
+    ),
+    'components/collector/REBUILD_STATUS.md': (
+        'all six current dashboards are captured',
+        'clickhouse incident-lifecycle sink',
+        '`observability.incident_updates`, including the additive default-zero recurrence column',
+        'those counts are historical evidence, not a current queue inventory',
+    ),
+    'components/gx10/REBUILD_STATUS.md': (
+        'current additive sqlite schema groups',
+        'active engine version 3',
+        'current managed gemma caller and hidden-triage coordinator',
+        'current result/lifecycle producers and recurring sender',
+        'historical base reconstruction order',
+    ),
+    'docs/CURRENT_STATE.md': (
+        'no historical gx10 application producer',
+        'the reconstructed producers/sender are active now',
+        'complete rediscovered base sqlite schema',
+        'ordinary incident assessment records unavailable or invalid inference as an immutable terminal no-result',
+        'only hidden uncovered-event triage retains its immutable batch pending for bounded retry',
+    ),
+    'docs/ROADMAP.md': (
+        'reconstruct the base collector',
+        'reconstruct the base gx10',
+        'current full-system reconstruction contract',
+    ),
+    'docs/NORMALIZER_HANDOFF.md': (
+        'clean-host executable activation',
+        'verify-runtime.sh --transport-view handoff',
+        'verify-runtime.sh --transport-view raw',
+    ),
+    'docs/GRAFANA.md': (
+        'noc reconstruction input contract',
+        'exact organization and account sequence',
+        'exact datasource and dashboard sequence',
+        'explore, preferences, and playlist',
+        'build-noc-organization-captures.py',
+    ),
+    'docs/ACCEPTANCE.md': (
+        'executable first-live provenance helpers',
+        'remaining acceptance risk is empirical clean-host execution, not missing first-live tooling',
     ),
 }
 
@@ -241,13 +330,35 @@ def local_markdown_links(source: Path) -> tuple[Path, ...]:
 
 
 def repository_markdown_files() -> tuple[Path, ...]:
-    files = [ROOT / 'README.md']
-    for directory in (DOCS_DIR, ROOT / 'components'):
-        files.extend(
-            path for path in directory.rglob('*.md')
-            if not any(part.startswith('.') for part in path.relative_to(ROOT).parts)
-        )
-    return tuple(sorted(set(files)))
+    """Return every tracked or non-ignored Markdown file in the repository.
+
+    Git inventory is authoritative in the real checkout. A filesystem fallback
+    keeps focused validator tests useful in their temporary, non-Git trees.
+    """
+    result = subprocess.run(
+        [
+            'git',
+            'ls-files',
+            '--cached',
+            '--others',
+            '--exclude-standard',
+            '-z',
+        ],
+        cwd=ROOT,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if result.returncode == 0:
+        return tuple(sorted(
+            ROOT / raw.decode('utf-8')
+            for raw in result.stdout.split(b'\0')
+            if raw and raw.decode('utf-8').lower().endswith('.md')
+        ))
+    return tuple(sorted(
+        path for path in ROOT.rglob('*')
+        if path.is_file() and path.suffix.lower() == '.md'
+    ))
 
 
 def validate_documentation_reachability() -> None:

@@ -2,13 +2,18 @@
 
 ## Status
 
-Repository-only two-server rebuild acceptance: `PASS`.
+Repository-only captured-base rebuild acceptance: `PASS`.
+
+Current full-system clean rebuild acceptance: `CONDITIONAL`; the executable
+application-layer runbook is complete for the documented input set, but the
+GX10 platform/runtime artifact bundle is externally supplied and disposable
+two-host execution is waived and empirically unverified.
 
 Read-only reference-system revalidation: `PASS`.
 
 Disposable clean two-server execution: `WAIVED BY OPERATOR`, empirically unverified.
 
-The public collector and GX10 rebuild packages, component runbooks, cross-system runbook, current/target architecture split, and final sanitation gate are complete. Suitable disposable Debian 13 amd64 and Ubuntu 24.04 arm64 GX10-class targets are not available. On 2026-08-23, the operator explicitly accepted that residual risk and authorized advancement; the project still does not claim that clean-host execution passed.
+The public collector and GX10 rebuild packages, component runbooks, cross-system runbook, current/target architecture split, executable first-live provenance helpers, and final sanitation gate are complete for the explicit input contract. The repository does not acquire or provision the captured GX10 kernel/driver/CUDA baseline, exact Ollama executable, offline model store, or pinned-package sources; those inputs must accompany a rebuild. Suitable disposable Debian 13 amd64 and Ubuntu 24.04 arm64 GX10-class targets are not available. On 2026-08-23, the operator explicitly accepted that residual risk and authorized advancement; the project still does not claim that clean-host execution passed. NOC dashboard capture/restore/query tooling is retained, while organization/account/datasource creation remains an exact manual/API boundary.
 
 ## Current operational addendum
 
@@ -21,6 +26,40 @@ compact one-click log drilldowns, and the rolling interface-flap threshold.
 The operator confirmed the resulting behavior is the desired functional
 baseline. Current authority remains `docs/CURRENT_STATE.md`; the detailed
 evidence remains append-only in `docs/PROJECT_JOURNAL.md`.
+
+## Current clean-rebuild interpretation
+
+The ordered procedure is `docs/TWO_SERVER_REBUILD.md`; component milestone
+histories are not substitutes for that runbook.
+
+Important clean-versus-existing-host boundaries are now explicit:
+
+- the clean GX10 outbox installer directly creates the current selective-
+  snapshot boundary; the legacy live snapshot upgrader must not follow it
+- the selected model's protected-current-state-copy evidence qualifies the
+  exact retained model version; a clean host does not fabricate a predecessor
+  production database
+- the collector runtime verifier defaults to the base raw bind and requires
+  explicit `--transport-view handoff` after the normalizer cutover
+- the final extended GX10 state uses the correlation, reasoning, outbox, and
+  sender verifiers; the earlier base-only runtime verifier is not rerun after
+  those timers are active
+- reboot acceptance is collector first, then GX10, using the exact current-state
+  matrix and conserved redacted cardinalities in the two-server runbook
+
+The retained synthetic sender/result-gate suites safely replace deliberate live
+exact/divergent replay probes during a clean rebuild. The separate executable
+first-live sequence binds the GX ready-to-delivered transition to one immutable
+collector acceptance row, exact ready bytes, and one AI ClickHouse row or
+exactly `record_count` lifecycle rows in the exclusive route. Its no-echo,
+read-only contract and exact commands are in `docs/RESULT_TRANSPORT.md`.
+
+The isolated Grafana NOC organization has a guarded private capture builder plus
+retained dashboard restore and query verifiers. Organization, account,
+datasource, preference, permission, and playlist creation remain the exact
+manual/API sequence in `docs/GRAFANA.md`; there is no idempotent end-to-end
+bootstrap. That is a manual acceptance boundary, not an undocumented resource
+or a claim that the helper mutates Grafana.
 
 ## Durable public-repository gate
 
@@ -209,11 +248,14 @@ The following remain empirically unverified:
 - clean collector execution on disposable Debian 13 amd64
 - clean GX10 execution on disposable Ubuntu 24.04 arm64 GX10-class hardware
 - full disposable two-server execution of `docs/TWO_SERVER_REBUILD.md`
+- strict clean-host first-live ledger/ready/ClickHouse provenance execution on
+  disposable paired hosts (the public-safe verifier and tests now exist)
+- automated isolated-NOC reconstruction and permission/query verification
 
 These checks no longer block subsequent milestones because the operator explicitly waived the execution gate. When suitable systems become available, execute the component and cross-system runbooks exactly and append public-safe results here and in `docs/PROJECT_JOURNAL.md`.
 
 ## Acceptance interpretation
 
-The repository contains the implementation, guarded installers, offline dependencies contract, verifiers, current/target architecture, and operator instructions necessary to attempt a deterministic rebuild without undocumented conversational memory.
+The repository contains the implementation, guarded installers, offline dependencies contract, verifiers, current/target architecture, and operator instructions necessary to rebuild the complete current target without undocumented conversational memory. The remaining acceptance risk is empirical clean-host execution, not missing first-live tooling.
 
 Repository and reference-read-only evidence pass. Environmental execution evidence is waived for project sequencing, not assumed or represented as a pass. The rebuild/documentation milestone is therefore accepted with residual risk.

@@ -16,7 +16,7 @@ The prior collector gate rejected a duplicate only while a same-name file remain
 
 ## Durable collector acceptance
 
-The candidate gate creates `.accepted-v1.sqlite3` inside the protected ready directory. Vector reads only `*.jsonl`, so the ledger and any short-lived SQLite journal are outside its source glob.
+The active gate maintains `.accepted-v1.sqlite3` inside the protected ready directory. Vector reads only `*.jsonl`, so the ledger and any short-lived SQLite journal are outside its source glob.
 
 Each immutable ledger row stores:
 
@@ -105,11 +105,327 @@ Eight management tests cover config-last installation, failure cleanup, partial-
 
 The matching collector authorizer is independently guarded. It accepts exactly one root-owned public Ed25519 input, refuses key duplication, preserves the complete predecessor `authorized_keys` bytes in a root-only mode-`0600` backup, atomically appends only the new line, and runs `sshd -t` without reloading or restarting SSH. Any failure after publication restores the exact predecessor and removes attempt-created backup state. An exact already-authorized key is idempotently reusable and, when the protected backup exists, must equal the exact backup plus that single line. Five synthetic append/reuse/duplicate/private-input/rollback tests pass locally and from exact bytes staged on the collector runtime.
 
+## Clean-host transport qualification
+
+The clean collector base already installs the result-writer public key. The
+existing-host authorizer above is not a second clean-rebuild step.
+
+Before any live transport, run the retained no-network suites from the reviewed
+repository revision:
+
+```text
+python3 -B components/collector/tests/validate-result-gate-package.py
+python3 -B components/gx10/tests/test_result_sender.py
+python3 -B components/gx10/tests/test_result_sender_management.py
+python3 -B components/gx10/tests/test_first_live_evidence.py
+```
+
+The collector suite explicitly proves exact replay after ready-file removal,
+same-name divergent replay, immutable acceptance rows, and ready/ledger
+divergence refusal. The GX10 suites prove at-most-one transport selection,
+unchanged deterministic name/content, post-success ready-to-delivered movement,
+interrupted/failing transport retention, duplicate/divergent-state refusal, and
+configured inactive/active systemd boundaries. These synthetic tests are the
+safe clean-rebuild substitute for deliberate exact and divergent production
+re-uploads. Do not create a modified production result solely to retest a
+historical quarantine outcome.
+
+The first-live suites additionally prove GX/collector evidence-schema
+compatibility, concurrent new-ready accounting, privilege restoration,
+ready/delivered overlap refusal, preaccepted identity refusal, ledger and ready
+identity mismatch, zero/duplicate/wrong-route/divergent ClickHouse results,
+thin-projection mismatch, private credential metadata, temporary credential-
+configuration cleanup, and no private-path echo on unexpected failures.
+
+After the sender is configured and its staged `/run` key source has been
+removed, keep its timer disabled through the first-live proof:
+
+```text
+components/gx10/install/verify-result-outbox.py --active
+components/gx10/install/verify-result-sender.py --configured \
+    --runtime-config /etc/network-log-gx10/runtime.json
+```
+
+The sender verifier must still report `timer_enabled=no` and service inactive.
+Do not start the sender service until the retained qualification package below
+has first captured a protected GX10 pre-send inventory. The sender selects the
+oldest entry across AI results and incident-lifecycle batches, while the outbox
+verifier prints only AI `ready`/`delivered` counts; those counts cannot identify
+the selected cross-host byte sequence.
+
+Allow the normal collector settling window, result-gate timer, and Vector
+cadence to run. On the collector, require the gate timer and core current-view
+runtime to remain healthy:
+
+```text
+systemctl is-enabled --quiet ai-results-gate.timer
+systemctl is-active --quiet ai-results-gate.timer
+COLLECTOR_CLICKHOUSE_PASSWORD_FILE=/root/collector-rebuild-inputs/clickhouse-default-password
+test -s "$COLLECTOR_CLICKHOUSE_PASSWORD_FILE"
+env CLICKHOUSE_DEFAULT_PASSWORD_FILE="$COLLECTOR_CLICKHOUSE_PASSWORD_FILE" \
+    components/collector/install/verify-runtime.sh --transport-view handoff
+```
+
+This proves the current collector/runtime contract. The one manual sender cycle
+below is the only live action allowed before recurring activation.
+
+### Executable first-live provenance proof
+
+The retained package is public code but its two evidence files are private.
+`capture-first-live-evidence.py` acquires the sender lock, inventories the
+outbox as the service account, binds the deterministic next file, and emits only
+aggregate markers. `verify-first-live-provenance.py` reads the existing
+root-protected `grafana_reader` password file through a temporary mode-`0600`
+client configuration, performs read-only queries, and emits no filename,
+digest, content, credential, or connection value. Evidence is canonical,
+root-owned, single-link mode `0600`, bounded to 4 MiB, and kept outside Git.
+
+Run the following from the reviewed checkout as root on GX10 while the sender
+timer is disabled:
+
+```text
+GX_FIRST_LIVE_DIR=/root/network-log-first-live-evidence
+GX_FIRST_LIVE_PREPARED="$GX_FIRST_LIVE_DIR/prepared-v1.json"
+GX_FIRST_LIVE_FINALIZED="$GX_FIRST_LIVE_DIR/finalized-v1.json"
+: "${GX_ADMIN_USER:?set GX_ADMIN_USER to the existing non-root GX administrator}"
+GX_ADMIN_GROUP="$(id -gn "$GX_ADMIN_USER")"
+GX_FIRST_LIVE_TRANSFER_DIR=/run/network-log-first-live-admin
+export GX_FIRST_LIVE_DIR GX_FIRST_LIVE_PREPARED GX_FIRST_LIVE_FINALIZED
+export GX_ADMIN_USER GX_ADMIN_GROUP GX_FIRST_LIVE_TRANSFER_DIR
+test "$(id -u "$GX_ADMIN_USER")" -ne 0
+install -d -o root -g root -m 0700 "$GX_FIRST_LIVE_DIR"
+test ! -L "$GX_FIRST_LIVE_DIR"
+test "$(stat -c '%U:%G:%a' "$GX_FIRST_LIVE_DIR")" = root:root:700
+test ! -e "$GX_FIRST_LIVE_PREPARED"
+test ! -e "$GX_FIRST_LIVE_FINALIZED"
+test ! -e "$GX_FIRST_LIVE_TRANSFER_DIR"
+install -d -o "$GX_ADMIN_USER" -g "$GX_ADMIN_GROUP" -m 0700 \
+    "$GX_FIRST_LIVE_TRANSFER_DIR"
+components/gx10/install/capture-first-live-evidence.py prepare \
+    --output "$GX_FIRST_LIVE_PREPARED"
+install -o "$GX_ADMIN_USER" -g "$GX_ADMIN_GROUP" -m 0600 -- \
+    "$GX_FIRST_LIVE_PREPARED" \
+    "$GX_FIRST_LIVE_TRANSFER_DIR/prepared-v1.json"
+cmp -s -- "$GX_FIRST_LIVE_PREPARED" \
+    "$GX_FIRST_LIVE_TRANSFER_DIR/prepared-v1.json"
+```
+
+Require `GX10_FIRST_LIVE_EVIDENCE_PREPARE=PASS`. On the operator management
+host, transfer the transient admin-owned copy byte-for-byte through the existing
+administrator SSH aliases—not the backlog-reader or result-writer SFTP role—to
+the collector administrator's home, then remove the GX transient source:
+
+```text
+: "${GX_ADMIN_SSH_ALIAS:?set the existing GX administrator SSH alias}"
+: "${COLLECTOR_ADMIN_SSH_ALIAS:?set the existing collector administrator SSH alias}"
+: "${GX_ADMIN_USER:?set the existing non-root GX administrator}"
+: "${COLLECTOR_ADMIN_USER:?set the existing non-root collector administrator}"
+export GX_ADMIN_SSH_ALIAS COLLECTOR_ADMIN_SSH_ALIAS
+export GX_ADMIN_USER COLLECTOR_ADMIN_USER
+test "$(ssh "$GX_ADMIN_SSH_ALIAS" 'id -un')" = "$GX_ADMIN_USER"
+test "$(ssh "$COLLECTOR_ADMIN_SSH_ALIAS" 'id -un')" = "$COLLECTOR_ADMIN_USER"
+ssh "$COLLECTOR_ADMIN_SSH_ALIAS" \
+    'test ! -e .network-log-first-live-prepared.json'
+scp -3 -p \
+    "$GX_ADMIN_SSH_ALIAS:/run/network-log-first-live-admin/prepared-v1.json" \
+    "$COLLECTOR_ADMIN_SSH_ALIAS:.network-log-first-live-prepared.json"
+ssh "$GX_ADMIN_SSH_ALIAS" \
+    'rm -f -- /run/network-log-first-live-admin/prepared-v1.json'
+ssh "$GX_ADMIN_SSH_ALIAS" \
+    'test ! -e /run/network-log-first-live-admin/prepared-v1.json'
+```
+
+The alias values and their endpoint/user configuration remain operator-private.
+On the collector, adopt and preflight the admin-owned home file as root:
+
+```text
+: "${COLLECTOR_ADMIN_USER:?set COLLECTOR_ADMIN_USER to the existing non-root collector administrator}"
+COLLECTOR_ADMIN_HOME="$(getent passwd "$COLLECTOR_ADMIN_USER" | cut -d: -f6)"
+test "$(getent passwd "$COLLECTOR_ADMIN_USER" | wc -l)" -eq 1
+test "$(id -u "$COLLECTOR_ADMIN_USER")" -ne 0
+test -n "$COLLECTOR_ADMIN_HOME"
+test "${COLLECTOR_ADMIN_HOME#/}" != "$COLLECTOR_ADMIN_HOME"
+test -d "$COLLECTOR_ADMIN_HOME"
+test ! -L "$COLLECTOR_ADMIN_HOME"
+test "$(stat -c '%U' "$COLLECTOR_ADMIN_HOME")" = "$COLLECTOR_ADMIN_USER"
+COLLECTOR_ADMIN_HOME_MODE="$(stat -c '%a' "$COLLECTOR_ADMIN_HOME")"
+test "$((0$COLLECTOR_ADMIN_HOME_MODE & 0022))" -eq 0
+COLLECTOR_FIRST_LIVE_PREPARED_INPUT="$COLLECTOR_ADMIN_HOME/.network-log-first-live-prepared.json"
+COLLECTOR_FIRST_LIVE_FINALIZED_INPUT="$COLLECTOR_ADMIN_HOME/.network-log-first-live-finalized.json"
+COLLECTOR_FIRST_LIVE_DIR=/root/network-log-first-live-evidence
+COLLECTOR_FIRST_LIVE_PREPARED="$COLLECTOR_FIRST_LIVE_DIR/prepared-v1.json"
+COLLECTOR_FIRST_LIVE_FINALIZED="$COLLECTOR_FIRST_LIVE_DIR/finalized-v1.json"
+COLLECTOR_GRAFANA_READER_PASSWORD_FILE=/root/collector-rebuild-inputs/grafana-reader-password
+export COLLECTOR_ADMIN_USER COLLECTOR_ADMIN_HOME
+export COLLECTOR_FIRST_LIVE_PREPARED_INPUT COLLECTOR_FIRST_LIVE_FINALIZED_INPUT
+export COLLECTOR_FIRST_LIVE_DIR COLLECTOR_FIRST_LIVE_PREPARED
+export COLLECTOR_FIRST_LIVE_FINALIZED COLLECTOR_GRAFANA_READER_PASSWORD_FILE
+install -d -o root -g root -m 0700 "$COLLECTOR_FIRST_LIVE_DIR"
+test ! -L "$COLLECTOR_FIRST_LIVE_DIR"
+test "$(stat -c '%U:%G:%a' "$COLLECTOR_FIRST_LIVE_DIR")" = root:root:700
+test ! -e "$COLLECTOR_FIRST_LIVE_PREPARED"
+test ! -e "$COLLECTOR_FIRST_LIVE_FINALIZED"
+test -f "$COLLECTOR_FIRST_LIVE_PREPARED_INPUT"
+test ! -L "$COLLECTOR_FIRST_LIVE_PREPARED_INPUT"
+test "$(stat -c '%U:%a:%h' "$COLLECTOR_FIRST_LIVE_PREPARED_INPUT")" = "$COLLECTOR_ADMIN_USER:600:1"
+install -o root -g root -m 0600 -- \
+    "$COLLECTOR_FIRST_LIVE_PREPARED_INPUT" \
+    "$COLLECTOR_FIRST_LIVE_PREPARED"
+cmp -s -- "$COLLECTOR_FIRST_LIVE_PREPARED_INPUT" \
+    "$COLLECTOR_FIRST_LIVE_PREPARED"
+rm -f -- "$COLLECTOR_FIRST_LIVE_PREPARED_INPUT"
+test ! -e "$COLLECTOR_FIRST_LIVE_PREPARED_INPUT"
+components/collector/sbin/verify-first-live-provenance.py \
+    --password-file "$COLLECTOR_GRAFANA_READER_PASSWORD_FILE" \
+    preflight --prepared "$COLLECTOR_FIRST_LIVE_PREPARED"
+```
+
+Require `COLLECTOR_FIRST_LIVE_PREFLIGHT=PASS`. It proves the selected identity
+is absent from the immutable acceptance ledger, incoming/ready spools, and both
+ClickHouse routes before any send. Back on GX10, invoke exactly one oneshot and
+seal the transition while the timer remains disabled:
+
+```text
+systemctl start network-log-gx10-result-sender.service
+test "$(systemctl show network-log-gx10-result-sender.service --property=ActiveState --value)" = inactive
+test "$(systemctl show network-log-gx10-result-sender.service --property=Result --value)" = success
+components/gx10/install/capture-first-live-evidence.py finalize \
+    --prepared "$GX_FIRST_LIVE_PREPARED" \
+    --output "$GX_FIRST_LIVE_FINALIZED"
+components/gx10/install/verify-result-sender.py --configured \
+    --runtime-config /etc/network-log-gx10/runtime.json
+```
+
+Require `GX10_FIRST_LIVE_EVIDENCE_FINALIZE=PASS`, `timer_enabled=no`, and an
+inactive service. Finalize requires the selected bytes/name to have moved to
+delivered, every baseline ready/delivered identity to remain unchanged, no
+ready/delivered overlap, and exactly one delivered transition. New ready work
+created concurrently is counted and bound without being mistaken for a second
+send.
+
+Back on GX10 as root, create only the transient admin-readable finalized copy:
+
+```text
+: "${GX_ADMIN_USER:?set GX_ADMIN_USER to the existing non-root GX administrator}"
+GX_ADMIN_GROUP="$(id -gn "$GX_ADMIN_USER")"
+GX_FIRST_LIVE_DIR=/root/network-log-first-live-evidence
+GX_FIRST_LIVE_FINALIZED="$GX_FIRST_LIVE_DIR/finalized-v1.json"
+GX_FIRST_LIVE_TRANSFER_DIR=/run/network-log-first-live-admin
+test -d "$GX_FIRST_LIVE_TRANSFER_DIR"
+test ! -L "$GX_FIRST_LIVE_TRANSFER_DIR"
+test "$(stat -c '%U:%G:%a' "$GX_FIRST_LIVE_TRANSFER_DIR")" = "$GX_ADMIN_USER:$GX_ADMIN_GROUP:700"
+test ! -e "$GX_FIRST_LIVE_TRANSFER_DIR/finalized-v1.json"
+install -o "$GX_ADMIN_USER" -g "$GX_ADMIN_GROUP" -m 0600 -- \
+    "$GX_FIRST_LIVE_FINALIZED" \
+    "$GX_FIRST_LIVE_TRANSFER_DIR/finalized-v1.json"
+cmp -s -- "$GX_FIRST_LIVE_FINALIZED" \
+    "$GX_FIRST_LIVE_TRANSFER_DIR/finalized-v1.json"
+```
+
+On the operator management host, transfer it through the same aliases and
+remove the GX transient source:
+
+```text
+: "${GX_ADMIN_SSH_ALIAS:?set the existing GX administrator SSH alias}"
+: "${COLLECTOR_ADMIN_SSH_ALIAS:?set the existing collector administrator SSH alias}"
+: "${GX_ADMIN_USER:?set the existing non-root GX administrator}"
+: "${COLLECTOR_ADMIN_USER:?set the existing non-root collector administrator}"
+test "$(ssh "$GX_ADMIN_SSH_ALIAS" 'id -un')" = "$GX_ADMIN_USER"
+test "$(ssh "$COLLECTOR_ADMIN_SSH_ALIAS" 'id -un')" = "$COLLECTOR_ADMIN_USER"
+ssh "$COLLECTOR_ADMIN_SSH_ALIAS" \
+    'test ! -e .network-log-first-live-finalized.json'
+scp -3 -p \
+    "$GX_ADMIN_SSH_ALIAS:/run/network-log-first-live-admin/finalized-v1.json" \
+    "$COLLECTOR_ADMIN_SSH_ALIAS:.network-log-first-live-finalized.json"
+ssh "$GX_ADMIN_SSH_ALIAS" \
+    'rm -f -- /run/network-log-first-live-admin/finalized-v1.json'
+ssh "$GX_ADMIN_SSH_ALIAS" \
+    'test ! -e /run/network-log-first-live-admin/finalized-v1.json'
+```
+
+On the collector as root, adopt and verify the finalized evidence:
+
+```text
+: "${COLLECTOR_ADMIN_USER:?set COLLECTOR_ADMIN_USER to the existing non-root collector administrator}"
+COLLECTOR_ADMIN_HOME="$(getent passwd "$COLLECTOR_ADMIN_USER" | cut -d: -f6)"
+test "$(getent passwd "$COLLECTOR_ADMIN_USER" | wc -l)" -eq 1
+test "$(id -u "$COLLECTOR_ADMIN_USER")" -ne 0
+test -n "$COLLECTOR_ADMIN_HOME"
+test "${COLLECTOR_ADMIN_HOME#/}" != "$COLLECTOR_ADMIN_HOME"
+test -d "$COLLECTOR_ADMIN_HOME"
+test ! -L "$COLLECTOR_ADMIN_HOME"
+test "$(stat -c '%U' "$COLLECTOR_ADMIN_HOME")" = "$COLLECTOR_ADMIN_USER"
+COLLECTOR_ADMIN_HOME_MODE="$(stat -c '%a' "$COLLECTOR_ADMIN_HOME")"
+test "$((0$COLLECTOR_ADMIN_HOME_MODE & 0022))" -eq 0
+COLLECTOR_FIRST_LIVE_FINALIZED_INPUT="$COLLECTOR_ADMIN_HOME/.network-log-first-live-finalized.json"
+COLLECTOR_FIRST_LIVE_DIR=/root/network-log-first-live-evidence
+COLLECTOR_FIRST_LIVE_PREPARED="$COLLECTOR_FIRST_LIVE_DIR/prepared-v1.json"
+COLLECTOR_FIRST_LIVE_FINALIZED="$COLLECTOR_FIRST_LIVE_DIR/finalized-v1.json"
+COLLECTOR_GRAFANA_READER_PASSWORD_FILE=/root/collector-rebuild-inputs/grafana-reader-password
+test -f "$COLLECTOR_FIRST_LIVE_FINALIZED_INPUT"
+test ! -L "$COLLECTOR_FIRST_LIVE_FINALIZED_INPUT"
+test "$(stat -c '%U:%a:%h' "$COLLECTOR_FIRST_LIVE_FINALIZED_INPUT")" = "$COLLECTOR_ADMIN_USER:600:1"
+install -o root -g root -m 0600 -- \
+    "$COLLECTOR_FIRST_LIVE_FINALIZED_INPUT" \
+    "$COLLECTOR_FIRST_LIVE_FINALIZED"
+cmp -s -- "$COLLECTOR_FIRST_LIVE_FINALIZED_INPUT" \
+    "$COLLECTOR_FIRST_LIVE_FINALIZED"
+rm -f -- "$COLLECTOR_FIRST_LIVE_FINALIZED_INPUT"
+test ! -e "$COLLECTOR_FIRST_LIVE_FINALIZED_INPUT"
+components/collector/sbin/verify-first-live-provenance.py \
+    --password-file "$COLLECTOR_GRAFANA_READER_PASSWORD_FILE" \
+    final --prepared "$COLLECTOR_FIRST_LIVE_PREPARED" \
+    --finalized "$COLLECTOR_FIRST_LIVE_FINALIZED" --wait-seconds 300
+```
+
+Require `COLLECTOR_FIRST_LIVE_PROVENANCE=PASS`. The verifier binds the finalized
+GX evidence to its exact prepared bytes, one immutable ledger row and accepted
+ready file, absence from incoming, the selected ClickHouse route, zero rows in
+the wrong route, exact `raw_json` byte multisets, and every stored thin
+projection. An AI file requires one row; a lifecycle batch requires exactly its
+`record_count` rows. Only transient absence is retried; metadata, schema,
+ledger, route, duplicate, content, or projection divergence fails immediately.
+
+Retain both root-only evidence files through full acceptance and reboot
+verification, then archive or remove them according to operator evidence policy.
+Never place them in Git or routine command output. Failed writes remove only
+their attempt-created output; an existing evidence path is always refused. Once
+both transfers are adopted, return to GX10, remove the now-empty admin staging
+directory as root and require it absent:
+
+```text
+GX_FIRST_LIVE_TRANSFER_DIR=/run/network-log-first-live-admin
+test -d "$GX_FIRST_LIVE_TRANSFER_DIR"
+rmdir -- "$GX_FIRST_LIVE_TRANSFER_DIR"
+test ! -e "$GX_FIRST_LIVE_TRANSFER_DIR"
+```
+
+If a transfer fails, preserve the root-owned evidence, remove only the
+admin-owned GX source and collector-home destination for that phase, and retry
+the administrator transfer from the unchanged root evidence. The bounded
+cleanup is:
+
+```text
+: "GX10 root-shell transient cleanup"
+GX_FIRST_LIVE_TRANSFER_DIR=/run/network-log-first-live-admin
+rm -f -- "$GX_FIRST_LIVE_TRANSFER_DIR/prepared-v1.json"
+rm -f -- "$GX_FIRST_LIVE_TRANSFER_DIR/finalized-v1.json"
+rmdir -- "$GX_FIRST_LIVE_TRANSFER_DIR"
+
+: "collector root-shell transient cleanup after validated administrator-home lookup"
+rm -f -- "$COLLECTOR_ADMIN_HOME/.network-log-first-live-prepared.json"
+rm -f -- "$COLLECTOR_ADMIN_HOME/.network-log-first-live-finalized.json"
+```
+
+Never reuse or overwrite a root evidence output path. If the one manual sender
+cycle already ran, do not rerun it; repair only the evidence-transfer/final
+verification step from the unchanged root evidence.
+
 ## Configured-inactive production checkpoint
 
 At this checkpoint, the dedicated authorization and all GX10 private inputs were installed and independently verified. Exact idempotent configuration reuse passed. Temporary key inputs were removed after the installed GX10 identity matched the collector authorization. The sender timer remained disabled; exactly one bounded manual service cycle invoked SFTP and moved one ready file to delivered. The active outbox and all prior deterministic schedules remained healthy; the collector result gate, Vector, ClickHouse, SSH configuration, authorization metadata, and exact predecessor-backup relation passed.
 
-## Bounded first-live and replay plan
+## Historical bounded first-live and replay plan
 
 This plan was executed successfully before recurring activation:
 

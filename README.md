@@ -5,8 +5,12 @@ searchable log archive, durable incident state, local-AI review, and an
 operator-focused Grafana NOC queue.
 
 **Working-system status:** operational. The public rebuild packages are
-complete, although clean installation on two disposable servers was unavailable
-and remains explicitly unverified rather than being represented as passed.
+complete for the documented input set, although clean installation on two
+disposable servers was unavailable and remains explicitly unverified rather
+than being represented as passed. A bare pair of hosts plus addresses and
+credentials is not sufficient: the GX10 rebuild also needs the external
+platform/runtime artifact bundle listed in
+[`docs/TWO_SERVER_REBUILD.md`](docs/TWO_SERVER_REBUILD.md).
 For the current production baseline, deferred work, and latest validation,
 read [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
 
@@ -240,13 +244,17 @@ completed state.
 
 ## Rebuild and security boundary
 
-The repository is designed so two clean servers plus operator-supplied private
-environment values are sufficient to reconstruct the system without relying on
-conversation history. The public artifacts include implementation, guarded
-installers, configuration templates, data contracts, runbooks, and independent
-verifiers. The coordinated order and complete private-input inventory are in
-[`docs/TWO_SERVER_REBUILD.md`](docs/TWO_SERVER_REBUILD.md); environment values
-remain outside the checkout.
+The repository is designed so two application-clean compatible servers, this
+repository, operator-supplied private deployment values, and the documented
+GX10 prerequisite artifact bundle are sufficient to reconstruct the system
+without relying on conversation history. The bundle includes the captured
+kernel/driver/CUDA baseline, exact Ollama executable, offline model store, and
+access to the pinned packages; those large or externally licensed/provisioned
+inputs are not acquired by this repository. The public artifacts include
+implementation, guarded installers, configuration templates, data contracts,
+runbooks, and independent verifiers. The coordinated order and authoritative
+input inventory are in [`docs/TWO_SERVER_REBUILD.md`](docs/TWO_SERVER_REBUILD.md);
+private values and external artifacts remain outside the checkout.
 
 The full disposable two-server rebuild was not executed because suitable spare
 systems were unavailable. The operator accepted that residual risk for project

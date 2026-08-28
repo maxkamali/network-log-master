@@ -139,7 +139,12 @@ Consequence: parity checks may normalize narrowly understood representation-only
 
 **Status:** Accepted
 
-The reconstruction/documentation effort is complete only when two clean servers, this public repository, and operator-supplied environment values are sufficient for another engineer or AI to reconstruct the current functional system without undocumented implementation memory.
+The reconstruction/documentation effort is complete only when two
+application-clean compatible servers, this public repository,
+operator-supplied private deployment values, and the GX10 prerequisite
+artifact bundle defined by `docs/TWO_SERVER_REBUILD.md` are sufficient for
+another engineer or AI to reconstruct the current functional system without
+undocumented implementation memory.
 
 Why:
 
@@ -153,6 +158,10 @@ Consequence:
 - real non-sensitive implementation and configuration belong in the repository
 - rebuild/install/verification tooling is a first-class project deliverable
 - environment-specific credentials, addresses, usernames, SSH keys, certificate private keys, and other private identity remain operator-supplied rather than publicly committed
+- the externally provisioned GX10 kernel/driver/CUDA baseline, exact Ollama
+  executable, offline model store, and pinned package sources are an explicit
+  prerequisite bundle; the repository verifies them but does not claim to
+  acquire or provision them
 - current working components should be captured before they are substantially redesigned
 
 ## ADR-011 - Grafana dashboards are rebuilt through the supported resource API
@@ -189,7 +198,7 @@ Why:
 
 Consequence:
 
-- `docs/CURRENT_STATE.md` is the authority for strict execution order and must contain exactly one `NEXT` item
+- `docs/CURRENT_STATE.md` is the authority for strict execution order; it must contain exactly one `NEXT` item while work remains and none after explicit completion
 - `docs/PROJECT_JOURNAL.md` is append-only historical context
 - every completed validated sub-section is journaled and pushed to GitHub before materially proceeding into the next sub-section
 - `docs/START_HERE.md` defines the canonical recovery/read order
@@ -235,7 +244,7 @@ Consequence:
 - the new VM must verify GitHub state and authenticated connectivity to both reference systems before materially continuing
 - direct credential availability is not blanket authorization for destructive or difficult-to-reverse actions
 - destructive/high-risk production changes, material architecture/scope decisions, and unresolved ambiguity requiring operator intent still require human involvement
-- existing publication, sanitation, validation, journal, and single-`NEXT` continuity rules remain unchanged
+- existing publication, sanitation, validation, journal, and continuity rules remain unchanged: exactly one `NEXT` while work remains, none after explicit completion
 - item 12N was partial at the environment transition because its first external-tool detector missed previously proven SFTP and Zstandard use; the corrected detector and dependency/provenance rerun later passed, so item 12N is complete
 - the durable transition/resume evidence is recorded in `docs/VM_HANDOFF.md`
 
@@ -248,9 +257,9 @@ Public rebuild artifacts and current-state documentation must reproduce only the
 Why:
 
 - GX10 rediscovery proved the automatic chain `timer -> fetch -> ingest`
-- deterministic enrichment exists but has no discovered automatic invocation
-- Ollama is active with six complete models but has no discovered application-specific observability-pipeline caller
-- the collector result-return boundary exists but has no discovered GX10 producer
+- deterministic enrichment existed during rediscovery, but no historical automatic invocation was found; item 26 later added the separate current correlation schedule
+- Ollama was active with six complete models during rediscovery, but no historical application-specific observability-pipeline caller was found; the managed Gemma caller/triage owner is active now
+- the collector result-return boundary existed during rediscovery, but no historical GX10 producer was found; the reconstructed result/lifecycle producers and recurring sender are active now
 - silently connecting these separately present capabilities would create new architecture and mislabel it as recovered current behavior
 
 Historical reconstruction consequence:

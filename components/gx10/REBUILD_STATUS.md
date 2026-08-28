@@ -56,11 +56,11 @@ sender isolation, source integrity, healthy collector services/ledger, and
 1,232 delivered files matching 1,232 immutable ledger rows by filename,
 SHA-256, and size.
 
-Item 36 is complete. The protected production upgrade advances the engine to version 2 with a protocol-specific 24-hour recovery-monitoring deadline for confirmed BGP/OSPF/OSPFv3 incidents while retaining the 15-minute candidate and five-minute other-protocol rules. A relapse reopens the same active correlation identity. Lifecycle producer version 2 derives a dedicated recurrence count from append-only relapse transitions, uses monotonic version-scaled snapshots and version-2 filenames, and retains strict version-1 file compatibility across producer inventory, sender, and collector gate. Exact closure reconciliation matched all 853 authoritative incidents, recurrence sum 3,037, and 526 recurrence-bearing incidents in ClickHouse; the outbox was empty and all four GX10 schedules were enabled/active with zero relevant restarts.
+Item 36 is complete. That protected production upgrade advanced the engine to version 2 with a protocol-specific 24-hour recovery-monitoring deadline for confirmed BGP/OSPF/OSPFv3 incidents while retaining the 15-minute candidate and five-minute other-protocol rules. The later version-3 correction summarized above extended the same monitoring policy to one-observation protocol candidates. A relapse reopens the same active correlation identity. Lifecycle producer version 2 derives a dedicated recurrence count from append-only relapse transitions, uses monotonic version-scaled snapshots and version-2 filenames, and retains strict version-1 file compatibility across producer inventory, sender, and collector gate. Exact closure reconciliation matched all 853 authoritative incidents, recurrence sum 3,037, and 526 recurrence-bearing incidents in ClickHouse; the outbox was empty and all four GX10 schedules were enabled/active with zero relevant restarts.
 
 The post-closure hidden AI detection side channel is complete and active. It scans only canonical events not already owned by deterministic incident evidence, covers severity 0–4 plus novel/repeated severity 5, groups bounded deterministic signatures, and uses the pinned local Gemma model with a strict versioned JSON contract. Unavailable, timed-out, or invalid inference remains pending and creates no incident. Valid positives become ordinary per-device `event_signature` incidents; ignored events remain only in logs. Learned exact-event-code coverage is disabled until three consistent confidence-70+ decisions spanning at least 30 minutes and is categorically unavailable above severity 3. The managed owner gives existing reasoning backlog priority and otherwise permits at most one model invocation per five-minute cycle. Production activation used a protected SQLite backup, additive schema migration, exact predecessor upgrades, a successful 24-decision shadow batch, 215 tests, clean database integrity, and collector acceptance of the initial 45-record lifecycle export.
 
-Item 33 adds the affected Device to newly projected result files. The producer and sender accept both exact legacy device-less bytes and the backward-compatible device-bearing shape; existing files were reused without rewrite. Protected predecessor copies, exact installed hashes, 192 tests, active pipeline/correlation/reasoning/outbox/sender schedules, and zero service restarts passed.
+Item 33 added the affected Device to newly projected result files. The producer and sender accept both exact legacy device-less bytes and the backward-compatible device-bearing shape; existing files were reused without rewrite. Protected predecessor copies, exact installed hashes, 192 tests, active pipeline/correlation/reasoning/outbox/sender schedules, and zero service restarts passed.
 
 Item 34 is complete. An inference-independent producer now exports only changed authoritative incident snapshots through a protected local cursor and content-addressed batches of at most 100 records/256 KiB. Its exact-hash runner executes after the existing result producer under the same private-network oneshot and shared lock. The first production pass mapped 804 incidents into nine files; all were delivered through the existing one-file sender, and later natural changes followed the same path. The installed outbox and configured-active sender verifiers pass, both timers are enabled/active, existing 355 AI result files were reused exactly, and the full suite passes 200 tests plus the filesystem contract.
 
@@ -102,16 +102,16 @@ Completed:
 - public-safe fetch/ingest sources plus the canonical normalized-field projector
 - protected runtime configuration loader and fail-closed renderer
 - 27/27 live-to-public function AST parity
-- deterministic SQLite initializer matching all 5 recovered table DDL hashes, 13 indexes, and 3 foreign keys
+- deterministic SQLite initializer matching the rediscovered 5-table base DDL, 13 indexes, and 3 foreign keys
 - exact two-pattern functional suppression seed with neutral nonfunctional metadata
 - captured ingest schema migrator and canonical projection schema validator proven non-mutating against the initialized schema
 - 18 synthetic configuration/application/database tests passing
 - complete sanitized service/timer capture preserving fetch-then-ingest order, cadence, and all live hardening directives
 - clean-machine application/unit installer with no-overwrite, ownership/mode preflight, systemd verification, and no automatic activation
 - canonical projection and deterministic incident processing use a separate managed offline schedule
-- deterministic incident schema/engine candidate with stable instance identity, append-only evidence/transitions, event-time lifecycle, repeat accounting, rolling context, and two-layer replay protection
+- active `incident-v1.sql` schema with engine-version-3 policy, stable instance identity, append-only evidence/transitions, event-time lifecycle, repeat/recurrence accounting, rolling context, and two-layer replay protection
 - guarded existing-database migration with exact schema/artifact hashes, protected SQLite backup, zero-scheduler-reference enforcement, and empty-state-only rollback
-- clean-machine initialization and verification include the incident extension; existing-system managed correlation installation/activation is separately gated
+- clean-machine initialization and verification include the incident, reasoning-packet, inference, and hidden-triage extensions; existing-system migrations and each managed activation remain separately gated
 - exact pinned application-package installer and fail-closed platform verifier
 - exact operator-supplied Ollama binary installer with no automatic activation
 - guarded offline model-store importer with source/target content hashing, no overwrite, and resumable exact reuse
@@ -240,9 +240,9 @@ The ingest component contract includes:
 
 Exact private paths and transport identities remain operator-supplied.
 
-## SQLite contract
+## Rediscovered base SQLite contract
 
-The effective application schema is fully captured from read-only immutable SQLite metadata:
+The historical five-table base schema was fully captured from read-only immutable SQLite metadata:
 
 - 5 application tables
 - 13 explicit indexes
@@ -257,11 +257,20 @@ Tables:
 - `event_enrichment`
 - `suppression_rules`
 
-No surviving base-schema/bootstrap initializer was found in the bounded search, and SQLite carries no nonzero application or migration version identifier.
+No surviving historical base-schema/bootstrap initializer was found in the bounded search, and the rediscovered SQLite database carried no nonzero application or migration version identifier.
 
-Reconstruction must create the captured effective schema directly. It must not invent historical migration provenance and present it as discovered behavior.
+Reconstruction creates that captured base schema directly. It must not invent historical migration provenance and present it as discovered behavior.
 
-The item-25 target-state extension is deliberately separate from that recovered baseline. It adds `incidents`, `incident_evidence`, and `incident_transitions`, five explicit indexes, and four append-only triggers. The existing-system guard requires the exact recovered base before applying the extension and does not rewrite historical rows.
+## Current additive SQLite schema groups
+
+The current clean-machine initializer creates the recovered base plus four explicitly reconstructed extensions:
+
+- `incident-v1.sql` adds `incidents`, `incident_evidence`, and `incident_transitions`, five explicit indexes, and four append-only triggers
+- `reasoning-v1.sql` adds the append-only reasoning-packet boundary
+- `inference-v1.sql` adds immutable model/prompt versions, durable reasoning runs, and append-only reasoning results
+- `triage-v1.sql` adds uncovered-event signatures, batches, runs, decisions, overrides, summaries, and learned-rule provenance
+
+`install/initialize-database.py` creates and validates all five schema layers in an unpublished temporary database before atomic publication on a clean target. Existing-system migration guards apply each extension only to its exact predecessor and do not rewrite historical rows. The selective item-42 outbox snapshot copies only the ten tables required by result/lifecycle projection; that narrow reader inventory is not the complete application schema.
 
 ## Historical deterministic enrichment and canonical projection
 
@@ -278,11 +287,11 @@ The normalized production handoff made reparsing those same vendor messages a du
 
 An on-server copy rehearsal scanned `949845` stored events, projected `2781` exact canonical rows, preserved `24207` historical version-3 rows, applied local suppression to `1984` rows, and projected zero rows on the second run. The live database was unchanged.
 
-## Deterministic incident candidate
+## Active deterministic incident engine
 
-The version-1 candidate consumes only classification-version-4 projections. Correlation identity is derived from canonical family/protocol/entity identity; each recurrence receives a deterministic instance ID bound to its first immutable source observation. Evidence and transitions are append-only, one active instance per correlation key is enforced by SQLite, and mutable incident rows materialize repeat totals, state changes, strongest severity, and 60-minute/180-minute/24-hour context.
+The active engine retains the version-1 durable incident schema and consumes only classification-version-4 projections. Its current policy implementation is engine version 3. Correlation identity is derived from canonical family/protocol/entity identity; each recurrence receives a deterministic instance ID bound to its first immutable source observation. Evidence and transitions are append-only, one active instance per correlation key is enforced by SQLite, and mutable incident rows materialize repeat totals, state changes, strongest severity, and 60-minute/180-minute/24-hour context.
 
-Lifecycle is deterministic and event-time based: explicit down-class transitions open immediately, degradation requires repeated adverse evidence within 15 minutes, and recovery enters `RECOVERING`. The item-36 repository candidate holds confirmed BGP/OSPF/OSPFv3 recovery for 24 continuous healthy hours and retains five minutes for other protocols. Relapse before resolution reopens the same incident; adverse evidence after resolution creates a new instance. Cursor advancement and incident changes share one transaction, while unique evidence event IDs preserve idempotency even after cursor reset.
+Lifecycle is deterministic and event-time based: explicit down-class transitions open immediately, degradation requires repeated adverse evidence within 15 minutes, and recovery enters `RECOVERING`. Under active engine version 3, confirmed BGP/OSPF/OSPFv3 recovery remains monitored for 24 continuous healthy hours, and a one-observation protocol candidate enters that same monitored recovery state at its 15-minute candidate deadline instead of resolving. Other protocols retain the five-minute recovery rule. Relapse before resolution reopens the same incident; adverse evidence after resolution creates a new instance. Cursor advancement and incident changes share one transaction, while unique evidence event IDs preserve idempotency even after cursor reset.
 
 The engine neither parses messages nor calls Ollama. Its artifact/schema first passed the unscheduled item-25 installation; item 26 later added only the separate managed runner/service/timer reference.
 
@@ -294,7 +303,7 @@ The working database retained zero version-4 rows and unchanged scheduling throu
 
 Ollama is installed, active, enabled, and loopback-only on TCP/11434. Its binary is not owned by a Debian package. Six complete model manifests and all referenced blobs were verified; exact manifests and digests are recorded in item 12L.
 
-Rediscovery found no application-specific network-observability caller of Ollama.
+Rediscovery found no historical application-specific network-observability caller of Ollama. The current repository-managed Gemma caller and hidden-triage coordinator are active reconstructed additions, not rediscovered behavior.
 
 The collector provides a validated write-only AI-result return boundary, but rediscovery found no historical GX10 producer executable, wrapper, service, or retained transfer command. Items 28–30 later added a new, explicitly designed local reasoning/result-outbox/write-only sender boundary. It is active only after separate deterministic, protected-copy, configured-inactive, first-live, replay/conflict, exact-stage, and natural acceptance/ingestion gates; it is not represented as rediscovered behavior.
 
@@ -320,11 +329,11 @@ Do not silently change these findings during reconstruction:
 
 - automatic application behavior discovered during rediscovery was `timer -> fetch -> ingest`; item 26 later added a separate managed `projection -> incident` schedule without changing that original chain
 - the captured enrichment had no historical scheduler; its canonical projector replacement remained unscheduled until the separately journaled item-26 activation
-- Ollama/model infrastructure is present without an identified observability-pipeline caller
-- the collector result-return boundary is present without an identified GX10 producer
+- rediscovery found Ollama/model infrastructure without a historical observability-pipeline caller; the current managed Gemma caller and hidden-triage coordinator are active reconstructed additions
+- rediscovery found the collector result-return boundary without a historical GX10 producer; the current result/lifecycle producers and recurring sender are active reconstructed additions
 - missing historical bootstrap/install provenance is reconstructed from effective contracts, not invented as recovered history
 
-## Reconstruction order
+## Historical base reconstruction order
 
 Completed in bounded, journaled subsections:
 
@@ -336,6 +345,8 @@ Completed in bounded, journaled subsections:
 6. `DONE` — add package, structural, public-safety, and runtime verifiers
 7. `DONE` — write the clean-machine operator runbook
 8. `WAIVED BY OPERATOR` — clean-machine GX10 validation remains empirically unverified; run it if a disposable target later becomes available
+
+These eight steps describe the historical base reconstruction milestone, not the complete current GX10 target. Full reconstruction must continue through the extension phases in `CLEAN_MACHINE_RUNBOOK.md` and the collector-first cross-host sequence in `docs/TWO_SERVER_REBUILD.md`, including normalizer handoff, incident/correlation, managed reasoning and hidden triage, selective snapshot, result/lifecycle outbox, and the configured-inactive sender gate before controlled activation.
 
 Every completed subsection is durably journaled. The component milestone is closed without laundering unavailable disposable-host validation into a pass.
 

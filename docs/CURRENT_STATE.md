@@ -1,6 +1,6 @@
 # Current State
 
-Last verified project checkpoint: 2026-08-27.
+Last verified project checkpoint: 2026-08-28.
 
 This file is the authority for current execution order. Exactly one item is marked `NEXT` while project execution remains; a completed state has none.
 
@@ -14,7 +14,14 @@ rewriting historical claims to sound current.
 
 ## Project acceptance criterion and disposition
 
-The rebuild/documentation project is complete only when two clean servers, this public repository, and operator-supplied environment values are sufficient for another engineer or AI to reconstruct the current functional system without undocumented implementation memory.
+The rebuild/documentation project is complete only when two application-clean
+compatible servers, this public repository, operator-supplied private
+deployment values, and the GX10 prerequisite artifact bundle defined in
+`docs/TWO_SERVER_REBUILD.md` are sufficient for another engineer or AI to
+reconstruct the current functional system without undocumented implementation
+memory. A bare GX10 plus addresses and credentials is not sufficient; the
+captured platform baseline, exact Ollama executable, offline model store, and
+pinned-package access remain explicit external inputs.
 
 Environment-specific credentials, addresses, usernames, SSH keys, certificate private keys, and similar identity-bearing values are intentionally supplied by the operator during rebuild rather than stored publicly.
 
@@ -35,7 +42,14 @@ Post-closure AI-results Grafana dashboard feature: `DONE` under item 32.
 
 Post-closure local-model comparison: `DONE`. Two identical 13-case synthetic passes retained exact `gemma4:latest`; `nemotron-3.5-lightning:30b` was faster after warm-up but had material strict-contract and noncritical-severity regressions. No production model or runtime state changed.
 
-Post-closure enhanced AI dashboard copy: `DONE` under item 33. The distinct sixth live resource and all fifteen original/enhanced queries pass while the original `AI Incident Analysis` capture remains byte-exact. Device is projected directly for current results, private lookup restores 145 legacy identities, and one unmatched historical collector row is explicitly labeled unavailable rather than guessed.
+Post-closure enhanced AI dashboard copy: `DONE` under item 33. At item-33
+closure, the distinct sixth live resource and all fifteen then-current
+original/enhanced queries passed while the original `AI Incident Analysis`
+capture remained byte-exact. Later milestones changed the enhanced query
+inventory; the current six-resource/thirteen-query contract is stated below.
+Device is projected directly for current results, private lookup restores 145
+legacy identities, and one unmatched historical collector row is explicitly
+labeled unavailable rather than guessed.
 
 Post-closure deterministic NOC workflow: `DONE` under item 34. Authoritative GX10 incident snapshots are exported independently of inference, routed exclusively into a separate collector lifecycle table, and presented in the enhanced dashboard as searchable Active Events, Interface Flaps, and Resolved Events windows. Initial production closure verified 804 current incidents, 26 active non-flap events, 10 active flaps, 768 resolved incidents, complete Device identity, clean lifecycle timestamps, zero lifecycle rows in the AI table, six exact Grafana resources, and all thirteen original/enhanced queries.
 
@@ -94,16 +108,24 @@ predecessor copy retained. Existing historical rows were not rewritten.
 
 Post-closure hidden AI detection side channel: `DONE`. GX10 now batches deterministic signatures for uncovered severity 0–4 events plus novel/repeated severity-5 notices, asks the pinned local `gemma4:latest` model for one strict incident/ignore/insufficient decision per signature, and creates ordinary `event_signature` incidents only from validated positive decisions. Model failure retains a pending batch and never creates an incident. Positive incidents use the existing lifecycle, outbox, collector table, dashboard windows, search, and drilldown; no dashboard resource or query changed. Automatic learned coverage is limited to severity 0–3 and requires three consistent confidence-70+ decisions spanning at least 30 minutes with no contradictory decision. Production activated under an online protected SQLite backup after 215 tests, an exact staged-server pass, one safe length-limited shadow failure, and one 24-decision shadow success. Initial active evidence contains 33 incident and 15 ignore decisions, 35 ordinary lifecycle incidents, zero active learned rules, clean SQLite integrity, healthy GX10 schedules, and collector acceptance of the 45-record lifecycle batch.
 
+The two Gemma failure contracts are intentionally different. Ordinary incident assessment records unavailable or invalid inference as an immutable terminal no-result and does not automatically retry that versioned reservation. Only hidden uncovered-event triage retains its immutable batch pending for bounded retry; neither path blocks deterministic capture, ingest, correlation, lifecycle export, or existing result delivery.
+
 Post-closure operator documentation baseline: `DONE`. The operator confirmed the current production behavior meets the desired functional baseline. The root `README.md` is the canonical plain-language application overview with operator workflow, dual-server diagram, AI authority boundary, current validation status, and navigation map. `START_HERE`, architecture, roadmap, handoff, component status, and acceptance documentation are reconciled to the active system. `docs/DOCUMENTATION_GUIDE.md` defines document ownership and update rules for future changes.
 
 Post-closure current-system rebuild documentation readiness: `DONE`. The
-collector-first cross-host ordering, private-input contract, staged extension
-activation, disabled sender boundary, NOC reconstruction, and reboot acceptance
-are centralized in `docs/TWO_SERVER_REBUILD.md`; component runbooks own their
-host-local commands. Documentation validation now rejects orphaned maintained
-pages and key stale/current contract regressions. This improves repository
-rebuild readiness without claiming that the still-waived disposable clean-host
-execution passed.
+collector-first cross-host ordering, complete private-input inventory, explicit
+external GX10 prerequisite bundle, staged extension activation, disabled sender
+boundary, NOC reconstruction, and reboot acceptance are centralized in
+`docs/TWO_SERVER_REBUILD.md`; component runbooks own their host-local commands.
+The repository now includes executable GX10 first-live evidence capture and
+collector ledger/ready/ClickHouse provenance verification, distinct raw/handoff
+transport-verifier modes, and a guarded two-dashboard NOC capture builder plus
+the exact organization/account/datasource API sequence. Documentation
+validation rejects orphaned maintained pages and key stale/current contract
+regressions. No current runbook depends on missing first-live tooling. This
+improves repository rebuild readiness without claiming that the still-waived
+disposable clean-host execution or manual NOC API sequence passed on clean
+systems.
 
 The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
@@ -124,7 +146,7 @@ The working observability path currently provides:
 - local Ollama runtime on GX10
 - a hidden, fail-closed local-model side channel for important deterministic-coverage gaps, with ordinary incident projection and gated severity-0–3 learned coverage
 
-Rediscovery did not identify a historical GX10 application producer or application-specific Ollama caller. Items 28–30 now add a separately managed strict local caller and result-return path without altering the deterministic ingest/correlation authority. The local outbox and recurring sender are active after first-live, exact-replay, divergent-conflict, exact staged-verifier, and natural delivery/acceptance/ClickHouse gates. The collector's immutable acceptance ledger remains the replay authority.
+Rediscovery did not identify a historical GX10 application producer or application-specific Ollama caller. Items 28–30 later added a separately managed strict local caller and result-return path without altering the deterministic ingest/correlation authority. The local outbox and recurring sender are active after first-live, exact-replay, divergent-conflict, exact staged-verifier, and natural delivery/acceptance/ClickHouse gates. The collector's immutable acceptance ledger remains the replay authority.
 
 The deterministic incident correlator now has a validated schema/engine contract, passing private working-database-copy and independent deterministic replay proof, a completed working-system migration under protected backup, and a separately managed production `projection -> incident` timer. Initial backfill and scheduled zero-lag cadences passed while the original fetch/ingest timer continued advancing. Production local-LLM orchestration and the no-network result outbox are separately managed and active after their protected gates.
 
@@ -326,10 +348,10 @@ Durably journaled rediscovery through item 12N and the final closure audit has e
 - complete two-rule active suppression corpus
 - rediscovery-time automatic runtime chain `timer -> fetch -> ingest`
 - no rediscovered historical automatic invocation mechanism for deterministic enrichment
-- no discovered GX10 application producer for the collector result-return boundary
-- no discovered application-specific observability-pipeline caller of Ollama
+- no historical GX10 application producer for the collector result-return boundary was found during rediscovery; the reconstructed producers/sender are active now
+- no historical application-specific observability-pipeline caller of Ollama was found during rediscovery; the separately managed Gemma caller/triage owner is active now
 - Ollama active/enabled service state, executable provenance, loopback listener, model storage, and six complete local model manifests
-- complete effective SQLite schema: 5 application tables, 13 explicit indexes, 3 foreign keys, and zero unexpected schema objects
+- complete rediscovered base SQLite schema: 5 application tables, 13 explicit indexes, 3 foreign keys, and zero unexpected schema objects; the current rebuild adds the separately documented incident, reasoning, inference, and triage schema groups
 - no surviving bounded SQLite/bootstrap initializer artifact
 - complete runtime-account, filesystem ownership/mode, SSH-material metadata, and systemd writable-path contracts
 - Python `3.12.3`, SQLite runtime `3.45.1`, zero third-party Python imports, and exact Python package provenance

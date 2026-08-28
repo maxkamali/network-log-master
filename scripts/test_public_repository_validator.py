@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import importlib.util
+import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -84,6 +86,185 @@ class PublicRepositoryValidatorTests(unittest.TestCase):
             '\n'.join((f'{name}=${{OPERATOR_VALUE}}', f'{name}=read_secret_file()')),
             'synthetic',
         )
+
+    def test_short_quoted_credential_literal_is_refused(self):
+        name = 'pass' + 'word'
+        synthetic = name + '=' + '"' + 'tiny' + '"'
+        with self.assertRaisesRegex(ValueError, 'literal credential assignment'):
+            VALIDATOR.validate_text(Path('synthetic'), synthetic, 'synthetic')
+
+    def test_history_short_credential_literal_is_refused(self):
+        name = 'pass' + 'word'
+        synthetic = name + '=x'
+        finding = ('a' * 40, 'docs/example.md', synthetic)
+        with mock.patch.object(
+            VALIDATOR,
+            'history_grep',
+            side_effect=([], [finding]),
+        ):
+            with self.assertRaisesRegex(ValueError, 'history sensitive-content'):
+                VALIDATOR.validate_history_content()
+
+    def test_underscore_and_dotted_credential_literals_are_refused(self):
+        name = 'api_' + 'key'
+        for value in ('private_value', 'private.value'):
+            with self.subTest(value=value):
+                synthetic = name + '=' + '"' + value + '"'
+                with self.assertRaisesRegex(
+                    ValueError,
+                    'literal credential assignment',
+                ):
+                    VALIDATOR.validate_text(Path('synthetic'), synthetic, 'synthetic')
+
+    def test_placeholder_words_inside_a_literal_do_not_bypass_scanning(self):
+        name = 'pass' + 'word'
+        for value in ('example_actual_value', 'redacted_but_still_literal'):
+            with self.subTest(value=value):
+                synthetic = name + '=' + '"' + value + '"'
+                with self.assertRaisesRegex(
+                    ValueError,
+                    'literal credential assignment',
+                ):
+                    VALIDATOR.validate_text(Path('synthetic'), synthetic, 'synthetic')
+
+    def test_safe_credential_indirections_remain_allowed(self):
+        name = 'pass' + 'word'
+        VALIDATOR.validate_text(
+            Path('synthetic'),
+            '\n'.join((
+                name + '=password',
+                name + '=path.read_text(',
+                name + '=load_password(args.password_file)',
+                name + '=args.password',
+                name + '=os.environ["OPERATOR_PASSWORD"]',
+                name + '=__GRAFANA_READER_PASSWORD__',
+                name + '=SECRET[reader-password]',
+            )),
+            'synthetic',
+        )
+
+    def test_documentation_and_loopback_ipv6_are_allowed(self):
+        VALIDATOR.validate_text(
+            Path('synthetic'),
+            '2001:db8::5 ::1',
+            'synthetic',
+        )
+
+    def test_non_public_ipv6_ranges_are_refused(self):
+        values = (
+            ':'.join(('fd00', '', '1')),
+            ':'.join(('fe80', '', '1')),
+            ':'.join(('2606', '4700', '4700', '', '1111')),
+        )
+        for value in values:
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, 'non-public IPv6'):
+                    VALIDATOR.validate_text(Path('synthetic'), value, 'synthetic')
+
+    def test_non_address_colon_syntax_is_ignored(self):
+        VALIDATOR.validate_text(
+            Path('synthetic'),
+            '2026-08-28T10:20:30Z dict[str, int] https://example.com',
+            'synthetic',
+        )
+
+    def test_dashboard_capture_refuses_server_owned_metadata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / 'components/collector/grafana/dashboards/test.json'
+            path.parent.mkdir(parents=True)
+            document = {
+                'apiVersion': 'dashboard.grafana.app/v2',
+                'kind': 'Dashboard',
+                'metadata': {
+                    'name': 'test',
+                    'namespace': 'default',
+                    'uid': 'server-object-identity',
+                },
+                'spec': {},
+                'status': {},
+            }
+            with mock.patch.object(VALIDATOR, 'ROOT', root):
+                with self.assertRaisesRegex(ValueError, 'server-owned metadata'):
+                    VALIDATOR.validate_text(
+                        path,
+                        json.dumps(document),
+                        'dashboard.json',
+                    )
+
+    def test_local_denylist_is_private_and_does_not_echo_match(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            root = base / 'repository'
+            root.mkdir()
+            denylist = base / 'publication-denylist.txt'
+            private_term = 'environment' + ' identity'
+            denylist.write_text(private_term + '\n', encoding='utf-8')
+            os.chmod(denylist, 0o600)
+            with mock.patch.object(VALIDATOR, 'ROOT', root), \
+                    mock.patch.dict(
+                        os.environ,
+                        {VALIDATOR.LOCAL_DENYLIST_ENV: str(denylist)},
+                        clear=False,
+                    ):
+                terms = VALIDATOR.load_local_denylist()
+                with self.assertRaises(ValueError) as context:
+                    VALIDATOR.validate_local_denylist_text(
+                        'contains ' + private_term,
+                        'synthetic',
+                        terms,
+                    )
+            self.assertNotIn(private_term, str(context.exception))
+
+    def test_local_denylist_refuses_repository_or_broad_mode(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / 'repository'
+            root.mkdir()
+            inside = root / 'denylist.txt'
+            inside.write_text('private-term\n', encoding='utf-8')
+            os.chmod(inside, 0o600)
+            with mock.patch.object(VALIDATOR, 'ROOT', root), \
+                    mock.patch.dict(
+                        os.environ,
+                        {VALIDATOR.LOCAL_DENYLIST_ENV: str(inside)},
+                        clear=False,
+                    ):
+                with self.assertRaisesRegex(ValueError, 'outside the repository'):
+                    VALIDATOR.load_local_denylist()
+
+            outside = Path(directory) / 'denylist.txt'
+            outside.write_text('private-term\n', encoding='utf-8')
+            os.chmod(outside, 0o644)
+            with mock.patch.object(VALIDATOR, 'ROOT', root), \
+                    mock.patch.dict(
+                        os.environ,
+                        {VALIDATOR.LOCAL_DENYLIST_ENV: str(outside)},
+                        clear=False,
+                    ):
+                with self.assertRaisesRegex(ValueError, 'group/world'):
+                    VALIDATOR.load_local_denylist()
+
+    def test_history_denylist_uses_stdin_and_does_not_echo_match(self):
+        private_term = 'historical' + '-environment-identity'
+        revision = 'a' * 40
+        grep_result = mock.Mock(
+            returncode=0,
+            stdout=(revision + ':docs/example.md\n').encode('utf-8'),
+            stderr=b'',
+            args=['git', 'grep'],
+        )
+        rev_list = mock.Mock(stdout=(revision + '\n').encode('ascii'))
+        with mock.patch.object(VALIDATOR, 'git', return_value=rev_list), \
+                mock.patch.object(
+                    VALIDATOR.subprocess,
+                    'run',
+                    return_value=grep_result,
+                ) as run:
+            with self.assertRaises(ValueError) as context:
+                VALIDATOR.validate_history_local_denylist((private_term,))
+        self.assertNotIn(private_term, str(context.exception))
+        self.assertIn(private_term.encode('utf-8'), run.call_args.kwargs['input'])
+        self.assertNotIn(private_term, ' '.join(run.call_args.args[0]))
 
     def test_embedded_url_credential_is_refused(self):
         synthetic = 'https://' + 'operator:private-value@' + 'example.com/path'

@@ -1,6 +1,48 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+READER_BIND_SOURCE="raw"
+
+if [ "${1:-}" = "--help" ]; then
+    echo "usage: verify-transport.sh [--reader-bind-source raw|handoff]"
+    exit 0
+fi
+
+if [ "${1:-}" = "--reader-bind-source" ]; then
+    [ "$#" -eq 2 ] \
+        || {
+            echo "FAIL: --reader-bind-source requires raw or handoff" >&2
+            exit 1
+        }
+    READER_BIND_SOURCE="$2"
+    shift 2
+fi
+
+[ "$#" -eq 0 ] \
+    || {
+        echo "FAIL: unexpected transport-verifier argument" >&2
+        exit 1
+    }
+
+case "$READER_BIND_SOURCE" in
+    raw)
+        READER_SOURCE_PATH="/var/spool/vector-ai"
+        READER_OTHER_SOURCE_PATH="/var/spool/network-log-normalizer-handoff"
+        READER_SOURCE_OWNER="vector"
+        READER_SOURCE_GROUP="vector"
+        ;;
+    handoff)
+        READER_SOURCE_PATH="/var/spool/network-log-normalizer-handoff"
+        READER_OTHER_SOURCE_PATH="/var/spool/vector-ai"
+        READER_SOURCE_OWNER="network-log-normalizer"
+        READER_SOURCE_GROUP="network-log-normalizer"
+        ;;
+    *)
+        echo "FAIL: unsupported reader bind source: $READER_BIND_SOURCE" >&2
+        exit 1
+        ;;
+esac
+
 fail()
 {
     echo "FAIL: $*" >&2
@@ -16,6 +58,26 @@ require_equal()
     if [ "$actual" != "$expected" ]; then
         fail "$label expected=$expected actual=$actual"
     fi
+}
+
+exact_line_count()
+{
+    local expected="$1"
+    local path="$2"
+
+    awk -v expected="$expected" \
+        '$0 == expected { count += 1 } END { print count + 0 }' \
+        "$path"
+}
+
+fstab_target_count()
+{
+    local target="$1"
+    local path="$2"
+
+    awk -v target="$target" \
+        '$0 !~ /^[[:space:]]*#/ && NF > 1 && $2 == target { count += 1 } END { print count + 0 }' \
+        "$path"
 }
 
 require_account()
@@ -101,6 +163,25 @@ require_mount_options()
                 ;;
         esac
     done
+}
+
+require_mount_source()
+{
+    local target="$1"
+    local expected="$2"
+    local actual
+
+    actual="$(
+        findmnt \
+            -n \
+            -o FSROOT \
+            --mountpoint "$target"
+    )"
+
+    require_equal \
+        "$target bind source" \
+        "$expected" \
+        "$actual"
 }
 
 require_sshd_value()
@@ -194,6 +275,14 @@ require_metadata \
     vector \
     vector
 
+if [ "$READER_BIND_SOURCE" = "handoff" ]; then
+    require_metadata \
+        "$READER_SOURCE_PATH" \
+        750 \
+        "$READER_SOURCE_OWNER" \
+        "$READER_SOURCE_GROUP"
+fi
+
 require_metadata \
     /var/spool/ai-results \
     750 \
@@ -227,8 +316,8 @@ require_metadata \
 require_metadata \
     /srv/ai-spool-reader/spool \
     750 \
-    vector \
-    vector
+    "$READER_SOURCE_OWNER" \
+    "$READER_SOURCE_GROUP"
 
 require_metadata \
     /srv/ai-results-writer \
@@ -260,6 +349,13 @@ require_equal \
     "vector spool ACL" \
     "$EXPECTED_VECTOR_ACL" \
     "$(getfacl --absolute-names --omit-header /var/spool/vector-ai)"
+
+if [ "$READER_BIND_SOURCE" = "handoff" ]; then
+    require_equal \
+        "normalizer handoff spool ACL" \
+        "$EXPECTED_VECTOR_ACL" \
+        "$(getfacl --absolute-names --omit-header "$READER_SOURCE_PATH")"
+fi
 
 EXPECTED_RESULTS_ROOT_ACL="$(cat <<'EOF'
 user::rwx
@@ -321,6 +417,10 @@ require_mount_options \
     nodev \
     noexec
 
+require_mount_source \
+    /srv/ai-spool-reader/spool \
+    "$READER_SOURCE_PATH"
+
 require_mount_options \
     /srv/ai-results-writer/incoming \
     rw \
@@ -328,10 +428,17 @@ require_mount_options \
     nodev \
     noexec
 
-grep -Fqx \
-    '/var/spool/vector-ai /srv/ai-spool-reader/spool none bind,ro,nosuid,nodev,noexec 0 0' \
-    /etc/fstab \
-    || fail "reader bind mount missing from /etc/fstab"
+EXPECTED_READER_FSTAB_LINE="$READER_SOURCE_PATH /srv/ai-spool-reader/spool none bind,ro,nosuid,nodev,noexec 0 0"
+OTHER_READER_FSTAB_LINE="$READER_OTHER_SOURCE_PATH /srv/ai-spool-reader/spool none bind,ro,nosuid,nodev,noexec 0 0"
+
+[ "$(exact_line_count "$EXPECTED_READER_FSTAB_LINE" /etc/fstab)" -eq 1 ] \
+    || fail "expected exactly one selected reader bind in /etc/fstab"
+
+[ "$(fstab_target_count /srv/ai-spool-reader/spool /etc/fstab)" -eq 1 ] \
+    || fail "reader bind target is absent or duplicated in /etc/fstab"
+
+[ "$(exact_line_count "$OTHER_READER_FSTAB_LINE" /etc/fstab)" -eq 0 ] \
+    || fail "unselected reader bind remains in /etc/fstab"
 
 grep -Fqx \
     '/var/spool/ai-results/incoming /srv/ai-results-writer/incoming none bind,rw,nosuid,nodev,noexec 0 0' \
@@ -426,4 +533,5 @@ require_sshd_value \
     forcecommand \
     'internal-sftp -d /incoming -u 0437 -P read,opendir,readdir,remove,mkdir,rmdir,rename,readlink,symlink,posix-rename,hardlink,copy-data,setstat,fsetstat,lsetstat'
 
+echo "reader_bind_source=$READER_BIND_SOURCE"
 echo "TRANSPORT_VERIFY=PASS"

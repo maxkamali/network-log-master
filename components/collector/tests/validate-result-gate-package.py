@@ -9,32 +9,40 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[3]
 GATE = ROOT / "components/collector/sbin/ai-results-gate"
+FIRST_LIVE = ROOT / "components/collector/sbin/verify-first-live-provenance.py"
 TESTS = Path(__file__).resolve().parent
 
 
 def main() -> int:
     try:
-        source = GATE.read_text(encoding="utf-8", errors="strict")
-        compile(source, str(GATE), "exec")
+        for executable, label in (
+            (GATE, "AI result gate"),
+            (FIRST_LIVE, "first-live provenance verifier"),
+        ):
+            source = executable.read_text(encoding="utf-8", errors="strict")
+            compile(source, str(executable), "exec")
+            if not os.access(executable, os.X_OK):
+                raise ValueError(f"{label} executable mode missing")
 
-        if not os.access(GATE, os.X_OK):
-            raise ValueError("AI result gate executable mode missing")
-
-        subprocess.run(
-            [
-                sys.executable,
-                "-B",
-                "-m",
-                "unittest",
-                "discover",
-                "-s",
-                str(TESTS),
-                "-p",
-                "test_ai_results_gate.py",
-            ],
-            cwd=ROOT,
-            check=True,
-        )
+        for pattern in (
+            "test_ai_results_gate.py",
+            "test_first_live_provenance.py",
+        ):
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    "-m",
+                    "unittest",
+                    "discover",
+                    "-s",
+                    str(TESTS),
+                    "-p",
+                    pattern,
+                ],
+                cwd=ROOT,
+                check=True,
+            )
         print("AI_RESULTS_GATE_PACKAGE_VALIDATION=PASS")
         return 0
     except (OSError, subprocess.CalledProcessError, ValueError) as exc:

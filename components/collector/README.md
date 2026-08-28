@@ -24,6 +24,16 @@ The collector owns:
 - long-lived data retention
 - unknown-event inventory and replay material
 
+For the current two-host extension, the repository also retains the root-only
+`sbin/verify-first-live-provenance.py` qualification helper. It does not alter
+the ledger, ready files, ClickHouse, Grafana, or service state. During the one
+manual pre-activation sender cycle it binds private GX evidence to one immutable
+acceptance row, exact accepted bytes, the exclusive ClickHouse route, and the
+route's exact record cardinality/projections. The complete non-root
+administrator transfer and invocation sequence is in
+[`docs/RESULT_TRANSPORT.md`](../../docs/RESULT_TRANSPORT.md); it is not part of
+the base collector installer.
+
 The enhanced Grafana resource is the deterministic NOC queue over lifecycle
 state and raw-log evidence. Active Events and Resolved Events exclude every
 interface entity. Interface Flaps independently shows a device/interface only
@@ -261,6 +271,16 @@ The required final marker is:
 
 The verifier checks package state, services, retention, transport, ClickHouse schema/access/listeners, Vector configuration/listeners, Grafana TLS/health/datasources, and Certbot behavior.
 
+The default invocation is fail-closed for the base raw reader bind. After the
+separately verified normalizer handoff, use the explicit current view:
+
+    sudo env CLICKHOUSE_DEFAULT_PASSWORD_FILE="$INPUT_DIR/clickhouse-default-password" components/collector/install/verify-runtime.sh --transport-view handoff
+
+That mode changes only the expected read-only spool source, source
+owner/group/ACL, mounted-root metadata, and exact `/etc/fstab` line. Every other
+collector check is identical. The verifier prints `reader_bind_source=raw` or
+`reader_bind_source=handoff`; an unknown mode fails before runtime inspection.
+
 If SSH was deliberately reloaded after the first verifier run, run the verifier again after confirming the new management/transport access.
 
 ### Failure and retry policy
@@ -318,8 +338,8 @@ Preserved behavior includes:
 
 - UDP and TCP syslog ingestion
 - current transforms
-- ClickHouse syslog and AI-update sinks
-- AI-result ready-file ingestion
+- ClickHouse syslog, AI-update, and incident-lifecycle sinks
+- AI-result and incident-lifecycle ready-file ingestion with exclusive routing
 - durable compressed GX10 spool output
 - current disabled ClickHouse sink health-check behavior
 
@@ -332,6 +352,7 @@ The independent runtime verifier passed Vector configuration/listener parity.
 - database creation
 - raw syslog table
 - AI-update table
+- deterministic incident-lifecycle table and additive recurrence column
 - Grafana semantic view
 - rendered service-account/access SQL template
 
@@ -357,7 +378,7 @@ The following scripts are published and were tested non-destructively against Gr
 - `grafana/scripts/verify-dashboards.py`
 - `grafana/scripts/verify-ai-dashboard-queries.py`
 
-Proven behavior includes exact captured-`spec` round trip, POST create, PUT replace, `dryRun=All` validation without persistence, and successful execution of the original seven plus enhanced eight AI dashboard queries through Grafana's configured ClickHouse datasource.
+Proven behavior includes exact captured-`spec` round trip, POST create, PUT replace, `dryRun=All` validation without persistence, and successful execution of the current original seven plus enhanced six AI dashboard queries—thirteen total—through Grafana's configured ClickHouse datasource. The enhanced dashboard had eight queries at its item-33 historical checkpoint; later NOC corrections intentionally reduced the current enhanced resource to six.
 
 Grafana 13.1.1 also supports secure administrator reset through `/usr/share/grafana/bin/grafana cli admin reset-admin-password --password-from-stdin`.
 
@@ -396,7 +417,7 @@ The live transport verifier passed with `TRANSPORT_VERIFY=PASS`.
 
 `sbin/` and `systemd/` contain:
 
-- AI-result validation gate
+- AI-result and incident-lifecycle validation gate with an immutable shared acceptance ledger
 - result-gate service/timer
 - result-gate filesystem access override
 - Vector descriptor-limit override for the preserved immutable ready-result
@@ -435,7 +456,8 @@ extension activation from the base installer alone.
 
 Collector installer structural, credential-exposure, dependency, failure-cleanup, and public-safety validation is complete.
 
-The operator-facing clean-machine rebuild runbook is complete and validated.
+The operator-facing clean-machine rebuild runbook is repository/static-
+validated. It has not passed disposable-host end-to-end execution.
 
 The public collector rebuild-package and documentation milestone is closed after final current-state and public-history sanitation.
 

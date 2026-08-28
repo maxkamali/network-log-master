@@ -6,6 +6,7 @@ import argparse
 import copy
 import json
 from pathlib import Path
+import re
 import sys
 import time
 from typing import Any
@@ -15,6 +16,9 @@ from dashboard_api import DashboardApi, DashboardApiError, load_password
 
 
 DATASOURCE_TYPE = "grafana-clickhouse-datasource"
+ROW_FIELD_MARKER_RE = re.compile(
+    r"\$\{__data\.fields(?:\.([A-Za-z0-9_]+)|\[([0-9]+)\])\}"
+)
 
 
 def query_payload(
@@ -88,7 +92,7 @@ def response_counts(response: object, ref_id: str) -> tuple[int, int]:
 def response_field_values(
     response: object,
     ref_id: str,
-    field_name: str,
+    field_name: str | int,
 ) -> list[str]:
     if not isinstance(response, dict):
         raise DashboardApiError("datasource response is not an object")
@@ -100,7 +104,11 @@ def response_field_values(
         fields = ((frame.get("schema") or {}).get("fields") or [])
         columns = ((frame.get("data") or {}).get("values") or [])
         for index, field in enumerate(fields):
-            if field.get("name") != field_name:
+            if isinstance(field_name, int):
+                selected = index == field_name
+            else:
+                selected = field.get("name") == field_name
+            if not selected:
                 continue
             if index >= len(columns) or not isinstance(columns[index], list):
                 raise DashboardApiError("datasource response field values are invalid")
@@ -110,6 +118,25 @@ def response_field_values(
                 if value is not None and str(value)
             )
     return values
+
+
+def row_field_markers(query: dict[str, Any]) -> tuple[tuple[str, str | int], ...]:
+    raw_sql = query.get("rawSql")
+    if not isinstance(raw_sql, str):
+        raise DashboardApiError("Explore data link has no SQL")
+    result = []
+    for match in ROW_FIELD_MARKER_RE.finditer(raw_sql):
+        selector: str | int
+        if match.group(1) is not None:
+            selector = match.group(1)
+        else:
+            selector = int(match.group(2))
+        item = (match.group(0), selector)
+        if item not in result:
+            result.append(item)
+    if not result:
+        raise DashboardApiError("Explore data link has no row-field marker")
+    return tuple(result)
 
 
 def drilldown_queries(panel: dict[str, Any]) -> list[dict[str, Any]]:
@@ -160,7 +187,7 @@ def drilldown_payload(
                 "Explore data link is missing its row-field marker"
             )
         raw_sql = raw_sql.replace(marker, value.replace("'", "''"))
-    if "${__data.fields." in raw_sql:
+    if "${__data.fields." in raw_sql or "${__data.fields[" in raw_sql:
         raise DashboardApiError(
             "Explore data link has an unresolved row-field marker"
         )
@@ -248,24 +275,17 @@ def main() -> int:
             if not links:
                 continue
             linked_panels += 1
-            incident_ids = response_field_values(response, ref_id, "incident_id")
-            device_hex = response_field_values(response, ref_id, "device_hex")
-            interface_hex = response_field_values(
-                response, ref_id, "interface_hex"
-            )
-            if incident_ids:
-                substitutions = {
-                    "${__data.fields.incident_id}": incident_ids[0],
-                }
-            elif device_hex and interface_hex:
-                substitutions = {
-                    "${__data.fields.device_hex}": device_hex[0],
-                    "${__data.fields.interface_hex}": interface_hex[0],
-                }
-            else:
-                print(f"{dashboard.name}/{panel_name} drilldown=SKIP_EMPTY")
-                continue
             for link_query in links:
+                substitutions = {}
+                for marker, selector in row_field_markers(link_query):
+                    values = response_field_values(response, ref_id, selector)
+                    if not values:
+                        substitutions = {}
+                        break
+                    substitutions[marker] = values[0]
+                if not substitutions:
+                    print(f"{dashboard.name}/{panel_name} drilldown=SKIP_EMPTY")
+                    continue
                 link_ref_id, link_payload = drilldown_payload(
                     link_query, substitutions, start_ms, end_ms
                 )

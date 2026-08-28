@@ -86,7 +86,175 @@ A clean rebuild or a guarded restaging step must create or verify:
 
 The handoff root needs a default ACL so future partitions and files remain readable through the restricted SFTP account. No write permission is granted to that account.
 
-## Production preflight
+## Clean-host executable activation
+
+This is the current clean-rebuild procedure. It uses only the public clean-host
+unit names and installed verifiers. Run collector commands on the collector and
+GX10 commands on GX10; do not combine the two host shells.
+
+On the collector, re-establish the exact retained base-input password path after
+every reconnect. This is the default example from the collector runbook; use the
+operator-selected absolute path if it differs:
+
+```text
+COLLECTOR_CLICKHOUSE_PASSWORD_FILE=/root/collector-rebuild-inputs/clickhouse-default-password
+export COLLECTOR_CLICKHOUSE_PASSWORD_FILE
+test -s "$COLLECTOR_CLICKHOUSE_PASSWORD_FILE"
+```
+
+### 1. Revalidate staged state
+
+On the collector, after `install-handoff.py` succeeds:
+
+```text
+sudo /usr/local/sbin/verify-network-log-normalizer-shadow --mode active
+sudo /usr/local/sbin/verify-network-log-normalizer-handoff --mode staged
+```
+
+Require `NORMALIZER_SHADOW_RUNTIME_VERIFY=PASS`,
+`normalizer_handoff_mode=staged`, and
+`NORMALIZER_HANDOFF_RUNTIME_VERIFY=PASS`. Confirm the protected plan floor is at
+least ten minutes in the future and beyond the highest path GX10 has consumed.
+
+### 2. Pause GX10 at the replay boundary
+
+On GX10:
+
+```text
+sudo systemctl stop network-log-gx10.timer
+sudo systemctl stop network-log-gx10.service
+sudo systemctl is-enabled --quiet network-log-gx10.timer
+test "$(systemctl show network-log-gx10.service --property=ActiveState --value)" = inactive
+test "$(systemctl show network-log-gx10.service --property=Result --value)" = success
+```
+
+The timer must remain enabled but inactive and the oneshot must report inactive.
+Record public-safe `source_files`, event, queue, and highest-remote-path counts.
+Do not delete or edit a database row to make the selected floor pass.
+
+### 3. Produce and freeze the handoff view
+
+On the collector, wait until the floor is current and a completed settled shadow
+output exists at or after it. Enable the handoff timer, freeze shadow production,
+stop any publisher cadence, run one final bounded publisher cycle, then verify
+the stable instant:
+
+```text
+sudo systemctl enable --now network-log-normalizer-handoff.timer
+sudo systemctl stop network-log-normalizer-shadow.timer
+sudo systemctl stop network-log-normalizer-shadow.service
+sudo systemctl stop network-log-normalizer-handoff.timer
+sudo systemctl stop network-log-normalizer-handoff.service
+sudo systemctl is-enabled --quiet network-log-normalizer-shadow.timer
+sudo systemctl is-enabled --quiet network-log-normalizer-handoff.timer
+sudo systemctl start network-log-normalizer-handoff.service
+test "$(systemctl show network-log-normalizer-shadow.service --property=ActiveState --value)" = inactive
+test "$(systemctl show network-log-normalizer-handoff.service --property=ActiveState --value)" = inactive
+test "$(systemctl show network-log-normalizer-handoff.service --property=Result --value)" = success
+sudo /usr/local/sbin/verify-network-log-normalizer-handoff --mode prepared
+```
+
+`systemctl start` waits for the final publisher oneshot. Require both oneshots
+inactive before `--mode prepared`. Stopping the timers does not disable them.
+Because shadow was frozen before the final publication, no newly completed row
+can race the complete handoff inventory. Prepared mode requires the handoff timer
+enabled/inactive and validates exact artifacts, plan, ledgers, tree, ACL, and
+published-byte/cardinality evidence without changing the bind.
+
+### 4. Protect and change only the bind definition
+
+On the collector, choose an absent protected recovery directory and retain the
+exact predecessor:
+
+```text
+HANDOFF_ROLLBACK_DIR=/root/network-log-normalizer-handoff-recovery
+sudo test ! -e "$HANDOFF_ROLLBACK_DIR"
+sudo install -d -o root -g root -m 0700 "$HANDOFF_ROLLBACK_DIR"
+sudo cp --preserve=all --no-clobber /etc/fstab \
+    "$HANDOFF_ROLLBACK_DIR/fstab.before-handoff"
+sudo cmp -s /etc/fstab "$HANDOFF_ROLLBACK_DIR/fstab.before-handoff"
+sudo sh -c 'cd "$1" && sha256sum fstab.before-handoff > fstab.before-handoff.sha256 && chmod 0600 fstab.before-handoff.sha256' \
+    sh "$HANDOFF_ROLLBACK_DIR"
+sudo sh -c 'cd "$1" && sha256sum --check --status fstab.before-handoff.sha256' \
+    sh "$HANDOFF_ROLLBACK_DIR"
+```
+
+Using a protected root editor, replace exactly this single line:
+
+```text
+/var/spool/vector-ai /srv/ai-spool-reader/spool none bind,ro,nosuid,nodev,noexec 0 0
+```
+
+with exactly:
+
+```text
+/var/spool/network-log-normalizer-handoff /srv/ai-spool-reader/spool none bind,ro,nosuid,nodev,noexec 0 0
+```
+
+Refuse the change if the raw line is absent, duplicated, or not exact, or if the
+handoff line already exists. With GX10 still paused and both collector
+normalizer timers stopped, switch only that mount:
+
+```text
+sudo umount /srv/ai-spool-reader/spool
+sudo mount /srv/ai-spool-reader/spool
+sudo /usr/local/sbin/verify-network-log-normalizer-handoff --mode cutover
+sudo env CLICKHOUSE_DEFAULT_PASSWORD_FILE="$COLLECTOR_CLICKHOUSE_PASSWORD_FILE" \
+    components/collector/install/verify-runtime.sh --transport-view handoff
+```
+
+Require `normalizer_handoff_mode=cutover` and
+`NORMALIZER_HANDOFF_RUNTIME_VERIFY=PASS`, then `reader_bind_source=handoff` and
+`COLLECTOR_RUNTIME_VERIFY=PASS` before resuming any publisher or GX10 schedule.
+The handoff verifier checks the live source and mount options; the full collector
+verifier additionally requires exact metadata/ACL and one exact, unique selected
+`/etc/fstab` target. Do not restart SSH, Vector, ClickHouse, or Grafana.
+
+### 5. Resume bounded processing
+
+On the collector:
+
+```text
+sudo systemctl start network-log-normalizer-shadow.timer
+sudo systemctl start network-log-normalizer-handoff.timer
+sudo systemctl is-active --quiet network-log-normalizer-shadow.timer
+sudo systemctl is-active --quiet network-log-normalizer-handoff.timer
+```
+
+On GX10, run exactly one bounded pipeline cycle while its timer remains stopped:
+
+```text
+sudo systemctl start network-log-gx10.service
+test "$(systemctl show network-log-gx10.service --property=ActiveState --value)" = inactive
+test "$(systemctl show network-log-gx10.service --property=Result --value)" = success
+```
+
+Require a successful at/after-floor download and ingest, exact collector/GX10
+file SHA-256 and record-count parity, no failed row, and no duplicate
+`(source_file, record_number)` identity. Then resume and verify the base GX10
+schedule:
+
+```text
+sudo systemctl start network-log-gx10.timer
+sudo components/gx10/install/verify-runtime.py --active
+```
+
+At this point correlation/reasoning are still disabled by the authoritative
+two-server order, so the base active verifier is valid. On the collector, repeat
+the full runtime verifier in its explicit current-view mode after schedules
+resume:
+
+```text
+sudo env CLICKHOUSE_DEFAULT_PASSWORD_FILE="$COLLECTOR_CLICKHOUSE_PASSWORD_FILE" \
+    components/collector/install/verify-runtime.sh --transport-view handoff
+```
+
+Require `reader_bind_source=handoff` and
+`COLLECTOR_RUNTIME_VERIFY=PASS`. The verifier's default remains `raw`; omitting
+`--transport-view handoff` after cutover must fail closed rather than silently
+accepting the changed source.
+
+## Historical reference-system preflight
 
 The documented cutover is complete. This sequence is retained for a future
 separately authorized handoff change or rollback rehearsal; it is not current
@@ -182,13 +350,63 @@ During staging, the collector reported that `ConditionPathIsRegularFile` was uns
 
 Rollback remains a mount/view change, not a data rewrite:
 
-1. Disable the GX10 timer and wait for the oneshot pipeline service to become inactive.
-2. Record current queue/status counts. Do not delete a downloaded normalized file or edit a `source_files` row.
-3. Restore the exact prior raw-spool `/etc/fstab` bind entry and remount only `/srv/ai-spool-reader/spool`.
-4. Verify the raw bind source/options and restricted SFTP read-only behavior.
-5. Run one manual GX10 cycle. Already processed at/after-floor paths must skip because their remote identity is unchanged. Failed paths may redownload raw bytes under the existing retry contract; their prior event transaction must have rolled back.
-6. Verify no duplicate `(source_file, record_number)` rows, no unexplained event-count jump, and no failed/processing residue.
-7. Re-enable the GX10 timer after verification. Disable the handoff publisher timer, but preserve its plan, ledger, handoff tree, shadow tree, and raw tree for investigation.
+1. On GX10, pause the timer and oneshot exactly as in clean activation. Record
+   current queue/status counts. Do not delete a downloaded normalized file or
+   edit a `source_files` row.
+2. On the collector, stop (but initially do not disable) the shadow and handoff
+   timers/oneshots and wait for both services to become inactive.
+3. Require the protected predecessor to exist and still be byte-identical to
+   the raw-bind definition captured before cutover. Restore it and switch only
+   the reader mount:
+
+   ```text
+   HANDOFF_ROLLBACK_DIR=/root/network-log-normalizer-handoff-recovery
+   COLLECTOR_CLICKHOUSE_PASSWORD_FILE=/root/collector-rebuild-inputs/clickhouse-default-password
+   export HANDOFF_ROLLBACK_DIR
+   export COLLECTOR_CLICKHOUSE_PASSWORD_FILE
+   sudo test -d "$HANDOFF_ROLLBACK_DIR"
+   test -s "$COLLECTOR_CLICKHOUSE_PASSWORD_FILE"
+   test "$(sudo stat -c '%a:%U:%G' "$HANDOFF_ROLLBACK_DIR")" = 700:root:root
+   sudo test -f "$HANDOFF_ROLLBACK_DIR/fstab.before-handoff"
+   sudo sh -c 'cd "$1" && sha256sum --check --status fstab.before-handoff.sha256' \
+       sh "$HANDOFF_ROLLBACK_DIR"
+   sudo cp --preserve=all --no-clobber /etc/fstab \
+       "$HANDOFF_ROLLBACK_DIR/fstab.before-rollback"
+   sudo cp --preserve=all --force \
+       "$HANDOFF_ROLLBACK_DIR/fstab.before-handoff" /etc/fstab
+   sudo umount /srv/ai-spool-reader/spool
+   sudo mount /srv/ai-spool-reader/spool
+   sudo env CLICKHOUSE_DEFAULT_PASSWORD_FILE="$COLLECTOR_CLICKHOUSE_PASSWORD_FILE" \
+       components/collector/install/verify-runtime.sh --transport-view raw
+   ```
+
+4. Require `reader_bind_source=raw`, `TRANSPORT_VERIFY=PASS`, and
+   `COLLECTOR_RUNTIME_VERIFY=PASS`. Do not use the handoff verifier's `cutover`
+   mode against the intentionally restored raw view.
+5. On GX10, run one manual `network-log-gx10.service` cycle. Already processed
+   at/after-floor paths must skip because their remote identity is unchanged.
+   Failed paths may redownload raw bytes under the existing retry contract;
+   their prior event transaction must have rolled back.
+6. Verify no duplicate `(source_file, record_number)` rows, no unexplained
+   event-count jump, and no failed/processing residue. Restart and verify the
+   GX10 timer:
+
+   ```text
+   sudo systemctl start network-log-gx10.timer
+   sudo systemctl is-enabled --quiet network-log-gx10.timer
+   sudo systemctl is-active --quiet network-log-gx10.timer
+   ```
+7. Keep the handoff publisher disabled after rollback:
+
+   ```text
+   sudo systemctl disable --now network-log-normalizer-handoff.timer
+   sudo systemctl stop network-log-normalizer-handoff.service
+   sudo systemctl start network-log-normalizer-shadow.timer
+   sudo /usr/local/sbin/verify-network-log-normalizer-shadow --mode active
+   ```
+
+   Preserve its plan, ledger, handoff tree, shadow tree, raw tree, and protected
+   `/etc/fstab` predecessor for investigation.
 
 Rollback never attempts to reverse already-ingested normalized rows in place.
 

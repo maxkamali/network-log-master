@@ -107,6 +107,13 @@ def main() -> int:
     )
 
     parser.add_argument(
+        "--expected-count",
+        type=int,
+        default=EXPECTED_DASHBOARD_COUNT,
+        help="fail unless the capture directory has this exact count",
+    )
+
+    parser.add_argument(
         "--replace",
         action="store_true",
         help=(
@@ -129,11 +136,16 @@ def main() -> int:
         args.dashboard_dir
     )
 
+    if args.expected_count < 1:
+        raise DashboardApiError(
+            "expected count must be positive"
+        )
+
     if len(captures) != \
-            EXPECTED_DASHBOARD_COUNT:
+            args.expected_count:
         raise DashboardApiError(
             "expected exactly "
-            f"{EXPECTED_DASHBOARD_COUNT} "
+            f"{args.expected_count} "
             "dashboard captures"
         )
 

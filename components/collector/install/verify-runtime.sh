@@ -1,6 +1,38 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+TRANSPORT_VIEW="raw"
+
+if [ "${1:-}" = "--help" ]; then
+    echo "usage: verify-runtime.sh [--transport-view raw|handoff]"
+    exit 0
+fi
+
+if [ "${1:-}" = "--transport-view" ]; then
+    [ "$#" -eq 2 ] \
+        || {
+            echo "FAIL: --transport-view requires raw or handoff" >&2
+            exit 1
+        }
+    TRANSPORT_VIEW="$2"
+    shift 2
+fi
+
+[ "$#" -eq 0 ] \
+    || {
+        echo "FAIL: unexpected runtime-verifier argument" >&2
+        exit 1
+    }
+
+case "$TRANSPORT_VIEW" in
+    raw|handoff)
+        ;;
+    *)
+        echo "FAIL: unsupported transport view: $TRANSPORT_VIEW" >&2
+        exit 1
+        ;;
+esac
+
 die()
 {
     echo "FAIL: $*" >&2
@@ -312,7 +344,8 @@ echo "RETENTION_RUNTIME_CONTRACT=PASS"
 echo
 echo "=== TRANSPORT CONTRACT ==="
 
-"$FILESYSTEM_DIR/verify-transport.sh"
+"$FILESYSTEM_DIR/verify-transport.sh" \
+    --reader-bind-source "$TRANSPORT_VIEW"
 
 echo
 echo "=== CLICKHOUSE ADMIN CONNECTION ==="
@@ -1336,4 +1369,5 @@ do
     require_active "$timer"
 done
 
+echo "collector_transport_view=$TRANSPORT_VIEW"
 echo "COLLECTOR_RUNTIME_VERIFY=PASS"

@@ -53,8 +53,10 @@ Prepare these outside the repository:
 10. a distinct root-owned result-writer Ed25519 private key for the later
     sender configuration; its public half must already be present in the
     collector base authorized-keys input
-11. protected absent locations for the reasoning pre-activation backup and the
-    selective snapshot upgrade backup directory
+11. a protected absent location for the reasoning pre-activation backup
+12. existing non-root sudo-capable administrator accounts on GX10 and the
+    collector, plus their operator-host SSH aliases, for the transient private
+    first-live evidence transfer in Phase 11C; keep those values outside Git
 
 Firewall reconstruction is out of scope. The operator is responsible for allowing only the required outbound collector transport and for retaining the Ollama listener on loopback.
 
@@ -74,9 +76,25 @@ The populated file must define:
 
 The later sender configuration also needs a separately protected result-writer
 identity. Do not put that key in this base input file or repository. Stage it
-only from protected temporary storage when Phase 11C requests it; the
-configurator installs the service-owned copy and removes attempt-created
-temporary state after verification.
+only from protected temporary storage when Phase 11B requests it. The
+configurator installs the service-owned copy and removes only target files that
+its own failed attempt created. It does **not** remove the operator-supplied
+source. Phase 11B explicitly removes and verifies absence of the `/run` source
+after configured-state verification.
+
+Phase 11C additionally uses `GX_ADMIN_USER` in the GX root shell and the
+operator-private administrator usernames/SSH aliases named in
+`docs/TWO_SERVER_REBUILD.md`. They are transport-channel inputs, not application
+runtime configuration, and must not be added to this file or committed.
+
+In the same root shell, set only the path to that separately protected source;
+the variable is not rendered into the GX10 base configuration:
+
+    GX10_RESULT_WRITER_PRIVATE_KEY_FILE=/root/network-log-gx10-inputs/result-writer-ed25519
+    export GX10_RESULT_WRITER_PRIVATE_KEY_FILE
+
+The source must be a non-symlinked, nonempty, root-owned regular file with mode
+`0400` or `0600`. Do not read it into a shell variable.
 
 Do not place the populated file, private key, known-hosts file, Ollama binary, or model store inside the Git checkout.
 
@@ -313,7 +331,14 @@ Require zero projection lag, zero incident lag, successful service result, zero 
 
 ## Phase 10: managed AI and hidden-triage activation
 
-Proceed only after managed correlation has passed its multi-cadence gate and the exact selected local-model version has separately passed synthetic and protected current-state-copy evaluation.
+Proceed only after managed correlation has passed its multi-cadence gate and
+the installed selected-model manifest/configuration exactly matches the version
+qualified by the retained synthetic and protected-current-state-copy evidence
+in `docs/MANAGED_REASONING.md`. The protected current-state-copy exercise was a
+one-time model-version qualification gate; a clean host has no predecessor
+production database and is not expected to recreate that private copy. A model,
+manifest, configuration, prompt, or output-schema change is a new qualification
+event and must not be treated as part of this rebuild.
 
 This phase activates the selected incident-assessment path and the hidden
 uncovered-event triage path under the same managed owner. Deterministic
@@ -368,9 +393,16 @@ active no-network result/lifecycle projection, the selective snapshot used by
 that projection, and the independently disableable write-only sender. It also
 depends on the hidden triage contract already installed by managed reasoning.
 
-### 11A. Install and activate the local outbox
+### 11A. Install and activate the current snapshot-aware local outbox
 
-Install the outbox while its managed timer remains inactive:
+The current clean installer directly installs the selective rollback-journal
+snapshot boundary together with both local producers. It creates the protected
+snapshot root and configuration, installs
+`network-log-gx10-outbox-snapshot.service`, and binds the result/lifecycle
+producers to that snapshot. It does **not** install the historical direct-
+working-database predecessor.
+
+Install the current outbox while its managed timer remains inactive:
 
     components/gx10/install/install-result-outbox.py \
         --confirm-install-inactive-result-outbox
@@ -397,35 +429,17 @@ Expected activation marker:
 
 `GX10_RESULT_OUTBOX_LOCAL_ACTIVATION=PASS`
 
-### 11B. Upgrade to the selective snapshot
-
-Choose an absent child directory below a root-owned protected recovery parent.
-First preflight without writing:
-
-    components/gx10/install/upgrade-result-outbox-snapshot.py \
-        --backup-dir "$GX10_OUTBOX_SNAPSHOT_BACKUP_DIR" --check
-
-Expected marker:
-
-`GX10_RESULT_OUTBOX_SNAPSHOT_UPGRADE_CHECK=PASS`
-
-Apply only after the outbox is healthy and the protected backup target has been
-reviewed:
-
-    components/gx10/install/upgrade-result-outbox-snapshot.py \
-        --backup-dir "$GX10_OUTBOX_SNAPSHOT_BACKUP_DIR" \
-        --confirm-live-outbox-snapshot-upgrade
-    components/gx10/install/verify-result-outbox.py --active
-
-Expected upgrade marker:
-
-`GX10_RESULT_OUTBOX_SNAPSHOT_UPGRADE=PASS`
-
 The producer now reads the selective rollback-journal snapshot, not the mutable
 working database. Do not retain the rejected recurring full-database-copy
 design.
 
-### 11C. Install and configure the sender while disabled
+`upgrade-result-outbox-snapshot.py` is **not** a clean-install phase. It is a
+guarded migration for an exact, already-active legacy outbox whose snapshot
+unit, configuration, and root are absent. Running it after the clean installer
+must fail because the current snapshot targets already exist. Retain that tool
+only for a separately authorized existing-host migration.
+
+### 11B. Install and configure the sender while disabled
 
 The clean collector base already installed the matching result-writer public
 key. Do not append it again unless repairing an existing collector through the
@@ -445,10 +459,27 @@ Stage the distinct protected writer key temporarily at the documented
 root-readable path, then configure the disabled sender using the rendered
 runtime configuration:
 
+    test -n "${GX10_RESULT_WRITER_PRIVATE_KEY_FILE:-}"
+    test -f "$GX10_RESULT_WRITER_PRIVATE_KEY_FILE"
+    test -s "$GX10_RESULT_WRITER_PRIVATE_KEY_FILE"
+    test ! -L "$GX10_RESULT_WRITER_PRIVATE_KEY_FILE"
+    test "$(stat -c '%U' "$GX10_RESULT_WRITER_PRIVATE_KEY_FILE")" = root
+    test "$(stat -c '%h' "$GX10_RESULT_WRITER_PRIVATE_KEY_FILE")" -eq 1
+    case "$(stat -c '%a' "$GX10_RESULT_WRITER_PRIVATE_KEY_FILE")" in 400|600) ;; *) false ;; esac
+    test ! -e /run/network-log-result-writer.key
+    cleanup_result_writer_input() { rm -f -- /run/network-log-result-writer.key; }
+    trap cleanup_result_writer_input EXIT
+    trap 'exit 1' HUP INT TERM
+    install -o root -g root -m 0600 -- \
+        "$GX10_RESULT_WRITER_PRIVATE_KEY_FILE" \
+        /run/network-log-result-writer.key
     components/gx10/install/configure-result-sender.py \
         --identity-input /run/network-log-result-writer.key \
         --runtime-config /etc/network-log-gx10/runtime.json \
         --confirm-configure-disabled-result-sender
+    cleanup_result_writer_input
+    trap - EXIT HUP INT TERM
+    test ! -e /run/network-log-result-writer.key
     components/gx10/install/verify-result-sender.py --configured \
         --runtime-config /etc/network-log-gx10/runtime.json
 
@@ -460,15 +491,76 @@ The configured sender must still be disabled/inactive and must not invoke SFTP
 during configuration. The verifier proves the separately installed service
 identity, known-hosts pin, canonical configuration, and zero-transport state.
 
-### 11D. Prove transport before recurring delivery
+The exit/signal trap removes only the staged source on configurator failure or
+interruption. On success, remove it immediately before configured-state
+verification and clear the traps only after proving absence. Thus a later
+verifier failure cannot leave the operator-supplied key staged in `/run`. The
+installed service-owned identity remains in its verifier-derived private
+location. Never print either the source or installed key.
 
-Follow `docs/RESULT_TRANSPORT.md` for the bounded first-live delivery. Keep the
-sender timer disabled, require at least one ready file, start exactly one sender
-service cycle, and prove one ready-to-delivered transition, one collector
-acceptance-ledger identity, and exactly one corresponding ClickHouse row.
+### 11C. Qualify transport before recurring delivery
 
-Then prove exact replay and same-name divergent conflict isolation before
-enabling the recurring timer:
+First run the retained public-safe replay and conflict suites. These tests use
+only synthetic temporary state and make no network connection:
+
+    python3 -B components/collector/tests/validate-result-gate-package.py
+    python3 -B components/gx10/tests/test_result_sender.py
+    python3 -B components/gx10/tests/test_result_sender_management.py
+
+Require `AI_RESULTS_GATE_PACKAGE_VALIDATION=PASS` and successful GX10 test
+completion. These suites prove sender interruption behavior and the collector's
+exact-replay/divergent-conflict classification. They deliberately replace live
+re-upload probes during a clean rebuild; do not fabricate a divergent
+production payload merely to repeat historical evidence.
+
+Keep the sender at the independently verified zero-transport boundary:
+
+    components/gx10/install/verify-result-outbox.py --active
+    components/gx10/install/verify-result-sender.py --configured \
+        --runtime-config /etc/network-log-gx10/runtime.json
+
+Require `timer_enabled=no` and service inactive. Do not manually start the
+sender merely because a ready file exists. Create the protected first-live
+evidence files as root; an existing output path is a stop condition:
+
+    GX_FIRST_LIVE_DIR=/root/network-log-first-live-evidence
+    GX_FIRST_LIVE_PREPARED="$GX_FIRST_LIVE_DIR/prepared-v1.json"
+    GX_FIRST_LIVE_FINALIZED="$GX_FIRST_LIVE_DIR/finalized-v1.json"
+    export GX_FIRST_LIVE_DIR GX_FIRST_LIVE_PREPARED GX_FIRST_LIVE_FINALIZED
+    install -d -o root -g root -m 0700 "$GX_FIRST_LIVE_DIR"
+    test ! -L "$GX_FIRST_LIVE_DIR"
+    test "$(stat -c '%U:%G:%a' "$GX_FIRST_LIVE_DIR")" = root:root:700
+    test ! -e "$GX_FIRST_LIVE_PREPARED"
+    test ! -e "$GX_FIRST_LIVE_FINALIZED"
+    components/gx10/install/capture-first-live-evidence.py prepare \
+        --output "$GX_FIRST_LIVE_PREPARED"
+
+Require `GX10_FIRST_LIVE_EVIDENCE_PREPARE=PASS`. Transfer the prepared file
+unchanged through the existing authenticated administrator channel, never an
+application SFTP role. On the collector, follow the exact root-owned adoption
+and `COLLECTOR_FIRST_LIVE_PREFLIGHT=PASS` sequence in the **Executable first-live
+provenance proof** section of `docs/RESULT_TRANSPORT.md`. Only after that
+preflight passes, invoke exactly one sender oneshot while its timer is disabled:
+
+    systemctl start network-log-gx10-result-sender.service
+    test "$(systemctl show network-log-gx10-result-sender.service --property=ActiveState --value)" = inactive
+    test "$(systemctl show network-log-gx10-result-sender.service --property=Result --value)" = success
+    components/gx10/install/capture-first-live-evidence.py finalize \
+        --prepared "$GX_FIRST_LIVE_PREPARED" \
+        --output "$GX_FIRST_LIVE_FINALIZED"
+    components/gx10/install/verify-result-sender.py --configured \
+        --runtime-config /etc/network-log-gx10/runtime.json
+
+Require `GX10_FIRST_LIVE_EVIDENCE_FINALIZE=PASS`, `timer_enabled=no`, and
+service inactive. Transfer the finalized file unchanged through the same
+administrator channel and run the exact collector final verifier in
+`docs/RESULT_TRANSPORT.md`. It must report
+`COLLECTOR_FIRST_LIVE_PROVENANCE=PASS`, with one AI row or exactly
+`record_count` lifecycle rows in the selected route and zero in the other.
+Retain the root-only evidence through Phase 12.
+
+Only after that two-host first-live qualification passes may the recurring
+timer be enabled:
 
     systemctl enable --now network-log-gx10-result-sender.timer
     components/gx10/install/verify-result-sender.py --configured --active \
@@ -480,13 +572,28 @@ must route only to `incident_updates`; AI records must route only to
 
 ## Phase 12: full-system acceptance and reboot recovery
 
-Before declaring a clean rebuild complete, run every base, normalizer/handoff,
-correlation, managed-reasoning/triage, snapshot/outbox, sender, collector-gate,
-dashboard, and NOC verifier required by `docs/TWO_SERVER_REBUILD.md`. Let
-oneshot services settle, reboot the collector first and verify it, then reboot
-GX10 and verify it. Require enabled expected timers, zero deterministic lag,
-zero unreconciled `STARTED` runs, no unexpected restarts, and conserved
-outbox/ready/delivered/ledger state.
+Before declaring a clean rebuild complete, run the exact cross-host acceptance
+matrix in `docs/TWO_SERVER_REBUILD.md`. For the final extended GX10 state, use:
+
+    components/gx10/install/verify-platform.py
+    components/gx10/install/verify-ollama.py
+    systemctl is-enabled --quiet network-log-gx10.timer
+    systemctl is-active --quiet network-log-gx10.timer
+    components/gx10/install/verify-correlation.py --active --private-runtime
+    components/gx10/install/verify-managed-reasoning.py --active --private-runtime
+    components/gx10/install/verify-result-outbox.py --active
+    components/gx10/install/verify-result-sender.py --configured --active \
+        --runtime-config /etc/network-log-gx10/runtime.json
+
+Do not rerun `verify-runtime.py --active` after Phase 9. That verifier
+deliberately describes the earlier base-only boundary and requires correlation
+and reasoning to remain disabled; Phase 8 is its correct execution point.
+
+Let all oneshots settle, capture the redacted verifier counts, reboot the
+collector first and verify it, then reboot GX10 and repeat the matrix above.
+Require enabled expected timers, zero deterministic/triage lag, zero
+unreconciled `STARTED` runs, no unexpected restart growth, and conserved
+outbox/ready/delivered/collector-ledger state.
 
 No disposable GX10 host has executed this complete extension sequence. This is
 retained empirical risk: stop on any mismatch rather than translating
@@ -502,8 +609,29 @@ historical production commands by memory.
 - Do not use this runbook to repair or modify the working reference GX10.
 - Do not enable result return as part of base activation. It is a separately
   implemented current extension and must pass Phase 11's independent gates.
+- Do not run the legacy snapshot upgrader on a clean installation; the clean
+  outbox installer already installs the current snapshot-aware boundary.
 - The application installer places the item-26 correlation and item-29 reasoning runner/unit files, but the base clean-runtime activator deliberately leaves both timers disabled.
 - Use Phase 9 and `docs/MANAGED_CORRELATION.md` before Phase 10. Use Phase 10 and `docs/MANAGED_REASONING.md` only after deterministic correlation and local-model copy gates pass and operator authorization is explicit.
+
+For a temporary disable after successful first activation, preserve all durable
+state and stop only the owning timer/oneshot:
+
+    systemctl disable --now network-log-gx10-result-sender.timer
+    systemctl stop network-log-gx10-result-sender.service
+    systemctl disable --now network-log-gx10-result-outbox.timer
+    systemctl stop network-log-gx10-result-outbox.service network-log-gx10-outbox-snapshot.service
+    systemctl disable --now network-log-gx10-reasoning.timer
+    systemctl stop network-log-gx10-reasoning.service
+    systemctl disable --now network-log-gx10-correlation.timer
+    systemctl stop network-log-gx10-correlation.service
+
+Disable downstream-to-upstream in that order. Re-enable upstream-to-downstream
+only after each installed-state verifier passes, then run its active verifier.
+This recovery path applies only to an already activated exact installation; it
+does not replace the guarded first-activation scripts. Never remove or restore
+the database, snapshot, outbox, delivered files, key, ledger, quarantine, or
+activation backup merely to make a verifier pass.
 
 ## Current validation status
 

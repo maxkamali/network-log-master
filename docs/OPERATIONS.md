@@ -5,6 +5,8 @@
 This document records the current operational behavior of the observability pipeline without publishing environment-specific credentials, addresses, hostnames, or firewall policy.
 
 For the exact current execution order, use `docs/CURRENT_STATE.md`. For fresh-session recovery, begin with `docs/START_HERE.md`.
+For documentation ownership and required update points, use
+`docs/DOCUMENTATION_GUIDE.md`.
 
 ## Collector ingest
 
@@ -92,15 +94,23 @@ This local database is working state, not the authoritative raw-log archive.
 
 ## GX10 orchestration boundary
 
-The original recovered automatic chain remains:
+The public clean-machine package names its reconstructed base units
+`network-log-gx10.service` and `network-log-gx10.timer`. The working production
+host intentionally uses deployment-specific unit names that are not published.
+Do not use a public package unit name as a live-host command: resolve the
+operator-private pipeline unit from the host's installed unit inventory first.
+
+In either environment, the original automatic chain is:
 
 ```text
-network-log-gx10.timer
+fetch/ingest timer
   -> fetch-spool.py
   -> ingest-spool.py
 ```
 
-The original timer uses a two-minute boot delay, a one-minute inactive interval, and five-second accuracy. Its oneshot service is non-root and retains the captured filesystem and kernel hardening.
+The reconstructed timer contract uses a two-minute boot delay, a one-minute
+inactive interval, and five-second accuracy. Its oneshot service is non-root
+and retains the captured filesystem and kernel hardening.
 
 A second independent offline chain is now active:
 

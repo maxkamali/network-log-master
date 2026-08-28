@@ -88,14 +88,22 @@ The handoff root needs a default ACL so future partitions and files remain reada
 
 ## Production preflight
 
-Production cutover requires a separate explicit operator authorization. After authorization, perform these checks before changing the live bind mount:
+The documented cutover is complete. This sequence is retained for a future
+separately authorized handoff change or rollback rehearsal; it is not current
+execution authority. Before any live action, resolve the production
+fetch/ingest unit from operator-private host configuration. The public
+clean-machine unit name must not be assumed to be the live unit name.
+
+After authorization, perform these checks before changing the live bind mount:
 
 1. Verify GitHub `main`, repository sanitation, the exact handoff package manifest, and the recorded live shadow package hashes.
 2. Verify Vector, ClickHouse, Grafana, the shadow timer, the raw bind mount, and the GX10 pipeline are healthy with no unexplained restart or failed-file state.
 3. Run the complete active shadow verifier and require zero pending, incomplete, missing, orphaned, mutated, or parser-error evidence at the observation boundary.
 4. Select a future UTC minute for `F` that leaves enough time for the 120-second source settle boundary plus two complete shadow/publisher schedules. Render the exact canonical source path into the protected plan.
 5. Stage the exact-hash handoff artifacts, empty handoff root, ACL, plan, and empty handoff ledger. Leave the handoff timer disabled.
-6. On GX10, disable the GX10 timer and wait for `network-log-gx10.service` to become inactive before any path at or after `F` becomes settled and fetchable.
+6. On GX10, disable the resolved production fetch/ingest timer and wait for
+   its paired oneshot service to become inactive before any path at or after
+   `F` becomes settled and fetchable.
 7. Record public-safe GX10 baselines: total `source_files`, total `recent_events`, status counts, last remote scan time, incoming/processed queue counts, and the highest remote path. Do not publish connection values or event content.
 8. Prove that GX10 contains no `source_files.remote_path` at or after `/spool/<F>`. Any such row is a cutover blocker; choose a later floor and reinitialize the still-empty handoff plan/ledger rather than deleting GX10 state.
 9. Enable the publisher only after GX10 is stopped. Wait for settled shadow output at or after `F`, then temporarily stop both the shadow and publisher timers and wait for both oneshots to become inactive. Run the complete handoff verifier against that stable snapshot.

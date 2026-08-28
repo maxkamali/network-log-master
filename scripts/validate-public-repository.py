@@ -17,6 +17,7 @@ IPV4_RE = re.compile(
 )
 HISTORY_IPV4_PATTERN = r'([0-9]{1,3}\.){3}[0-9]{1,3}'
 MARKDOWN_LINK_RE = re.compile(r'\[[^\]]+\]\(([^)]+)\)')
+ROLLBACK_TAG_RE = re.compile(r'^pre-[a-z0-9]+(?:-[a-z0-9]+)*-[0-9]{8}$')
 ALLOWED_NETWORKS = tuple(
     ipaddress.ip_network(value)
     for value in (
@@ -337,8 +338,16 @@ def validate_ref_topology():
     if local_heads != ['refs/heads/main']:
         raise ValueError('unexpected local branch topology')
     tags = git('tag', '--list').stdout.decode('utf-8').splitlines()
-    if tags:
-        raise ValueError('unexpected public tag topology')
+    for tag in tags:
+        if not ROLLBACK_TAG_RE.fullmatch(tag):
+            raise ValueError(f'unexpected public tag topology: {tag}')
+        object_type = git(
+            'cat-file',
+            '-t',
+            f'refs/tags/{tag}',
+        ).stdout.decode('utf-8').strip()
+        if object_type != 'tag':
+            raise ValueError(f'rollback tag must be annotated: {tag}')
 
 
 def main():

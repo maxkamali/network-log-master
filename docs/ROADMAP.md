@@ -201,6 +201,7 @@ After every completed project sub-section:
 2. append the result to `docs/PROJECT_JOURNAL.md`
 3. push the journal update to GitHub
 4. update `docs/CURRENT_STATE.md` when execution order/current state changes
-5. only then proceed materially into the next sub-section
+5. use `docs/DOCUMENTATION_GUIDE.md` to update each affected canonical document
+6. only then proceed materially into the next sub-section
 
 For long or risk-heavy sub-sections, publish intermediate validated recovery checkpoints when useful, while keeping the current `NEXT` item unchanged until the sub-section is complete.

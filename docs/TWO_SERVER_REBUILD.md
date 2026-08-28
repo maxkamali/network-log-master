@@ -27,7 +27,15 @@ devices
 
 The collector also has a separate write-only AI-result transport, validation gate, ClickHouse sink, and Grafana presentation boundary.
 
-The current GX10 package does not contain a producer for that result-return boundary. It also does not automatically run canonical normalized-field projection and does not contain an application-specific Ollama caller. A successful rebuild must preserve those absences.
+The clean-machine base package intentionally reproduces the captured
+fetch-to-ingest boundary first. Historical rediscovery found no predecessor
+producer for the result-return boundary, no automatic canonical normalized-
+field projection, and no application-specific Ollama caller. The active
+production system now has separately gated extensions for those capabilities;
+their activation is documented in `docs/CURRENT_STATE.md` and the relevant
+component runbooks. Do not enable an extension by inference during a base
+rebuild, and do not claim its end-to-end result path until its dedicated gate
+has passed.
 
 ## Host prerequisites
 

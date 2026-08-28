@@ -12,8 +12,8 @@ The public collector and GX10 rebuild packages, component runbooks, cross-system
 
 ## Current operational addendum
 
-The working two-server application is complete through item 42 with no numbered
-`NEXT` item. Post-rebuild production gates activated deterministic incidents,
+The numbered project sequence is complete with no numbered `NEXT` item.
+Post-rebuild production gates activated deterministic incidents,
 bounded Gemma reasoning, hidden fail-closed review of uncovered important
 events, replay-protected AI/lifecycle result return, ClickHouse ingestion, the
 isolated Grafana NOC organization and playlist, 24-hour BGP/OSPF monitoring,
@@ -40,7 +40,8 @@ The gate validates:
 - exactly one numbered `NEXT` while work remains, or zero only in an explicitly
   completed `docs/CURRENT_STATE.md`
 - sensitive paths and secret/private-address patterns across every commit reachable from all refs
-- one local branch (`main`) and zero tags
+- one local branch (`main`) and only annotated rollback tags named
+  `pre-<scope>-YYYYMMDD`
 
 Required markers:
 
@@ -50,7 +51,9 @@ Required markers:
 - `PUBLIC_REPOSITORY_REF_TOPOLOGY=PASS`
 - `PUBLIC_REPOSITORY_VALIDATION=PASS`
 
-Five synthetic negative/positive tests prove rejection of private addresses, token patterns, private-key markers, and sensitive artifact paths while accepting documentation addresses and the captured ClickHouse version literal.
+Synthetic negative/positive tests prove rejection of private addresses, token
+patterns, private-key markers, and sensitive artifact paths while accepting
+documentation addresses and the captured ClickHouse version literal.
 
 ## Final repository-only validation
 

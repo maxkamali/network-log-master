@@ -133,6 +133,19 @@ class PublicRepositoryValidatorTests(unittest.TestCase):
                 '2. `NEXT` — contradictory work\n'
             )
 
+    def test_rollback_tag_name_shape(self):
+        self.assertIsNotNone(
+            VALIDATOR.ROLLBACK_TAG_RE.fullmatch(
+                'pre-documentation-audit-20260827'
+            )
+        )
+        self.assertIsNone(
+            VALIDATOR.ROLLBACK_TAG_RE.fullmatch('release-20260827')
+        )
+        self.assertIsNone(
+            VALIDATOR.ROLLBACK_TAG_RE.fullmatch('pre-audit-latest')
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

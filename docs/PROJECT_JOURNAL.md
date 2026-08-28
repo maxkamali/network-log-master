@@ -13342,3 +13342,52 @@ GX10's correlation timer was enabled/active, its most recent invocation was
 successful, and the installed engine hash matched the published version-3
 release. This check was read-only and changed no incident, result, cache,
 ClickHouse, dashboard, credential, or account state.
+
+## 2026-08-27 - Documentation authority and continuity audit
+
+### Scope
+
+Established a maintainable documentation system without changing production
+behavior. The annotated public rollback tag
+`pre-documentation-audit-20260827` was published before the audit. It protects
+the exact pre-audit repository state; no production file, database, dashboard,
+account, credential, or service configuration was changed during this work.
+
+### Documentation reconciliation
+
+- added `docs/DOCUMENTATION_GUIDE.md` as the authority map, change checklist,
+  writing rules, validation procedure, and small journal/decision templates
+- made `README.md` the concise application overview and `docs/START_HERE.md`
+  the agent/engineer recovery path, linking both to the current-state authority
+- removed stale current-summary milestone/test-count wording from current
+  entry documents while retaining historical evidence in the append-only
+  journal and component records
+- reconciled acceptance, handoff, data-contract, rebuild, operations,
+  component-status, NOC/AI-side-channel references, and roadmap continuity
+  language to distinguish current behavior from historical clean-rebuild
+  evidence and deferred work
+- clarified that public clean-machine systemd unit names are reconstruction
+  contracts, not production-host commands; any live action must resolve the
+  operator-private installed unit inventory first
+- updated the public repository gate to allow only annotated rollback tags
+  named `pre-<scope>-YYYYMMDD`, retaining a single local `main` branch and
+  rejecting every other tag shape or a lightweight rollback tag
+
+### Validation
+
+- new local documentation validator passed the required entry path, local
+  Markdown links, anchors, and stale-summary checks
+- documentation/public-validator unit suite passed 20 tests
+- full current-tree, all-reachable-history, link, execution-authority, and
+  rollback-tag topology gate passed
+- `git diff --check` passed
+- read-only service confirmation found collector ingestion, storage,
+  presentation, and result-gate scheduling active; all five intended GX10
+  application schedules were enabled and active between their oneshot runs
+
+### Follow-up
+
+Future changes use `docs/DOCUMENTATION_GUIDE.md` and update only the documents
+that own the affected facts. Delivery-confirmed result archival remains the
+only documented deferred hardening item and remains outside the completed
+numbered sequence.

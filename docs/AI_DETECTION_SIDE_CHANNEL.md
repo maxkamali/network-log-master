@@ -2,7 +2,8 @@
 
 ## Status and operator contract
 
-Status: `ACTIVE` on the working GX10 system as of 2026-08-25 PDT.
+Status: `ACTIVE` on the working GX10 system. Current production state is
+maintained in `docs/CURRENT_STATE.md`.
 
 The repository implementation consists of the additive `triage-v1.sql` ledger,
 the deterministic selector/batcher and strict caller in

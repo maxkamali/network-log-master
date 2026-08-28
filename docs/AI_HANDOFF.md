@@ -32,7 +32,14 @@ Stop and reconcile meaningful disagreement instead of guessing.
 
 ## Current durable state
 
-The end-to-end working system is complete through execution-order item 41. There is no remaining numbered `NEXT` item. The rolling interface-flap filter, forward-only 24-hour OSPF/BGP monitoring policy, backward-compatible lifecycle producer version 2 recurrence projection, additive collector column, enhanced-dashboard `MONITORING`/issue-occurrence presentation, isolated NOC Viewer access boundary, one-minute NOC rotation playlist, and compact one-click Explore drilldowns are active under protected predecessors.
+The numbered project sequence is complete with no remaining numbered `NEXT`
+item. The rolling interface-flap filter, forward-only 24-hour OSPF/BGP
+monitoring policy, backward-compatible lifecycle producer version 2 recurrence
+projection, additive collector column, enhanced-dashboard `MONITORING`/issue-
+occurrence presentation, isolated NOC Viewer access boundary, one-minute NOC
+rotation playlist, compact one-click Explore drilldowns, protocol-candidate
+monitoring correction, and Vector descriptor-limit protection are active under
+protected predecessors.
 
 - The collector normalization shadow path and forward-only verified handoff are active; raw history and the exact rollback boundary remain preserved.
 - GX10 fetch/ingest, canonical projection, deterministic incident correlation, managed Gemma reasoning, AI-result projection, deterministic incident-lifecycle projection, and the recurring one-file write-only sender are active under independent schedules.

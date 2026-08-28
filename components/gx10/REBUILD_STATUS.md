@@ -8,6 +8,16 @@ Public clean-machine reconstruction and operator documentation are `DONE` under 
 
 Clean-machine GX10 validation is `WAIVED BY OPERATOR` because no disposable Ubuntu 24.04 arm64 GX10-class target is available. It remains empirically unverified.
 
+## Current operating extensions
+
+The numbered rebuild sequence is complete. The active incident engine includes
+the later version-3 correction for BGP/OSPF/OSPFv3 candidates: a single
+observation enters `RECOVERING`, a confirmed recovery is monitored for 24
+continuous healthy hours, and a relapse reopens the same incident while
+incrementing recurrence accounting. Current production state and residual risk
+belong in `docs/CURRENT_STATE.md`; this file retains component-specific
+rebuild and implementation evidence.
+
 The later collector-normalizer production integration completed its forward-only GX10 handoff cutover on 2026-08-24. The unchanged fetch/ingest pipeline reached exact collector-ledger parity across the reviewed multi-cadence window. Item 24 then replaced the unscheduled live transitional vendor/message reparser under its exact captured hash with the canonical schema-version-1 projector. The replacement has zero scheduler references, the live database was unchanged, all historical version-3 rows remain, and a root-only exact legacy rollback copy is retained.
 
 Item 25 is complete. The deterministic incident engine passed private working-database-copy rehearsal, cursor-reset replay, and an independent exact-state rebuild. Its three-table append-only extension and exact engine artifact were installed on the working GX10 system under a protected pre-migration backup before the separately gated item-26 activation.

@@ -20,7 +20,8 @@ Read and verify in this order before changing implementation:
 8. Component-specific documentation for the area being reviewed. For the completed result-return boundary, read `docs/RESULT_OUTBOX.md`, `docs/RESULT_TRANSPORT.md`, `components/gx10/README.md`, and `components/collector/REBUILD_STATUS.md`.
 9. `docs/DETECTION_COVERAGE_BACKLOG.md` — review important captured event types that still require deterministic parser and incident-lifecycle coverage.
 10. `docs/AI_DETECTION_SIDE_CHANNEL.md` — review the active hidden AI review of uncovered important events and the guarded severity 0-3 learned-coverage boundary.
-11. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
+11. `docs/DOCUMENTATION_GUIDE.md` — when changing documentation, use the authority map and update checklist rather than duplicating current facts.
+12. Verify repository reality with `git log -10 --oneline` and `git status --short` before making changes.
 
 Do not infer a new execution order from the journal. `docs/CURRENT_STATE.md` is the execution authority.
 
@@ -53,17 +54,19 @@ Use synthetic fixtures and documentation address space when examples require ide
 - Validate each sub-section before declaring it complete.
 - After each completed sub-section, append the result to `docs/PROJECT_JOURNAL.md` and push that journal update to GitHub before materially entering the next sub-section.
 - Keep `docs/CURRENT_STATE.md` synchronized with execution order; maintain exactly one `NEXT` while work remains and none after explicit end-to-end closure.
+- Use `docs/DOCUMENTATION_GUIDE.md` to decide which documents a change updates.
 - Do not weaken safety or validation gates merely to make a commit pass.
 - Do not execute clean-machine rebuild installers against the working reference systems unless the installer explicitly supports that mode.
 
 ## Current operating baseline
 
-The working systems are complete through item 42 with no numbered `NEXT` item.
+The numbered project sequence is complete with no numbered `NEXT` item.
 Collector capture/normalization, the verified GX10 handoff, deterministic
 incidents, local reasoning, hidden uncovered-event triage, validated result
 return, the isolated NOC organization, compact one-click drilldowns, 24-hour
-protocol monitoring, the rolling interface-flap filter, and the selective
-transactional outbox snapshot are active.
+protocol monitoring, the rolling interface-flap filter, the transactional
+outbox snapshot, the protocol-candidate monitoring correction, and the Vector
+descriptor-limit protection are active.
 
 Read `docs/CURRENT_STATE.md` before reopening scope or changing production
 behavior. The append-only journal contains historical intermediate states and

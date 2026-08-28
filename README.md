@@ -4,12 +4,11 @@ A two-server network-observability application that turns device syslog into a
 searchable log archive, durable incident state, local-AI review, and an
 operator-focused Grafana NOC queue.
 
-**Working-system status:** operational and feature-complete through project item
-42. The GX10 result outbox now reads an atomic validated ten-table SQLite
-projection instead of opening the mutable WAL database from its strict sandbox.
-The public rebuild packages are complete, although clean installation on two
-disposable servers was unavailable and remains explicitly unverified rather
-than being represented as passed.
+**Working-system status:** operational. The public rebuild packages are
+complete, although clean installation on two disposable servers was unavailable
+and remains explicitly unverified rather than being represented as passed.
+For the current production baseline, deferred work, and latest validation,
+read [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
 
 ## What this application does
 
@@ -190,12 +189,10 @@ contracts more reliably. See
 | Normalizer | Deterministic vendor-aware event normalization with capture-first fallback | [`components/normalizer/`](components/normalizer/) |
 | GX10 | Replay-safe ingest, canonical projection, deterministic incidents, local reasoning, side-channel triage, and result delivery | [`components/gx10/`](components/gx10/) |
 
-This reliability checkpoint reran 62 collector tests and 223 GX10 tests. The
-completed normalizer/handoff gate records 94 normalizer/worker tests and 14
-collector normalizer-package tests. Operational checkpoints also retain the
-GX10 filesystem contract and the public current-tree/history/link/ref-topology
-gate. Historical milestone counts remain in the append-only journal where they
-describe the gate that existed at that time.
+Component and repository validation are versioned with the implementation.
+Current verification status belongs in
+[`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md); historical test counts and
+deployment evidence remain in the append-only journal.
 
 ## Start here
 
@@ -229,6 +226,7 @@ completed state.
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) — architecture decisions
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — completed milestone sequence
 - [`docs/PROJECT_JOURNAL.md`](docs/PROJECT_JOURNAL.md) — append-only engineering history
+- [`docs/DOCUMENTATION_GUIDE.md`](docs/DOCUMENTATION_GUIDE.md) — documentation ownership and update rules
 - [`SECURITY.md`](SECURITY.md) — public-repository security policy
 
 ## Rebuild and security boundary

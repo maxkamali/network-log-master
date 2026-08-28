@@ -4,6 +4,14 @@ Last verified project checkpoint: 2026-08-27.
 
 This file is the authority for current execution order. Exactly one item is marked `NEXT` while project execution remains; a completed state has none.
 
+## How to use this document
+
+The material above the numbered historical record is the current operating
+authority. Update that current summary when behavior, residual risk, or
+execution state changes. Retain completed milestones below as evidence; add
+new validation and deployment detail to `docs/PROJECT_JOURNAL.md` rather than
+rewriting historical claims to sound current.
+
 ## Project acceptance criterion and disposition
 
 The rebuild/documentation project is complete only when two clean servers, this public repository, and operator-supplied environment values are sufficient for another engineer or AI to reconstruct the current functional system without undocumented implementation memory.
@@ -20,7 +28,7 @@ Disposable clean-two-server execution: `WAIVED BY OPERATOR`, empirically unverif
 
 Rebuild/documentation milestone disposition: `ACCEPTED WITH RESIDUAL RISK`.
 
-End-to-end working-system target: `COMPLETE` through item 42.
+End-to-end working-system target: `COMPLETE`.
 There is no remaining `NEXT` item.
 
 Post-closure AI-results Grafana dashboard feature: `DONE` under item 32.
@@ -86,7 +94,7 @@ predecessor copy retained. Existing historical rows were not rewritten.
 
 Post-closure hidden AI detection side channel: `DONE`. GX10 now batches deterministic signatures for uncovered severity 0–4 events plus novel/repeated severity-5 notices, asks the pinned local `gemma4:latest` model for one strict incident/ignore/insufficient decision per signature, and creates ordinary `event_signature` incidents only from validated positive decisions. Model failure retains a pending batch and never creates an incident. Positive incidents use the existing lifecycle, outbox, collector table, dashboard windows, search, and drilldown; no dashboard resource or query changed. Automatic learned coverage is limited to severity 0–3 and requires three consistent confidence-70+ decisions spanning at least 30 minutes with no contradictory decision. Production activated under an online protected SQLite backup after 215 tests, an exact staged-server pass, one safe length-limited shadow failure, and one 24-decision shadow success. Initial active evidence contains 33 incident and 15 ignore decisions, 35 ordinary lifecycle incidents, zero active learned rules, clean SQLite integrity, healthy GX10 schedules, and collector acceptance of the 45-record lifecycle batch.
 
-Post-closure operator documentation baseline: `DONE`. The operator confirmed the current production behavior meets the desired functional baseline. The root `README.md` is now the canonical plain-language application overview with operator workflow, dual-server diagram, AI authority boundary, current validation status, and navigation map. `START_HERE`, architecture, roadmap, handoff, component status, and acceptance documentation are reconciled to the active item-41 system.
+Post-closure operator documentation baseline: `DONE`. The operator confirmed the current production behavior meets the desired functional baseline. The root `README.md` is the canonical plain-language application overview with operator workflow, dual-server diagram, AI authority boundary, current validation status, and navigation map. `START_HERE`, architecture, roadmap, handoff, component status, and acceptance documentation are reconciled to the active system. `docs/DOCUMENTATION_GUIDE.md` defines document ownership and update rules for future changes.
 
 The final public repository milestone remains published without claiming that unavailable clean-host execution passed. If suitable disposable systems become available later, the runbooks should still be executed and the qualification removed only after successful evidence is recorded.
 
@@ -423,9 +431,10 @@ Direct credentials must not be interpreted as blanket authorization for destruct
 
 Post-closure feature: `DONE` — implemented and activated the hidden AI detection side channel without adding a numbered `NEXT`: additive append-only triage schema, deterministic signatures, strict versioned batch inference, waiting retries, ordinary incident bridging, 60-minute quiet plus 15-minute confirmation lifecycle, one-inference-per-cycle scheduling, severity-0–3 learned-rule gate, existing outbox/dashboard integration, protected backup, shadow-to-active rollout, 215 tests, and collector acceptance evidence.
 
-The end-to-end feature target is complete through item 42 with no remaining
-numbered `NEXT`. Item 42 added no operator-facing behavior and changed no model
-authority, collector schema, dashboard, credential, or transport identity.
+Historical execution-order record: the numbered milestone sequence ended at
+item 42 with no remaining numbered `NEXT`. Item 42 added no operator-facing
+behavior and changed no model authority, collector schema, dashboard,
+credential, or transport identity.
 
 ## Scope constraints
 

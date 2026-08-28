@@ -166,6 +166,33 @@ Status: `DONE`
 5. `DONE` — guarded automatic exact-event learned coverage to severity 0–3 with three consistent confidence-70+ decisions spanning at least 30 minutes and no contradiction
 6. `DONE` — activated through protected migration, shadow proof, exact staged validation, existing result/lifecycle transport, and collector acceptance
 
+## Deferred hardening - Delivery-confirmed AI-result archive
+
+Status: `DEFERRED`; this is not a current `NEXT` item.
+
+The collector deliberately preserves immutable accepted AI-result payloads in
+its ready directory. Vector tails that directory and keeps a descriptor per
+file. The active service limit is explicitly 65,536 descriptors, which safely
+corrects the former inherited 1,024-descriptor limit without removing evidence.
+
+Before any automatic archival or deletion is introduced:
+
+1. `TODO` — design a per-file, idempotent delivery proof that binds the
+   acceptance-ledger filename/digest/record count to the exact ClickHouse raw
+   record or records produced by that file.
+2. `TODO` — build a reversible archive workflow that acts only after that proof,
+   preserves original bytes and metadata, and retains a protected rollback
+   boundary.
+3. `TODO` — prove restart, partial-ingestion, duplicate/replay, failed sink,
+   ledger-integrity, and rollback behavior on an isolated copy before live use.
+4. `TODO` — add bounded descriptor/cache telemetry and a documented capacity
+   review threshold, then deploy under a separate protected production gate.
+
+Global Vector acknowledgements are not the solution by themselves: the live
+UDP source does not support them and Vector reports that enabling them could
+allow silent loss. The current ready-file preservation plus descriptor-limit
+override remains the safe operational policy until this milestone is complete.
+
 ## Continuity gate
 
 After every completed project sub-section:

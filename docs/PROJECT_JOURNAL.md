@@ -13330,3 +13330,15 @@ does not prove the exact file has durably reached ClickHouse, and moving it
 before that proof could create silent loss during a Vector restart. The larger
 descriptor limit restores safe current operation; a future delivery-confirmed,
 reversible archival design is a separately scoped change.
+
+### Initial post-release health recheck
+
+After multiple natural timer opportunities following deployment, Vector was
+active with `LimitNOFILE=65536`, zero service restarts, and zero new
+`Too many open files` journal entries. The preserved ready cache advanced
+normally from 2,308 to 2,312 files, remaining far below the service bound; the
+AI-result gate timer was active and its most recent result was successful.
+GX10's correlation timer was enabled/active, its most recent invocation was
+successful, and the installed engine hash matched the published version-3
+release. This check was read-only and changed no incident, result, cache,
+ClickHouse, dashboard, credential, or account state.
